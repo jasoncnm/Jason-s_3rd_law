@@ -15,6 +15,8 @@
 #define MAX_BLOCKS 100
 #define MAX_WALLS 100
 #define MAX_GOALS 100
+#define MAX_ANIMATION 100
+
 #define MAX_UNDO_RECORDS 1000    // IMPORTANT: This might need to be handle if released. I'm Using std::stack for now (dynamic alloc)
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1080
@@ -23,6 +25,7 @@
 #define LEVELS_PATH "Assets/Level/levels.lv"
 
 #include "assets.h"
+#include "animation.h"
 
 enum State
 {
@@ -81,11 +84,11 @@ struct ArrowButton
     int tileSize = 32;
 
     Vector2 topLeftPos;
-    
+
     bool seletable = false;
     bool hover = false;
     bool preseed = false;
-    
+    bool show = true;
 };
 
 
@@ -94,13 +97,34 @@ struct Slime
     int tileX;
     int tileY;
 
+    Vector2 pivot;
+
     float tileSize;
     int mass = 3;
+
+    bool show = true;
 };
 
+struct SlimeAnimation
+{
+    
+    Slime startSlime;
+    Slime endSlime;
+
+    Slime * currentSlime;
+
+    float mergetime = 1.0f;
+    
+    bool merge;
+    int possessed;
+
+    Slime * mergedSlime;
+    Slime * possesserSlime;
+};
 
 struct Player
 {
+    
     int moveSteps;
     int childrenCount;
 
@@ -109,7 +133,6 @@ struct Player
 
     Slime mother;
     Slime children[MAX_SLIME];
-
 };
 
 struct Record
@@ -146,10 +169,20 @@ struct GameState
     Record currentRecord;
 
     KeyMapping keyMappings[GAME_INPUT_COUNT];
+
+
+    float animateTime = 0.0f;
+    float duration = 1.0f;
     
 };
 
+bool animationPlaying = false;
+int animateSlimeCount = 0;
+SlimeAnimation animateSlimes[MAX_SLIME] = { 0 };
+
 long long levelsTimestamp;
+
+
 
 #define GAME_H
 #endif

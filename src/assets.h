@@ -39,7 +39,7 @@ struct Sprite
 };
 
 //  ========================================================================
-//              NOTE: ender Functions
+//              NOTE: Assets Functions
 //  ========================================================================
 Sprite GetSprite(SpriteID spriteID)
 {

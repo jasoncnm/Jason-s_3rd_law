@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <cmath>
 #include <sys/stat.h>
 
 //  ========================================================================
@@ -453,6 +454,43 @@ Mat4 OrthographicProjection(float left, float right, float top, float bottom)
     result.dw = 1.0f;
 
     return result;
+}
+
+
+// NOTE Easing functions
+float Linear(float x)
+{
+    return x;
+}
+
+float EaseInSine(float x)
+{
+    return 1 - cosf((x * PI) / 2);
+}
+
+float EaseOutSine(float x)
+{
+    return sinf((x * PI) / 2);
+}
+
+float EaseInOutSine(float x)
+{    
+    return -(cosf(PI * x) - 1) / 2;
+}
+
+int abs(int x)
+{
+    return (x > 0) ? x :  -x;
+}
+
+bool SameSign(int x, int y)
+{
+    if (x == 0 || y == 0) return x == y;
+
+    int a = x > 0 ? 1 : -1;
+    int b = y > 0 ? 1 : -1;
+
+    return a == b;
 }
 
 #define ENGINE_LIB_H
