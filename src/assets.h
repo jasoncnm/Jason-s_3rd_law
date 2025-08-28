@@ -41,6 +41,14 @@ struct Sprite
 //  ========================================================================
 //              NOTE: Assets Functions
 //  ========================================================================
+SpriteID GetArrowHoverSpriteID(SpriteID spriteID)
+{
+    SM_ASSERT((spriteID >= SPRITE_ARROW_UP) && (spriteID <= SPRITE_ARROW_RIGHT), "Given sprite is not an arrow");
+
+    return (SpriteID)(SPRITE_ARROW_UP_HOVER + (spriteID - SPRITE_ARROW_UP));    
+
+}
+
 Sprite GetSprite(SpriteID spriteID)
 {
     Sprite sprite = {};

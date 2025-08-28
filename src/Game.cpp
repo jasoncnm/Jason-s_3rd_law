@@ -107,100 +107,34 @@ bool CheckWalls(unsigned int tileX, unsigned int tileY, unsigned int wallCount, 
     return result;
 }
 
-void Merge(SlimeAnimation & sa, Player & player, Slime * currentSlime)
-{
-    SM_ASSERT(player.childrenCount > 0, "No child to merge");
-    // SM_ASSERT(sa.mergedSlimeIndex < player.childrenCount , "Merged Slime Out of Bound!");
-    // SM_ASSERT(!sa.possessed || (sa.possesserIndex < player.childrenCount), "Possesser Out of Bound!");
-    // SM_ASSERT(!sa.possessed || (sa.possesserIndex != sa.mergedSlimeIndex), "You cannot possesse itself!!");
-    
-    currentSlime->mass += sa.mergedSlime->mass;
-    currentSlime->tileSize = GetTileSize(player.maxTileSize, currentSlime->mass, 4.0f);
-    currentSlime->pivot = GetTilePivot(currentSlime->tileX, currentSlime->tileY, currentSlime->tileSize);
-
-    if (sa.possessed)
-    {
-        Slime tmp = player.mother;
-
-        player.mother = *sa.possesserSlime;
-
-        *sa.possesserSlime = tmp;
-        
-    }
-
-    *sa.mergedSlime = player.children[--player.childrenCount];
-    
-}
-
 SlimeAnimation CreateSlimeAnimation(Slime * refSlime,
                                     float maxTileSize,
                                     int startX, int startY,
                                     int endX, int endY,
-                                    int startMass, int endMass,
-                                    bool merge = false, Slime * mergedSlime = nullptr,
-                                    bool possessed = false, Slime * possesserSlime = nullptr)
+                                    int startMass, int endMass)
 {
-    Slime aniStart = { 0 };
-    
-    aniStart.tileSize = GetTileSize(maxTileSize, startMass, 4.0f);
-    aniStart.pivot = GetTilePivot((float)startX, (float)startY, aniStart.tileSize);
 
-    Slime aniEnd = { 0 };
-
-    aniEnd.tileSize = GetTileSize(maxTileSize, endMass, 4.0f);
-    aniEnd.pivot = GetTilePivot((float)endX, (float)endY, aniEnd.tileSize);
+    animationPlaying = true;
 
     SlimeAnimation result = { 0 };
-    result.startSlime = aniStart;
-    result.endSlime = aniEnd;
+    result.startTilePos = { startX, startY };
+    result.endTilePos = {  endX, endY };
     result.currentSlime = refSlime;
-    result.merge = merge;
-    result.mergedSlime = mergedSlime;
-    result.possessed = possessed;
-    result.possesserSlime = possesserSlime;
     
     return result;
     
 }
 
-int BounceSlime(Player & player, int destX, int destY)
+void BounceSlime(Player & player, int destX, int destY)
 {
     
     SM_ASSERT(player.mother.mass > 0, "Slime is too small to bounce");
-
-    int mass = player.mother.mass;
     
     bool merge = false;
     int mergedIndex = -1;
 
     int prevX = player.mother.tileX;
     int prevY = player.mother.tileY;
-
-    for (int i = 0; i < player.childrenCount;  i++)
-    {
-        Slime & child = player.children[i];
-
-        // Rectangle [(prevX, prevY),  (destX, destY)]
-        int dx = destX - prevX;
-        int dy = destY - prevY;
-        int dChildX = child.tileX - prevX;
-        int dChildY = child.tileY - prevY;
-
-        if ((abs(dx) >= abs(dChildX)) && (abs(dy) >= abs(dChildY)) &&
-            SameSign(dx, dChildX) && SameSign(dy, dChildY))
-        {
-            // NOTE: merge
-            // TODO: merge multiple children in single action
-            merge = true;
-            mergedIndex = i;
-
-            mass += child.mass;
-
-            animationPlaying = true;
-
-            break;
-        }
-    }
           
     player.mother.tileX = destX;
     player.mother.tileY = destY;
@@ -208,58 +142,17 @@ int BounceSlime(Player & player, int destX, int destY)
     animateSlimes[animateSlimeCount++] =
         CreateSlimeAnimation(&player.mother,
                              player.maxTileSize,
-                             prevX, prevY, destX, destY,
-                             player.mother.mass, player.mother.mass,
-                             merge, &player.children[mergedIndex]);
-
-    return mass;    
+                             prevX, prevY,
+                             destX, destY,
+                             player.mother.mass, player.mother.mass);
     
 }
 
-void SplitSlime(Player & player, int destX, int destY, int prevX, int prevY, int playerMass)
+void SplitSlime(Player & player, int destX, int destY, int prevX, int prevY)
 {
     SM_ASSERT(player.mother.mass > 0, "Slime is too small to split");
-
-    bool merge = false;
-    bool possessed = false;
-
-    int mergedIndex = -1;
-    int possesserIndex = -1;
         
     Slime * refSlime = nullptr;
-
-    
-    // NOTE: Check for merge and possess 
-    for (int i = 0; i < player.childrenCount; i++)
-    {
-        Slime * child = &player.children[i];
-
-        // Rectangle [(prevX, prevY),  (destX, destY)]
-        int dx = destX - prevX;
-        int dy = destY - prevY;
-        int dChildX = child->tileX - prevX;
-        int dChildY = child->tileY - prevY;
-
-        if ((abs(dx) >= abs(dChildX)) && (abs(dy) >= abs(dChildY)) &&
-            SameSign(dx, dChildX) && SameSign(dy, dChildY))
-        {
-            // TODO: merge multiple children in single action
-
-            merge = true;
-            mergedIndex = i;
-            
-            int childMass = child->mass + 1;
-            
-            if (childMass > playerMass)
-            {
-                possessed = true;
-                possesserIndex = player.childrenCount;
-            }
-            
-            break;
-        }
-    }
-
     
     // NOTE: Create a small slime and shoot at the destination
     {
@@ -268,16 +161,18 @@ void SplitSlime(Player & player, int destX, int destY, int prevX, int prevY, int
         s.tileY = destY;
         s.mass = 1;
         s.show = false;
+        s.split = true;
 
         player.children[player.childrenCount++] = s;
         refSlime = &player.children[player.childrenCount - 1];
 
         // NOTE: split Animation
-        animationPlaying = true;
         animateSlimes[animateSlimeCount++] =
-            CreateSlimeAnimation(refSlime, player.maxTileSize, prevX, prevY,
-                                 destX, destY, 1, 1,  merge, &player.children[mergedIndex],
-                                 possessed, &player.children[possesserIndex]);
+            CreateSlimeAnimation(refSlime,
+                                 player.maxTileSize,
+                                 prevX, prevY,
+                                 destX, destY,
+                                 s.mass, s.mass);
         
     }
 
@@ -285,7 +180,6 @@ void SplitSlime(Player & player, int destX, int destY, int prevX, int prevY, int
 
 bool SlimeAction(GameState & gameState, int bounceDirX, int bounceDirY)
 {
-
     
     bool stateChanged = false;
 
@@ -356,7 +250,7 @@ bool SlimeAction(GameState & gameState, int bounceDirX, int bounceDirY)
 
         if (bounce)
         {
-            mass = BounceSlime(player, bounceX, bounceY);
+            BounceSlime(player, bounceX, bounceY);
         }
         else if (split)
         {
@@ -368,11 +262,11 @@ bool SlimeAction(GameState & gameState, int bounceDirX, int bounceDirY)
 
         if (split)
         {
-            SplitSlime(player, splitX, splitY, prevX, prevY, mass);
+            SplitSlime(player, splitX, splitY, prevX, prevY);
         }
         else if (bounce)
         {
-            SplitSlime(player, prevX, prevY, prevX, prevY, mass);
+            SplitSlime(player, prevX, prevY, prevX, prevY);
         }
                 
     }
@@ -584,6 +478,66 @@ void LoadLevelToGameState(GameState & state, State loadState)
 }
 
 
+void Merge(Record & record, SlimeAnimation & sa)
+{
+
+    for (int j = 0; j < record.player.childrenCount; j++)
+    {
+                            
+        SM_ASSERT((sa.currentSlime == &record.player.mother)  ||
+                  (sa.currentSlime != (record.player.children + record.player.childrenCount)),
+                  "currentSlime should not be same as the deleted slime"); 
+                            
+        Slime * slime = record.player.children + j;
+
+        if (sa.currentSlime != slime && !slime->split)
+        {
+
+            Rectangle rec1 = { sa.currentSlime->pivot.x, sa.currentSlime->pivot.y,
+                sa.currentSlime->tileSize, sa.currentSlime->tileSize };
+            Rectangle rec2 = { slime->pivot.x, slime->pivot.y, slime->tileSize, slime->tileSize };
+
+            IVec2 tilePos = PixelPositionToTilePosition(sa.currentSlime->pivot.x, sa.currentSlime->pivot.y);
+
+            // IMPORTANT: This is framerate dependent for not, to make it framerate independent,
+            //            You need to implement fix timestep see:
+            //              https://gafferongames.com/post/fix_your_timestep/ 
+            //              https://www.youtube.com/watch?v=VpSWuywFlC8
+            //  NOTE:    I think I should test if low frame rate actually affect the detection, then thinking of the above impl
+            if ((tilePos.x == slime->tileX) && (tilePos.y == slime->tileY)) 
+                // if (CheckCollisionRecs(rec1, rec2))
+            {
+                sa.currentSlime->mass += slime->mass;
+                if (sa.currentSlime->mass > 4)
+                {
+                    sa.currentSlime->mass = 4;
+                }
+
+                Slime * last = record.player.children + (record.player.childrenCount - 1);
+                                    
+                *slime = record.player.children[--record.player.childrenCount];
+                j--;
+
+                if (sa.currentSlime == &record.player.mother)
+                {
+                    for (int k = 0; k < animateSlimeCount; k++)
+                    {
+                        if (last == animateSlimes[k].currentSlime)
+                        {
+                            animateSlimes[k].currentSlime = slime;
+                        }
+                    }
+                }
+                else if (last == sa.currentSlime)
+                {
+                    sa.currentSlime = slime;
+                                            
+                }
+            }
+        }
+    }
+}
+
 // NOTE: Program main entry point
 int main(void)
 {
@@ -605,24 +559,24 @@ int main(void)
 
     // NOTE: Arrow Buttons
     // UP
-    startState.currentRecord.upArrow.sprite = GetSprite(SPRITE_ARROW_UP);
-    startState.currentRecord.upArrow.id = SPRITE_ARROW_UP;
-    startState.currentRecord.upArrow.tileSize = 32;
+    startState.upArrow.sprite = GetSprite(SPRITE_ARROW_UP);
+    startState.upArrow.id = SPRITE_ARROW_UP;
+    startState.upArrow.tileSize = 32;
 
     // DOWN
-    startState.currentRecord.downArrow.sprite = GetSprite(SPRITE_ARROW_DOWN);
-    startState.currentRecord.downArrow.id = SPRITE_ARROW_DOWN;
-    startState.currentRecord.downArrow.tileSize = 32;
+    startState.downArrow.sprite = GetSprite(SPRITE_ARROW_DOWN);
+    startState.downArrow.id = SPRITE_ARROW_DOWN;
+    startState.downArrow.tileSize = 32;
 
     // LEFT
-    startState.currentRecord.rightArrow.sprite = GetSprite(SPRITE_ARROW_LEFT);
-    startState.currentRecord.rightArrow.id = SPRITE_ARROW_LEFT;
-    startState.currentRecord.rightArrow.tileSize = 32;
+    startState.leftArrow.sprite = GetSprite(SPRITE_ARROW_LEFT);
+    startState.leftArrow.id = SPRITE_ARROW_LEFT;
+    startState.leftArrow.tileSize = 32;
 
     // RIGHT
-    startState.currentRecord.rightArrow.sprite = GetSprite(SPRITE_ARROW_RIGHT);
-    startState.currentRecord.rightArrow.id = SPRITE_ARROW_RIGHT;
-    startState.currentRecord.rightArrow.tileSize = 32;
+    startState.rightArrow.sprite = GetSprite(SPRITE_ARROW_RIGHT);
+    startState.rightArrow.id = SPRITE_ARROW_RIGHT;
+    startState.rightArrow.tileSize = 32;
     
     GameState gameState = startState;
 
@@ -708,9 +662,15 @@ int main(void)
             if (!animationPlaying) {
                 // NOTE: read input
 
-                // NOTE: Arrow Buttons
+                
+                // TODO NOTE: Move At edge of walls with keyboards
                 {
-                    record.leftArrow.show = record.rightArrow.show = record.upArrow.show = record.downArrow.show = true;
+
+                }
+
+                // NOTE: Split Arrow Buttons
+                {
+                    gameState.leftArrow.show = gameState.rightArrow.show = gameState.upArrow.show = gameState.downArrow.show = true;
                     
                     Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState.camera);
                 
@@ -721,118 +681,59 @@ int main(void)
                     Vector2 leftPos  = { (float)(centerPos.x-1), (float)(centerPos.y) };
                     Vector2 rightPos = { (float)(centerPos.x+1), (float)(centerPos.y) };
 
-                    // LEFT
-                    {
-                        Vector2 pos = TilePositionToPixelPosition(leftPos.x, leftPos.y,  0);
-                        Vector2 topLeft  = Vector2Subtract(pos, Vector2Scale(Vector2One(), (float)32 * 0.5f));
+                    Vector2 dir[4] = { upPos, downPos, leftPos, rightPos };
+                    ArrowButton * arrows[4] = { &gameState.upArrow, &gameState.downArrow, &gameState.leftArrow, &gameState.rightArrow };
 
-                        Sprite & leftArrow = record.leftArrow.sprite;
-                        float tileSize = (float)record.leftArrow.tileSize;
-            
+                    for (int i = 0; i < 4; i++)
+                    {
+                        Vector2 tilePos = dir[i];
+
+                        ArrowButton * arrow = arrows[i];
+                                                                        
+                        Vector2 pos = TilePositionToPixelPosition(tilePos.x, tilePos.y,  0);
+                        Vector2 topLeft  = Vector2Subtract(pos, Vector2Scale(Vector2One(), (float)32 * 0.5f));
+                        
+                        float tileSize = (float)arrow->tileSize;
+
                         Rectangle rect = { (float)topLeft.x, (float)topLeft.y, tileSize, tileSize };
                         if (CheckCollisionPointRec(mousePos, rect))
                         {
-                            record.leftArrow.hover = true;
-                            leftArrow = GetSprite(SPRITE_ARROW_LEFT_HOVER);
+                            arrow->hover = true;
+                            arrow->sprite = GetSprite(GetArrowHoverSpriteID(arrow->id));
                         }
                         else
                         {
-                            record.leftArrow.hover = false;
-                            leftArrow = GetSprite(SPRITE_ARROW_LEFT);
+                            arrow->hover = false;
+                            arrow->sprite = GetSprite(arrow->id);
                         }
-                        record.leftArrow.topLeftPos = topLeft;
+                        
+                        arrow->topLeftPos = topLeft;
 
                     }
 
-                    // RIGHT
-                    {
-                        Vector2 pos = TilePositionToPixelPosition(rightPos.x, rightPos.y,  0);
-                        Vector2 topLeft  = Vector2Subtract(pos, Vector2Scale(Vector2One(), (float)32 * 0.5f));
-
-                        Sprite & rightArrow = record.rightArrow.sprite;
-                        float tileSize = (float)record.rightArrow.tileSize;
-            
-                        Rectangle rect = { (float)topLeft.x, (float)topLeft.y, tileSize, tileSize };
-                        if (CheckCollisionPointRec(mousePos, rect))
-                        {
-                            record.rightArrow.hover = true;
-                            rightArrow = GetSprite(SPRITE_ARROW_RIGHT_HOVER);
-                        }
-                        else
-                        {
-                            record.rightArrow.hover = false;
-                            rightArrow = GetSprite(SPRITE_ARROW_RIGHT);
-                        }
-                        record.rightArrow.topLeftPos = topLeft;
-                    }
-
-                    // UP
-                    {
-                        Vector2 pos = TilePositionToPixelPosition(upPos.x, upPos.y,  0);
-                        Vector2 topLeft  = Vector2Subtract(pos, Vector2Scale(Vector2One(), (float)32 * 0.5f));
-
-                        Sprite & upArrow = record.upArrow.sprite;
-                        float tileSize = (float)record.upArrow.tileSize;
-            
-                        Rectangle rect = { (float)topLeft.x, (float)topLeft.y, tileSize, tileSize };
-                        if (CheckCollisionPointRec(mousePos, rect))
-                        {
-                            record.upArrow.hover = true;
-                            upArrow = GetSprite(SPRITE_ARROW_UP_HOVER);
-                        }
-                        else
-                        {
-                            record.upArrow.hover = false;
-                            upArrow = GetSprite(SPRITE_ARROW_UP);
-                        }
-                        record.upArrow.topLeftPos = topLeft;
-                    }
-
-
-                    // DOWN
-                    {
-                        Vector2 pos = TilePositionToPixelPosition(downPos.x, downPos.y,  0);
-                        Vector2 topLeft  = Vector2Subtract(pos, Vector2Scale(Vector2One(), (float)32 * 0.5f));
-
-                        Sprite & downArrow = record.downArrow.sprite;
-                        float tileSize = (float)record.downArrow.tileSize;
-            
-                        Rectangle rect = { (float)topLeft.x, (float)topLeft.y, tileSize, tileSize };
-                        if (CheckCollisionPointRec(mousePos, rect))
-                        {
-                            record.downArrow.hover = true;
-                            downArrow = GetSprite(SPRITE_ARROW_DOWN_HOVER);
-                        }
-                        else
-                        {
-                            record.downArrow.hover = false;
-                            downArrow = GetSprite(SPRITE_ARROW_DOWN);
-                        }
-                        record.downArrow.topLeftPos = topLeft;
-                    }
-
+                    
                     if (JustPressed(gameState, MOUSE_LEFT))
                     {
                         
-                        if (record.leftArrow.hover)
+                        if (gameState.leftArrow.hover)
                         {
                             // IMPORTANT shoot left and bounce right
                             stateChanged = SlimeAction(gameState, 1, 0);
                         }
                         
-                        if (record.rightArrow.hover)
+                        if (gameState.rightArrow.hover)
                         {
                             // IMPORTANT shoot right and bounce left
                             stateChanged = SlimeAction(gameState, -1, 0);
                         }
                         
-                        if (record.upArrow.hover)
+                        if (gameState.upArrow.hover)
                         {
                             // IMPORTANT shoot up and bounce down
                             stateChanged = SlimeAction(gameState, 0, 1);
                         }
                         
-                        if (record.downArrow.hover)
+                        if (gameState.downArrow.hover)
                         {
                             // IMPORTANT shoot down and bounce up
                             stateChanged = SlimeAction(gameState, 0, -1);
@@ -840,19 +741,17 @@ int main(void)
                     }
                 }
 
-                // NOTE: Simulate
+                if (stateChanged)
                 {
-                    if (stateChanged)
-                    {
-                        gameState.animateTime = 0;
-                        undoRecords.push(prevRecord);
-                        continue;
-                    }
+                    gameState.animateTime = 0;
+                    undoRecords.push(prevRecord);
+                    continue;
                 }
 
             }
             else
             {
+                // NOTE: Simulate
 
                 if (gameState.animateTime <= gameState.duration)
                 {
@@ -863,28 +762,20 @@ int main(void)
                     float x = gameState.animateTime / gameState.duration;
 
                     if (x > 1)  x = 1;
+                    float t = EaseOutSine(x);
 
                     for (int i = 0; i < animateSlimeCount; i++)
                     {
-
                         SlimeAnimation & sa = animateSlimes[i];
+                    
+                        sa.currentSlime->tileSize = GetTileSize(record.player.maxTileSize, sa.currentSlime->mass, 4);
+
+                        Vector2 startPivot = GetTilePivot(sa.startTilePos.x, sa.startTilePos.y, sa.currentSlime->tileSize);
+                        Vector2 endPivot = GetTilePivot(sa.endTilePos.x, sa.endTilePos.y, sa.currentSlime->tileSize);
                         
-                        Slime & startSlime = sa.startSlime;
-                        Slime & endSlime = sa.endSlime;
-                        Slime * currentSlime = sa.currentSlime;
+                        sa.currentSlime->pivot = Vector2Lerp(startPivot, endPivot, t);
 
-                        float t = EaseOutSine(x);
-
-                        currentSlime->pivot = Vector2Lerp(startSlime.pivot, endSlime.pivot, t);
-
-                        if (sa.merge && t >= sa.mergetime)
-                        {
-                            Merge(sa, record.player, currentSlime);                            
-                        }
-                        else
-                        {
-                            currentSlime->tileSize = (1 - t) * startSlime.tileSize + t * endSlime.tileSize;
-                        }
+                        Merge(record, sa);
                     }
                     
                 }
@@ -893,6 +784,32 @@ int main(void)
                     animateSlimeCount = 0;
                     gameState.animateTime = 0;
                     animationPlaying = false;
+
+                    record.player.mother.split = false;
+
+                    Slime * max = nullptr;
+                    int maxMass = 0;
+                    
+                    for (int i = 0; i < record.player.childrenCount; i++)
+                    {
+                        Slime * child = record.player.children + i;
+                        child->split = false;
+                        if (child->mass > maxMass)
+                        {
+                            maxMass = child->mass;
+                            max = child;
+                        }
+                    }
+
+                    SM_ASSERT(max, "should not be nullptr");
+
+                    if (maxMass > record.player.mother.mass)
+                    {
+                        Slime tmp = record.player.mother;
+                        record.player.mother = *max;
+                        *max = tmp;
+                    }
+                    
                     continue;
                 }
 
@@ -906,6 +823,10 @@ int main(void)
                     // NOTE: Undo                
                     gameState.currentRecord = undoRecords.top();
                     undoRecords.pop();
+
+                    animateSlimeCount = 0;
+                    gameState.animateTime = 0;
+                    animationPlaying = false;
                 }
 
                 // NOTE: Restart States        
@@ -913,6 +834,11 @@ int main(void)
                 {
                     undoRecords.push(gameState.currentRecord);
                     gameState.currentRecord = startState.currentRecord;
+
+                    animateSlimeCount = 0;
+                    gameState.animateTime = 0;
+                    animationPlaying = false;
+
                 }
             }
 
@@ -962,6 +888,29 @@ int main(void)
         }
         
 
+        // NOTE: Draw player
+
+        Color pColor = record.player.color;
+        
+        // NOTE: Test
+        Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState.camera);
+        {
+
+            Record & record = gameState.currentRecord;
+
+            Rectangle playerRect = {
+                (float)record.player.mother.pivot.x,
+                (float)record.player.mother.pivot.y,
+                (float)record.player.mother.tileSize,
+                (float)record.player.mother.tileSize };
+
+            if (CheckCollisionPointRec(mousePos, playerRect)) pColor = RED;
+        }
+
+        
+        DrawRectangleV(record.player.mother.pivot, { (float)record.player.mother.tileSize, (float)record.player.mother.tileSize}, pColor);
+
+
         // NOTE: Draw children
         for (int i = 0; i < record.player.childrenCount; i++)
         {
@@ -989,85 +938,62 @@ int main(void)
             DrawRectangleV(wallTopLeftPos, {  (float)record.wallSize,  (float)record.wallSize }, BLACK);
         }
 
-
-
-        // NOTE: Draw player
-
-        Color pColor = record.player.color;
-        
-        // NOTE: Test
-        Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState.camera);
-        {
-
-            Record & record = gameState.currentRecord;
-
-            Rectangle playerRect = {
-                (float)record.player.mother.pivot.x,
-                (float)record.player.mother.pivot.y,
-                (float)record.player.mother.tileSize,
-                (float)record.player.mother.tileSize };
-
-            if (CheckCollisionPointRec(mousePos, playerRect)) pColor = RED;
-        }
-
-        
-        DrawRectangleV(record.player.mother.pivot, { (float)record.player.mother.tileSize, (float)record.player.mother.tileSize}, pColor);
         
         if (!animationPlaying)
         {
             // NOTE: Arrow sprite
             // Left
-            if (record.leftArrow.show)
+            if (gameState.leftArrow.show)
             {
-                Sprite & leftArrow = record.leftArrow.sprite;
-                float tileSize = (float)record.leftArrow.tileSize;
+                Sprite & leftArrow = gameState.leftArrow.sprite;
+                float tileSize = (float)gameState.leftArrow.tileSize;
             
                 Rectangle source = {
                     (float)leftArrow.altasOffset.x, (float)leftArrow.altasOffset.y,
                     (float)leftArrow.spriteSize.x, (float)leftArrow.spriteSize.y
                 };
             
-                DrawTextureRec(texture, source, record.leftArrow.topLeftPos, WHITE);
+                DrawTextureRec(texture, source, gameState.leftArrow.topLeftPos, WHITE);
             }
 
 
             // Right
-            if (record.rightArrow.show)
+            if (gameState.rightArrow.show)
             {
-                Sprite rightArrow = record.rightArrow.sprite;
-                float tileSize = (float)record.rightArrow.tileSize;
+                Sprite rightArrow = gameState.rightArrow.sprite;
+                float tileSize = (float)gameState.rightArrow.tileSize;
             
                 Rectangle source = {
                     (float)rightArrow.altasOffset.x, (float)rightArrow.altasOffset.y,
                     (float)rightArrow.spriteSize.x, (float)rightArrow.spriteSize.y
                 };
-                DrawTextureRec(texture, source, record.rightArrow.topLeftPos, WHITE);
+                DrawTextureRec(texture, source, gameState.rightArrow.topLeftPos, WHITE);
             }
 
             // Up
-            if (record.upArrow.show)
+            if (gameState.upArrow.show)
             {
-                Sprite upArrow = record.upArrow.sprite;
-                float tileSize = (float)record.upArrow.tileSize;
+                Sprite upArrow = gameState.upArrow.sprite;
+                float tileSize = (float)gameState.upArrow.tileSize;
             
                 Rectangle source = {
                     (float)upArrow.altasOffset.x, (float)upArrow.altasOffset.y,
                     (float)upArrow.spriteSize.x, (float)upArrow.spriteSize.y
                 };
-                DrawTextureRec(texture, source, record.upArrow.topLeftPos, WHITE);
+                DrawTextureRec(texture, source, gameState.upArrow.topLeftPos, WHITE);
             }
 
             // Down
-            if (record.downArrow.show)
+            if (gameState.downArrow.show)
             {
-                Sprite downArrow = record.downArrow.sprite;
-                float tileSize = (float)record.downArrow.tileSize;
+                Sprite downArrow = gameState.downArrow.sprite;
+                float tileSize = (float)gameState.downArrow.tileSize;
             
                 Rectangle source = {
                     (float)downArrow.altasOffset.x, (float)downArrow.altasOffset.y,
                     (float)downArrow.spriteSize.x, (float)downArrow.spriteSize.y
                 };
-                DrawTextureRec(texture, source, record.downArrow.topLeftPos, WHITE);
+                DrawTextureRec(texture, source, gameState.downArrow.topLeftPos, WHITE);
             }
         }
         
@@ -1077,8 +1003,9 @@ int main(void)
 
         IVec2 centerPos = { (int)record.player.mother.tileX, (int)record.player.mother.tileY };
         
-        DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player Size: %.2f", centerPos.x, centerPos.y,
-                            record.player.mother.mass, record.player.mother.tileSize), 10, 140, 20, GREEN);
+        DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player Size: %.2f, Child Count: %i",
+                            centerPos.x, centerPos.y,
+                            record.player.mother.mass, record.player.mother.tileSize, record.player.childrenCount), 10, 140, 20, GREEN);
         DrawText(TextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f",
                             gameState.camera.target.x, gameState.camera.target.y,
                             gameState.camera.offset.x, gameState.camera.offset.y, gameState.camera.zoom), 10, 50, 20, RAYWHITE);

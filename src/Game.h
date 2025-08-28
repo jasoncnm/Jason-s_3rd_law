@@ -103,23 +103,16 @@ struct Slime
     int mass = 3;
 
     bool show = true;
+    bool split = false;
 };
 
 struct SlimeAnimation
 {
+    IVec2 startTilePos;
+    IVec2 endTilePos;
     
-    Slime startSlime;
-    Slime endSlime;
-
     Slime * currentSlime;
 
-    float mergetime = 1.0f;
-    
-    bool merge;
-    int possessed;
-
-    Slime * mergedSlime;
-    Slime * possesserSlime;
 };
 
 struct Player
@@ -151,8 +144,6 @@ struct Record
     unsigned int goalCount;
     unsigned int goalSize;
     Goal goals[MAX_GOALS];
-
-    ArrowButton upArrow, downArrow, leftArrow, rightArrow;
     
 };
 
@@ -169,6 +160,9 @@ struct GameState
     Record currentRecord;
 
     KeyMapping keyMappings[GAME_INPUT_COUNT];
+
+    
+    ArrowButton upArrow, downArrow, leftArrow, rightArrow;
 
 
     float animateTime = 0.0f;
