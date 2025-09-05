@@ -8,4 +8,4 @@ libs="-Lthird_party/lib -lraylib -luser32 -lgdi32 -lshell32 -lmsvcrt -lwinmm -no
 outputFile=JasonLaw.exe
 
 echo "Engine not running, building main..."
-clang++ $includes -g src/Game.cpp -o$outputFile  $libs $warnings $defines
+clang++ $includes -g src/main.cpp -o$outputFile  $libs $warnings $defines

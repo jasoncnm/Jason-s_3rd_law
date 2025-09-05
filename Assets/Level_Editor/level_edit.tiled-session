@@ -1,0 +1,46 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "TileMap/tileMap.tmx",
+    "expandedProjectPaths": [
+        "TlieSet",
+        "TileMap",
+        "."
+    ],
+    "fileStates": {
+        "TileMap/tileMap.tmx": {
+            "scale": 3,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 184.16666666666669,
+                "y": 166.5
+            }
+        },
+        "TileMap/tileMap.tmx#tileSet": {
+            "scaleInDock": 4
+        },
+        "TlieSet/tileSet.tsx": {
+            "scaleInDock": 4,
+            "scaleInEditor": 8
+        }
+    },
+    "last.exportedFilePath": "W:/RayLib_Games/Jason's_3rd_law/Assets/Level",
+    "last.imagePath": "W:/RayLib_Games/Jason's_3rd_law/Assets/Texture",
+    "lastUsedTilesetExportFilter": "JSON tileset files (*.tsj *.json)",
+    "map.height": 180,
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedFormat": "tmx",
+    "map.width": 180,
+    "openFiles": [
+        "TileMap/tileMap.tmx",
+        "TlieSet/tileSet.tsx"
+    ],
+    "project": "level_edit.tiled-project",
+    "recentFiles": [
+        "TlieSet/tileSet.tsx",
+        "TileMap/tileMap.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx"
+}

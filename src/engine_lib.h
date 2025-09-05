@@ -13,6 +13,11 @@
 #include <cmath>
 #include <sys/stat.h>
 
+
+#include "raylib.h"
+#include "raymath.h"
+
+
 //  ========================================================================
 // NOTE: Defines
 //  ========================================================================
@@ -369,7 +374,40 @@ struct IVec2
     {
         return { x - other.x, y - other.y };
     }
+
+    IVec2 operator+(IVec2 other)
+    {
+        return { x + other.x, y + other.y };
+    }
+
+    IVec2 operator-()
+    {
+        return { -x, -y};
+    }
+
+    bool operator==(IVec2 other)
+    {
+        return (x == other.x) && (y == other.y); 
+    }
+
+    bool operator!=(IVec2 other)
+    {
+        return !((IVec2){ x, y } == other); 
+    }
+
+    
+    
 };
+
+int Abs(int x)
+{
+    return x > 0 ? x : -x;
+}
+
+IVec2 Abs(IVec2 val)
+{
+    return { Abs(val.x), Abs(val.y) };
+}
 
 Vec2 IVec2ToVec2(IVec2 val)
 {
@@ -476,11 +514,6 @@ float EaseOutSine(float x)
 float EaseInOutSine(float x)
 {    
     return -(cosf(PI * x) - 1) / 2;
-}
-
-int abs(int x)
-{
-    return (x > 0) ? x :  -x;
 }
 
 bool SameSign(int x, int y)

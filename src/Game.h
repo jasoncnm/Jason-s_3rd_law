@@ -7,10 +7,7 @@
    $Notice: $
    ======================================================================== */
 
-
-#define MAP_TILE_SIZE 64       // Tiles size
-
-#define MAX_SLIME 50
+#define MAP_TILE_SIZE 32       // Tiles size
 #define MAX_QUEUE 100
 #define MAX_BLOCKS 100
 #define MAX_WALLS 100
@@ -18,14 +15,15 @@
 #define MAX_ANIMATION 100
 
 #define MAX_UNDO_RECORDS 1000    // IMPORTANT: This might need to be handle if released. I'm Using std::stack for now (dynamic alloc)
-#define SCREEN_WIDTH 1920
-#define SCREEN_HEIGHT 1080
 
-#define TEXTURE_PATH "Assets/Texture/SpriteAtlas.png"
-#define LEVELS_PATH "Assets/Level/levels.lv"
 
+#include "raylib.h"
+#include "raymath.h"
+
+#include "engine_lib.h"
 #include "assets.h"
-#include "animation.h"
+
+#include "slime.h"
 
 enum State
 {
@@ -38,6 +36,11 @@ enum GameInputType
     NO_INPUT,
     MOUSE_LEFT,
     MOUSE_RIGHT,
+    LEFT_KEY,
+    RIGHT_KEY,
+    UP_KEY,
+    DOWN_KEY,
+    SPACE_KEY,
     GAME_INPUT_COUNT,
 };
 
@@ -58,30 +61,36 @@ struct Map
 struct Goal
 {
     bool cover = false;
-    unsigned int goalX;
-    unsigned int goalY;
+    IVec2 tile;
 };
 
 // NOTE: PushBlock
 struct Block
 {
-    unsigned int blockX;
-    unsigned int blockY;
+    Sprite sprite;
+    SpriteID id;
+
+    IVec2 tile;
+
+    int mass = 1;
+    
     Color color;
 };
 
 // NOTE: Wall
 struct Wall
 {
-    unsigned int wallX;
-    unsigned int wallY;
+    Sprite sprite;
+    SpriteID id;
+    int tileSize = 32;
+
+    IVec2 tile;
 };
 
 struct ArrowButton
 {
     Sprite sprite;
     SpriteID id;
-    int tileSize = 32;
 
     Vector2 topLeftPos;
 
@@ -92,58 +101,14 @@ struct ArrowButton
 };
 
 
-struct Slime
-{
-    int tileX;
-    int tileY;
-
-    Vector2 pivot;
-
-    float tileSize;
-    int mass = 3;
-
-    bool show = true;
-    bool split = false;
-};
-
-struct SlimeAnimation
-{
-    IVec2 startTilePos;
-    IVec2 endTilePos;
-    
-    Slime * currentSlime;
-
-};
-
-struct Player
-{
-    
-    int moveSteps;
-    int childrenCount;
-
-    float maxTileSize;
-    Color color = YELLOW;
-
-    Slime mother;
-    Slime children[MAX_SLIME];
-};
-
 struct Record
 {
 
     Player player;
 
-    unsigned int blockCount;
-    unsigned int blockSize;
-    Block blocks[MAX_BLOCKS];
-
-    unsigned int wallCount;
-    unsigned int wallSize;
-    Wall walls[MAX_WALLS];
-
-    unsigned int goalCount;
-    unsigned int goalSize;
-    Goal goals[MAX_GOALS];
+    Array<Block, MAX_BLOCKS> blocks;
+    Array<Wall, MAX_WALLS> walls;
+    Array<Goal, MAX_GOALS>  goals;
     
 };
 
@@ -160,21 +125,164 @@ struct GameState
     Record currentRecord;
 
     KeyMapping keyMappings[GAME_INPUT_COUNT];
-
     
     ArrowButton upArrow, downArrow, leftArrow, rightArrow;
 
-
     float animateTime = 0.0f;
     float duration = 1.0f;
-    
+
+    bool initialized = false;
 };
 
-bool animationPlaying = false;
-int animateSlimeCount = 0;
-SlimeAnimation animateSlimes[MAX_SLIME] = { 0 };
 
-long long levelsTimestamp;
+// NOTE: Globals
+
+static float timeSinceLastPress = 0.0f;
+static const float pressFreq = 0.2f;
+
+
+bool CheckOutOfBound(unsigned int tileX, unsigned int tileY, Map & tileMap)
+{
+    bool result =
+           (tileX < 1)
+        || (tileX > tileMap.tilesX)
+        || (tileY < 1)
+        || (tileY > tileMap.tilesY);
+
+    return result;
+}
+
+bool CheckOutOfBound(IVec2 tilePos, Map & tileMap)
+{
+    return CheckOutOfBound(tilePos.x, tilePos.y, tileMap);
+}
+
+template<typename T, int N>
+bool CheckTiles(IVec2 tilePos, Array<T, N> arr)
+{
+    bool result = false;
+
+    for (unsigned int index = 0; index < arr.count; index++)
+    {
+        if (arr[index].tile == tilePos)
+        {
+            result = true;
+            break;
+        }
+    }
+
+    return result;
+
+}
+
+int GetBlockIndex(IVec2 tile, Array<Block, MAX_BLOCKS> blocks)
+{
+    for (unsigned int index = 0; index < blocks.count; index++)
+    {
+        Block & block = blocks[index];
+        if (tile == block.tile)
+        {
+            return index;
+        }
+    }
+    return -1;
+}
+
+bool BounceBlock(GameState & gameState, IVec2 dir, int blockIndex)
+{
+
+    bool result = false;
+
+    Record & record = gameState.currentRecord;
+    
+    IVec2 bp = record.blocks[blockIndex].tile;
+
+    IVec2 start = bp + dir;
+    
+    for (IVec2 pos = start;
+         !CheckTiles(pos, record.walls);
+         pos = pos + dir)
+    {
+        result = true;
+
+        if (CheckOutOfBound(pos, gameState.tileMap))
+        {
+            record.blocks.RemoveIdxAndSwap(blockIndex);
+            return result;
+        }
+        
+        int nIndex = GetBlockIndex(pos + dir, record.blocks);
+        
+        if (nIndex != -1 && blockIndex != nIndex)
+        {
+            record.blocks[blockIndex].tile = pos;
+            blockIndex = nIndex;
+        }
+        bp = pos;
+    }
+
+    record.blocks[blockIndex].tile = bp;
+
+    return result;
+
+}
+
+bool CheckPushableBlocks(GameState & gameState, Slime & slime,
+                         IVec2 blockNextPos, IVec2 pushDir, 
+                         int accumulatedMass, bool & pushed)
+{
+
+    Record & record = gameState.currentRecord;
+
+    pushed = true;
+    
+    if (CheckTiles(blockNextPos, record.walls))
+    {
+        return false;
+    }
+    
+    int index = GetBlockIndex(blockNextPos, record.blocks);
+
+    if (index != -1)
+    {
+        Block & block = record.blocks[index];
+        int newAccumulatedMass = accumulatedMass + block.mass;
+        if (newAccumulatedMass > slime.mass)
+        {
+            //slime.attachDir = pushDir;
+            
+            return false;
+        }
+        
+        if (CheckPushableBlocks(gameState, slime, blockNextPos + pushDir, pushDir, newAccumulatedMass, pushed))
+        {
+            IVec2 dirs[4] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+
+            for (int i = 0; i < 4; i++)
+            {
+                if (CheckTiles(block.tile + dirs[i], record.walls))
+                {
+                    block.tile = blockNextPos + pushDir;
+
+                    pushed |= true;
+                    
+                    return true;
+                }
+            }
+
+            BounceBlock(gameState, pushDir, index);
+
+            pushed |= true;
+            
+            return true;
+        }
+        return false;
+    }
+
+    pushed = false;
+        
+    return true;
+}
 
 
 

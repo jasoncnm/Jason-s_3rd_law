@@ -1,0 +1,57 @@
+#if !defined(TILEMAP_H)
+/* ========================================================================
+   $File: $
+   $Date: $
+   $Revision: $
+   $Creator: Junjie Mao $
+   $Notice: $
+   ======================================================================== */
+
+Vector2 TilePositionToPixelPosition(float tileX, float tileY)
+{
+    Vector2 result;
+    result.x = (float)tileX * MAP_TILE_SIZE - (MAP_TILE_SIZE) / 2.0f;
+    result.y = (float)tileY * MAP_TILE_SIZE - (MAP_TILE_SIZE) / 2.0f;
+
+    return result;
+}
+
+Vector2 TilePositionToPixelPosition(IVec2 tilePos)
+{
+    return TilePositionToPixelPosition((float)tilePos.x, (float)tilePos.y);
+}
+
+
+IVec2 PixelPositionToTilePosition(float x, float y)
+{
+    IVec2 result;
+    // result.x = (float)tileX * MAP_TILE_SIZE - (MAP_TILE_SIZE) / 2.0f;
+    result.x = (int)(x / MAP_TILE_SIZE+1);
+
+    // result.y = (float)tileY * MAP_TILE_SIZE - (MAP_TILE_SIZE) / 2.0f;
+    result.y = (int)(y / MAP_TILE_SIZE+1);
+
+    return result;
+
+}
+
+IVec2 PixelPositionToTilePosition(Vec2 pos)
+{
+    return PixelPositionToTilePosition(pos.x, pos.y);
+}
+
+Vector2 GetTilePivot(int tileX, int tileY)
+{
+    Vector2 playerPos = TilePositionToPixelPosition((float)tileX, (float)tileY);            
+
+    return Vector2Subtract(playerPos, Vector2Scale(Vector2One(), (float)MAP_TILE_SIZE * 0.5f));
+}
+
+Vector2 GetTilePivot(IVec2 tilePos)
+{
+    return GetTilePivot(tilePos.x, tilePos.y);
+}
+
+
+#define TILEMAP_H
+#endif

@@ -29,6 +29,9 @@ enum SpriteID
     SPRITE_ARROW_DOWN_HOVER,
     SPRITE_ARROW_LEFT_HOVER,
     SPRITE_ARROW_RIGHT_HOVER,
+    SPRITE_WALL,
+    SPRITE_BLOCK,
+    SPRITE_SLIME_1,
     SPRITE_COUNT,
 };
 
@@ -63,60 +66,80 @@ Sprite GetSprite(SpriteID spriteID)
         }
         case SPRITE_ARROW_LEFT:
         {
-            sprite.altasOffset = { 16, 0 };
+            sprite.altasOffset = { 32, 0 };
             sprite.spriteSize  = { 32, 32 };
 
             break;
         }
         case SPRITE_ARROW_UP:
         {
-            sprite.altasOffset = { 80, 0 };
+            sprite.altasOffset = { 96, 0 };
             sprite.spriteSize  = { 32, 32 };
 
             break;
         }
         case SPRITE_ARROW_DOWN:
         {
-            sprite.altasOffset = { 48, 0 };
+            sprite.altasOffset = { 64, 0 };
             sprite.spriteSize  = { 32, 32 };
 
             break;
         }
         case SPRITE_ARROW_RIGHT:
         {
-            sprite.altasOffset = { 112, 0 };
+            sprite.altasOffset = { 128, 0 };
             sprite.spriteSize  = { 32, 32 };
 
             break;
         }
         case SPRITE_ARROW_LEFT_HOVER:
         {
-            sprite.altasOffset = { 16, 64 };
+            sprite.altasOffset = { 32, 64 };
             sprite.spriteSize  = { 32, 32 };
 
             break;
         }
         case SPRITE_ARROW_UP_HOVER:
         {
-            sprite.altasOffset = { 80, 64 };
+            sprite.altasOffset = { 96, 64 };
             sprite.spriteSize  = { 32, 32 };
 
             break;
         }
         case SPRITE_ARROW_DOWN_HOVER:
         {
-            sprite.altasOffset = { 48, 64 };
+            sprite.altasOffset = { 64, 64 };
             sprite.spriteSize  = { 32, 32 };
 
             break;
         }
         case SPRITE_ARROW_RIGHT_HOVER:
         {
-            sprite.altasOffset = { 112, 64 };
+            sprite.altasOffset = { 128, 64 };
             sprite.spriteSize  = { 32, 32 };
 
             break;
         }
+        case SPRITE_WALL:
+        {
+            sprite.altasOffset = { 96, 96 };
+            sprite.spriteSize  = { 32, 32 };
+            break;
+        }
+        case SPRITE_BLOCK:
+        {
+            sprite.altasOffset = { 64, 96 };
+            sprite.spriteSize  = { 32, 32 };
+
+            break;
+        }
+        case SPRITE_SLIME_1:
+        {
+            sprite.altasOffset = { 32, 96 };
+            sprite.spriteSize  = { 32, 32 };
+            break;
+        }
+
     }
 
     return sprite;

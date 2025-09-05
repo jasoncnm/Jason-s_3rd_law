@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="9" height="9" tilewidth="32" tileheight="32" infinite="0" nextlayerid="9" nextobjectid="1">
+ <editorsettings>
+  <export target="../../Level/level.tmj" format="json"/>
+ </editorsettings>
+ <tileset firstgid="1" name="tileSet" tilewidth="32" tileheight="32" tilecount="35" columns="5">
+  <image source="../../Texture/SpriteAtlas.png" width="160" height="224"/>
+ </tileset>
+ <layer id="3" name="Blocks" width="9" height="9">
+  <data encoding="csv">
+19,19,19,19,19,19,19,19,19,
+19,0,0,0,0,0,0,0,19,
+19,0,0,18,0,0,0,0,19,
+19,0,0,0,0,0,0,0,19,
+19,0,0,0,0,0,0,0,0,
+19,0,0,18,0,0,0,0,19,
+19,0,0,18,0,0,0,0,19,
+19,0,0,0,0,0,0,0,19,
+19,19,19,19,19,19,19,19,19
+</data>
+ </layer>
+ <layer id="8" name="Player" width="9" height="9">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,17,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="7" name="Overlap" width="9" height="9">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+</map>
