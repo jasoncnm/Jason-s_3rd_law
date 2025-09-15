@@ -6,8 +6,8 @@
    $Notice: $
    ======================================================================== */
 
-#define SCREEN_WIDTH 1920
-#define SCREEN_HEIGHT 1080
+#define SCREEN_WIDTH 1200
+#define SCREEN_HEIGHT 1200
 
 
 #include <cassert>
@@ -22,15 +22,25 @@
 // NOTE: Program main entry point
 int main(void)
 {
-
+    if (IsWindowState(FLAG_VSYNC_HINT)) ClearWindowState(FLAG_VSYNC_HINT);
+    else SetWindowState(FLAG_VSYNC_HINT);
+    
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
-
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jason's 3rd law");
 
-    GameState gameState;
-
     InitTexture();
+
+    
+    BumpAllocator transientStorage = MakeBumpAllocator(MB(50));
+    BumpAllocator persistentStorage = MakeBumpAllocator(MB(50));
+
+    gameState = (GameState *)BumpAlloc(&persistentStorage, sizeof(GameState));
+    if (!gameState)
+    {
+        SM_ERROR("Failed to allocate gameState");
+        return -1;
+    }
     
     // NOTE: Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key

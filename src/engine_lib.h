@@ -150,9 +150,14 @@ struct Array
         return count == N;
     }
 
+    bool IsEmpty()
+    {
+        return count == 0;
+    }
+
 };
 
- 
+
 //  ========================================================================
 // NOTE: Bump Allocator
 //  ========================================================================
@@ -395,7 +400,10 @@ struct IVec2
         return !((IVec2){ x, y } == other); 
     }
 
-    
+    int SqrMagnitude()
+    {
+        return x * x + y * y;
+    }
     
 };
 

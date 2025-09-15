@@ -3,44 +3,228 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TileMap/tileMap.tmx",
+    "activeFile": "TileMap/Room_7.tmj",
     "expandedProjectPaths": [
-        "TlieSet",
+        ".",
         "TileMap",
-        "."
+        "TlieSet"
     ],
     "fileStates": {
-        "TileMap/tileMap.tmx": {
-            "scale": 3,
+        "": {
+            "scaleInDock": 3
+        },
+        "TileMap/Room_1.tmj": {
+            "scale": 2,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 184.16666666666669,
-                "y": 166.5
+                "x": 199.25,
+                "y": 194.75
+            }
+        },
+        "TileMap/Room_1.tmx": {
+            "scale": 2,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 192.25,
+                "y": 175.75
+            }
+        },
+        "TileMap/Room_1.tmx#tileSet": {
+            "dynamicWrapping": false,
+            "scaleInDock": 3
+        },
+        "TileMap/Room_10.tmj": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 580.25,
+                "y": 172.25
+            }
+        },
+        "TileMap/Room_11.tmj": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 158.25,
+                "y": 793.25
+            }
+        },
+        "TileMap/Room_12.tmj": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 158.25,
+                "y": 726.75
+            }
+        },
+        "TileMap/Room_13.tmj": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 510.25,
+                "y": 308.25
+            }
+        },
+        "TileMap/Room_14.tmj": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 994.5,
+                "y": 265.5
+            }
+        },
+        "TileMap/Room_2.tmj": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 250.25,
+                "y": 492.25
+            }
+        },
+        "TileMap/Room_2.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 175.66666666666669,
+                "y": 175.66666666666669
+            }
+        },
+        "TileMap/Room_3.tmj": {
+            "scale": 1.5,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": -709.6666666666666,
+                "y": 245.66666666666663
+            }
+        },
+        "TileMap/Room_3.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": -124.33333333333326,
+                "y": 448.3333333333333
+            }
+        },
+        "TileMap/Room_4.tmj": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 175.5,
+                "y": 175.5
+            }
+        },
+        "TileMap/Room_5.tmj": {
+            "scale": 2,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 176.25,
+                "y": 175.75
+            }
+        },
+        "TileMap/Room_6.tmj": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 228.25,
+                "y": 172.25
+            }
+        },
+        "TileMap/Room_7.tmj": {
+            "scale": 4,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": -281.625,
+                "y": 179.125
+            }
+        },
+        "TileMap/Room_8.tmj": {
+            "scale": 4,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": -1130.375,
+                "y": -793.375
+            }
+        },
+        "TileMap/Room_9.tmj": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": -856.75,
+                "y": -157.25
+            }
+        },
+        "TileMap/Test.tmj": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 1212.5,
+                "y": 891.5
+            }
+        },
+        "TileMap/Tunnel_1.tmx": {
+            "scale": 3,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 99.5,
+                "y": 181.83333333333331
+            }
+        },
+        "TileMap/Tunnel_2.tmx": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": -343.5,
+                "y": 434.5
+            }
+        },
+        "TileMap/tileMap.tmx": {
+            "scale": 3,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 214.5,
+                "y": 169.83333333333331
             }
         },
         "TileMap/tileMap.tmx#tileSet": {
             "scaleInDock": 4
         },
+        "TlieSet/tileSet.tsj": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
         "TlieSet/tileSet.tsx": {
-            "scaleInDock": 4,
-            "scaleInEditor": 8
+            "scaleInDock": 2,
+            "scaleInEditor": 4
         }
     },
-    "last.exportedFilePath": "W:/RayLib_Games/Jason's_3rd_law/Assets/Level",
+    "last.exportedFilePath": "W:/RayLib_Games/Jason's_3rd_law/Assets/Level_Editor/TileMap",
     "last.imagePath": "W:/RayLib_Games/Jason's_3rd_law/Assets/Texture",
+    "last.worldFilePath": "W:/RayLib_Games/Jason's_3rd_law/Assets/Level_Editor",
     "lastUsedTilesetExportFilter": "JSON tileset files (*.tsj *.json)",
-    "map.height": 180,
+    "loadedWorlds": [
+        "W:/RayLib_Games/Jason's_3rd_law/Assets/Level_Editor/maps.world"
+    ],
+    "map.height": 11,
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
-    "map.lastUsedFormat": "tmx",
-    "map.width": 180,
+    "map.lastUsedFormat": "json",
+    "map.width": 11,
     "openFiles": [
-        "TileMap/tileMap.tmx",
-        "TlieSet/tileSet.tsx"
+        "TileMap/Room_7.tmj"
     ],
     "project": "level_edit.tiled-project",
     "recentFiles": [
-        "TlieSet/tileSet.tsx",
-        "TileMap/tileMap.tmx"
+        "TileMap/Room_7.tmj",
+        "TileMap/Room_12.tmj",
+        "TileMap/Room_10.tmj",
+        "TileMap/Room_9.tmj",
+        "TileMap/Room_14.tmj",
+        "TileMap/Room_5.tmj",
+        "TileMap/Room_4.tmj",
+        "TileMap/Room_3.tmj",
+        "TileMap/Room_2.tmj",
+        "TileMap/Room_13.tmj",
+        "TileMap/Room_11.tmj",
+        "TileMap/Room_1.tmj"
     ],
     "tileset.lastUsedFormat": "tsx"
 }

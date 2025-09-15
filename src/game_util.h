@@ -1,4 +1,4 @@
-#if !defined(TILEMAP_H)
+#if !defined(GAME_UTIL_H)
 /* ========================================================================
    $File: $
    $Date: $
@@ -6,6 +6,36 @@
    $Creator: Junjie Mao $
    $Notice: $
    ======================================================================== */
+
+template<typename T, int N>
+bool CheckTiles(IVec2 tilePos, Array<T, N> arr)
+{
+    bool result = false;
+
+    for (unsigned int index = 0; index < arr.count; index++)
+    {
+        if (arr[index].tile == tilePos)
+        {
+            result = true;
+            break;
+        }
+    }
+
+    return result;
+}
+
+template<typename T, int N>
+int GetTileIndex(IVec2 tilePos, Array<T, N> tiles)
+{
+    for (unsigned int index = 0; index < tiles.count; index++)
+    {
+        if (tilePos == tiles[index].tile)
+        {
+            return index;
+        }
+    }
+    return -1;
+}
 
 Vector2 TilePositionToPixelPosition(float tileX, float tileY)
 {
@@ -16,9 +46,9 @@ Vector2 TilePositionToPixelPosition(float tileX, float tileY)
     return result;
 }
 
-Vector2 TilePositionToPixelPosition(IVec2 tilePos)
+Vector2 TilePositionToPixelPosition(Vector2 tilePos)
 {
-    return TilePositionToPixelPosition((float)tilePos.x, (float)tilePos.y);
+    return TilePositionToPixelPosition(tilePos.x, tilePos.y);
 }
 
 
@@ -53,5 +83,5 @@ Vector2 GetTilePivot(IVec2 tilePos)
 }
 
 
-#define TILEMAP_H
+#define GAME_UTIL_H
 #endif

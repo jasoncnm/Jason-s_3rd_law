@@ -21,10 +21,13 @@ enum SlimeState
 {
     MOVE_STATE,
     SPLIT_STATE,
+    FREEZE_STATE,
 };
 
 struct Slime
 {
+    SlimeState state = MOVE_STATE;
+
     IVec2 tile;
     IVec2 attachDir;
 
@@ -59,7 +62,6 @@ struct Player
 
     Array<Slime, MAX_SLIME> children;
 
-    SlimeState state = MOVE_STATE;
 };
 
 
@@ -74,6 +76,35 @@ SlimeAnimation animateSlimes[MAX_SLIME] = { 0 };
 //              NOTE: Slime Functions
 //  ========================================================================
 
+void UnFreezeAllSlime(Player & player)
+{
+    player.mother.state = MOVE_STATE;
+    for (int i = 0; i < player.children.count; i++)
+    {
+        player.children[i].state = MOVE_STATE;
+    }
+}
+
+Slime * CheckSlime(IVec2 tilePos, Player & player)
+{
+    Slime * result = nullptr;
+    if (player.mother.tile == tilePos)
+    {
+        result = &player.mother;
+    }
+
+    for (int i = 0; i < player.children.count; i++)
+    {
+        Slime * s = &player.children[i];
+        if (s->tile == tilePos)
+        {
+            result = s; 
+        }
+    }
+
+    return result;
+    
+}
 
 
 SlimeAnimation CreateSlimeAnimation(Slime * refSlime,
@@ -119,7 +150,7 @@ void SplitSlime(Player & player, IVec2 destPos, IVec2 prevPos)
     
     // NOTE: Create a small slime and shoot at the destination
     {
-        Slime s = { 0 };
+        Slime s = { };
         s.tile = destPos;
         s.mass = 1;
         s.show = false;

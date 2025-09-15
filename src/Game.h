@@ -8,14 +8,14 @@
    ======================================================================== */
 
 #define MAP_TILE_SIZE 32       // Tiles size
-#define MAX_QUEUE 100
-#define MAX_BLOCKS 100
-#define MAX_WALLS 100
-#define MAX_GOALS 100
-#define MAX_ANIMATION 100
+#define MAX_BLOCKS 500
+#define MAX_WALLS 1100
+#define MAX_CABLE 200
+#define MAX_ANIMATION 10
 
 #define MAX_UNDO_RECORDS 1000    // IMPORTANT: This might need to be handle if released. I'm Using std::stack for now (dynamic alloc)
 
+#include <vector>
 
 #include "raylib.h"
 #include "raymath.h"
@@ -24,6 +24,11 @@
 #include "assets.h"
 
 #include "slime.h"
+#include "electric_door.h"
+
+// ----------------------------------------------------
+// NOTE: Game Structs
+// ----------------------------------------------------
 
 enum State
 {
@@ -53,15 +58,9 @@ struct KeyMapping
 // NOTE: Map data type
 struct Map
 {
-    unsigned int tilesX;            // Number of tiles in X axis
-    unsigned int tilesY;            // Number of tiles in Y axis
-};
-
-// NOTE: Goal spot
-struct Goal
-{
-    bool cover = false;
-    IVec2 tile;
+    IVec2 tilePos;            // Top left tile position of the map
+    int   width;              // Number of tiles in X axis
+    int   height;             // Number of tiles in Y axis
 };
 
 // NOTE: PushBlock
@@ -87,6 +86,17 @@ struct Wall
     IVec2 tile;
 };
 
+struct Glass
+{
+    Sprite sprite;
+    SpriteID id;
+    int tileSize = 32;
+
+    bool broken = false;
+
+    IVec2 tile;
+};
+
 struct ArrowButton
 {
     Sprite sprite;
@@ -100,27 +110,29 @@ struct ArrowButton
     bool show = true;
 };
 
-
 struct Record
 {
-
     Player player;
+
+    ElectricDoorSystem electricDoorSystem;
 
     Array<Block, MAX_BLOCKS> blocks;
     Array<Wall, MAX_WALLS> walls;
-    Array<Goal, MAX_GOALS>  goals;
-    
-};
+    Array<Glass, MAX_BLOCKS> glasses;
 
+    bool CheckWalls(IVec2 tilePos);
+};
 
 // NOTE: GameState
 struct GameState
 {
     State state;
 
+    IVec2 tileMin, tileMax;
+    
     Camera2D camera;
 
-    Map tileMap;
+    Array<Map, 100> tileMaps;
 
     Record currentRecord;
 
@@ -131,87 +143,99 @@ struct GameState
     float animateTime = 0.0f;
     float duration = 1.0f;
 
+
     bool initialized = false;
 };
 
-
-// NOTE: Globals
-
+// ----------------------------------------------------
+// NOTE: Game Globals
+// ----------------------------------------------------
 static float timeSinceLastPress = 0.0f;
 static const float pressFreq = 0.2f;
+static GameState * gameState;
 
 
-bool CheckOutOfBound(unsigned int tileX, unsigned int tileY, Map & tileMap)
+// ----------------------------------------------------
+// NOTE: Game Functions
+// ----------------------------------------------------
+
+bool Record::CheckWalls(IVec2 tilePos)
+{
+    bool result = CheckTiles(tilePos, walls);
+
+    for (int i = 0; i < electricDoorSystem.doorIndexes.count; i++)
+    {
+        Cable & door = electricDoorSystem.cables[electricDoorSystem.doorIndexes[i]];
+        if (door.tile == tilePos)
+        {
+            result |= true;
+        }
+    }
+
+    for (int i = 0; i < glasses.count; i++)
+    {
+        Glass & glass = glasses[i];
+        if (!glass.broken && glass.tile == tilePos)
+        {
+            result |= true;
+        }
+    }
+    
+    return result;
+}
+
+bool CheckOutOfBound(int tileX, int tileY)
 {
     bool result =
-           (tileX < 1)
-        || (tileX > tileMap.tilesX)
-        || (tileY < 1)
-        || (tileY > tileMap.tilesY);
+           (tileX < gameState->tileMin.x)
+        || (tileX > gameState->tileMax.x)
+        || (tileY < gameState->tileMin.y)
+        || (tileY > gameState->tileMax.y);
 
     return result;
 }
 
-bool CheckOutOfBound(IVec2 tilePos, Map & tileMap)
+bool CheckOutOfBound(IVec2 tilePos)
 {
-    return CheckOutOfBound(tilePos.x, tilePos.y, tileMap);
+    return CheckOutOfBound(tilePos.x, tilePos.y);
 }
 
-template<typename T, int N>
-bool CheckTiles(IVec2 tilePos, Array<T, N> arr)
-{
-    bool result = false;
-
-    for (unsigned int index = 0; index < arr.count; index++)
-    {
-        if (arr[index].tile == tilePos)
-        {
-            result = true;
-            break;
-        }
-    }
-
-    return result;
-
-}
-
-int GetBlockIndex(IVec2 tile, Array<Block, MAX_BLOCKS> blocks)
-{
-    for (unsigned int index = 0; index < blocks.count; index++)
-    {
-        Block & block = blocks[index];
-        if (tile == block.tile)
-        {
-            return index;
-        }
-    }
-    return -1;
-}
-
-bool BounceBlock(GameState & gameState, IVec2 dir, int blockIndex)
+bool BounceBlock(IVec2 dir, int blockIndex)
 {
 
     bool result = false;
 
-    Record & record = gameState.currentRecord;
+    Record & record = gameState->currentRecord;
     
     IVec2 bp = record.blocks[blockIndex].tile;
 
     IVec2 start = bp + dir;
     
     for (IVec2 pos = start;
-         !CheckTiles(pos, record.walls);
+         ;
          pos = pos + dir)
     {
+        if (record.CheckWalls(pos))
+        {
+            int glassIndex = GetTileIndex(pos, record.glasses);
+            if (glassIndex >= 0)
+            {
+                record.glasses[glassIndex].broken = true;
+                record.glasses[glassIndex].sprite = GetSprite(SPRITE_GLASS_BROKEN);
+                continue;
+            }
+            break;
+        }
+        
         result = true;
 
-        if (CheckOutOfBound(pos, gameState.tileMap))
+        if (CheckOutOfBound(pos))
         {
             record.blocks.RemoveIdxAndSwap(blockIndex);
             return result;
         }
         
-        int nIndex = GetBlockIndex(pos + dir, record.blocks);
+        int nIndex = GetTileIndex(pos + dir, record.blocks);
         
         if (nIndex != -1 && blockIndex != nIndex)
         {
@@ -227,21 +251,21 @@ bool BounceBlock(GameState & gameState, IVec2 dir, int blockIndex)
 
 }
 
-bool CheckPushableBlocks(GameState & gameState, Slime & slime,
+bool CheckPushableBlocks(Slime & slime,
                          IVec2 blockNextPos, IVec2 pushDir, 
                          int accumulatedMass, bool & pushed)
 {
 
-    Record & record = gameState.currentRecord;
+    Record & record = gameState->currentRecord;
 
     pushed = true;
     
-    if (CheckTiles(blockNextPos, record.walls))
+    if (record.CheckWalls(blockNextPos))
     {
         return false;
     }
     
-    int index = GetBlockIndex(blockNextPos, record.blocks);
+    int index = GetTileIndex(blockNextPos, record.blocks);
 
     if (index != -1)
     {
@@ -254,13 +278,13 @@ bool CheckPushableBlocks(GameState & gameState, Slime & slime,
             return false;
         }
         
-        if (CheckPushableBlocks(gameState, slime, blockNextPos + pushDir, pushDir, newAccumulatedMass, pushed))
+        if (CheckPushableBlocks(slime, blockNextPos + pushDir, pushDir, newAccumulatedMass, pushed))
         {
             IVec2 dirs[4] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 
             for (int i = 0; i < 4; i++)
             {
-                if (CheckTiles(block.tile + dirs[i], record.walls))
+                if (record.CheckWalls(block.tile + dirs[i]) || CheckTiles(block.tile + dirs[i], record.blocks))
                 {
                     block.tile = blockNextPos + pushDir;
 
@@ -270,7 +294,7 @@ bool CheckPushableBlocks(GameState & gameState, Slime & slime,
                 }
             }
 
-            BounceBlock(gameState, pushDir, index);
+            BounceBlock(pushDir, index);
 
             pushed |= true;
             
@@ -285,6 +309,177 @@ bool CheckPushableBlocks(GameState & gameState, Slime & slime,
 }
 
 
+inline void PowerOnCable(Cable & cable, bool & end)
+{
+
+    Record & record = gameState->currentRecord;
+    if (cable.type == CABLE_TYPE_DOOR)
+    {
+        if (!cable.open)
+        {
+
+            // TODO: Need to reconsider the approache to un freeze slime when there are duplicates
+            if (record.player.mother.state == FREEZE_STATE) record.player.mother.state = MOVE_STATE;
+            
+            cable.open = true;
+            switch(cable.id)
+            {
+                case SPRITE_DOOR_LEFT_CLOSE:
+                {
+                    IVec2 offset = { 1, -1 };
+
+                    IVec2 bounceDir = { 1, 0 };
+
+                    int blockIndex = GetTileIndex(cable.tile + bounceDir, record.blocks);
+
+                    if (blockIndex >= 0)
+                    {
+                        BounceBlock(bounceDir, blockIndex);
+                    }
+
+                    cable.tile = cable.tile + offset;
+                    cable.sprite = GetSprite(SPRITE_DOOR_LEFT_OPEN);
+                
+                    break;
+                }
+                case SPRITE_DOOR_RIGHT_CLOSE:
+                {
+                    IVec2 offset = { -1, 1 };
+                
+                    IVec2 bounceDir = { -1, 0 };
+
+                    int blockIndex = GetTileIndex(cable.tile + bounceDir, record.blocks);
+
+                    if (blockIndex >= 0)
+                    {
+                        BounceBlock(bounceDir, blockIndex);
+                    }
+
+                    cable.tile = cable.tile + offset;
+                    cable.sprite = GetSprite(SPRITE_DOOR_RIGHT_OPEN);
+                
+                    break;
+                }
+                case SPRITE_DOOR_TOP_CLOSE:
+                {
+                    IVec2 offset = { -1, 1 };
+
+                    IVec2 bounceDir = { 0, 1 };
+
+                    int blockIndex = GetTileIndex(cable.tile + bounceDir, record.blocks);
+
+                    if (blockIndex >= 0)
+                    {
+                        BounceBlock(bounceDir, blockIndex);
+                    }
+
+                    cable.tile = cable.tile + offset;
+                    cable.sprite = GetSprite(SPRITE_DOOR_TOP_OPEN);
+                
+                    break;
+                }
+                case SPRITE_DOOR_DOWN_CLOSE:
+                {
+                    IVec2 offset = { 1, -1 };
+                
+                    IVec2 bounceDir = { 0, -1 };
+
+                    int blockIndex = GetTileIndex(cable.tile + bounceDir, record.blocks);
+
+                    if (blockIndex >= 0)
+                    {
+                        BounceBlock(bounceDir, blockIndex);
+                    }
+
+                    cable.tile = cable.tile + offset;
+                    cable.sprite = GetSprite(SPRITE_DOOR_DOWN_OPEN);
+
+                    break;
+                }
+
+            }
+
+        }
+        end = true;
+    }
+    else if (cable.type == CABLE_TYPE_CONNECTION_POINT)
+    {
+        if (!cable.conductive)
+        {
+            end = true;
+        }
+        else
+        {
+            end = false;
+        }
+    }
+    else
+    {
+        cable.conductive = true;
+        cable.sprite = GetSprite(GetCablePowerONID(cable.id));
+        end = false;
+    }
+    
+}
+
+
+void OnSourcePowerOn(std::vector<bool> & visited, int sourceIndex)
+{
+    bool end = false;
+
+    visited[sourceIndex] = true;
+
+    PowerOnCable(gameState->currentRecord.electricDoorSystem.cables[sourceIndex], end);
+
+    if (end) return;
+    
+    int indexes[4] =
+        {
+            gameState->currentRecord.electricDoorSystem.cables[sourceIndex].leftIndex,
+            gameState->currentRecord.electricDoorSystem.cables[sourceIndex].rightIndex,
+            gameState->currentRecord.electricDoorSystem.cables[sourceIndex].upIndex,
+            gameState->currentRecord.electricDoorSystem.cables[sourceIndex].downIndex
+        };
+
+    for (int i = 0; i < 4; i++)
+    {
+        int id = indexes[i];
+        if (id >= 0 && !visited[id])
+        {
+            OnSourcePowerOn(visited, id);
+        }
+    }
+
+    return;
+    
+}
+
+bool UpdateCameraPosition()
+{
+    
+    for  (int i = 0; i < gameState->tileMaps.count; i++)
+    {
+        Map & map = gameState->tileMaps[i];
+        IVec2 playerTile = gameState->currentRecord.player.mother.tile;
+
+        if (playerTile.x > map.tilePos.x && playerTile.x <= (map.tilePos.x + map.width) &&
+            playerTile.y > map.tilePos.y && playerTile.y <= (map.tilePos.y + map.height))
+        {
+
+            Vector2 pos = TilePositionToPixelPosition(map.width * 0.5f + map.tilePos.x + 0.5f, map.height * 0.5f + map.tilePos.y + 0.5f);
+            if (Vector2Equals(pos, gameState->camera.target))
+            {
+                return false;
+            }
+            else
+            {
+                gameState->camera.target = pos;
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 #define GAME_H
 #endif

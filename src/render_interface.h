@@ -11,11 +11,11 @@
 #include "engine_lib.h"
 
 #define TEXTURE_PATH "Assets/Texture/SpriteAtlas.png"
+#define MAX_TRANSFORM 1000
 
 //  ========================================================================
 //              NOTE: Render Structs
 //  ========================================================================
-
 
 //  ========================================================================
 //              NOTE: Render Globals
@@ -35,12 +35,16 @@ void DeInitTexture()
     UnloadTexture(texture);
 }
 
-void DrawTileMap(int tilesX, int tilesY, int tileSize, Color tileColor, Color gridColor)
+void DrawTileMap(IVec2 startPos, IVec2 dim, Color tileColor, Color gridColor)
 {
+    int tileSize = MAP_TILE_SIZE;
+
+    IVec2 endPos = startPos + dim;    
+    
     // NOTE: Draw Tile Maps
-    for (unsigned int y = 0; y < tilesY; y++)
+    for (int y = startPos.y; y < endPos.y; y++)
     {
-        for (unsigned int x = 0; x < tilesX; x++)
+        for (int x = startPos.x; x < endPos.x; x++)
         {
             // NOTE: Draw tiles from id (and tile borders)
             DrawRectangle(
