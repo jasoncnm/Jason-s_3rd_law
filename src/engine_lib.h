@@ -385,6 +385,7 @@ struct IVec2
         return { x + other.x, y + other.y };
     }
 
+
     IVec2 operator-()
     {
         return { -x, -y};
@@ -398,6 +399,12 @@ struct IVec2
     bool operator!=(IVec2 other)
     {
         return !((IVec2){ x, y } == other); 
+    }
+
+    void operator += (IVec2 other)
+    {
+        x += other.x;
+        y += other.y;
     }
 
     int SqrMagnitude()

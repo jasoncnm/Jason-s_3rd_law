@@ -40,18 +40,6 @@ struct Cable
 };
 
 
-struct ElectricDoorSystem
-{
-    Array<int, MAX_CABLE> sourceIndexes;
-    Array<int, MAX_CABLE> doorIndexes;
-
-    Array<Cable, MAX_CABLE> cables;
-
-    void SetUp();
-    
-    void Search(Array<bool, MAX_CABLE> & visited, int currentIndex, int sourceIndex);
-};
-
 bool IsConnected(Cable & a, Cable & b, IVec2 & offset)
 {
     offset = b.tile - a.tile;
@@ -86,6 +74,62 @@ bool IsConnected(Cable & a, Cable & b, IVec2 & offset)
     SM_ASSERT(false, "What is going on??");
     return false;
     
+}
+
+struct ElectricDoorSystem
+{
+    Array<int, MAX_CABLE> sourceIndexes;
+    Array<int, MAX_CABLE> doorIndexes;
+
+    Array<Cable, MAX_CABLE> cables;
+
+    void SetUp();
+    
+    void Search(Array<bool, MAX_CABLE> & visited, int currentIndex, int sourceIndex);
+
+    bool DoorBlocked(IVec2 tilepos, IVec2 reachDir);
+    bool CheckDoor(IVec2 tilePos);
+};
+
+bool ElectricDoorSystem::DoorBlocked(IVec2 tilePos, IVec2 reachDir)
+{
+    SM_ASSERT(reachDir.SqrMagnitude() <= 1, "Directional Vector should be a unit vector");
+    
+    bool result = false;
+    for (int i = 0; i < doorIndexes.count; i++)
+    {
+        Cable & door = cables[doorIndexes[i]];
+        if (door.tile == tilePos)
+        {
+            if (Abs(reachDir.x) > 0)
+            {
+                result = door.left || door.right;
+            }
+            else if (Abs(reachDir.y) > 0)
+            {
+                result = door.up || door.down;
+            }
+                     
+            break;
+        }
+    }
+    return result;
+}
+
+bool ElectricDoorSystem::CheckDoor(IVec2 tilePos)
+{
+    
+    bool result = false;
+    for (int i = 0; i < doorIndexes.count; i++)
+    {
+        Cable & door = cables[doorIndexes[i]];
+        if (door.tile == tilePos)
+        {
+            result = true;
+            break;
+        }
+    }
+    return result;
 }
 
 void ElectricDoorSystem::Search(Array<bool, MAX_CABLE> & visited, int currentIndex, int sourceIndex)

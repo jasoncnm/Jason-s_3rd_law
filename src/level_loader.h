@@ -113,7 +113,7 @@ void LoadGameObject(Record & record, int id, IVec2 tilePos)
         slime.sprite = GetSprite(SPRITE_SLIME_1);
         slime.pivot = GetTilePivot(slime.tile);
                         
-        record.player.children.Add(slime);
+        record.player.slimes.Add(slime);
                                 
         SM_TRACE("Slime generated (tile location: %i, %i)", slime.tile.x, slime.tile.y);
 
@@ -125,9 +125,13 @@ void LoadGameObject(Record & record, int id, IVec2 tilePos)
         cable.id = (SpriteID)(SPRITE_DOOR_LEFT_CLOSE + (id - DOOR_LEFT));
         cable.type = CABLE_TYPE_DOOR;
         cable.tile = tilePos;
-        cable.up = cable.down = cable.left = cable.right = true;
         cable.open = false;
         cable.sprite = GetSprite(cable.id);
+
+        if (id == DOOR_LEFT || id == DOOR_RIGHT)
+            cable.left = cable.right = true;
+        else if (id == DOOR_UP || id == DOOR_DOWN)
+            cable.up = cable.down = true;
 
         record.electricDoorSystem.doorIndexes.Add(record.electricDoorSystem.cables.Add(cable));
         
@@ -390,7 +394,7 @@ void GenerateTileMap(Record & currentRecord, std::string fileName, IVec2 startPo
                             mother.sprite = GetSprite(SPRITE_SLIME_1);
                             mother.pivot = GetTilePivot(mother.tile);
                         
-                            currentRecord.player.mother = mother;
+                            currentRecord.player.motherIndex = currentRecord.player.slimes.Add(mother);
                                 
                             SM_TRACE("Player generated (tile location: %i, %i)", mother.tile.x, mother.tile.y);
 
@@ -448,7 +452,9 @@ void LoadLevelToGameState(GameState & state, State loadState)
             int startPosX = (int)map["x"] / MAP_TILE_SIZE + 1;
             int startPosY = (int)map["y"] / MAP_TILE_SIZE + 1;
 
-            Map tileMap = { { startPosX, startPosY }, mapWidth, mapHeight };
+            Map tileMap = {};
+            tileMap.tilePos = { startPosX, startPosY };
+            tileMap.width = mapWidth, tileMap.height =  mapHeight;
             state.tileMaps.Add(tileMap);
 
             std::string path = LEVELS_PATH + fileName;
@@ -494,20 +500,20 @@ void LoadLevelToGameState(GameState & state, State loadState)
 
         for (int i = 0; i < 4; i++)
         {
-            IVec2 pos = currentRecord.player.mother.tile + directions[i];
+            IVec2 pos = currentRecord.player.slimes[currentRecord.player.motherIndex].tile + directions[i];
             if (currentRecord.CheckWalls(pos) ||
                 CheckTiles(pos, currentRecord.blocks))
             {
-                currentRecord.player.mother.attach = true;
-                currentRecord.player.mother.attachDir = directions[i];
+                currentRecord.player.slimes[currentRecord.player.motherIndex].attach = true;
+                currentRecord.player.slimes[currentRecord.player.motherIndex].attachDir = directions[i];
                 break;
             }
         }
 
 
-        for (int i = 0; i < currentRecord.player.children.count; i++)
+        for (int i = 0; i < currentRecord.player.slimes.count; i++)
         {
-            Slime & child = currentRecord.player.children[i];
+            Slime & child = currentRecord.player.slimes[i];
 
             for (int j = 0; j < 4; j++)
             {

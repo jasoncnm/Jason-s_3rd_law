@@ -42,6 +42,8 @@ struct Slime
     bool show = true;
     bool split = false;
     bool attach = false;
+
+    void Bounce(IVec2 bounceDir);
 };
 
 struct SlimeAnimation
@@ -55,12 +57,11 @@ struct SlimeAnimation
 struct Player
 {
     int moveSteps;
+    int motherIndex;
 
     Color color = YELLOW;
 
-    Slime mother;
-
-    Array<Slime, MAX_SLIME> children;
+    Array<Slime, MAX_SLIME> slimes;
 
 };
 
@@ -78,24 +79,19 @@ SlimeAnimation animateSlimes[MAX_SLIME] = { 0 };
 
 void UnFreezeAllSlime(Player & player)
 {
-    player.mother.state = MOVE_STATE;
-    for (int i = 0; i < player.children.count; i++)
+    for (int i = 0; i < player.slimes.count; i++)
     {
-        player.children[i].state = MOVE_STATE;
+        player.slimes[i].state = MOVE_STATE;
     }
 }
 
 Slime * CheckSlime(IVec2 tilePos, Player & player)
 {
     Slime * result = nullptr;
-    if (player.mother.tile == tilePos)
-    {
-        result = &player.mother;
-    }
 
-    for (int i = 0; i < player.children.count; i++)
+    for (int i = 0; i < player.slimes.count; i++)
     {
-        Slime * s = &player.children[i];
+        Slime * s = &player.slimes[i];
         if (s->tile == tilePos)
         {
             result = s; 
@@ -126,25 +122,25 @@ SlimeAnimation CreateSlimeAnimation(Slime * refSlime,
 void BounceSlime(Player & player, IVec2 dest)
 {
     
-    SM_ASSERT(player.mother.mass > 0, "Slime is too small to bounce");
+    SM_ASSERT(player.slimes[player.motherIndex].mass > 0, "Slime is too small to bounce");
     
     bool merge = false;
     int mergedIndex = -1;
 
-    IVec2 prevTile = player.mother.tile;
+    IVec2 prevTile = player.slimes[player.motherIndex].tile;
 
-    player.mother.tile = dest;
+    player.slimes[player.motherIndex].tile = dest;
 
     animateSlimes[animateSlimeCount++] =
-        CreateSlimeAnimation(&player.mother,
+        CreateSlimeAnimation(&player.slimes[player.motherIndex],
                              prevTile, dest,
-                             player.mother.mass, player.mother.mass);
+                             player.slimes[player.motherIndex].mass, player.slimes[player.motherIndex].mass);
     
 }
 
 void SplitSlime(Player & player, IVec2 destPos, IVec2 prevPos)
 {
-    SM_ASSERT(player.mother.mass > 0, "Slime is too small to split");
+    SM_ASSERT(player.slimes[player.motherIndex].mass > 0, "Slime is too small to split");
         
     Slime * refSlime = nullptr;
     
@@ -156,8 +152,8 @@ void SplitSlime(Player & player, IVec2 destPos, IVec2 prevPos)
         s.show = false;
         s.split = true;
 
-        int index = player.children.Add(s);
-        refSlime = &player.children[index];
+        int index = player.slimes.Add(s);
+        refSlime = &player.slimes[index];
 
         // NOTE: split Animation
         animateSlimes[animateSlimeCount++] =
@@ -168,20 +164,18 @@ void SplitSlime(Player & player, IVec2 destPos, IVec2 prevPos)
 
 }
 
-void Posses(Slime * mother, Slime * child)
+void Posses(Player & player, int childIndex)
 {
-    Slime tmp = *mother;
-    *mother = *child;
-    *child = tmp;
+    player.motherIndex = childIndex;
 }
 
 void Merge(Player & player, SlimeAnimation & sa)
 {
 
-    for (int j = 0; j < player.children.count; j++)
+    for (int j = 0; j < player.slimes.count; j++)
     {
                             
-        Slime * slime = &player.children[j];
+        Slime * slime = &player.slimes[j];
 
         if (sa.currentSlime != slime && !slime->split)
         {
@@ -207,21 +201,21 @@ void Merge(Player & player, SlimeAnimation & sa)
                     sa.currentSlime->mass = 3;
                 }
 
-                player.children.RemoveIdxAndSwap(j);
+                player.slimes.RemoveIdxAndSwap(j);
                 
                 j--;
 
-                if (sa.currentSlime == &player.mother)
+                if (sa.currentSlime == &player.slimes[player.motherIndex])
                 {
                     for (int k = 0; k < animateSlimeCount; k++)
                     {
-                        if (player.children[j].tile == animateSlimes[k].currentSlime->tile)
+                        if (player.slimes[j].tile == animateSlimes[k].currentSlime->tile)
                         {
-                            animateSlimes[k].currentSlime = &player.children[j];
+                            animateSlimes[k].currentSlime = &player.slimes[j];
                         }
                     }
                 }
-                else if (player.children[j].tile == sa.currentSlime->tile)
+                else if (player.slimes[j].tile == sa.currentSlime->tile)
                 {
                     sa.currentSlime = slime;
                 }

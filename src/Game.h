@@ -55,14 +55,6 @@ struct KeyMapping
 };
 
 
-// NOTE: Map data type
-struct Map
-{
-    IVec2 tilePos;            // Top left tile position of the map
-    int   width;              // Number of tiles in X axis
-    int   height;             // Number of tiles in Y axis
-};
-
 // NOTE: PushBlock
 struct Block
 {
@@ -123,6 +115,20 @@ struct Record
     bool CheckWalls(IVec2 tilePos);
 };
 
+
+// NOTE: Map data type
+struct Map
+{
+    Record resetRecord;
+    
+    IVec2 tilePos;            // Top left tile position of the map
+    int   width;              // Number of tiles in X axis
+    int   height;             // Number of tiles in Y axis
+
+    bool firstEnter = false;
+};
+
+
 // NOTE: GameState
 struct GameState
 {
@@ -143,6 +149,8 @@ struct GameState
     float animateTime = 0.0f;
     float duration = 1.0f;
 
+    int currentMapIndex = 0;
+
 
     bool initialized = false;
 };
@@ -153,6 +161,7 @@ struct GameState
 static float timeSinceLastPress = 0.0f;
 static const float pressFreq = 0.2f;
 static GameState * gameState;
+static std::stack<Record> undoRecords;
 
 
 // ----------------------------------------------------
@@ -215,20 +224,20 @@ bool BounceBlock(IVec2 dir, int blockIndex)
          ;
          pos = pos + dir)
     {
-        if (record.CheckWalls(pos))
+        if (record.electricDoorSystem.DoorBlocked(pos, dir) || CheckTiles(pos, record.walls))
         {
-            int glassIndex = GetTileIndex(pos, record.glasses);
-            if (glassIndex >= 0)
-            {
-                record.glasses[glassIndex].broken = true;
-                record.glasses[glassIndex].sprite = GetSprite(SPRITE_GLASS_BROKEN);
-                continue;
-            }
             break;
         }
-        
+
         result = true;
 
+        int glassIndex = GetTileIndex(pos, record.glasses);
+        if (glassIndex >= 0)
+        {
+            record.glasses[glassIndex].broken = true;
+            record.glasses[glassIndex].sprite = GetSprite(SPRITE_GLASS_BROKEN);
+        }
+        
         if (CheckOutOfBound(pos))
         {
             record.blocks.RemoveIdxAndSwap(blockIndex);
@@ -319,8 +328,10 @@ inline void PowerOnCable(Cable & cable, bool & end)
         {
 
             // TODO: Need to reconsider the approache to un freeze slime when there are duplicates
-            if (record.player.mother.state == FREEZE_STATE) record.player.mother.state = MOVE_STATE;
-            
+            if (record.player.slimes[record.player.motherIndex].state == FREEZE_STATE)
+            {
+                record.player.slimes[record.player.motherIndex].state = MOVE_STATE;
+            }
             cable.open = true;
             switch(cable.id)
             {
@@ -456,30 +467,83 @@ void OnSourcePowerOn(std::vector<bool> & visited, int sourceIndex)
 
 bool UpdateCameraPosition()
 {
+    bool updated = false;
     
     for  (int i = 0; i < gameState->tileMaps.count; i++)
     {
         Map & map = gameState->tileMaps[i];
-        IVec2 playerTile = gameState->currentRecord.player.mother.tile;
+        IVec2 playerTile = gameState->currentRecord.player.slimes[gameState->currentRecord.player.motherIndex].tile;
 
         if (playerTile.x > map.tilePos.x && playerTile.x <= (map.tilePos.x + map.width) &&
             playerTile.y > map.tilePos.y && playerTile.y <= (map.tilePos.y + map.height))
         {
 
             Vector2 pos = TilePositionToPixelPosition(map.width * 0.5f + map.tilePos.x + 0.5f, map.height * 0.5f + map.tilePos.y + 0.5f);
-            if (Vector2Equals(pos, gameState->camera.target))
+            if (!Vector2Equals(pos, gameState->camera.target))
             {
-                return false;
-            }
-            else
-            {
+                if (!map.firstEnter)
+                {
+                    map.firstEnter = true;
+                    map.resetRecord = gameState->currentRecord;
+                }
+                gameState->currentMapIndex = i;
                 gameState->camera.target = pos;
-                return true;
+                updated =  true;
             }
+            break;
         }
     }
-    return false;
+    return updated;
 }
+
+void Restart()
+{
+    undoRecords.push(gameState->currentRecord);
+    gameState->currentRecord = gameState->tileMaps[gameState->currentMapIndex].resetRecord;
+
+    animateSlimeCount = 0;
+    gameState->animateTime = 0;
+    animationPlaying = false;
+
+}
+
+
+
+void Slime::Bounce(IVec2 bounceDir)
+{
+    IVec2 target = tile;
+
+    IVec2 start = target + bounceDir;
+
+    for (IVec2 pos = start; ; pos = pos + bounceDir)
+    {
+        if (gameState->currentRecord.CheckWalls(pos))
+        {
+            
+            break;
+        }
+                
+        if (CheckOutOfBound(pos))
+        {
+            Restart();
+        }
+
+                
+        int blockIndex = GetTileIndex(pos + bounceDir, gameState->currentRecord.blocks);
+        
+        if (blockIndex != -1)
+        {
+            break;
+        }
+
+        target = pos;
+    }
+
+    attachDir = bounceDir;
+    tile = target;
+    
+}
+
 
 #define GAME_H
 #endif

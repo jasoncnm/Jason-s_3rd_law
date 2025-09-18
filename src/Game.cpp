@@ -21,8 +21,6 @@
 //  ========================================================================
 //              NOTE: Game Globals
 //  ========================================================================
-static GameState startState;
-static std::stack<Record> undoRecords;
 
 
 //  ========================================================================
@@ -61,16 +59,16 @@ bool SlimeAction(IVec2 bounceDir)
     
     Player & player = record.player;
 
-    IVec2 prevPos = player.mother.tile;
+    IVec2 prevPos = player.slimes[player.motherIndex].tile;
 
     bool bounce = false;
     IVec2 bouncePos;
 
     // NOTE: Bounce Position
-    if (player.mother.mass > 1)
+    if (player.slimes[player.motherIndex].mass > 1)
     {
         
-        for ( IVec2 tilePos = player.mother.tile + bounceDir;
+        for ( IVec2 tilePos = player.slimes[player.motherIndex].tile + bounceDir;
               !CheckOutOfBound(tilePos);
               tilePos = tilePos + bounceDir)
         {
@@ -89,11 +87,11 @@ bool SlimeAction(IVec2 bounceDir)
     IVec2 splitPos;
     
     // NOTE: Split Positions
-    if (player.mother.mass > 1)
+    if (player.slimes[player.motherIndex].mass > 1)
     {
         IVec2 splitDir = - bounceDir;
 
-        for (IVec2 tilePos = player.mother.tile + splitDir;
+        for (IVec2 tilePos = player.slimes[player.motherIndex].tile + splitDir;
              !CheckOutOfBound(tilePos);
              tilePos = tilePos + splitDir)
         {
@@ -112,9 +110,9 @@ bool SlimeAction(IVec2 bounceDir)
     
     if (stateChanged)
     {
-        player.mother.mass--;
+        player.slimes[player.motherIndex].mass--;
 
-        int mass = player.mother.mass;
+        int mass = player.slimes[player.motherIndex].mass;
 
         if (bounce)
         {
@@ -122,7 +120,7 @@ bool SlimeAction(IVec2 bounceDir)
         }
         else if (split)
         {
-            player.mother.pivot = GetTilePivot(player.mother.tile);            
+            player.slimes[player.motherIndex].pivot = GetTilePivot(player.slimes[player.motherIndex].tile);            
         }
 
         if (split)
@@ -152,65 +150,64 @@ void GameUpdate(GameState * gameStateIn)
     if (!gameState->initialized)
     {
         // NOTE: Initialization
-        startState.initialized = true;
+        gameState->initialized = true;
 
         // NOTE: Key Mappings
         {
-            startState.keyMappings[MOUSE_LEFT].keys.Add(MOUSE_BUTTON_LEFT);
-            startState.keyMappings[MOUSE_RIGHT].keys.Add(MOUSE_BUTTON_RIGHT);
+            gameState->keyMappings[MOUSE_LEFT].keys.Add(MOUSE_BUTTON_LEFT);
+            gameState->keyMappings[MOUSE_RIGHT].keys.Add(MOUSE_BUTTON_RIGHT);
 
-            startState.keyMappings[LEFT_KEY].keys.Add(KEY_A);
-            startState.keyMappings[LEFT_KEY].keys.Add(KEY_LEFT);
-            startState.keyMappings[RIGHT_KEY].keys.Add(KEY_D);
-            startState.keyMappings[RIGHT_KEY].keys.Add(KEY_RIGHT);
-            startState.keyMappings[UP_KEY].keys.Add(KEY_W);
-            startState.keyMappings[UP_KEY].keys.Add(KEY_UP);
-            startState.keyMappings[DOWN_KEY].keys.Add(KEY_S);
-            startState.keyMappings[DOWN_KEY].keys.Add(KEY_DOWN);
-            startState.keyMappings[SPACE_KEY].keys.Add(KEY_SPACE);
+            gameState->keyMappings[LEFT_KEY].keys.Add(KEY_A);
+            gameState->keyMappings[LEFT_KEY].keys.Add(KEY_LEFT);
+            gameState->keyMappings[RIGHT_KEY].keys.Add(KEY_D);
+            gameState->keyMappings[RIGHT_KEY].keys.Add(KEY_RIGHT);
+            gameState->keyMappings[UP_KEY].keys.Add(KEY_W);
+            gameState->keyMappings[UP_KEY].keys.Add(KEY_UP);
+            gameState->keyMappings[DOWN_KEY].keys.Add(KEY_S);
+            gameState->keyMappings[DOWN_KEY].keys.Add(KEY_DOWN);
+            gameState->keyMappings[SPACE_KEY].keys.Add(KEY_SPACE);
 
         }
     
-        LoadLevelToGameState(startState, STATE_TEST_LEVEL);
+        LoadLevelToGameState(*gameState, STATE_TEST_LEVEL);
 
         // NOTE: Initalize undo record
         undoRecords = std::stack<Record>();
 
         // NOTE: Arrow Buttons
         // UP
-        startState.upArrow.sprite = GetSprite(SPRITE_ARROW_UP);
-        startState.upArrow.id = SPRITE_ARROW_UP;
+        gameState->upArrow.sprite = GetSprite(SPRITE_ARROW_UP);
+        gameState->upArrow.id = SPRITE_ARROW_UP;
 
         // DOWN
-        startState.downArrow.sprite = GetSprite(SPRITE_ARROW_DOWN);
-        startState.downArrow.id = SPRITE_ARROW_DOWN;
+        gameState->downArrow.sprite = GetSprite(SPRITE_ARROW_DOWN);
+        gameState->downArrow.id = SPRITE_ARROW_DOWN;
 
         // LEFT
-        startState.leftArrow.sprite = GetSprite(SPRITE_ARROW_LEFT);
-        startState.leftArrow.id = SPRITE_ARROW_LEFT;
+        gameState->leftArrow.sprite = GetSprite(SPRITE_ARROW_LEFT);
+        gameState->leftArrow.id = SPRITE_ARROW_LEFT;
 
         // RIGHT
-        startState.rightArrow.sprite = GetSprite(SPRITE_ARROW_RIGHT);
-        startState.rightArrow.id = SPRITE_ARROW_RIGHT;
-        
-        *gameState = startState;
+        gameState->rightArrow.sprite = GetSprite(SPRITE_ARROW_RIGHT);
+        gameState->rightArrow.id = SPRITE_ARROW_RIGHT;
 
         undoRecords.push(gameState->currentRecord);
     }
 
+#if 0
     // NOTE: Level Hot Reloading
     {
         long long currentTimeStamp = GetTimestamp(LEVELS_PATH);
 
         if (currentTimeStamp > levelsTimestamp)
         {
-            LoadLevelToGameState(startState, startState.state);
+            LoadLevelToGameState(startState, gameState->state);
             *gameState = startState;
             undoRecords = std::stack<Record>();
         }
 
     }
-
+#endif
 
     // NOTE: Debug Camera Control
     {
@@ -258,11 +255,7 @@ void GameUpdate(GameState * gameStateIn)
         }
         else
         {
-            if (UpdateCameraPosition())
-            {
-                startState = *gameState;
-            }
-            
+            UpdateCameraPosition();
         }
 
     }
@@ -278,13 +271,22 @@ void GameUpdate(GameState * gameStateIn)
     // NOTE: Control Action State
     if (JustPressed(SPACE_KEY))
     {
-        if (record.player.mother.state == SPLIT_STATE) record.player.mother.state = MOVE_STATE;
-        else if (record.player.mother.state == MOVE_STATE) record.player.mother.state = SPLIT_STATE;
+        if (record.player.slimes[record.player.motherIndex].state == SPLIT_STATE)
+        {
+            record.player.slimes[record.player.motherIndex].state = MOVE_STATE;
+        }
+        else if (record.player.slimes[record.player.motherIndex].state == MOVE_STATE)
+        {
+            record.player.slimes[record.player.motherIndex].state = SPLIT_STATE;
+        }
     }
+
+    timeSinceLastPress -= GetFrameTime();
+
     
     // NOTE: Actions
     if (!animationPlaying) {
-        switch(record.player.mother.state)
+        switch(record.player.slimes[record.player.motherIndex].state)
         {
             case MOVE_STATE:
             {
@@ -293,8 +295,6 @@ void GameUpdate(GameState * gameStateIn)
                 
                 IVec2 actionDir = { 0 };
             
-                timeSinceLastPress -= GetFrameTime();
-
                 if (timeSinceLastPress < 0)
                 {
                     bool isPressed = false;
@@ -330,7 +330,7 @@ void GameUpdate(GameState * gameStateIn)
 
                 if (stateChanged)
                 {
-                    Slime & mother =  record.player.mother;
+                    Slime & mother =  record.player.slimes[record.player.motherIndex];
                     // TODO: Control Children if their mass same as mother
                     if (mother.attach)
                     {
@@ -349,6 +349,14 @@ void GameUpdate(GameState * gameStateIn)
  
                         if (!CheckPushableBlocks(mother, actionTilePos, actionDir, 0, pushed))
                         {
+
+                            if (record.electricDoorSystem.CheckDoor(actionTilePos) &&
+                                !record.electricDoorSystem.DoorBlocked(actionTilePos, actionDir))
+                            {
+                                stateChanged = false;
+                                break;
+                            }
+                            
                             if (mother.attachDir == -actionDir)
                             {
                                 int index = GetTileIndex(mother.tile + mother.attachDir, record.blocks);
@@ -384,16 +392,34 @@ void GameUpdate(GameState * gameStateIn)
                                 break;
                             }
                         }
+                        
                         // NOTE: no obsticale, move player
                         {
                             IVec2 standingPlatformPos = actionTilePos + mother.attachDir;
                             if (record.CheckWalls(standingPlatformPos) ||
                                 CheckTiles(standingPlatformPos, record.blocks))
                             {
-                                SetSlimePosition(mother, {actionTilePos.x, actionTilePos.y});
+                                if (record.electricDoorSystem.CheckDoor(actionTilePos) &&
+                                    !record.electricDoorSystem.DoorBlocked(actionTilePos, actionDir))
+                                {
+                                    stateChanged = false;
+                                    break;
+                                }
+                                
+                                SetSlimePosition(mother, { actionTilePos.x, actionTilePos.y });
                             }
                             else if (Abs(mother.attachDir) != Abs(actionDir))
                             {
+                                IVec2 newTile = standingPlatformPos;
+                                IVec2 newAttach = - actionDir;
+
+                                if (record.electricDoorSystem.CheckDoor(actionTilePos) &&
+                                    !record.electricDoorSystem.DoorBlocked(actionTilePos, actionDir))
+                                {
+                                    stateChanged = false;
+                                    break;
+                                }
+
                                 SetSlimePosition(mother, {standingPlatformPos.x, standingPlatformPos.y});
 
                                 mother.attachDir = -actionDir;
@@ -485,27 +511,27 @@ void GameUpdate(GameState * gameStateIn)
             gameState->animateTime = 0;
             animationPlaying = false;
 
-            record.player.mother.split = false;
+            record.player.slimes[record.player.motherIndex].split = false;
 
-            Slime * max = nullptr;
+            int maxIndex = -1;
             int maxMass = 0;
                     
-            for (int i = 0; i < record.player.children.count; i++)
+            for (int i = 0; i < record.player.slimes.count; i++)
             {
-                Slime * child = &record.player.children[i];
+                Slime * child = &record.player.slimes[i];
                 child->split = false;
                 if (child->mass > maxMass)
                 {
                     maxMass = child->mass;
-                    max = child;
+                    maxIndex = i;
                 }
             }
 
-            SM_ASSERT(max, "should not be nullptr");
+            SM_ASSERT(maxIndex >= 0, "should not be nullptr");
 
-            if (maxMass > record.player.mother.mass)
+            if (maxMass > record.player.slimes[record.player.motherIndex].mass)
             {
-                Posses(&record.player.mother, max);
+                Posses(record.player, maxIndex);
             }
                    
         }
@@ -516,7 +542,6 @@ void GameUpdate(GameState * gameStateIn)
     {
         if (!record.electricDoorSystem.cables.IsEmpty())
         {
-            bool change = false;
             // NOTE: Update Connection Point before checking connectivity
             
             for (int index = 0; index < record.electricDoorSystem.cables.count; index++)
@@ -577,7 +602,7 @@ void GameUpdate(GameState * gameStateIn)
             
     // NOTE: Undo and Restart
     {
-        if (IsKeyPressed(KEY_Z) && !undoRecords.empty())
+        if (timeSinceLastPress < 0 && IsKeyDown(KEY_Z) && !undoRecords.empty())
         {
             // NOTE: Undo                
             gameState->currentRecord = undoRecords.top();
@@ -586,19 +611,14 @@ void GameUpdate(GameState * gameStateIn)
             animateSlimeCount = 0;
             gameState->animateTime = 0;
             animationPlaying = false;
+
+            timeSinceLastPress = pressFreq;
         }
 
         // NOTE: Restart States        
         if (IsKeyPressed(KEY_R))
         {
-            // TODO: need to reset the tileMap state at the tilemap where the player located
-
-            undoRecords.push(gameState->currentRecord);
-            gameState->currentRecord = startState.currentRecord;
-
-            animateSlimeCount = 0;
-            gameState->animateTime = 0;
-            animationPlaying = false;
+            Restart();
 
         }
     }
@@ -607,7 +627,7 @@ void GameUpdate(GameState * gameStateIn)
     // NOTE: Arrow Setup
     {
         Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
-        IVec2 centerPos = record.player.mother.tile;
+        IVec2 centerPos = record.player.slimes[record.player.motherIndex].tile;
         
         Vector2 upPos    = { (float)centerPos.x, (float)(centerPos.y-1) };
         Vector2 downPos  = { (float)centerPos.x, (float)(centerPos.y+1) };
@@ -669,6 +689,16 @@ void GameRender(GameState * gameState)
         DrawSprite(texture, wall.sprite, wallTopLeftPos);
     }
 
+    // NOTE: Draw Glasses
+    for (int i = 0; i < record.glasses.count; i++)
+    {
+        Glass & g = record.glasses[i];
+        
+        Vector2 topLeft = GetTilePivot(g.tile);
+        DrawSprite(texture, g.sprite, topLeft);
+
+    }
+    
     // NOTE: Electric Door
     {
         for (int i = 0; i < record.electricDoorSystem.cables.count; i++)
@@ -677,6 +707,7 @@ void GameRender(GameState * gameState)
             DrawSprite(texture, cable.sprite, GetTilePivot(cable.tile));
         }
     }
+
             
     // NOTE: Draw Blocks
     for (unsigned int index = 0; index < record.blocks.count; index++)
@@ -689,52 +720,21 @@ void GameRender(GameState * gameState)
         // DrawRectangleV(blockTopLeftPos, {  (float)record.blockSize,  (float)record.blockSize }, block.color);
     }
 
-    // NOTE: Draw Glasses
-    for (int i = 0; i < record.glasses.count; i++)
+    // NOTE: Draw slimes
+    for (int i = 0; i < record.player.slimes.count; i++)
     {
-        Glass & g = record.glasses[i];
-        
-        Vector2 topLeft = GetTilePivot(g.tile);
-        DrawSprite(texture, g.sprite, topLeft);
-
+        Slime child = record.player.slimes[i];
+        //DrawRectangleV(child.pivot, { (float)child.tileSize, (float)child.tileSize}, GREEN);
+        DrawSprite(texture, child.sprite, child.pivot);
     }
 
-    // NOTE: Draw player
-    Color pColor = record.player.color;
-    // NOTE: Test
-    Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
+    if (record.player.slimes[record.player.motherIndex].attach)
     {
-
-        Record & record = gameState->currentRecord;
-
-        Rectangle playerRect = {
-            (float)record.player.mother.pivot.x,
-            (float)record.player.mother.pivot.y,
-            MAP_TILE_SIZE, MAP_TILE_SIZE};
-
-        if (CheckCollisionPointRec(mousePos, playerRect))
-        {
-            pColor = RED;
-        }
-    }
-    //DrawRectangleV(record.player.mother.pivot, { (float)record.player.mother.tileSize, (float)record.player.mother.tileSize}, pColor);
-    DrawSprite(texture, record.player.mother.sprite, record.player.mother.pivot, pColor);
-
-    if (record.player.mother.attach)
-    {
-        IVec2 t = record.player.mother.tile + record.player.mother.attachDir;
+        IVec2 t = record.player.slimes[record.player.motherIndex].tile + record.player.slimes[record.player.motherIndex].attachDir;
     
         Vector2 pos = TilePositionToPixelPosition((float)t.x, (float)t.y);
 
         DrawCircleV(pos, 5.0f, RED);                              // Draw a color-filled circle
-    }
-
-    // NOTE: Draw children
-    for (int i = 0; i < record.player.children.count; i++)
-    {
-        Slime child = record.player.children[i];
-        //DrawRectangleV(child.pivot, { (float)child.tileSize, (float)child.tileSize}, GREEN);
-        DrawSprite(texture, child.sprite, child.pivot);
     }
         
     if (!animationPlaying)
@@ -770,15 +770,16 @@ void GameRender(GameState * gameState)
         
     // NOTE: UI Draw Game Informations
 
-    IVec2 centerPos = record.player.mother.tile;
+    IVec2 centerPos = record.player.slimes[record.player.motherIndex].tile;
 
+    Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
 
     DrawText(TextFormat("Player pivot (%.2f, %.2f), Mouse World Position (%.2f, %.2f)",
-                        record.player.mother.pivot.x, record.player.mother.pivot.y,
+                        record.player.slimes[record.player.motherIndex].pivot.x, record.player.slimes[record.player.motherIndex].pivot.y,
                         mousePos.x, mousePos.y), 10, 200, 20, GREEN);
     DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Child Count: %i",
                         centerPos.x, centerPos.y,
-                        record.player.mother.mass, record.player.children.count), 10, 140, 20, GREEN);
+                        record.player.slimes[record.player.motherIndex].mass, record.player.slimes.count), 10, 140, 20, GREEN);
     DrawText(TextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f",
                         gameState->camera.target.x, gameState->camera.target.y,
                         gameState->camera.offset.x, gameState->camera.offset.y, gameState->camera.zoom), 10, 50, 20, RAYWHITE);
