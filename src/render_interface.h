@@ -17,10 +17,11 @@
 //              NOTE: Render Structs
 //  ========================================================================
 
+
 //  ========================================================================
 //              NOTE: Render Globals
 //  ========================================================================
-Texture2D texture;
+static Texture2D texture;
 
 //  ========================================================================
 //              NOTE: Render Functions
@@ -28,6 +29,7 @@ Texture2D texture;
 void InitTexture()
 {
     texture = LoadTexture(TEXTURE_PATH);
+    SM_ASSERT(IsTextureValid(texture), "Unable to load file (%s) to texture", TEXTURE_PATH);
 }
 
 void DeInitTexture()

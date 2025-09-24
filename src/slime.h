@@ -42,8 +42,6 @@ struct Slime
     bool show = true;
     bool split = false;
     bool attach = false;
-
-    void Bounce(IVec2 bounceDir);
 };
 
 struct SlimeAnimation
@@ -223,12 +221,6 @@ void Merge(Player & player, SlimeAnimation & sa)
             }
         }
     }
-}
-
-void SetSlimePosition(Slime & slime, IVec2 tilePos)
-{
-    slime.tile = tilePos;
-    slime.pivot = GetTilePivot(tilePos);
 }
 
 

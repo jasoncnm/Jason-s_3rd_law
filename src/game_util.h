@@ -7,6 +7,14 @@
    $Notice: $
    ======================================================================== */
 
+enum Direction
+{
+    LEFT,
+    RIGHT,
+    UP,
+    DOWN,
+};
+
 template<typename T, int N>
 bool CheckTiles(IVec2 tilePos, Array<T, N> arr)
 {
@@ -59,7 +67,7 @@ IVec2 PixelPositionToTilePosition(float x, float y)
     result.x = (int)(x / MAP_TILE_SIZE+1);
 
     // result.y = (float)tileY * MAP_TILE_SIZE - (MAP_TILE_SIZE) / 2.0f;
-    result.y = (int)(y / MAP_TILE_SIZE+1);
+    result.y = (int)(y / MAP_TILE_SIZE+1) - 1;
 
     return result;
 

@@ -6,8 +6,8 @@
    $Notice: $
    ======================================================================== */
 
-#define SCREEN_WIDTH 1200
-#define SCREEN_HEIGHT 1200
+#define SCREEN_WIDTH 600
+#define SCREEN_HEIGHT 600
 
 
 #include <cassert>
@@ -15,7 +15,7 @@
 #include <sstream>
 #include <iostream>
 
-#include "Game.cpp"
+#include "game.cpp"
 
 #include "raylib.h"
 
@@ -24,16 +24,20 @@ int main(void)
 {
     if (IsWindowState(FLAG_VSYNC_HINT)) ClearWindowState(FLAG_VSYNC_HINT);
     else SetWindowState(FLAG_VSYNC_HINT);
+
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
     
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jason's 3rd law");
+    MaximizeWindow();
 
     InitTexture();
-
     
-    BumpAllocator transientStorage = MakeBumpAllocator(MB(50));
-    BumpAllocator persistentStorage = MakeBumpAllocator(MB(50));
+    BumpAllocator transientStorage = MakeBumpAllocator(MB(64));
+    BumpAllocator persistentStorage = MakeBumpAllocator(MB(64));
+
+    Memory gameMemory = { &transientStorage,  &persistentStorage };
 
     gameState = (GameState *)BumpAlloc(&persistentStorage, sizeof(GameState));
     if (!gameState)
@@ -46,17 +50,7 @@ int main(void)
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
         // NOTE: Update
-        GameUpdate(gameState);        
-    
-        // NOTE: Draw
-        BeginDrawing();
-
-        ClearBackground(GRAY);
-
-        GameRender(gameState);
-
-        EndDrawing();
-        
+        GameUpdateAndRender(gameState, &gameMemory);        
     }
 
     // De-Initialization

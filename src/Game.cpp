@@ -5,9 +5,12 @@
    $Creator: Junjie Mao $
    $Notice: $
    ======================================================================== */
-#include "Game.h"
-#include "level_loader.h"
+
+#include "game.h"
 #include "render_interface.h"
+#include "entity.cpp"
+#include "electric_door.cpp"
+#include "level_loader.cpp"
 
 //  ========================================================================
 //              NOTE: Game Constants
@@ -34,7 +37,7 @@ bool JustPressed(GameInputType type)
     {
         if (IsKeyPressed(mapping.keys[idx]) || IsMouseButtonPressed(mapping.keys[idx])) return true;
     }
-
+    
     return false;
 }
 
@@ -48,16 +51,546 @@ bool IsDown(GameInputType type)
     return false;
 }
 
-
-
-bool SlimeAction(IVec2 bounceDir)
+bool CheckWalls(IVec2 tilePos)
 {
-    
-    bool stateChanged = false;
 
-    Record & record = gameState->currentRecord;
+    for (int i = 0; i < gameState->entities.count; i++)
+    {
+        Entity * entity = GetEntity(i);
+
+        if (entity->tilePos == tilePos)
+        {
+            switch (entity->type)
+            {
+                case ENTITY_TYPE_WALL:
+                {
+                    return true;
+                    break;
+                }
+                case ENTITY_TYPE_GLASS:
+                {
+                    if (!entity->broken)
+                    {
+                        return true;
+                    }
+                    break;
+                }
+            }
+        }    
+    }
+    return false;
+}
+
+bool CheckOutOfBound(int tileX, int tileY)
+{
+    bool result =
+    (tileX < gameState->tileMin.x)
+        || (tileX > gameState->tileMax.x)
+        || (tileY < gameState->tileMin.y)
+        || (tileY > gameState->tileMax.y);
     
-    Player & player = record.player;
+    return result;
+}
+
+bool CheckOutOfBound(IVec2 tilePos)
+{
+    return CheckOutOfBound(tilePos.x, tilePos.y);
+}
+
+bool CheckBounce(IVec2 tilePos, IVec2 pushDir)
+{
+    IVec2 dirs[4] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+
+    bool bounce = true;
+    
+    for (int i = 0; i < 4; i++)
+    {
+        if (dirs[i] == -pushDir) continue;
+
+        for (int entityIndex = 0; entityIndex < gameState->entities.count; entityIndex++)
+        {
+            Entity * target = GetEntity(entityIndex);
+
+            if (target->tilePos == tilePos + dirs[i])
+            {
+                switch (target->type)
+                {
+                    case ENTITY_TYPE_WALL:
+                    {
+                        return false;
+                    }
+                    case ENTITY_TYPE_GLASS:
+                    {
+                        if (!target->broken)
+                        {
+                            return false;
+                        }
+                        break;
+                    }
+                    case ENTITY_TYPE_ELECTRIC_DOOR:
+                    {
+                        if (target->cableType == CABLE_TYPE_DOOR && SameSide(target, target->tilePos, dirs[i]))
+                        {
+                            return false; 
+                        }
+                        break;
+                    }
+                }
+            }
+            
+        }
+    }
+    return true;
+}
+
+PushActionResult PushActionCheck(Entity * entity, IVec2 blockNextPos, IVec2 pushDir, int accumulatedMass);
+void BounceEntity(Entity * entity, IVec2 dir)
+{
+    SM_ASSERT(entity->active, "entity does not exists");
+    
+    IVec2 start = entity->tilePos + dir;
+    
+    for (IVec2 pos = start;
+         ;
+         pos = pos + dir)
+    {
+        for (int i = 0; i < gameState->entities.count; i++)
+        {
+            Entity * target = GetEntity(i);
+
+            bool isSlime = (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE);
+
+            if (target->active && target->tilePos == pos)
+            {
+                switch(target->type)
+                {
+                    case ENTITY_TYPE_ELECTRIC_DOOR:
+                    {
+                        if (target->cableType == CABLE_TYPE_DOOR && SameSide(target, pos, dir))
+                        {
+                            // IMPORTANT: entity changed
+                            SetEntityPosition(entity, target, pos - dir);
+                            return;    
+                        }
+                        else if (isSlime && target->cableType == CABLE_TYPE_CONNECTION_POINT && target->conductive)
+                        {
+                            // IMPORTANT:  entity changed
+                            SetActionState(entity, FREEZE_STATE);
+                            SetEntityPosition(entity, nullptr, pos - dir);
+                            return;
+                        }
+                        break;
+                    }
+                    case ENTITY_TYPE_WALL:
+                    {
+                        // IMPORTANT: entity changed
+                        if (isSlime)
+                        {
+                            SetAttach(entity, target, dir);
+                        }
+                        SetEntityPosition(entity, target, pos - dir);
+                        return;
+                        SM_ASSERT(false, "WHAT?");
+                        
+                    }
+                    case ENTITY_TYPE_GLASS:
+                    {
+                        if (isSlime)
+                        {
+                            // IMPORTANT: entity changed
+                            SetAttach(entity, target, dir);
+                            SetEntityPosition(entity, target, pos - dir);
+                            return;
+                        }
+
+                        // IMPORTANT: target changed
+                        SetGlassBeBroken(target);
+                        break;                        
+                    }
+                    case ENTITY_TYPE_BLOCK:
+                    {
+                        // IMPORTANT: entity changed
+                        PushActionResult result = 
+                            PushActionCheck(entity, pos, dir, entity->mass);
+
+                        if (result.blocked)
+                        {
+                            SetEntityPosition(entity, result.blockedEntity, pos - dir);
+                        }
+                        else
+                        {
+                            SetEntityPosition(entity, nullptr, pos - dir);
+                        }
+                        
+                        return;
+                    }
+                    case ENTITY_TYPE_PLAYER:
+                    case ENTITY_TYPE_CLONE:
+                    {
+                        if (!isSlime)
+                        {
+                            // IMPORTANT: entity changed
+                            SetAttach(entity, target, dir);
+                            entity = target;
+                            break;
+                        }
+
+                        if (target->type == ENTITY_TYPE_PLAYER)
+                        {
+                            // IMPORTANT: entity changed
+                            entity = MergeSlimes(target, entity);
+                        }
+                        else
+                        {
+                            // IMPORTANT: entity changed
+                            entity = MergeSlimes(entity, target);
+                        }
+                                                
+                        break;
+                    }
+                }
+        
+                if (CheckOutOfBound(pos))
+                {
+                    // IMPORTANT: entity changed
+                    DeleteEntity(entity);
+                    return;
+                }
+                
+                break;
+            }
+            
+        }
+    }
+}
+
+PushActionResult PushActionCheck(Entity * entity, IVec2 blockNextPos, IVec2 pushDir, int accumulatedMass)
+{
+    SM_ASSERT(entity->movable, "Static entity cannot be pushing blocks!");
+
+    PushActionResult result = { false, false, nullptr };
+
+    for (int i = 0; i < gameState->entities.count; i++)
+    {
+        Entity * target = GetEntity(i);
+        if (target->tilePos == blockNextPos)
+        {
+            switch(target->type)
+            {
+                case ENTITY_TYPE_GLASS:
+                {
+                    if (!target->broken)
+                    {
+                        result.blocked = true;
+                        result.blockedEntity = target;
+                        return result;
+                    }
+                    break;
+                }
+                case ENTITY_TYPE_ELECTRIC_DOOR:
+                {
+                    // TODO: fix
+                    if (target->cableType == CABLE_TYPE_DOOR) //  && SameSide(target, blockNextPos, pushDir))
+                    {
+                        result.blocked = true;
+                        result.blockedEntity = target;
+                        return result;
+                    }
+                    break;
+                }
+                case ENTITY_TYPE_WALL:
+                {
+                    result.blocked = true;
+                    result.blockedEntity = target;
+                    return result;
+                }
+                case ENTITY_TYPE_PLAYER:
+                case ENTITY_TYPE_CLONE:
+                {
+                    if (entity->type == ENTITY_TYPE_CLONE || entity->type == ENTITY_TYPE_PLAYER)
+                    {
+                        // TODO: Merge
+                        MergeSlimes(entity, target);
+                        return result;
+                    }
+                }
+                case ENTITY_TYPE_BLOCK:
+                {
+                    int newAccumulatedMass = accumulatedMass + target->mass;
+                    if (newAccumulatedMass > entity->mass)
+                    {
+                        // (Update, not understand this todo ?) TODO: NOT DONE if entity is slime then attach to wall
+
+                        result.blockedEntity = target;
+                        result.blocked = true;
+                        return result;
+                    }
+
+                    result = PushActionCheck(entity, blockNextPos + pushDir, pushDir, newAccumulatedMass);
+                    
+                    if (!result.blocked)
+                    {
+                        result.pushed = true;
+                        if (CheckBounce(target->tilePos, pushDir))
+                        {
+                            BounceEntity(target, pushDir);
+                        }
+                        else
+                        {
+                            // IMPORTANT: target Entity changed
+                            SetEntityPosition(target, nullptr, blockNextPos + pushDir);
+                        }
+                        return result;
+                    }
+
+                    result.blockedEntity = target;
+                    return result;
+                    
+                    break;
+                }
+            }
+        }
+    }
+
+    // SM_ASSERT(false, "at leat one object is being pushed or blocked");
+    return result;
+}
+
+
+bool UpdateCameraPosition()
+{
+    bool updated = false;
+    
+    for  (int i = 0; i < gameState->tileMapCount; i++)
+    {
+        Map & map = gameState->tileMaps[i];
+        IVec2 playerTile = GetEntity(gameState->playerEntityIndex)->tilePos;
+        
+        if (playerTile.x > map.tilePos.x && playerTile.x <= (map.tilePos.x + map.width) &&
+            playerTile.y > map.tilePos.y && playerTile.y <= (map.tilePos.y + map.height))
+        {
+            
+            Vector2 pos = TilePositionToPixelPosition(map.width * 0.5f + map.tilePos.x + 0.5f, map.height * 0.5f + map.tilePos.y + 0.5f);
+            if (!Vector2Equals(pos, gameState->camera.target))
+            {
+                if (!map.firstEnter)
+                {
+                    map.initEntities = gameState->entities.GetVectorSTD();
+                    map.firstEnter = true;
+                }
+                gameState->currentMapIndex = i;
+                gameState->camera.target = pos;
+
+                updated =  true;
+            }
+            break;
+        }
+    }
+    
+    if (IsWindowResized())
+    {
+        int newWidth = GetScreenWidth();
+        int newHeight = GetScreenHeight();
+        gameState->camera.offset = { newWidth / 2.0f, newHeight / 2.0f };
+        gameState->camera.zoom = (newWidth < newHeight) ? newWidth * 1.75f / SCREEN_WIDTH : newHeight * 1.75 / SCREEN_WIDTH;
+        
+    }
+    
+    return updated;
+}
+
+
+void SetUndoEntities(std::vector<Entity> & undoEntities)
+{
+    for (int i = 0; i < undoEntities.size(); i++)
+    {
+        Entity e = undoEntities[i];
+        *GetEntity(e.entityIndex) = e;
+    }
+}
+
+void Undo()
+{
+    std::vector<Entity> & undoEntities = undoStack.back();
+    SetUndoEntities(undoEntities);        
+    undoStack.pop_back();
+
+    // animateSlimeCount = 0;
+    gameState->animateTime = 0;
+    animationPlaying = false;
+}
+
+
+void SetRedo(std::vector<UndoEntities> & tmpRedos, UndoEntities redoEntities)
+{
+    UndoEntities tmp;
+    for (int i = 0; i < redoEntities.count; i++)
+    {
+        tmp.Add(redoEntities[i]);
+    }
+    tmpRedos.insert(tmpRedos.begin(), tmp);        
+}
+
+UndoEntities ApplyRedo(std::vector<UndoEntities> & tmpRedos)
+{
+    UndoEntities result;
+    for (int i = 0; i < tmpRedos.size(); i++)
+    {
+        UndoEntities & ue = tmpRedos[i];
+        for (int j = 0; j < ue.count; j++)
+        {
+            result.Add(ue[j]);
+        }
+    }
+    return result;
+}
+
+void Restart()
+{
+
+    undoStack.push_back(gameState->entities.GetVectorSTD());    
+    
+    Map & currentMap = gameState->tileMaps[gameState->currentMapIndex];
+    std::vector<Entity> & initEntities = currentMap.initEntities;
+
+    SetUndoEntities(initEntities);
+    
+    // animateSlimeCount = 0;
+    gameState->animateTime = 0;
+    animationPlaying = false;
+    
+}
+
+bool MoveAction(IVec2 actionDir)
+{
+    Entity * mother = GetEntity(gameState->playerEntityIndex);
+
+    // TODO: Control Children if their mass same as mother
+    if (mother->attach)
+    {
+
+        IVec2 currentPos = mother->tilePos;
+                        
+        IVec2 actionTilePos = currentPos + actionDir;
+
+        if (mother->attachDir == actionDir)
+        {
+            return false;
+        }
+
+        bool pushed = false;
+
+        PushActionResult pushResult = PushActionCheck(mother, actionTilePos, actionDir, 0);
+        if (pushResult.blocked)
+        {
+#if 0
+            if (gameState->entities.dynamicEnt.electricDoorSystem.CheckDoor(actionTilePos) &&
+                !gameState->entities.dynamicEnt.electricDoorSystem.DoorBlocked(actionTilePos, actionDir))
+            {
+                return false;
+            }
+#endif
+
+            if (pushResult.blockedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+                pushResult.blockedEntity->cableType == CABLE_TYPE_DOOR &&
+                !SameSide(pushResult.blockedEntity, actionTilePos, actionDir))
+            {
+                return false;
+            }
+            
+            if (mother->attachDir == -actionDir)
+            {
+                // TODO: Bounce with the block
+                PushActionResult result = PushActionCheck(mother, mother->tilePos + mother->attachDir, mother->attachDir, 0);
+
+                if (result.blocked)
+                {
+                    // IMPORTANT: mother entity changed
+                    SetAttach(mother, pushResult.blockedEntity, actionDir);
+                    return true;
+                }
+                BounceEntity(mother, mother->attachDir);
+                // SetSlimePosition(mother, gameState->entities.dynamicEnt.blocks[index].tile - mother->attachDir);
+                return true;
+            }
+
+            // IMPORTANT: mother entity changed
+            SetAttach(mother, pushResult.blockedEntity, actionDir);
+
+            return true;
+        }
+
+        if (mother->attachDir == -actionDir)
+        {
+            if (pushResult.pushed)
+            {
+                // TODO: Bounce with the block
+                PushActionResult result = PushActionCheck(mother, mother->tilePos + mother->attachDir, mother->attachDir, 0);
+
+                if (!result.blocked)
+                {
+                    BounceEntity(mother, mother->attachDir);
+                }
+                // SetSlimePosition(mother, gameState->entities.dynamicEnt.blocks[index].tile - mother->attachDir);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+                        
+        // NOTE: no obsticale, move player
+        {
+            IVec2 standingPlatformPos = actionTilePos + mother->attachDir;
+            FindAttachableResult findResult = FindAttachable(standingPlatformPos, mother->attachDir);
+            if (findResult.has)
+            {
+                Entity * resultEntity = findResult.entity;
+                if (resultEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+                    resultEntity->cableType == CABLE_TYPE_DOOR &&
+                    !SameSide(resultEntity, standingPlatformPos, mother->attachDir))
+                {
+                    return false;
+                }
+                
+                // IMPORTANT: mother entity changed
+                SetEntityPosition(mother, findResult.entity, actionTilePos);
+            }
+            else if (Abs(mother->attachDir) != Abs(actionDir))
+            {
+                IVec2 newTile = standingPlatformPos;
+                IVec2 newAttach = - actionDir;
+
+                Entity * attachedEntity = GetEntity(mother->attachedEntityIndex);
+
+                if (attachedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+                    attachedEntity->cableType == CABLE_TYPE_DOOR &&
+                    !SameSide(attachedEntity, newTile, newAttach))
+                {
+                    return false;
+                }
+                
+                // IMPORTANT: mother entity changed
+                SetEntityPosition(mother, attachedEntity, newTile);
+            }
+            else 
+            {
+                return false || pushed;
+            }
+            return true;
+        }
+        
+    }
+    return false;
+}
+
+bool SplitAction(IVec2 bounceDir)
+{
+    bool stateChanged = false;
+#if 0    
+    
+    Player & player = gameState->entities.dynamicEnt.player;
 
     IVec2 prevPos = player.slimes[player.motherIndex].tile;
 
@@ -73,7 +606,7 @@ bool SlimeAction(IVec2 bounceDir)
               tilePos = tilePos + bounceDir)
         {
             // TODO: check block not implimented
-            if (!record.CheckWalls(tilePos))
+            if (!CheckWalls(tilePos))
             {
                 bounce = true;
                 bouncePos = tilePos;
@@ -96,7 +629,7 @@ bool SlimeAction(IVec2 bounceDir)
              tilePos = tilePos + splitDir)
         {
             // TODO: check block not implimented
-            if (!record.CheckWalls(tilePos))
+            if (!CheckWalls(tilePos))
             {
                 split = true;
                 splitPos = tilePos;
@@ -133,30 +666,63 @@ bool SlimeAction(IVec2 bounceDir)
         }
                 
     }
-
+#endif
     return stateChanged;
     
 }
+
+
+inline void DrawSpriteLayer(EntityLayer layer)
+{
+    auto & entityIndexArray = gameState->entityTable[layer];
+
+    for (int i = 0; i < entityIndexArray.count; i++)
+    {
+    
+        Entity * entity = GetEntity(entityIndexArray[i]);
+
+        if (entity->active)
+        {
+            Vector2 topleft = GetTilePivot(entity->tilePos);
+            DrawSprite(texture, entity->sprite, topleft);
+
+            if (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE)
+            {
+                if (entity->attach)
+                {
+                    IVec2 t = entity->tilePos + entity->attachDir;                        
+        
+                    Vector2 pos = TilePositionToPixelPosition((float)t.x, (float)t.y);
+        
+                    DrawCircleV(pos, 5.0f, RED);                              // Draw a color-filled circle
+                }
+            }
+                
+        }            
+    }
+}
+
 
 //  ========================================================================
 //              NOTE: Game Functions (exposed)
 //  ========================================================================
 
-void GameUpdate(GameState * gameStateIn)
+void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
 {
-
+    
     if (gameState != gameStateIn) gameState = gameStateIn;
+    if (gameMemory != gameMemoryIn) gameMemory = gameMemoryIn;
     
     if (!gameState->initialized)
     {
         // NOTE: Initialization
         gameState->initialized = true;
-
+        
         // NOTE: Key Mappings
         {
             gameState->keyMappings[MOUSE_LEFT].keys.Add(MOUSE_BUTTON_LEFT);
             gameState->keyMappings[MOUSE_RIGHT].keys.Add(MOUSE_BUTTON_RIGHT);
-
+            
             gameState->keyMappings[LEFT_KEY].keys.Add(KEY_A);
             gameState->keyMappings[LEFT_KEY].keys.Add(KEY_LEFT);
             gameState->keyMappings[RIGHT_KEY].keys.Add(KEY_D);
@@ -166,56 +732,58 @@ void GameUpdate(GameState * gameStateIn)
             gameState->keyMappings[DOWN_KEY].keys.Add(KEY_S);
             gameState->keyMappings[DOWN_KEY].keys.Add(KEY_DOWN);
             gameState->keyMappings[SPACE_KEY].keys.Add(KEY_SPACE);
-
+            
         }
-    
+
+        gameState->tileMaps = (Map *)BumpAllocArray(gameMemory->persistentStorage, 100, sizeof(Map));
+        
         LoadLevelToGameState(*gameState, STATE_TEST_LEVEL);
-
-        // NOTE: Initalize undo record
-        undoRecords = std::stack<Record>();
-
+        
+        // NOTE: Initalize undoStack record
+        undoStack = std::vector<std::vector<Entity>>();
+        undoStack.push_back(gameState->entities.GetVectorSTD());
+        
         // NOTE: Arrow Buttons
         // UP
         gameState->upArrow.sprite = GetSprite(SPRITE_ARROW_UP);
         gameState->upArrow.id = SPRITE_ARROW_UP;
-
+        
         // DOWN
         gameState->downArrow.sprite = GetSprite(SPRITE_ARROW_DOWN);
         gameState->downArrow.id = SPRITE_ARROW_DOWN;
-
+        
         // LEFT
         gameState->leftArrow.sprite = GetSprite(SPRITE_ARROW_LEFT);
         gameState->leftArrow.id = SPRITE_ARROW_LEFT;
-
+        
         // RIGHT
         gameState->rightArrow.sprite = GetSprite(SPRITE_ARROW_RIGHT);
         gameState->rightArrow.id = SPRITE_ARROW_RIGHT;
-
-        undoRecords.push(gameState->currentRecord);
+        
     }
-
+    
 #if 0
     // NOTE: Level Hot Reloading
+    for (int i = 0; i < tileMapSources.count; i++)
     {
-        long long currentTimeStamp = GetTimestamp(LEVELS_PATH);
-
-        if (currentTimeStamp > levelsTimestamp)
+        char * fileName = tileMapSources[i].fileName;
+        long long currentTimeStamp = GetTimestamp(fileName);
+        
+        if (currentTimeStamp > tileMapSources[i].timestamp)
         {
-            LoadLevelToGameState(startState, gameState->state);
-            *gameState = startState;
+            LoadLevelToGameState(*gameState, gameState->state);
             undoRecords = std::stack<Record>();
         }
-
     }
 #endif
-
+    
     // NOTE: Debug Camera Control
     {
         // NOTE: CameraZoom
         // Camera zoom controls
         // Uses log scaling to provide consistent zoom speed
         gameState->camera.zoom = expf(logf(gameState->camera.zoom) + ((float)GetMouseWheelMove()*0.1f));
-
+        
         // NOTE: Camera Drag
         if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
         {
@@ -223,12 +791,12 @@ void GameUpdate(GameState * gameStateIn)
             gameState->camera.target.x -= mouseDelta.x;
             gameState->camera.target.y -= mouseDelta.y;
         }
-
+        
         if (gameState->camera.zoom > 10.0f) gameState->camera.zoom = 10.0f;
         else if (gameState->camera.zoom < 0.1f) gameState->camera.zoom = 0.1f;
-
+        
         float moveSpeed = 200.0f;
-
+        
         // NOTE: Camera Move
         if (IsDown(MOUSE_RIGHT))
         {
@@ -239,54 +807,52 @@ void GameUpdate(GameState * gameStateIn)
             if (IsDown(DOWN_KEY))
             {
                 gameState->camera.target.y += moveSpeed * GetFrameTime();
-
+                
             }
             if (IsDown(LEFT_KEY))
             {
                 gameState->camera.target.x -= moveSpeed * GetFrameTime();
-
+                
             }
             if (IsDown(RIGHT_KEY))
             {
                 gameState->camera.target.x += moveSpeed * GetFrameTime();
             }
-
-            return;
+            
         }
         else
         {
             UpdateCameraPosition();
         }
-
+        
     }
-
-            
+    
+    
     // NOTE: Recored if State Changes
     bool stateChanged = false;
 
-    Record prevRecord = gameState->currentRecord;
-
-    Record & record = gameState->currentRecord;
-
+    Entity * player = GetEntity(gameState->playerEntityIndex);
+    
     // NOTE: Control Action State
     if (JustPressed(SPACE_KEY))
     {
-        if (record.player.slimes[record.player.motherIndex].state == SPLIT_STATE)
+        if (player->actionState == SPLIT_STATE)
         {
-            record.player.slimes[record.player.motherIndex].state = MOVE_STATE;
+            player->actionState = MOVE_STATE;
         }
-        else if (record.player.slimes[record.player.motherIndex].state == MOVE_STATE)
+        else if (player->actionState == MOVE_STATE)
         {
-            record.player.slimes[record.player.motherIndex].state = SPLIT_STATE;
+            player->actionState = SPLIT_STATE;
         }
     }
-
+    
     timeSinceLastPress -= GetFrameTime();
 
+    std::vector<Entity> prevState = gameState->entities.GetVectorSTD();
     
     // NOTE: Actions
     if (!animationPlaying) {
-        switch(record.player.slimes[record.player.motherIndex].state)
+        switch(player->actionState)
         {
             case MOVE_STATE:
             {
@@ -294,231 +860,136 @@ void GameUpdate(GameState * gameStateIn)
                 gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = false;
                 
                 IVec2 actionDir = { 0 };
-            
+                
                 if (timeSinceLastPress < 0)
                 {
                     bool isPressed = false;
-            
+                    
                     if (IsDown(LEFT_KEY))
                     {
                         actionDir = {-1 , 0};                    
                         isPressed = true;
                     }
-
+                    
                     if (IsDown(RIGHT_KEY))
                     {
                         actionDir = {1, 0};
                         isPressed = true;
                     }
-
+                    
                     if (IsDown(UP_KEY))
                     {
                         actionDir = {0, -1};
                         isPressed = true;
                     }
-            
+                    
                     if (IsDown(DOWN_KEY))
                     {
                         actionDir = {0, 1};
                         isPressed = true;
                     }
-
-                    if (isPressed) timeSinceLastPress = pressFreq;
-
-                    stateChanged = isPressed;
-                }
-
-                if (stateChanged)
-                {
-                    Slime & mother =  record.player.slimes[record.player.motherIndex];
-                    // TODO: Control Children if their mass same as mother
-                    if (mother.attach)
+                    
+                    if (isPressed)
                     {
-
-                        IVec2 currentPos = mother.tile;
-                        
-                        IVec2 actionTilePos = currentPos + actionDir;
-
-                        if (mother.attachDir == actionDir)
-                        {
-                            stateChanged = false;
-                            break;
-                        }
-
-                        bool pushed = false;
- 
-                        if (!CheckPushableBlocks(mother, actionTilePos, actionDir, 0, pushed))
-                        {
-
-                            if (record.electricDoorSystem.CheckDoor(actionTilePos) &&
-                                !record.electricDoorSystem.DoorBlocked(actionTilePos, actionDir))
-                            {
-                                stateChanged = false;
-                                break;
-                            }
-                            
-                            if (mother.attachDir == -actionDir)
-                            {
-                                int index = GetTileIndex(mother.tile + mother.attachDir, record.blocks);
-                                if (index != -1)
-                                {
-                                    Block & attachedBlock = record.blocks[index];
-                                    // TODO: Bounce with the block
-                                    if (!CheckPushableBlocks(mother, mother.tile + mother.attachDir, mother.attachDir, 0, pushed))
-                                    {
-                                        mother.attachDir = actionDir;
-                                        break;
-                                    } 
-
-                                    SetSlimePosition(mother, attachedBlock.tile - mother.attachDir);
-                                    break;
-                                }
-                            }
-
-                            mother.attachDir = actionDir;
-
-                            break;
-                        }
-                        
-                        if (mother.attachDir == -actionDir)
-                        {
-                            int index = GetTileIndex(currentPos + mother.attachDir, record.blocks);
-                            if (pushed && (index != -1))
-                            {
-                                // TODO: Bounce with the block
-                                CheckPushableBlocks(mother, mother.tile + mother.attachDir, mother.attachDir, 0, pushed);
-
-                                SetSlimePosition(mother, record.blocks[index].tile - mother.attachDir);
-                                break;
-                            }
-                        }
-                        
-                        // NOTE: no obsticale, move player
-                        {
-                            IVec2 standingPlatformPos = actionTilePos + mother.attachDir;
-                            if (record.CheckWalls(standingPlatformPos) ||
-                                CheckTiles(standingPlatformPos, record.blocks))
-                            {
-                                if (record.electricDoorSystem.CheckDoor(actionTilePos) &&
-                                    !record.electricDoorSystem.DoorBlocked(actionTilePos, actionDir))
-                                {
-                                    stateChanged = false;
-                                    break;
-                                }
-                                
-                                SetSlimePosition(mother, { actionTilePos.x, actionTilePos.y });
-                            }
-                            else if (Abs(mother.attachDir) != Abs(actionDir))
-                            {
-                                IVec2 newTile = standingPlatformPos;
-                                IVec2 newAttach = - actionDir;
-
-                                if (record.electricDoorSystem.CheckDoor(actionTilePos) &&
-                                    !record.electricDoorSystem.DoorBlocked(actionTilePos, actionDir))
-                                {
-                                    stateChanged = false;
-                                    break;
-                                }
-
-                                SetSlimePosition(mother, {standingPlatformPos.x, standingPlatformPos.y});
-
-                                mother.attachDir = -actionDir;
-                            }
-                            else 
-                            {
-                                stateChanged = false || pushed;
-                            }
-                        }
+                        timeSinceLastPress = pressFreq;
+                        stateChanged = MoveAction(actionDir);
                     }
                 }
-                    
+                
                 break;
             }
             case SPLIT_STATE:
             {
                 // NOTE: Split Arrow Buttons
                 gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = true;
-
+                
                 if (JustPressed(MOUSE_LEFT))
                 {
-                        
+                    
                     if (gameState->leftArrow.hover)
                     {
                         // IMPORTANT shoot left and bounce right
-                        stateChanged = SlimeAction({ 1, 0 });
+                        stateChanged = SplitAction({ 1, 0 });
                     }
-                        
+                    
                     if (gameState->rightArrow.hover)
                     {
                         // IMPORTANT shoot right and bounce left
-                        stateChanged = SlimeAction({ -1, 0 });
+                        stateChanged = SplitAction({ -1, 0 });
                     }
-                        
+                    
                     if (gameState->upArrow.hover)
                     {
                         // IMPORTANT shoot up and bounce down
-                        stateChanged = SlimeAction({ 0, 1 });
+                        stateChanged = SplitAction({ 0, 1 });
                     }
-                        
+                    
                     if (gameState->downArrow.hover)
                     {
                         // IMPORTANT shoot down and bounce up
-                        stateChanged = SlimeAction({ 0, -1 });
+                        stateChanged = SplitAction({ 0, -1 });
                     }
                 }
                 break;
             }
         }
 
+        if (gameState->electricDoorSystem)
+        {
+            gameState->electricDoorSystem->Update();
+        }
+        
         if (stateChanged)
         {
             gameState->animateTime = 0;
-            undoRecords.push(prevRecord);
+            undoStack.push_back(prevState);
         }
- 
+        
+        
     }
     else
     {
+        // TODO
         // NOTE: Simulate
-
+#if 0
         if (gameState->animateTime <= gameState->duration)
         {
             SM_ASSERT(gameState->duration > 0, "Animation time is zero!");
-
+            
             gameState->animateTime += GetFrameTime();
-
+            
             float x = gameState->animateTime / gameState->duration;
-
+            
             if (x > 1)  x = 1;
             float t = EaseOutSine(x);
-
+            
             for (int i = 0; i < animateSlimeCount; i++)
             {
                 SlimeAnimation & sa = animateSlimes[i];
-
+                
                 Vector2 startPivot = GetTilePivot(sa.startTilePos.x, sa.startTilePos.y);
                 Vector2 endPivot = GetTilePivot(sa.endTilePos.x, sa.endTilePos.y);
-                        
+                
                 sa.currentSlime->pivot = Vector2Lerp(startPivot, endPivot, t);
-
-                Merge(record.player, sa);
+                
+                Merge(entities.dynamicEnt.player, sa);
             }
-                    
+            
         }
         else
         {
             animateSlimeCount = 0;
             gameState->animateTime = 0;
             animationPlaying = false;
-
-            record.player.slimes[record.player.motherIndex].split = false;
-
+            
+            entities.dynamicEnt.player.slimes[entities.dynamicEnt.player.motherIndex].split = false;
+            
             int maxIndex = -1;
             int maxMass = 0;
-                    
-            for (int i = 0; i < record.player.slimes.count; i++)
+            
+            for (int i = 0; i < entities.dynamicEnt.player.slimes.count; i++)
             {
-                Slime * child = &record.player.slimes[i];
+                Slime * child = &entities.dynamicEnt.player.slimes[i];
                 child->split = false;
                 if (child->mass > maxMass)
                 {
@@ -526,31 +997,33 @@ void GameUpdate(GameState * gameStateIn)
                     maxIndex = i;
                 }
             }
-
+            
             SM_ASSERT(maxIndex >= 0, "should not be nullptr");
-
-            if (maxMass > record.player.slimes[record.player.motherIndex].mass)
+            
+            if (maxMass > entities.dynamicEnt.player.slimes[entities.dynamicEnt.player.motherIndex].mass)
             {
-                Posses(record.player, maxIndex);
+                Posses(entities.dynamicEnt.player, maxIndex);
             }
-                   
+            
         }
-
+#endif
     }
 
+    // TODO
     // NOTE: Check electric door
+#if 0
     {
-        if (!record.electricDoorSystem.cables.IsEmpty())
+        if (!entities.dynamicEnt.electricDoorSystem.cables.IsEmpty())
         {
             // NOTE: Update Connection Point before checking connectivity
             
-            for (int index = 0; index < record.electricDoorSystem.cables.count; index++)
+            for (int index = 0; index < entities.dynamicEnt.electricDoorSystem.cables.count; index++)
             {
-                Cable & cable = record.electricDoorSystem.cables[index];
+                Cable & cable = entities.dynamicEnt.electricDoorSystem.cables[index];
                 if (cable.type == CABLE_TYPE_CONNECTION_POINT && !cable.conductive)
                 {
-                    Slime * s = CheckSlime(cable.tile, record.player);
-                    bool hasTiles = CheckTiles(cable.tile, record.blocks);
+                    Slime * s = CheckSlime(cable.tile, entities.dynamicEnt.player);
+                    bool hasTiles = CheckTiles(cable.tile, entities.dynamicEnt.blocks);
                     bool hasSlime = (s != nullptr);
                     if ( hasTiles || hasSlime )
                     {
@@ -558,14 +1031,14 @@ void GameUpdate(GameState * gameStateIn)
                         for (int i = 0; i < 4; i++)
                         {
                             int id = indexes[i];
-                            if (id >= 0 && record.electricDoorSystem.cables[id].conductive)
+                            if (id >= 0 && entities.dynamicEnt.electricDoorSystem.cables[id].conductive)
                             {
                                 if (hasSlime) s->state = FREEZE_STATE;
                                 cable.conductive = true;
-
-                                std::vector<bool> visited(record.electricDoorSystem.cables.count);
+                                
+                                std::vector<bool> visited(entities.dynamicEnt.electricDoorSystem.cables.count);
                                 OnSourcePowerOn(visited, cable.sourceIndex);
-
+                                
                                 goto End;
                             } 
                         }
@@ -573,17 +1046,17 @@ void GameUpdate(GameState * gameStateIn)
                 }
             }
             
-            for (int index = 0; index < record.electricDoorSystem.sourceIndexes.count; index++)
+            for (int index = 0; index < entities.dynamicEnt.electricDoorSystem.sourceIndexes.count; index++)
             {
-                int id = record.electricDoorSystem.sourceIndexes[index];
-            
-                Cable & source = record.electricDoorSystem.cables[id];
-                for (int i = 0; i < record.blocks.count; i++)
+                int id = entities.dynamicEnt.electricDoorSystem.sourceIndexes[index];
+                
+                Cable & source = entities.dynamicEnt.electricDoorSystem.cables[id];
+                for (int i = 0; i < entities.dynamicEnt.blocks.count; i++)
                 {
-                    if (record.blocks[i].tile == source.tile)
+                    if (entities.dynamicEnt.blocks[i].tile == source.tile)
                     {
-                        std::vector<bool> visited(record.electricDoorSystem.cables.count);
-                        for (int i = 0; i < record.electricDoorSystem.cables.count; i++)
+                        std::vector<bool> visited(entities.dynamicEnt.electricDoorSystem.cables.count);
+                        for (int i = 0; i < entities.dynamicEnt.electricDoorSystem.cables.count; i++)
                         {
                             visited[i] = false;   
                         }
@@ -599,54 +1072,55 @@ void GameUpdate(GameState * gameStateIn)
             }
         }
     } End:;
-            
+
+#endif
+
     // NOTE: Undo and Restart
     {
-        if (timeSinceLastPress < 0 && IsKeyDown(KEY_Z) && !undoRecords.empty())
+        if (timeSinceLastPress < 0 && IsKeyDown(KEY_Z) && !undoStack.empty())
         {
-            // NOTE: Undo                
-            gameState->currentRecord = undoRecords.top();
-            undoRecords.pop();
-
-            animateSlimeCount = 0;
-            gameState->animateTime = 0;
-            animationPlaying = false;
-
+            // NOTE: Undo
+            Undo();
+                        
             timeSinceLastPress = pressFreq;
-        }
 
-        // NOTE: Restart States        
-        if (IsKeyPressed(KEY_R))
+        }
+#if 1
+        // NOTE: Restart States
+        repeat &= !stateChanged;
+        if (IsKeyPressed(KEY_R) && !repeat)
         {
+            repeat = true;
             Restart();
-
+            
         }
+#endif
     }
-
-
+    
+    
     // NOTE: Arrow Setup
     {
         Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
-        IVec2 centerPos = record.player.slimes[record.player.motherIndex].tile;
+        IVec2 centerPos = player->tilePos;
         
         Vector2 upPos    = { (float)centerPos.x, (float)(centerPos.y-1) };
         Vector2 downPos  = { (float)centerPos.x, (float)(centerPos.y+1) };
         Vector2 leftPos  = { (float)(centerPos.x-1), (float)(centerPos.y) };
         Vector2 rightPos = { (float)(centerPos.x+1), (float)(centerPos.y) };
-
+        
         Vector2 dir[4] = { upPos, downPos, leftPos, rightPos };
         ArrowButton * arrows[4] = { &gameState->upArrow, &gameState->downArrow, &gameState->leftArrow, &gameState->rightArrow };
-
+        
         for (int i = 0; i < 4; i++)
         {
             Vector2 tilePos = dir[i];
-
+            
             ArrowButton * arrow = arrows[i];
-                                                                        
+            
             Vector2 pos = TilePositionToPixelPosition(tilePos.x, tilePos.y);
             Vector2 topLeft  = Vector2Subtract(pos, Vector2Scale(Vector2One(), (float)32 * 0.5f));
-                        
-
+            
+            
             Rectangle rect = { (float)topLeft.x, (float)topLeft.y, MAP_TILE_SIZE, MAP_TILE_SIZE };
             if (CheckCollisionPointRec(mousePos, rect))
             {
@@ -658,131 +1132,88 @@ void GameUpdate(GameState * gameStateIn)
                 arrow->hover = false;
                 arrow->sprite = GetSprite(arrow->id);
             }
-                        
-            arrow->topLeftPos = topLeft;
-
-        }
-    }
-    
-}
-
-void GameRender(GameState * gameState)
-{
-
-    BeginMode2D(gameState->camera);
-
-    for (int i = 0; i < gameState->tileMaps.count; i++)
-    {
-        Map & map = gameState->tileMaps[i];
-        
-        DrawTileMap(map.tilePos, { map.width, map.height }, BLUE, Fade(DARKBLUE, 0.5f));
-    }
-    
-    Record & record = gameState->currentRecord;
-
-    // NOTE: Draw Walls
-    for (unsigned int index = 0; index < record.walls.count; index++)
-    {
-        Wall & wall = record.walls[index];
-
-        Vector2 wallTopLeftPos = GetTilePivot(wall.tile);
-        DrawSprite(texture, wall.sprite, wallTopLeftPos);
-    }
-
-    // NOTE: Draw Glasses
-    for (int i = 0; i < record.glasses.count; i++)
-    {
-        Glass & g = record.glasses[i];
-        
-        Vector2 topLeft = GetTilePivot(g.tile);
-        DrawSprite(texture, g.sprite, topLeft);
-
-    }
-    
-    // NOTE: Electric Door
-    {
-        for (int i = 0; i < record.electricDoorSystem.cables.count; i++)
-        {
-            Cable & cable = record.electricDoorSystem.cables[i];
-            DrawSprite(texture, cable.sprite, GetTilePivot(cable.tile));
-        }
-    }
-
             
-    // NOTE: Draw Blocks
-    for (unsigned int index = 0; index < record.blocks.count; index++)
-    {
-        Block & block = record.blocks[index];
-
-        Vector2 blockTopLeftPos = GetTilePivot(block.tile);
-
-        DrawSprite(texture, block.sprite, blockTopLeftPos);
-        // DrawRectangleV(blockTopLeftPos, {  (float)record.blockSize,  (float)record.blockSize }, block.color);
+            arrow->topLeftPos = topLeft;
+            
+        }
     }
 
-    // NOTE: Draw slimes
-    for (int i = 0; i < record.player.slimes.count; i++)
+    // NOTE: Render Step
     {
-        Slime child = record.player.slimes[i];
-        //DrawRectangleV(child.pivot, { (float)child.tileSize, (float)child.tileSize}, GREEN);
-        DrawSprite(texture, child.sprite, child.pivot);
-    }
-
-    if (record.player.slimes[record.player.motherIndex].attach)
-    {
-        IVec2 t = record.player.slimes[record.player.motherIndex].tile + record.player.slimes[record.player.motherIndex].attachDir;
     
-        Vector2 pos = TilePositionToPixelPosition((float)t.x, (float)t.y);
+        // NOTE: Draw
+        BeginDrawing();
 
-        DrawCircleV(pos, 5.0f, RED);                              // Draw a color-filled circle
+        ClearBackground(GRAY);
+    
+        BeginMode2D(gameState->camera);
+    
+        for (int i = 0; i < gameState->tileMapCount; i++)
+        {
+            Map & map = gameState->tileMaps[i];
+        
+            DrawTileMap(map.tilePos, { map.width, map.height }, BLUE, Fade(DARKBLUE, 0.5f));
+        }
+
+        DrawSpriteLayer(LAYER_GROUND);
+        
+        DrawSpriteLayer(LAYER_OVERLAP);
+
+        DrawSpriteLayer(LAYER_BLOCKS);
+        
+        DrawSpriteLayer(LAYER_PLAYER);
+    
+        if (!animationPlaying)
+        {
+            // NOTE: Arrow sprite
+            // Left
+            if (gameState->leftArrow.show)
+            {
+                DrawSprite(texture, gameState->leftArrow.sprite, gameState->leftArrow.topLeftPos);
+            }
+        
+            // Right
+            if (gameState->rightArrow.show)
+            {
+                DrawSprite(texture, gameState->rightArrow.sprite, gameState->rightArrow.topLeftPos);
+            }
+        
+            // Up
+            if (gameState->upArrow.show)
+            {
+                DrawSprite(texture, gameState->upArrow.sprite, gameState->upArrow.topLeftPos);
+            }
+        
+            // Down
+            if (gameState->downArrow.show)
+            {
+                DrawSprite(texture, gameState->downArrow.sprite, gameState->downArrow.topLeftPos);
+            }
+        }
+    
+        EndMode2D();
+    
+        // NOTE: UI Draw Game Informations
+    
+        IVec2 centerPos = player->tilePos;
+    
+        Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
+        IVec2 mouseTilePos = PixelPositionToTilePosition(mousePos.x, mousePos.y);
+    
+        DrawText(TextFormat("Player pivot (%.2f, %.2f), Mouse World Position (%.2f, %.2f)",
+                            player->pivot.x, player->pivot.y,
+                            mousePos.x, mousePos.y), 10, 200, 20, GREEN);
+        DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Entity Count: %i, Mouse Tile (%i, %i)",
+                            centerPos.x, centerPos.y,
+                            player->mass, gameState->entities.count,
+                            mouseTilePos.x, mouseTilePos.y), 10, 140, 20, GREEN);
+        DrawText(TextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f",
+                            gameState->camera.target.x, gameState->camera.target.y,
+                            gameState->camera.offset.x, gameState->camera.offset.y, gameState->camera.zoom), 10, 50, 20, RAYWHITE);
+        DrawText("Arrow Direction to Shoot, R KEY to Restart, Z KEY to undo", 10, 10, 20, RAYWHITE);
+
+        
+        EndDrawing();
+
     }
-        
-    if (!animationPlaying)
-    {
-        // NOTE: Arrow sprite
-        // Left
-        if (gameState->leftArrow.show)
-        {
-            DrawSprite(texture, gameState->leftArrow.sprite, gameState->leftArrow.topLeftPos);
-        }
-
-
-        // Right
-        if (gameState->rightArrow.show)
-        {
-            DrawSprite(texture, gameState->rightArrow.sprite, gameState->rightArrow.topLeftPos);
-        }
-
-        // Up
-        if (gameState->upArrow.show)
-        {
-            DrawSprite(texture, gameState->upArrow.sprite, gameState->upArrow.topLeftPos);
-        }
-
-        // Down
-        if (gameState->downArrow.show)
-        {
-            DrawSprite(texture, gameState->downArrow.sprite, gameState->downArrow.topLeftPos);
-        }
-    }
-        
-    EndMode2D();
-        
-    // NOTE: UI Draw Game Informations
-
-    IVec2 centerPos = record.player.slimes[record.player.motherIndex].tile;
-
-    Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
-
-    DrawText(TextFormat("Player pivot (%.2f, %.2f), Mouse World Position (%.2f, %.2f)",
-                        record.player.slimes[record.player.motherIndex].pivot.x, record.player.slimes[record.player.motherIndex].pivot.y,
-                        mousePos.x, mousePos.y), 10, 200, 20, GREEN);
-    DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Child Count: %i",
-                        centerPos.x, centerPos.y,
-                        record.player.slimes[record.player.motherIndex].mass, record.player.slimes.count), 10, 140, 20, GREEN);
-    DrawText(TextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f",
-                        gameState->camera.target.x, gameState->camera.target.y,
-                        gameState->camera.offset.x, gameState->camera.offset.y, gameState->camera.zoom), 10, 50, 20, RAYWHITE);
-    DrawText("Arrow Direction to Shoot, R KEY to Restart, Z KEY to undo", 10, 10, 20, RAYWHITE);
-
 }

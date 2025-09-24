@@ -126,6 +126,12 @@ struct Array
         return elements[idx];
     }
 
+    T & last()
+    {
+        SM_ASSERT(!IsEmpty(), "Array is empty!");
+        return elements[count - 1];
+    }
+
     int Add(T element)
     {
         SM_ASSERT(count < maxElements, "Array Full!");
@@ -133,11 +139,36 @@ struct Array
         return count++;
     }
 
+    std::vector<T> GetVectorSTD()
+    {
+        std::vector<T> result;
+        result.reserve(count);
+        for (int i = 0; i < count; i++)
+        {
+            result.push_back(elements[i]);
+        }
+        
+        return result;
+    }
+
     void RemoveIdxAndSwap(int idx)
     {
         SM_ASSERT(idx >= 0, "Idx negative!");
         SM_ASSERT(idx < count, "Idx out of bounds!");
         elements[idx] = elements[--count];
+    }
+
+    void ReverseElements()
+    {
+        if (count > 1)
+        {
+            for (int i = 0; i < count / 2; i++)
+            {
+                T temp = elements[i];
+                elements[i] = elements[count - 1 - i];
+                elements[count - 1 - i] = temp;
+            }
+        }
     }
 
     void Clear()
@@ -187,6 +218,7 @@ BumpAllocator MakeBumpAllocator(size_t size)
     return ba;
 }
 
+#define BumpAllocArray(ba, count, size) BumpAlloc(ba, (count)*size)
 char * BumpAlloc(BumpAllocator * ba, size_t size)
 {
     char * result = nullptr;
