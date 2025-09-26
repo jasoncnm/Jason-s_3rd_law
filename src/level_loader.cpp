@@ -12,8 +12,7 @@
 //              NOTE: Level Functions
 //  ========================================================================
 
-
-AddEntityResult LoadGameObject(int id, IVec2 tilePos)
+inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
 {
     AddEntityResult entityResult;
     if (id == WALL)
@@ -40,6 +39,8 @@ AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddEntity(ENTITY_TYPE_CLONE, tilePos, SPRITE_SLIME_1);
         entityResult.entity->mass = 1;
+        entityResult.entity->tileSize = (float)MAP_TILE_SIZE / entityResult.entity->maxMass; 
+
         entityResult.entity->movable = true;
         gameState->slimeEntityIndices.Add(entityResult.entityIndex);
                                 
@@ -167,7 +168,7 @@ AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     return entityResult;
 }
 
-void GenerateTileMap(std::string fileName, IVec2 startPos, int width, int height)
+inline void GenerateTileMap(std::string fileName, IVec2 startPos, int width, int height)
 {
     // NOTE: Offsets start position
     startPos = startPos;
@@ -209,6 +210,7 @@ void GenerateTileMap(std::string fileName, IVec2 startPos, int width, int height
                         {
                             result = AddEntity(ENTITY_TYPE_PLAYER, tilePos, SPRITE_SLIME_1);
                             result.entity->mass = 1;
+                            result.entity->tileSize = (float)MAP_TILE_SIZE / result.entity->maxMass; 
                             result.entity->movable = true;
 
                             gameState->playerEntityIndex = result.entityIndex;

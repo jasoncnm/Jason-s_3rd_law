@@ -78,16 +78,16 @@ IVec2 PixelPositionToTilePosition(Vec2 pos)
     return PixelPositionToTilePosition(pos.x, pos.y);
 }
 
-Vector2 GetTilePivot(int tileX, int tileY)
+Vector2 GetTilePivot(int tileX, int tileY, float tileSize)
 {
-    Vector2 playerPos = TilePositionToPixelPosition((float)tileX, (float)tileY);            
+    Vector2 playerPos = TilePositionToPixelPosition(tileX, tileY);            
 
-    return Vector2Subtract(playerPos, Vector2Scale(Vector2One(), (float)MAP_TILE_SIZE * 0.5f));
+    return Vector2Subtract(playerPos, Vector2Scale(Vector2One(), tileSize * 0.5f));
 }
 
-Vector2 GetTilePivot(IVec2 tilePos)
+Vector2 GetTilePivot(IVec2 tilePos, float tileSize)
 {
-    return GetTilePivot(tilePos.x, tilePos.y);
+    return GetTilePivot(tilePos.x, tilePos.y, tileSize);
 }
 
 

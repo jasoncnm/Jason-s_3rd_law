@@ -1,0 +1,37 @@
+// raddbg 0.9.22 project file
+
+recent_file: path: "w:/RayLib_Games/Jason's_3rd_law/src/entity.cpp"
+recent_file: path: "W:/RayLib_Games/Jason's_3rd_law/src/entity.h"
+recent_file: path: "W:/RayLib_Games/Jason's_3rd_law/src/assets.h"
+recent_file: path: "W:/RayLib_Games/Jason's_3rd_law/src/game.cpp"
+recent_file: path: "w:/RayLib_Games/Jason's_3rd_law/src/level_loader.cpp"
+recent_file: path: "w:/RayLib_Games/Jason's_3rd_law/src/engine_lib.h"
+recent_file: path: "src/game.cpp"
+recent_file: path: "src/electric_door.cpp"
+recent_file: path: "../../computer enhance/my_work/code/sim8086.cpp"
+recent_file: path: "../../computer enhance/my_work/hw2/listing_0039_more_movs"
+recent_file: path: "d:/os/obj/amd64fre/minkernel/crts/ucrt/src/appcrt/stdio/mt/objfre/amd64/minkernel/crts/ucrt/src/appcrt/stdio/fopen.cpp"
+recent_file: path: "src/level_loader.cpp"
+recent_file: path: "src/engine_lib.h"
+recent_file: path: "src/entity.cpp"
+recent_file: path: "D:/a/_work/1/s/src/vctools/crt/vcstartup/src/misc/amd64/chkstk.asm"
+recent_file: path: "src/main.cpp"
+recent_file: path: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/include/stack"
+recent_file: path: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/include/deque"
+recent_file: path: "src/game_util.h"
+recent_file: path: "src/level_loader.h"
+recent_file: path: "src/game.h"
+recent_file: path: "src/actions.h"
+recent_file: path: "../../Applications/raddebugger/src/metagen/metagen_os/core/win32/metagen_os_core_win32.c"
+breakpoint:
+{
+  source_location: "../../computer enhance/my_work/code/sim8086.cpp:244:1"
+  hit_count: 0
+}
+target:
+{
+  executable: "W:/RayLib_Games/Jason's_3rd_law/JasonLaw.exe"
+  working_directory: "W:/RayLib_Games/Jason's_3rd_law/"
+  enabled: 1
+  debug_subprocesses: 1
+}

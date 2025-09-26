@@ -70,5 +70,16 @@ struct TileMapSrc
 //  ========================================================================
 static Array<TileMapSrc, 100> tileMapSources;
 
+
+//  ========================================================================
+//              NOTE: Level Functions
+//  ========================================================================
+inline AddEntityResult LoadGameObject(int id, IVec2 tilePos);
+
+inline void GenerateTileMap(std::string fileName, IVec2 startPos, int width, int height);
+
+void LoadLevelToGameState(GameState & state, State loadState);
+
+
 #define LEVEL_LOADER_H
 #endif

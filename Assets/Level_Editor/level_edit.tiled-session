@@ -3,10 +3,21 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TileMap/Test.tmj",
+    "activeFile": "TileMap/Room_12.tmj",
+    "console.history": [
+        "\"W:/hm_hero_proj/gp/misc/emacs.bat\" %mapfilev",
+        "Room_11.tmj",
+        "cls",
+        "clear",
+        "save",
+        "save all ",
+        "save all;",
+        "help ",
+        "/?"
+    ],
     "expandedProjectPaths": [
-        ".",
         "TileMap",
+        ".",
         "TlieSet"
     ],
     "fileStates": {
@@ -14,11 +25,11 @@
             "scaleInDock": 3
         },
         "TileMap/Room_1.tmj": {
-            "scale": 0.75,
-            "selectedLayer": 1,
+            "scale": 1.5,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 390,
-                "y": -47.33333333333326
+                "x": 3858.333333333333,
+                "y": -1447.6666666666665
             }
         },
         "TileMap/Room_1.tmx": {
@@ -34,43 +45,43 @@
             "scaleInDock": 3
         },
         "TileMap/Room_10.tmj": {
-            "scale": 0.5,
+            "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 661,
-                "y": 255
+                "x": 207.5,
+                "y": 175.5
             }
         },
         "TileMap/Room_11.tmj": {
-            "scale": 0.25,
+            "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 3058,
-                "y": -2650
+                "x": 175.5,
+                "y": 175.5
             }
         },
         "TileMap/Room_12.tmj": {
-            "scale": 0.5,
-            "selectedLayer": 0,
+            "scale": 0.75,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": -445,
-                "y": 1213
+                "x": 578,
+                "y": 718
             }
         },
         "TileMap/Room_13.tmj": {
-            "scale": 0.5,
+            "scale": 2,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -93,
-                "y": 1213
+                "x": 444.25,
+                "y": 324.75
             }
         },
         "TileMap/Room_14.tmj": {
-            "scale": 0.5,
+            "scale": 8,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 259,
-                "y": 509
+                "x": 3753.8125,
+                "y": -1604.0625
             }
         },
         "TileMap/Room_2.tmj": {
@@ -154,11 +165,11 @@
             }
         },
         "TileMap/Test.tmj": {
-            "scale": 0.75,
-            "selectedLayer": 0,
+            "scale": 4,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": -2842,
-                "y": 1648.6666666666665
+                "x": -2671.875,
+                "y": 1210.375
             }
         },
         "TileMap/Tunnel_1.tmx": {
@@ -197,8 +208,10 @@
             "scaleInEditor": 4
         }
     },
+    "last.executablePath": "C:/Users/Jason/AppData/Local/Programs/Microsoft VS Code/Code.exe",
     "last.exportedFilePath": "W:/RayLib_Games/Jason's_3rd_law/Assets/Level_Editor/TileMap",
     "last.imagePath": "W:/RayLib_Games/Jason's_3rd_law/Assets/Texture",
+    "last.workingDirectory": "W:/",
     "last.worldFilePath": "W:/RayLib_Games/Jason's_3rd_law/Assets/Level_Editor",
     "lastUsedTilesetExportFilter": "JSON tileset files (*.tsj *.json)",
     "loadedWorlds": [
@@ -209,28 +222,25 @@
     "map.lastUsedFormat": "json",
     "map.width": 11,
     "openFiles": [
-        "TileMap/Room_7.tmj",
-        "TileMap/Room_9.tmj",
-        "TileMap/Room_1.tmj",
-        "TileMap/Room_6.tmj",
-        "TileMap/Room_14.tmj",
-        "TileMap/Room_5.tmj",
-        "TileMap/Test.tmj"
+        "TileMap/Room_10.tmj",
+        "TileMap/Room_13.tmj",
+        "TileMap/Room_11.tmj",
+        "TileMap/Room_12.tmj"
     ],
     "project": "level_edit.tiled-project",
     "recentFiles": [
+        "TileMap/Room_10.tmj",
+        "TileMap/Room_13.tmj",
+        "TileMap/Room_11.tmj",
+        "TileMap/Room_12.tmj",
+        "TileMap/Room_1.tmj",
+        "TileMap/Test.tmj",
         "TileMap/Room_8.tmj",
         "TileMap/Room_4.tmj",
         "TileMap/Room_3.tmj",
         "TileMap/Room_2.tmj",
-        "TileMap/Room_11.tmj",
-        "TileMap/Room_12.tmj",
-        "TileMap/Room_13.tmj",
-        "TileMap/Test.tmj",
         "TileMap/Room_5.tmj",
-        "TileMap/Room_14.tmj",
-        "TileMap/Room_6.tmj",
-        "TileMap/Room_1.tmj"
+        "TileMap/Room_14.tmj"
     ],
     "tileset.lastUsedFormat": "tsx"
 }

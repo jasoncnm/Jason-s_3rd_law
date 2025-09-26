@@ -62,15 +62,24 @@ void DrawTileMap(IVec2 startPos, IVec2 dim, Color tileColor, Color gridColor)
     }
 }
 
-void DrawSprite(Texture2D & texture, Sprite & sprite, Vector2 topLeft, Color color = WHITE)
+void DrawSprite(Texture2D & texture, Sprite & sprite, Vector2 topLeft, float tileSize = 32, Color color = WHITE)
 {
             
-    Rectangle source = {
-        (float)sprite.altasOffset.x, (float)sprite.altasOffset.y,
-        (float)sprite.spriteSize.x, (float)sprite.spriteSize.y
-    };
-            
-    DrawTextureRec(texture, source, topLeft, color);
+    Rectangle source =
+        {
+            (float)sprite.altasOffset.x, (float)sprite.altasOffset.y,
+            (float)sprite.spriteSize.x, (float)sprite.spriteSize.y
+        };
+
+    Rectangle dest =
+        {
+            topLeft.x + tileSize, topLeft.y + tileSize,
+            tileSize, tileSize
+        };
+        
+    
+ // Draw a part of a texture defined by a rectangle with 'pro' parameters
+    DrawTexturePro(texture,  source,  dest, { dest.width, dest.height }, 0, color);
 }
 
 #define RENDER_INTERFACE_H

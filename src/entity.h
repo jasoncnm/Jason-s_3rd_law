@@ -7,6 +7,19 @@
    $Notice: $
    ======================================================================== */
 
+#include "electric_door.h"
+
+enum EntityLayer
+{
+ 
+    LAYER_PLAYER,
+    LAYER_BLOCKS,
+    LAYER_OVERLAP,
+    LAYER_GROUND,
+    
+    LAYER_COUNT,
+};
+
 enum EntityType
 {
     ENTITY_TYPE_NULL,
@@ -51,7 +64,7 @@ struct Entity
     int sourceIndex = -1;
     int rightIndex = -1, leftIndex = -1, upIndex = -1, downIndex = -1;
     
-    int tileSize = 32;
+    float tileSize = 32.0f;
 
     int mass = 1;
     int maxMass = 3;
@@ -86,6 +99,45 @@ struct FindAttachableResult
     Entity * entity;
     bool has;
 };
+
+// NOTE: Get a pointer of the entity by entities array index 
+inline Entity * GetEntity(int i);
+
+
+inline AddEntityResult
+AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color, int tileSize);
+
+inline AddEntityResult
+AddCable(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool down);
+
+inline AddEntityResult
+AddDoor(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool down);
+
+inline AddEntityResult
+AddSource(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool down);
+
+inline AddEntityResult
+AddConnection(IVec2 tilePos, SpriteID spriteID);
+
+inline void DeleteEntity(Entity * entity);
+
+inline void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir);
+
+inline void SetActionState(Entity * entity, ActionState state);
+
+inline void SetGlassBeBroken(Entity * glass);
+
+inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime);
+
+inline bool AttachSlime(Entity * slime, IVec2 dir);
+
+inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir);
+
+inline Entity * FindEntityByLocationAndLayer(IVec2 pos, EntityLayer layer);
+
+inline Entity * FindSlime(IVec2 pos);
+
+void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos);
 
 #define ENTITY_H
 #endif

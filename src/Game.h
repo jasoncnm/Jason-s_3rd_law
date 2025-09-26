@@ -22,9 +22,9 @@
 #include "engine_lib.h"
 #include "assets.h"
 #include "game_util.h"
-// #include "slime.h"
 #include "electric_door.h"
 #include "entity.h"
+
 // ----------------------------------------------------
 // NOTE: Game Structs
 // ----------------------------------------------------
@@ -48,17 +48,6 @@ enum GameInputType
     DOWN_KEY,
     SPACE_KEY,
     GAME_INPUT_COUNT,
-};
-
-enum EntityLayer
-{
- 
-    LAYER_PLAYER,
-    LAYER_BLOCKS,
-    LAYER_OVERLAP,
-    LAYER_GROUND,
-    
-    LAYER_COUNT,
 };
 
 struct KeyMapping
@@ -156,6 +145,35 @@ static Memory * gameMemory;
 static bool animationPlaying = false;
 
 static bool repeat = false;
+
+//  ========================================================================
+//              NOTE: Game Functions 
+//  ========================================================================
+inline bool JustPressed(GameInputType type);
+
+inline bool IsDown(GameInputType type);
+
+inline bool CheckOutOfBound(int tileX, int tileY);
+
+inline bool CheckOutOfBound(IVec2 tilePos);
+
+inline bool CheckBounce(IVec2 tilePos, IVec2 pushDir);
+
+PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int accumulatedMass);
+
+void BounceEntity(Entity * entity, IVec2 dir);
+
+inline bool UpdateCameraPosition();
+
+inline void Undo();
+
+inline void Restart();
+
+bool MoveAction(IVec2 actionDir);
+
+bool SplitAction(IVec2 bounceDir);
+
+inline void DrawSpriteLayer(EntityLayer layer);
 
 
 #define GAME_H

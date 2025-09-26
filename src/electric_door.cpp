@@ -7,10 +7,8 @@
    ======================================================================== */
 
 #include "electric_door.h"
-void BounceEntity(Entity * entity, IVec2 dir);
 
-
-bool SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir)
+inline bool SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir)
 {
     SM_ASSERT(door->type == ENTITY_TYPE_ELECTRIC_DOOR && door->cableType == CABLE_TYPE_DOOR,
               "Entity is not a door");
@@ -172,7 +170,7 @@ void ElectricDoorSystem::OnSourcePowerOn(Array<bool, MAX_CABLE> & visited, int c
 }
 
 
-bool ElectricDoorSystem::DoorBlocked(IVec2 tilePos, IVec2 reachDir)
+inline bool ElectricDoorSystem::DoorBlocked(IVec2 tilePos, IVec2 reachDir)
 {
     SM_ASSERT(reachDir.SqrMagnitude() <= 1, "Directional Vector should be a unit vector");
     
@@ -187,7 +185,7 @@ bool ElectricDoorSystem::DoorBlocked(IVec2 tilePos, IVec2 reachDir)
     return result;
 }
 
-bool ElectricDoorSystem::CheckDoor(IVec2 tilePos)
+inline bool ElectricDoorSystem::CheckDoor(IVec2 tilePos)
 {
     
     bool result = false;
@@ -260,7 +258,7 @@ void ElectricDoorSystem::Search(Array<bool, MAX_CABLE> & visited, int currentInd
     
 }
 
-void ElectricDoorSystem::SetUp()
+inline void ElectricDoorSystem::SetUp()
 {
     for (int index = 0; index < sourceIndices.count; index++)
     {
@@ -275,7 +273,7 @@ void ElectricDoorSystem::SetUp()
 }
 
 
-void ElectricDoorSystem::Update()
+inline void ElectricDoorSystem::Update()
 {
 
     for (int i = 0; i < connectionPointIndices.count; i++)

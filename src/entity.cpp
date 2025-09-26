@@ -7,16 +7,14 @@
    ======================================================================== */
 #include "entity.h"
 
-bool SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir);
-
 inline Entity * GetEntity(int i)
 {
     return &gameState->entities[i];
 }
 
 
-AddEntityResult
-AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE)
+inline AddEntityResult
+AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE, int tileSize = 32)
 {
     AddEntityResult result;
 
@@ -25,9 +23,10 @@ AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE
     entity.tilePos = tilePos;
     entity.spriteID = spriteID;
     entity.sprite = GetSprite(spriteID);
-    entity.pivot = GetTilePivot(tilePos);
+    entity.pivot = GetTilePivot(tilePos, tileSize);
     entity.color = color;
     entity.active = true;
+    entity.tileSize = tileSize;
         
     result.entityIndex = gameState->entities.Add(entity);
     result.entity = &gameState->entities[result.entityIndex];
@@ -39,7 +38,7 @@ AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE
 }
 
 
-AddEntityResult
+inline AddEntityResult
 AddCable(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool down)
 {
     AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, spriteID);
@@ -62,7 +61,7 @@ AddCable(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool 
 }
 
 
-AddEntityResult
+inline AddEntityResult
 AddDoor(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool down)
 {
     AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, spriteID);
@@ -86,7 +85,7 @@ AddDoor(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool d
     return entityResult;
 }
 
-AddEntityResult
+inline AddEntityResult
 AddSource(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool down)
 {
     AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, spriteID);
@@ -108,7 +107,7 @@ AddSource(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool
     return entityResult;
 }
 
-AddEntityResult
+inline AddEntityResult
 AddConnection(IVec2 tilePos, SpriteID spriteID)
 {
     AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, spriteID);
@@ -130,13 +129,12 @@ AddConnection(IVec2 tilePos, SpriteID spriteID)
     return entityResult;
 }
 
-void DeleteEntity(Entity * entity)
+inline void DeleteEntity(Entity * entity)
 {
     entity->active = false;
     entity->type = ENTITY_TYPE_NULL;
 }
 
-void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir);
 void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
 {
     SM_ASSERT(entity->active, "entity does not exist");
@@ -146,7 +144,7 @@ void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
     // entity->positionSetMarker = true;
     
     entity->tilePos = tilePos;
-    entity->pivot = GetTilePivot(tilePos);
+    entity->pivot = GetTilePivot(tilePos, entity->tileSize);
 
     if (touchingEntity && (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE))
     {
@@ -179,9 +177,9 @@ void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
     
 }
 
-void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir)
+inline void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir)
 {
-    SM_ASSERT((attacher->type == ENTITY_TYPE_PLAYER || attachee->type == ENTITY_TYPE_CLONE), "entity is not attachable");
+    SM_ASSERT((attacher->type == ENTITY_TYPE_PLAYER || attacher->type == ENTITY_TYPE_CLONE), "entity is not attachable");
     SM_ASSERT(attacher->active && attachee->active, "entity does not exist");
 
     if (attacher->movable)
@@ -199,36 +197,37 @@ void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir)
     }
 }
 
-void SetActionState(Entity * entity, ActionState state)
+inline void SetActionState(Entity * entity, ActionState state)
 {
     SM_ASSERT(entity->active, "entity does not exist");
     
     entity->actionState = state;    
 }
 
-void SetGlassBeBroken(Entity * glass)
+inline void SetGlassBeBroken(Entity * glass)
 {
     SM_ASSERT(glass->active, "entity does not exist");
-
     
     glass->broken = true;
     glass->sprite = GetSprite(SPRITE_GLASS_BROKEN);
 }
 
-Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
+inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
 {
     SM_ASSERT(mergeSlime->active && mergedSlime->active, "entity does not exist");
-
+    SM_ASSERT(mergeSlime != mergedSlime, "Entity cannot merge itself");
 
     mergeSlime->mass += mergedSlime->mass;
     DeleteEntity(mergedSlime);
+
+    mergeSlime->tileSize = mergeSlime->mass * ( MAP_TILE_SIZE / 3.0f);
 
     return mergeSlime;
     
 }
 
 
-bool AttachSlime(Entity * slime, IVec2 dir)
+inline bool AttachSlime(Entity * slime, IVec2 dir)
 {
     SM_ASSERT((slime->type == ENTITY_TYPE_PLAYER || slime->type == ENTITY_TYPE_CLONE), "entity is not attachable");
 
@@ -275,7 +274,7 @@ bool AttachSlime(Entity * slime, IVec2 dir)
 
 }
 
-FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
+inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
 {
     FindAttachableResult result = { nullptr, false };
     
@@ -319,7 +318,7 @@ FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
     return result;
 }
 
-Entity * FindEntityByLocationAndLayer(IVec2 pos, EntityLayer layer)
+inline Entity * FindEntityByLocationAndLayer(IVec2 pos, EntityLayer layer)
 {
     auto & entityIndeices = gameState->entityTable[layer];
     for (int i = 0; i < entityIndeices.count; i++)
@@ -332,5 +331,19 @@ Entity * FindEntityByLocationAndLayer(IVec2 pos, EntityLayer layer)
         }
     }
     
+    return nullptr;
+}
+
+inline Entity * FindSlime(IVec2 pos)
+{
+    for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
+    {
+        Entity * slime = GetEntity(gameState->slimeEntityIndices[i]);
+        if (slime->active && slime->tilePos == pos)
+        {
+            return slime;
+        }
+    }
+
     return nullptr;
 }

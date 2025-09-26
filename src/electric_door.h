@@ -8,7 +8,7 @@
    ======================================================================== */
 
 #define MAX_CABLE 1000
-
+struct Entity;
 
 enum CableType
 {
@@ -30,19 +30,22 @@ struct ElectricDoorSystem
     Array<int, 400> connectionPointIndices;
     Array<int, MAX_CABLE> entityIndices;
 
-    void Update();
+    inline void Update();
     
-    void SetUp();
+    inline void SetUp();
+
+    inline bool DoorBlocked(IVec2 tilepos, IVec2 reachDir);
     
+    inline bool CheckDoor(IVec2 tilePos);
+
     void Search(Array<bool, MAX_CABLE> & visited, int currentIndex, int sourceIndex);
 
     void OnSourcePowerOn(Array<bool, MAX_CABLE> & visited, int currentIndex);
-
-    bool DoorBlocked(IVec2 tilepos, IVec2 reachDir);
-    
-    bool CheckDoor(IVec2 tilePos);
 };
 
+inline bool SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir);
+
+inline void PowerOnCable(Entity * cable, bool & end);
 
 #define ELECTRIC_DOOR_H
 #endif
