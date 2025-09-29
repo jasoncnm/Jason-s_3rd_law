@@ -16,6 +16,7 @@
 *.dylib
 *.dll
 
+
 # Fortran module files
 *.mod
 *.smod
@@ -34,3 +35,9 @@
 JasonLaw.ilk
 JasonLaw.pdb
 /.vs
+
+#include raylib libary
+!/third_party/lib/raylib.dll
+!/third_party/lib/raylib.lib
+!/third_party/lib/raylibdll.lib
+
