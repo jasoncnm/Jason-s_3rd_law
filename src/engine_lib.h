@@ -12,7 +12,7 @@
 #include <string.h>
 #include <cmath>
 #include <sys/stat.h>
-
+#include <vector>
 
 #include "raylib.h"
 #include "raymath.h"
@@ -34,9 +34,9 @@
 
 #define b8 char
 #define BIT(x) 1 << (x)
-#define KB(x) ((unsigned long long)1024 * x)
-#define MB(x) ((unsigned long long)1024 * KB(x))
-#define GB(x) ((unsigned long long)1024 * MB(x))
+#define KB(x) (1024LL * x)
+#define MB(x) (1024LL * KB(x))
+#define GB(x) (1024LL * MB(x))
 
 //  ========================================================================
 // NOTE: Logging
@@ -402,6 +402,20 @@ struct Vec2
     }
 };
 
+float Distance(Vec2 a, Vec2 b)
+{
+    Vec2 offset = a - b;
+    float result = sqrtf(offset.x * offset.x + offset.y * offset.y);
+    return result;
+}
+
+struct IVec2;
+Vec2 IVec2ToVec2(IVec2 val);
+float Abs(float x)
+{
+    return x > 0 ? x : -x;
+}
+
 struct IVec2
 {
     int x;
@@ -420,7 +434,7 @@ struct IVec2
 
     IVec2 operator-()
     {
-        return { -x, -y};
+        return { -x, -y };
     }
 
     bool operator==(IVec2 other)
@@ -438,13 +452,30 @@ struct IVec2
         x += other.x;
         y += other.y;
     }
-
+    
     int SqrMagnitude()
     {
         return x * x + y * y;
     }
+
     
+    bool IsBetween(IVec2 a, IVec2 b)
+    {
+        float lenAB = Distance(IVec2ToVec2(a), IVec2ToVec2(b));
+        float lenA = Distance(IVec2ToVec2(a), IVec2ToVec2(*this));
+        float lenB = Distance(IVec2ToVec2(b), IVec2ToVec2(*this));
+
+        bool result = lenAB - (lenA + lenB) >= 0;
+
+        return result;
+        
+    }
 };
+
+int Sign(int x)
+{
+    return x >= 0 ? 1 : -1;
+}
 
 int Abs(int x)
 {

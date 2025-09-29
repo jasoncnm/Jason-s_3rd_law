@@ -8,20 +8,17 @@
    ======================================================================== */
 
 #define MAP_TILE_SIZE 32       // Tiles size
-#define MAX_BLOCKS 500
-#define MAX_WALLS 1100
 #define MAX_ANIMATION 50
 
+#define MAX_ENTITIES 5000
+
 #define MAX_UNDO_RECORDS 2000    // IMPORTANT: This might need to be handle if released. I'm Using std::stack for now (dynamic alloc)
-                               
-#include <vector>
 
 #include "raylib.h"
 #include "raymath.h"
 
 #include "engine_lib.h"
 #include "assets.h"
-#include "game_util.h"
 #include "electric_door.h"
 #include "entity.h"
 
@@ -65,6 +62,8 @@ struct ArrowButton
 {
     Sprite sprite;
     SpriteID id;
+
+    int tileSize;
     
     Vector2 topLeftPos;
     
@@ -74,10 +73,16 @@ struct ArrowButton
     bool show = true;
 };
 
+struct UndoState
+{
+    int playerIndex;
+    std::vector<Entity> undoEntities;    
+};
+
 // NOTE: Map data type
 struct Map
 {
-    std::vector<Entity> initEntities;
+    UndoState initUndoState;
 
     Entity playerEnter;
     
@@ -100,15 +105,14 @@ struct GameState
 
     ElectricDoorSystem * electricDoorSystem = nullptr;
 
-    Array<int, 5000> entityTable[LAYER_COUNT];
+    Array<int, MAX_ENTITIES> entityTable[LAYER_COUNT];
         
     KeyMapping keyMappings[GAME_INPUT_COUNT];
 
     int tileMapCount = 0;
     Map * tileMaps;
 
-    Array<Entity, 5000> entities;
-    Array<Entity, 50> movedEntities;
+    Array<Entity, MAX_ENTITIES> entities;
 
     int playerEntityIndex;
     Array<int, 3> slimeEntityIndices;
@@ -131,13 +135,12 @@ struct PushActionResult
     Entity * blockedEntity;
 };
 
-
 // ----------------------------------------------------
 // NOTE: Game Globals
 // ----------------------------------------------------
 static float timeSinceLastPress = 0.0f;
 static const float pressFreq = 0.2f;
-static std::vector<std::vector<Entity>> undoStack;
+static std::vector<UndoState> undoStack;
 
 static GameState * gameState;
 static Memory * gameMemory;

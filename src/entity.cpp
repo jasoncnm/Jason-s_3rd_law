@@ -6,12 +6,14 @@
    $Notice: $
    ======================================================================== */
 #include "entity.h"
+#include "game_util.h"
 
 inline Entity * GetEntity(int i)
 {
-    return &gameState->entities[i];
+    Entity * entity = &gameState->entities[i];
+    if (!entity->active) entity = nullptr;
+    return entity;
 }
-
 
 inline AddEntityResult
 AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE, int tileSize = 32)
@@ -140,20 +142,23 @@ void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
     SM_ASSERT(entity->active, "entity does not exist");
     SM_ASSERT(entity->movable, "entity cannot be moved");
 
-
     // entity->positionSetMarker = true;
     
     entity->tilePos = tilePos;
     entity->pivot = GetTilePivot(tilePos, entity->tileSize);
 
-    if (touchingEntity && (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE))
+    if (touchingEntity && touchingEntity && (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE))
     {
         IVec2 dir = (touchingEntity->tilePos - entity->tilePos);
+
         SM_ASSERT(dir.SqrMagnitude() == 1, "Two entity are not near by");
 
         SetAttach(entity, touchingEntity, dir);
     }
-    
+    else
+    {
+        entity->attach = false;
+    }
 
 #if 0
     if (entity->attach)
@@ -173,8 +178,6 @@ void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
     entity->positionSetMarker = false;
 
 #endif
-
-    
 }
 
 inline void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir)
@@ -241,7 +244,7 @@ inline bool AttachSlime(Entity * slime, IVec2 dir)
     {
         attachEntity = GetEntity(j);
 
-        if (attachEntity->active && attachEntity->tilePos == pos)
+        if (attachEntity && attachEntity->tilePos == pos)
         {
             switch (attachEntity->type)
             {
@@ -284,7 +287,7 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
     for (int i = 0; i < gameState->entities.count; i++)
     {
         entity = GetEntity(i);
-        if (entity->active && entity->tilePos == tilePos)
+        if (entity && entity->tilePos == tilePos)
         {
             switch(entity->type)
             {
@@ -307,11 +310,16 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
                     }
                     break;
                 }
+                case ENTITY_TYPE_PIT:
+                {
+                    has = false;
+                    goto EndLoop;     
+                }
             }
             
             if (has) break;
         }
-    }
+    } EndLoop:;
 
     result.has = has;
     result.entity = entity;
@@ -324,7 +332,7 @@ inline Entity * FindEntityByLocationAndLayer(IVec2 pos, EntityLayer layer)
     for (int i = 0; i < entityIndeices.count; i++)
     {
         Entity * entity = GetEntity(entityIndeices[i]);
-        if (entity->active && entity->tilePos == pos)
+        if (entity && entity->tilePos == pos)
         {
             return entity;
             break;
@@ -339,11 +347,188 @@ inline Entity * FindSlime(IVec2 pos)
     for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
     {
         Entity * slime = GetEntity(gameState->slimeEntityIndices[i]);
-        if (slime->active && slime->tilePos == pos)
+        if (slime && slime->tilePos == pos)
         {
             return slime;
         }
     }
 
     return nullptr;
+}
+
+inline void UpdateSlimes()
+{
+    for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
+    {
+        Entity * slime = GetEntity(gameState->slimeEntityIndices[i]);
+        if (slime && slime->attach)
+        {
+            Entity * attach = GetEntity(slime->attachedEntityIndex);
+            if (attach)
+            {
+                IVec2 oldPos = slime->tilePos;
+                IVec2 newPos = attach->tilePos - slime->attachDir;
+                if (oldPos != newPos)
+                {
+                    IVec2 dir = newPos - oldPos;
+                    dir.x = dir.x == 0 ? 0 : Sign(dir.x);
+                    dir.y = dir.y == 0 ? 0 : Sign(dir.y);
+                
+                    SM_ASSERT(dir.SqrMagnitude() == 1, "Invalid bounce direction");
+                    MoveTowardsUntilBlocked(slime, newPos, dir);
+                }
+            }
+        }
+    }
+
+    Entity * player = GetEntity(gameState->playerEntityIndex);
+    for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
+    {
+        Entity * slime = GetEntity(gameState->slimeEntityIndices[i]);
+        if (slime && slime != player && slime->mass > player->mass)
+        {
+            slime->type = ENTITY_TYPE_PLAYER;
+            slime->color = WHITE;
+
+            player->type = ENTITY_TYPE_CLONE;
+            player->color = GRAY;
+
+            gameState->playerEntityIndex = slime->entityIndex;
+        }
+    }
+    
+}
+
+inline void MoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir)
+{
+
+    IVec2 start = entity->tilePos + dir;
+    bool isSlime = (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE);
+
+    SM_ASSERT(isSlime, "For now entity can only be slime");
+
+    for (IVec2 pos = start; pos.IsBetween(start, dest); pos += dir)
+    {
+        for (int i = 0; i < gameState->entities.count; i++)
+        {
+            Entity * target = GetEntity(i);
+            if (target && target->tilePos == pos)
+            {
+                switch(target->type)
+                {
+                    case ENTITY_TYPE_PIT:
+                    {
+                        SetEntityPosition(entity, nullptr, pos - dir);
+                        return;
+                    }
+                    case ENTITY_TYPE_BLOCK:
+                    case ENTITY_TYPE_WALL:
+                    {
+                        SetEntityPosition(entity, target, pos - dir);
+                        return;
+                    }
+                    case ENTITY_TYPE_GLASS:
+                    {
+                        if (!target->broken)
+                        {
+                            SetEntityPosition(entity, target, pos - dir);
+                            return;
+                        }
+                        break;
+                    }
+                    case ENTITY_TYPE_PLAYER:
+                    {
+                        if (isSlime)
+                        {
+                            entity = MergeSlimes(target, entity);
+                            goto EndSearch;
+                        }
+                        
+                        break;
+                    }
+                    case ENTITY_TYPE_CLONE:
+                    {
+                        if (isSlime)
+                        {
+                            entity = MergeSlimes(entity, target);
+                            goto EndSearch;
+                        }
+
+                        break;
+                    }
+                    case ENTITY_TYPE_ELECTRIC_DOOR:
+                    {
+                        switch(target->cableType)
+                        {
+                            // TODO
+                            case CABLE_TYPE_DOOR:
+                            {
+                                if (SameSide(target, pos, dir))
+                                {
+                                    SetEntityPosition(entity, target, pos - dir);
+                                    return;
+                                }
+                                break;
+                            }
+                            case CABLE_TYPE_CONNECTION_POINT:
+                            {
+                                if (isSlime && target->conductive)
+                                {
+                                    SetEntityPosition(entity, nullptr, pos);
+                                    SetActionState(entity, FREEZE_STATE);
+                                }
+                                break;
+                            }
+                            
+                        }
+                        break;
+                    }
+                }
+            }
+        } EndSearch:;
+    }
+
+    SetEntityPosition(entity, nullptr, dest);
+    
+}
+
+inline Entity * FindEntity(IVec2 pos)
+{
+    Entity * result = nullptr;
+    for (int i = 0; i < gameState->entities.count; i++)
+    {
+        Entity * entity = GetEntity(i);
+        if (entity && entity->tilePos == pos)
+        {
+            result = entity;
+            break;
+        }
+    }
+    return result;
+}
+
+inline Entity * CreateSlimeClone(IVec2 tilePos)
+{
+    Entity * freeEntity = nullptr;
+    for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
+    {
+        Entity * entity = &gameState->entities[gameState->slimeEntityIndices[i]];
+        if (!entity->active)
+        {
+            freeEntity = entity;
+        }
+    }
+
+    SM_ASSERT(freeEntity, "slimes slots are full");
+
+    freeEntity->active = true;
+    freeEntity->tilePos = tilePos;
+    freeEntity->type = ENTITY_TYPE_CLONE;
+    freeEntity->mass = 1;
+    freeEntity->tileSize = ( MAP_TILE_SIZE / 3.0f);
+    freeEntity->color = GRAY;
+    freeEntity->attach = false;    
+
+    return freeEntity;
+    
 }

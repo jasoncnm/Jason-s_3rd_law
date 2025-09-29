@@ -34,9 +34,11 @@ enum SpriteID
 
     SPRITE_WALL,
     SPRITE_BLOCK,
+    SPRITE_BLOCK_2,
     SPRITE_GLASS,
     SPRITE_GLASS_BROKEN,
     SPRITE_SLIME_1,
+    SPRITE_PIT,
 
     SPRITE_CABLE_CONNECTION,
 
@@ -131,6 +133,12 @@ Sprite GetSprite(SpriteID spriteID)
             sprite.spriteSize = { 1, 1 };
             break;
         }
+        case SPRITE_PIT:
+        {
+            sprite.altasOffset = { 128, 96 };
+            sprite.spriteSize = { 32, 32 };
+            break;
+        }
         case SPRITE_ARROW_LEFT:
         {
             sprite.altasOffset = { 32, 0 };
@@ -196,6 +204,13 @@ Sprite GetSprite(SpriteID spriteID)
         case SPRITE_BLOCK:
         {
             sprite.altasOffset = { 64, 96 };
+            sprite.spriteSize  = { 32, 32 };
+
+            break;
+        }
+        case SPRITE_BLOCK_2:
+        {
+            sprite.altasOffset = { 32, 32 };
             sprite.spriteSize  = { 32, 32 };
 
             break;

@@ -49,6 +49,7 @@ int main(void)
     // NOTE: Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
+        transientStorage.used = 0;
         // NOTE: Update
         GameUpdateAndRender(gameState, &gameMemory);        
     }

@@ -27,7 +27,9 @@ enum TileID
     PLAYER_1 = 32,
     BLOCK    = 33,
     WALL     = 34,
+    BLOCK_2  = 12,
     GLASS    = 46,
+    PIT      = 35,
     
     DOOR_LEFT  = 82,
     DOOR_RIGHT = 83,
@@ -46,8 +48,8 @@ enum TileID
     SOURCE_DOWN  = 38,
     SOURCE_UP    = 48,
     
-    SOURCE_H          = 29,
-    SOURCE_V          = 30,
+    SOURCE_H          = 30,
+    SOURCE_V          = 29,
     SOURCE_UP_RIGHT   = 19,
     SOURCE_UP_LEFT     = 20,
     SOURCE_DOWN_RIGHT = 9,

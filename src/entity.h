@@ -29,6 +29,7 @@ enum EntityType
     ENTITY_TYPE_BLOCK,
     ENTITY_TYPE_GLASS,
     ENTITY_TYPE_ELECTRIC_DOOR,
+    ENTITY_TYPE_PIT,
 
     ENTITY_TYPE_COUNT,
 };
@@ -81,6 +82,8 @@ struct Entity
     bool open = false;
     bool conductive = false;
     bool left = false, right = false, up = false, down = false;
+
+    bool hover = false;
     
     bool active = false;
 
@@ -102,7 +105,6 @@ struct FindAttachableResult
 
 // NOTE: Get a pointer of the entity by entities array index 
 inline Entity * GetEntity(int i);
-
 
 inline AddEntityResult
 AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color, int tileSize);
@@ -135,9 +137,17 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir);
 
 inline Entity * FindEntityByLocationAndLayer(IVec2 pos, EntityLayer layer);
 
+inline Entity * FindEntity(IVec2 pos);
+
 inline Entity * FindSlime(IVec2 pos);
 
+inline void UpdateSlimes();
+
+inline void MoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir);
+
 void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos);
+
+inline bool HasPit(IVec2 tilePos);
 
 #define ENTITY_H
 #endif

@@ -30,6 +30,30 @@ inline bool SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir)
     return result;
 }
 
+inline void UnfreezeSlimes(Entity * door)
+{
+    SM_ASSERT(door, "door is inactive");
+    SM_ASSERT(door->cableType == CABLE_TYPE_DOOR, "entity is not a door");
+    SM_ASSERT(gameState->electricDoorSystem, "electric door does not exist");
+
+    auto & connectionPointIndices = gameState->electricDoorSystem->connectionPointIndices;
+    auto & entityIndices = gameState->electricDoorSystem->entityIndices;
+
+    for (int i = 0; i < connectionPointIndices.count; i++)
+    {
+        Entity * connect = GetEntity(entityIndices[connectionPointIndices[i]]);
+        if (connect && connect->sourceIndex == door->sourceIndex)
+        {
+            Entity * slime = FindSlime(connect->tilePos);
+
+            if (slime)
+            {
+                slime->actionState = MOVE_STATE;
+            }
+        }
+    }
+        
+}
 
 inline void PowerOnCable(Entity * cable, bool & end)
 {
@@ -37,13 +61,9 @@ inline void PowerOnCable(Entity * cable, bool & end)
     {
         if (!cable->open)
         {
-            // TODO: Need to reconsider the approache to un freeze slime when there are duplicates
-            Entity * player = GetEntity(gameState->playerEntityIndex);
-            if (player->actionState == FREEZE_STATE)
-            {
-                player->actionState = MOVE_STATE;
-            }
             cable->open = true;
+
+            UnfreezeSlimes(cable);
 
             IVec2 offset;
             IVec2 bounceDir;
@@ -104,16 +124,22 @@ inline void PowerOnCable(Entity * cable, bool & end)
             }
             else
             {
-                Entity * entity = FindEntityByLocationAndLayer(cable->tilePos + bounceDir, LAYER_PLAYER);
+                entity = FindEntityByLocationAndLayer(cable->tilePos + bounceDir, LAYER_PLAYER);
                 if (entity)
                 {
                     BounceEntity(entity, bounceDir);
                 }
-
             }
 
-            cable->tilePos = cable->tilePos + offset;
-            
+            if (entity && (entity->tilePos == cable->tilePos + bounceDir))
+            {
+                cable->open = false;
+                cable->sprite = GetSprite(cable->spriteID);
+            }
+            else
+            {
+                cable->tilePos = cable->tilePos + offset;
+            }
         }
         end = true;
     }
@@ -145,6 +171,7 @@ void ElectricDoorSystem::OnSourcePowerOn(Array<bool, MAX_CABLE> & visited, int c
     visited[currentIndex] = true;
 
     Entity * cable = GetEntity(entityIndices[currentIndex]);
+    SM_ASSERT(cable, "entity is not active");
     
     PowerOnCable(cable, end);
     
@@ -178,6 +205,7 @@ inline bool ElectricDoorSystem::DoorBlocked(IVec2 tilePos, IVec2 reachDir)
     for (int i = 0; i < doorIndices.count; i++)
     {
         Entity * door = GetEntity(entityIndices[doorIndices[i]]);
+        SM_ASSERT(door, "entity is not active");
 
         if (SameSide(door, tilePos, reachDir)) return true;
             
@@ -192,6 +220,7 @@ inline bool ElectricDoorSystem::CheckDoor(IVec2 tilePos)
     for (int i = 0; i < doorIndices.count; i++)
     {
         Entity * door = GetEntity(entityIndices[doorIndices[i]]);
+        SM_ASSERT(door, "entity is not active");
         if (door->tilePos == tilePos)
         {
             result = true;
@@ -216,6 +245,8 @@ void ElectricDoorSystem::Search(Array<bool, MAX_CABLE> & visited, int currentInd
         if (!visited[i])
         {
             Entity * entity = GetEntity(entityIndices[i]);
+            SM_ASSERT(entity, "entity is not active");
+
             IVec2 offset = entity->tilePos - current->tilePos;
 
             if (offset.SqrMagnitude() > 1) continue;
@@ -279,6 +310,8 @@ inline void ElectricDoorSystem::Update()
     for (int i = 0; i < connectionPointIndices.count; i++)
     {
         Entity * connection = GetEntity(entityIndices[connectionPointIndices[i]]);
+        SM_ASSERT(connection, "Entity is not active");
+        
         if (!connection->conductive)
         {
             Entity * entity = FindEntityByLocationAndLayer(connection->tilePos, LAYER_PLAYER);
@@ -301,16 +334,22 @@ inline void ElectricDoorSystem::Update()
                 for (int i = 0; i < 4; i++)
                 {
                     int id = indexes[i];
-                    if (id >= 0 && GetEntity(entityIndices[id])->conductive)
+                    if (id >= 0)
                     {
-                        if (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE) entity->actionState = FREEZE_STATE;
-                        connection->conductive = true;
+                        
+                        Entity * cable = GetEntity(entityIndices[id]);
+                        SM_ASSERT(cable, "Entity is not active");
+                        if (cable->conductive)
+                        {
+                            if (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE) entity->actionState = FREEZE_STATE;
+                            connection->conductive = true;
 
-                        Array<bool, MAX_CABLE> visited;
-                        for (int i = 0; i < entityIndices.count; i++) visited.Add(false);
-                        OnSourcePowerOn(visited, connection->sourceIndex);
+                            Array<bool, MAX_CABLE> visited;
+                            for (int i = 0; i < entityIndices.count; i++) visited.Add(false);
+                            OnSourcePowerOn(visited, connection->sourceIndex);
 
-                        return;
+                            return;
+                        } 
                     } 
                 }
 
@@ -322,6 +361,7 @@ inline void ElectricDoorSystem::Update()
     {
         int sourceIndex = sourceIndices[i];
         Entity * source = GetEntity(entityIndices[sourceIndex]);
+        SM_ASSERT(source, "Entity is not active");
 
         if (source->conductive) continue;
 
@@ -329,7 +369,8 @@ inline void ElectricDoorSystem::Update()
         for (int blockIndex = 0; blockIndex < table.count; blockIndex++)
         {
             Entity * block = GetEntity(table[blockIndex]);
-            if (block->type == ENTITY_TYPE_BLOCK && source->tilePos == block->tilePos)
+            
+            if (block && block->type == ENTITY_TYPE_BLOCK && source->tilePos == block->tilePos)
             {
                 
                 Array<bool, MAX_CABLE> visited;

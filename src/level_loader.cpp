@@ -15,11 +15,26 @@
 inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
 {
     AddEntityResult entityResult;
-    if (id == WALL)
+    if (id == PIT)
+    {
+        entityResult = AddEntity(ENTITY_TYPE_PIT, tilePos, SPRITE_PIT);
+        SM_TRACE("Pit generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+        
+    }
+    else if (id == WALL)
     {
         entityResult = AddEntity(ENTITY_TYPE_WALL, tilePos, SPRITE_WALL);
         
         SM_TRACE("Wall generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+    }
+    else if (id == BLOCK_2)
+    {
+        entityResult = AddEntity(ENTITY_TYPE_BLOCK, tilePos, SPRITE_BLOCK_2);
+        entityResult.entity->mass = 2;
+        entityResult.entity->movable = true;
+
+        SM_TRACE("BLOCK 2 generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+        
     }
     else if (id == BLOCK)
     {
@@ -39,7 +54,8 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddEntity(ENTITY_TYPE_CLONE, tilePos, SPRITE_SLIME_1);
         entityResult.entity->mass = 1;
-        entityResult.entity->tileSize = (float)MAP_TILE_SIZE / entityResult.entity->maxMass; 
+        entityResult.entity->tileSize = (float)MAP_TILE_SIZE / entityResult.entity->maxMass;
+        entityResult.entity->color = GRAY;
 
         entityResult.entity->movable = true;
         gameState->slimeEntityIndices.Add(entityResult.entityIndex);
@@ -163,7 +179,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     }
     else
     {
-        SM_ASSERT(false, "Unable to register ID");
+        SM_ASSERT(false, "Unable to register ID (%d)", id);
     }
     return entityResult;
 }
@@ -320,6 +336,8 @@ void LoadLevelToGameState(GameState & state, State loadState)
         {
             int index = gameState->slimeEntityIndices[i];
             Entity * entity = GetEntity(index);
+            SM_ASSERT(entity, "Entity is just created but not activate");
+            
             IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
 
             for (int j = 0; j < 4; j++)
