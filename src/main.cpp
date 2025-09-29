@@ -31,6 +31,7 @@ int main(void)
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jason's 3rd law");
     MaximizeWindow();
+    SetExitKey(KEY_NULL);
 
     InitTexture();
     
