@@ -149,5 +149,8 @@ void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos);
 
 inline bool HasPit(IVec2 tilePos);
 
+inline bool IsSlime(Entity * entity);
+
+
 #define ENTITY_H
 #endif

@@ -275,6 +275,7 @@ PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                         result.blockedEntity = target;
                         return result;
                     }
+                    
                     break;
                 }
                 case ENTITY_TYPE_PIT:
@@ -520,6 +521,30 @@ bool MoveAction(IVec2 actionDir)
                 return false;
             }
         }
+
+        // TODO: Check connection point at actiontile
+        ElectricDoorSystem * eds = gameState->electricDoorSystem;
+        for (int i = 0; i < eds->connectionPointIndices.count; i++)
+        {
+            Entity * connection = GetEntity(eds->entityIndices[eds->connectionPointIndices[i]]);
+            SM_ASSERT(connection, "Entity is not active");
+        
+            if (connection->tilePos == actionTilePos && CanFreezeSlime(connection))
+            {
+
+                SetActionState(mother, FREEZE_STATE);
+                SetEntityPosition(mother, nullptr, actionTilePos);
+                
+                connection->conductive = true;
+
+                Array<bool, MAX_CABLE> visited;
+                for (int i = 0; i < eds->entityIndices.count; i++) visited.Add(false);
+                eds->OnSourcePowerOn(visited, connection->sourceIndex);
+                break;
+            }
+        }
+
+        if (mother->actionState == FREEZE_STATE) return true;
                         
         // NOTE: no obsticale, move player
         {

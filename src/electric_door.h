@@ -50,5 +50,7 @@ inline void PowerOnCable(Entity * cable, bool & end);
 
 inline void UnfreezeSlimes(Entity * door);
 
+inline bool CanFreezeSlime(Entity * connect);
+
 #define ELECTRIC_DOOR_H
 #endif

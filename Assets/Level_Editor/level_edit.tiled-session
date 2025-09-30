@@ -24,11 +24,11 @@
             "scaleInDock": 3
         },
         "TileMap/Room_1.tmj": {
-            "scale": 1,
+            "scale": 2,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 176.5,
-                "y": 176
+                "x": 1623.25,
+                "y": 271.25
             }
         },
         "TileMap/Room_1.tmx": {
@@ -236,11 +236,11 @@
             }
         },
         "TileMap/Room_8.tmj": {
-            "scale": 1,
+            "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 208.5,
-                "y": 175
+                "x": -789,
+                "y": -417
             }
         },
         "TileMap/Room_9.tmj": {

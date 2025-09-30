@@ -15,6 +15,11 @@ inline Entity * GetEntity(int i)
     return entity;
 }
 
+inline bool IsSlime(Entity * entity)
+{
+    return entity->type == ENTITY_TYPE_CLONE || entity->type == ENTITY_TYPE_PLAYER;
+}
+
 inline AddEntityResult
 AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE, int tileSize = 32)
 {

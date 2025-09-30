@@ -8,6 +8,31 @@
 
 #include "electric_door.h"
 
+inline bool CanFreezeSlime(Entity * connection)
+{
+    bool result = false;
+
+    if (connection->conductive) return true;
+    
+    if (connection->cableType == CABLE_TYPE_CONNECTION_POINT)
+    {
+        int indexes[4] = { connection->leftIndex, connection->rightIndex, connection->upIndex, connection->downIndex };
+        for (int i = 0; i < 4; i++)
+        {
+            int id = indexes[i];
+            if (id >= 0)
+            {
+                Entity * cable = GetEntity(gameState->electricDoorSystem->entityIndices[id]);
+                SM_ASSERT(cable, "Entity is not active");
+                result |= cable->conductive;
+            }
+        }
+    }
+
+    return result;
+}
+    
+
 inline bool SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir)
 {
     SM_ASSERT(door->type == ENTITY_TYPE_ELECTRIC_DOOR && door->cableType == CABLE_TYPE_DOOR,
@@ -330,27 +355,17 @@ inline void ElectricDoorSystem::Update()
             }
             if (has)
             {
-                int indexes[4] = { connection->leftIndex, connection->rightIndex, connection->upIndex, connection->downIndex };
-                for (int i = 0; i < 4; i++)
+                if (CanFreezeSlime(connection))
                 {
-                    int id = indexes[i];
-                    if (id >= 0)
-                    {
-                        
-                        Entity * cable = GetEntity(entityIndices[id]);
-                        SM_ASSERT(cable, "Entity is not active");
-                        if (cable->conductive)
-                        {
-                            if (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE) entity->actionState = FREEZE_STATE;
-                            connection->conductive = true;
+                    if (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE) entity->actionState = FREEZE_STATE;
+                    connection->conductive = true;
 
-                            Array<bool, MAX_CABLE> visited;
-                            for (int i = 0; i < entityIndices.count; i++) visited.Add(false);
-                            OnSourcePowerOn(visited, connection->sourceIndex);
+                    Array<bool, MAX_CABLE> visited;
+                    for (int i = 0; i < entityIndices.count; i++) visited.Add(false);
+                    OnSourcePowerOn(visited, connection->sourceIndex);
 
-                            return;
-                        } 
-                    } 
+                    return;
+                    
                 }
 
             }
