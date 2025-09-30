@@ -12,7 +12,7 @@ inline bool CanFreezeSlime(Entity * connection)
 {
     bool result = false;
 
-    if (connection->conductive) return true;
+    if (connection->conductive) return false;
     
     if (connection->cableType == CABLE_TYPE_CONNECTION_POINT)
     {
@@ -63,7 +63,7 @@ inline void UnfreezeSlimes(Entity * door)
 
     auto & connectionPointIndices = gameState->electricDoorSystem->connectionPointIndices;
     auto & entityIndices = gameState->electricDoorSystem->entityIndices;
-
+#if 0
     for (int i = 0; i < connectionPointIndices.count; i++)
     {
         Entity * connect = GetEntity(entityIndices[connectionPointIndices[i]]);
@@ -77,7 +77,18 @@ inline void UnfreezeSlimes(Entity * door)
             }
         }
     }
-        
+#else
+
+    for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
+    {
+        Entity * slime = GetEntity(gameState->slimeEntityIndices[i]);
+        if (slime)
+        {
+            SetActionState(slime, MOVE_STATE);
+        }
+    }
+
+#endif
 }
 
 inline void PowerOnCable(Entity * cable, bool & end)
@@ -357,15 +368,13 @@ inline void ElectricDoorSystem::Update()
             {
                 if (CanFreezeSlime(connection))
                 {
-                    if (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE) entity->actionState = FREEZE_STATE;
+                    if (IsSlime(entity)) entity->actionState = FREEZE_STATE;
                     connection->conductive = true;
-
                     Array<bool, MAX_CABLE> visited;
                     for (int i = 0; i < entityIndices.count; i++) visited.Add(false);
                     OnSourcePowerOn(visited, connection->sourceIndex);
 
                     return;
-                    
                 }
 
             }

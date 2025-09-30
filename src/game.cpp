@@ -531,21 +531,22 @@ bool MoveAction(IVec2 actionDir)
         
             if (connection->tilePos == actionTilePos && CanFreezeSlime(connection))
             {
-
                 SetActionState(mother, FREEZE_STATE);
-                SetEntityPosition(mother, nullptr, actionTilePos);
-                
                 connection->conductive = true;
-
                 Array<bool, MAX_CABLE> visited;
                 for (int i = 0; i < eds->entityIndices.count; i++) visited.Add(false);
                 eds->OnSourcePowerOn(visited, connection->sourceIndex);
+                eds->Update();
+
                 break;
             }
         }
 
-        if (mother->actionState == FREEZE_STATE) return true;
-                        
+        if (mother->actionState == FREEZE_STATE)
+        {
+            SetEntityPosition(mother, nullptr, actionTilePos);
+            return true;
+        }            
         // NOTE: no obsticale, move player
         {
             IVec2 standingPlatformPos = actionTilePos + mother->attachDir;

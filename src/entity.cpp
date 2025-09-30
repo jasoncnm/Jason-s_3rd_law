@@ -493,8 +493,13 @@ inline void MoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir)
         } EndSearch:;
     }
 
-    SetEntityPosition(entity, nullptr, dest);
-    
+    Entity * attach = nullptr;
+    if (entity->attach)
+    {
+        attach = GetEntity(entity->attachedEntityIndex);
+    }
+    SetEntityPosition(entity, attach, dest);
+
 }
 
 inline Entity * FindEntity(IVec2 pos)
