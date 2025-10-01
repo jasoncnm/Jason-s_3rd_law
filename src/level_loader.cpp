@@ -349,7 +349,7 @@ void LoadLevelToGameState(GameState & state, State loadState)
     }
     
     // NOTE: SetUp Electric Door
-    if (gameState->electricDoorSystem) gameState->electricDoorSystem->SetUp();
+    if (gameState->electricDoorSystem) SetUpElectricDoor();
 
 }
 

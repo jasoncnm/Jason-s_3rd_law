@@ -65,16 +65,30 @@ Vector2 TilePositionToPixelPosition(Vector2 tilePos)
 }
 
 
-Vector2 GetTilePivot(int tileX, int tileY, float tileSize)
+Vector2 GetTilePivot(IVec2 tilePos, float tileSize, IVec2 attachDir = { 0, 0 })
 {
-    Vector2 playerPos = TilePositionToPixelPosition(tileX, tileY);            
+    Vector2 playerPos = TilePositionToPixelPosition(tilePos.x, tilePos.y);
+    Vector2 topLeft = Vector2Subtract(playerPos, Vector2Scale(Vector2One(), tileSize * 0.5f));
 
-    return Vector2Subtract(playerPos, Vector2Scale(Vector2One(), tileSize * 0.5f));
+    float dist = (MAP_TILE_SIZE - tileSize) * 0.5f;
+    Vector2 offset = Vector2Scale({ (float)attachDir.x, (float)attachDir.y }, dist);
+    topLeft = Vector2Add(topLeft, offset);                
+
+    return topLeft;
 }
 
-Vector2 GetTilePivot(IVec2 tilePos, float tileSize)
+
+
+Vector2 GetTilePivot(Entity * entity)
 {
-    return GetTilePivot(tilePos.x, tilePos.y, tileSize);
+    Vector2 topLeft = GetTilePivot(entity->tilePos, entity->tileSize);
+    
+    if (IsSlime(entity) && entity->attach)
+    {
+        topLeft = GetTilePivot(entity->tilePos, entity->tileSize, entity->attachDir);
+    }
+
+    return topLeft;
 }
 
 #define GAME_UTIL_H

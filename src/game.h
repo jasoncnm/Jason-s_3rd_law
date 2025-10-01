@@ -146,7 +146,6 @@ static GameState * gameState;
 static Memory * gameMemory;
 
 static bool animationPlaying = false;
-
 static bool repeat = false;
 
 //  ========================================================================

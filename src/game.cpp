@@ -8,10 +8,12 @@
 
 #include "game.h"
 #include "render_interface.h"
+#include "move_animation.h"
+#include "game_util.h"
+
 #include "entity.cpp"
 #include "electric_door.cpp"
 #include "level_loader.cpp"
-#include "game_util.h"
 
 //  ========================================================================
 //              NOTE: Game Constants
@@ -113,6 +115,19 @@ inline bool CheckBounce(IVec2 tilePos, IVec2 pushDir)
         }
     }
     return true;
+}
+
+MoveAnimation GetMoveAnimation(Vector2 moveStart, Vector2 moveEnd)
+{
+    MoveAnimation ani;
+    ani.playing = true;
+    ani.move_t = 0;
+    ani.move_target_t = 1;
+    ani.move_dt = 6.0f;
+    ani.moveStart = moveStart;
+    ani.moveEnd = moveEnd;
+
+    return ani;
 }
 
 void BounceEntity(Entity * entity, IVec2 dir)
@@ -492,15 +507,21 @@ bool MoveAction(IVec2 actionDir)
                 if (result.blocked)
                 {
                     // IMPORTANT: mother entity changed
+                    Vector2 startPos = GetTilePivot(mother);
                     SetAttach(mother, pushResult.blockedEntity, actionDir);
+                    Vector2 endPos = GetTilePivot(mother);
+                    mother->moveAniQueue.Add(GetMoveAnimation(startPos, endPos));
+                    
                     return true;
                 }
-                // BounceEntity(mother, mother->attachDir);
                 return true;
             }
 
             // IMPORTANT: mother entity changed
+            Vector2 startPos = GetTilePivot(mother);
             SetAttach(mother, pushResult.blockedEntity, actionDir);
+            Vector2 endPos = GetTilePivot(mother);
+            mother->moveAniQueue.Add(GetMoveAnimation(startPos, endPos));
             return true;
         }
 
@@ -523,10 +544,9 @@ bool MoveAction(IVec2 actionDir)
         }
 
         // TODO: Check connection point at actiontile
-        ElectricDoorSystem * eds = gameState->electricDoorSystem;
-        for (int i = 0; i < eds->connectionPointIndices.count; i++)
+        for (int i = 0; i < CP_Indices.count; i++)
         {
-            Entity * connection = GetEntity(eds->entityIndices[eds->connectionPointIndices[i]]);
+            Entity * connection = GetEntity(Cable_Indices[CP_Indices[i]]);
             SM_ASSERT(connection, "Entity is not active");
         
             if (connection->tilePos == actionTilePos && CanFreezeSlime(connection))
@@ -534,9 +554,9 @@ bool MoveAction(IVec2 actionDir)
                 SetActionState(mother, FREEZE_STATE);
                 connection->conductive = true;
                 Array<bool, MAX_CABLE> visited;
-                for (int i = 0; i < eds->entityIndices.count; i++) visited.Add(false);
-                eds->OnSourcePowerOn(visited, connection->sourceIndex);
-                eds->Update();
+                for (int i = 0; i < Cable_Indices.count; i++) visited.Add(false);
+                OnSourcePowerOn(visited, connection->sourceIndex);
+                UpdateElectricDoor();
 
                 break;
             }
@@ -562,7 +582,12 @@ bool MoveAction(IVec2 actionDir)
                 }
                 
                 // IMPORTANT: mother entity changed
+                Vector2 moveStart = GetTilePivot(mother);
                 SetEntityPosition(mother, findResult.entity, actionTilePos);
+                Vector2 moveEnd = GetTilePivot(mother);
+                mother->moveAniQueue.Add(GetMoveAnimation(moveStart, moveEnd));
+
+                
             }
             else if ((!findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
                      Abs(mother->attachDir) != Abs(actionDir))
@@ -580,7 +605,16 @@ bool MoveAction(IVec2 actionDir)
                 }
                 
                 // IMPORTANT: mother entity changed
+                Vector2 moveStart = GetTilePivot(mother);
+                Vector2 movemiddle =
+                    Vector2Add(moveStart, Vector2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f * (MAP_TILE_SIZE + mother->tileSize)));
+                
                 SetEntityPosition(mother, attachedEntity, newTile);
+                Vector2 moveEnd = GetTilePivot(mother);
+
+                mother->moveAniQueue.Add(GetMoveAnimation(moveStart, movemiddle));
+                
+                mother->moveAniQueue.Add(GetMoveAnimation(movemiddle, moveEnd));
             }
             else 
             {
@@ -638,17 +672,26 @@ inline void DrawSpriteLayer(EntityLayer layer)
 
         if (entity)
         {
-            Vector2 topleft = GetTilePivot(entity->tilePos, entity->tileSize);
 
-            if ((entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE) && entity->attach)
+            for (int aniIndex = 0; aniIndex < entity->moveAniQueue.count; aniIndex++)
             {
-                float dist = (MAP_TILE_SIZE - entity->tileSize) * 0.5f;
-                Vector2 offset = Vector2Scale({ (float)entity->attachDir.x, (float)entity->attachDir.y }, dist);
-                topleft = Vector2Add(topleft, offset);                
+                MoveAnimation & ani = entity->moveAniQueue[aniIndex];
+                if (ani.playing)
+                {
+                    Vector2 pos = ani.GetPosition();
+                    DrawSprite(texture, entity->sprite, pos, entity->tileSize, entity->color);
+                    goto NextLoop;
+                }
             }
-            
-            DrawSprite(texture, entity->sprite, topleft, entity->tileSize, entity->color);
-        }            
+
+            entity->moveAniQueue.Clear();
+            {
+                Vector2 topleft = GetTilePivot(entity);
+                DrawSprite(texture, entity->sprite, topleft, entity->tileSize, entity->color);
+            }
+        }
+
+NextLoop:;
     }
 }
 
@@ -725,7 +768,6 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             gameState->keyMappings[DOWN_KEY].keys.Add(KEY_S);
             gameState->keyMappings[DOWN_KEY].keys.Add(KEY_DOWN);
             gameState->keyMappings[SPACE_KEY].keys.Add(KEY_SPACE);
-            
         }
 
         gameState->tileMaps = (Map *)BumpAllocArray(gameMemory->persistentStorage, 100, sizeof(Map));
@@ -949,7 +991,7 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
 
         if (gameState->electricDoorSystem)
         {
-            gameState->electricDoorSystem->Update();
+            UpdateElectricDoor();
         }
         
         if (stateChanged)
@@ -1080,6 +1122,24 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         }
     }
 
+    for (int i = 0; i < gameState->entities.count; i++)
+    {
+        Entity * entity = GetEntity(i);
+        
+        if (entity)
+        {
+            for (int j = 0; j < entity->moveAniQueue.count; j++)
+            {
+                MoveAnimation & ani = entity->moveAniQueue[j];
+                if (ani.playing)
+                {
+                    ani.Update();
+                    break;
+                }
+            }
+        }
+    }
+            
     // NOTE: Render Step
     {
     

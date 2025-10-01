@@ -22,7 +22,7 @@ inline bool CanFreezeSlime(Entity * connection)
             int id = indexes[i];
             if (id >= 0)
             {
-                Entity * cable = GetEntity(gameState->electricDoorSystem->entityIndices[id]);
+                Entity * cable = GetEntity(Cable_Indices[id]);
                 SM_ASSERT(cable, "Entity is not active");
                 result |= cable->conductive;
             }
@@ -61,12 +61,10 @@ inline void UnfreezeSlimes(Entity * door)
     SM_ASSERT(door->cableType == CABLE_TYPE_DOOR, "entity is not a door");
     SM_ASSERT(gameState->electricDoorSystem, "electric door does not exist");
 
-    auto & connectionPointIndices = gameState->electricDoorSystem->connectionPointIndices;
-    auto & entityIndices = gameState->electricDoorSystem->entityIndices;
 #if 0
-    for (int i = 0; i < connectionPointIndices.count; i++)
+    for (int i = 0; i < CP_Indices.count; i++)
     {
-        Entity * connect = GetEntity(entityIndices[connectionPointIndices[i]]);
+        Entity * connect = GetEntity(Cable_Indices[CP_Indices[i]]);
         if (connect && connect->sourceIndex == door->sourceIndex)
         {
             Entity * slime = FindSlime(connect->tilePos);
@@ -200,13 +198,13 @@ inline void PowerOnCable(Entity * cable, bool & end)
 }
 
 
-void ElectricDoorSystem::OnSourcePowerOn(Array<bool, MAX_CABLE> & visited, int currentIndex)
+void OnSourcePowerOn(Array<bool, MAX_CABLE> & visited, int currentIndex)
 {
     bool end = false;
     
     visited[currentIndex] = true;
 
-    Entity * cable = GetEntity(entityIndices[currentIndex]);
+    Entity * cable = GetEntity(Cable_Indices[currentIndex]);
     SM_ASSERT(cable, "entity is not active");
     
     PowerOnCable(cable, end);
@@ -233,14 +231,14 @@ void ElectricDoorSystem::OnSourcePowerOn(Array<bool, MAX_CABLE> & visited, int c
 }
 
 
-inline bool ElectricDoorSystem::DoorBlocked(IVec2 tilePos, IVec2 reachDir)
+inline bool DoorBlocked(IVec2 tilePos, IVec2 reachDir)
 {
     SM_ASSERT(reachDir.SqrMagnitude() <= 1, "Directional Vector should be a unit vector");
     
     bool result = false;
-    for (int i = 0; i < doorIndices.count; i++)
+    for (int i = 0; i < Door_Indices.count; i++)
     {
-        Entity * door = GetEntity(entityIndices[doorIndices[i]]);
+        Entity * door = GetEntity(Cable_Indices[Door_Indices[i]]);
         SM_ASSERT(door, "entity is not active");
 
         if (SameSide(door, tilePos, reachDir)) return true;
@@ -249,13 +247,13 @@ inline bool ElectricDoorSystem::DoorBlocked(IVec2 tilePos, IVec2 reachDir)
     return result;
 }
 
-inline bool ElectricDoorSystem::CheckDoor(IVec2 tilePos)
+inline bool CheckDoor(IVec2 tilePos)
 {
     
     bool result = false;
-    for (int i = 0; i < doorIndices.count; i++)
+    for (int i = 0; i < Door_Indices.count; i++)
     {
-        Entity * door = GetEntity(entityIndices[doorIndices[i]]);
+        Entity * door = GetEntity(Cable_Indices[Door_Indices[i]]);
         SM_ASSERT(door, "entity is not active");
         if (door->tilePos == tilePos)
         {
@@ -266,21 +264,21 @@ inline bool ElectricDoorSystem::CheckDoor(IVec2 tilePos)
     return result;
 }
 
-void ElectricDoorSystem::Search(Array<bool, MAX_CABLE> & visited, int currentIndex, int sourceIndex)
+void Search(Array<bool, MAX_CABLE> & visited, int currentIndex, int sourceIndex)
 {
     visited[currentIndex] = true;
 
-    Entity * current = GetEntity(entityIndices[currentIndex]);
+    Entity * current = GetEntity(Cable_Indices[currentIndex]);
 
     current->sourceIndex = sourceIndex;
 
     if (current->cableType == CABLE_TYPE_DOOR) return;
 
-    for (int i = 0; i < entityIndices.count; i++)
+    for (int i = 0; i < Cable_Indices.count; i++)
     {
         if (!visited[i])
         {
-            Entity * entity = GetEntity(entityIndices[i]);
+            Entity * entity = GetEntity(Cable_Indices[i]);
             SM_ASSERT(entity, "entity is not active");
 
             IVec2 offset = entity->tilePos - current->tilePos;
@@ -325,27 +323,27 @@ void ElectricDoorSystem::Search(Array<bool, MAX_CABLE> & visited, int currentInd
     
 }
 
-inline void ElectricDoorSystem::SetUp()
+inline void SetUpElectricDoor()
 {
-    for (int index = 0; index < sourceIndices.count; index++)
+    for (int index = 0; index < Source_Indices.count; index++)
     {
-        int currentIndex = sourceIndices[index];
+        int currentIndex = Source_Indices[index];
 
         Array<bool, MAX_CABLE> visited;
 
-        for (int i = 0; i < entityIndices.count; i++) visited.Add(false);
+        for (int i = 0; i < Cable_Indices.count; i++) visited.Add(false);
 
         Search(visited, currentIndex, currentIndex);
     }
 }
 
 
-inline void ElectricDoorSystem::Update()
+inline void UpdateElectricDoor()
 {
 
-    for (int i = 0; i < connectionPointIndices.count; i++)
+    for (int i = 0; i < CP_Indices.count; i++)
     {
-        Entity * connection = GetEntity(entityIndices[connectionPointIndices[i]]);
+        Entity * connection = GetEntity(Cable_Indices[CP_Indices[i]]);
         SM_ASSERT(connection, "Entity is not active");
         
         if (!connection->conductive)
@@ -371,7 +369,7 @@ inline void ElectricDoorSystem::Update()
                     if (IsSlime(entity)) entity->actionState = FREEZE_STATE;
                     connection->conductive = true;
                     Array<bool, MAX_CABLE> visited;
-                    for (int i = 0; i < entityIndices.count; i++) visited.Add(false);
+                    for (int i = 0; i < Cable_Indices.count; i++) visited.Add(false);
                     OnSourcePowerOn(visited, connection->sourceIndex);
 
                     return;
@@ -381,10 +379,10 @@ inline void ElectricDoorSystem::Update()
         }
     }
     
-    for (int i = 0; i < sourceIndices.count; i++)
+    for (int i = 0; i < Source_Indices.count; i++)
     {
-        int sourceIndex = sourceIndices[i];
-        Entity * source = GetEntity(entityIndices[sourceIndex]);
+        int sourceIndex = Source_Indices[i];
+        Entity * source = GetEntity(Cable_Indices[sourceIndex]);
         SM_ASSERT(source, "Entity is not active");
 
         if (source->conductive) continue;
@@ -398,7 +396,7 @@ inline void ElectricDoorSystem::Update()
             {
                 
                 Array<bool, MAX_CABLE> visited;
-                for (int i = 0; i < entityIndices.count; i++) visited.Add(false);
+                for (int i = 0; i < Cable_Indices.count; i++) visited.Add(false);
                 OnSourcePowerOn(visited, sourceIndex);
             }
         }

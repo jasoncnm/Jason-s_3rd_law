@@ -30,7 +30,6 @@ AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE
     entity.tilePos = tilePos;
     entity.spriteID = spriteID;
     entity.sprite = GetSprite(spriteID);
-    entity.pivot = GetTilePivot(tilePos, tileSize);
     entity.color = color;
     entity.active = true;
     entity.tileSize = tileSize;
@@ -62,7 +61,7 @@ AddCable(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool 
         gameState->electricDoorSystem = (ElectricDoorSystem *)BumpAlloc(gameMemory->persistentStorage, sizeof (ElectricDoorSystem));
     }
 
-    gameState->electricDoorSystem->entityIndices.Add(entityResult.entityIndex);
+    Cable_Indices.Add(entityResult.entityIndex);
 
     return entityResult;
 }
@@ -87,7 +86,7 @@ AddDoor(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool d
         gameState->electricDoorSystem = (ElectricDoorSystem *)BumpAlloc(gameMemory->persistentStorage, sizeof (ElectricDoorSystem));
     }
 
-    gameState->electricDoorSystem->doorIndices.Add(gameState->electricDoorSystem->entityIndices.Add(entityResult.entityIndex));
+    Door_Indices.Add(Cable_Indices.Add(entityResult.entityIndex));
 
     return entityResult;
 }
@@ -109,7 +108,7 @@ AddSource(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool
         gameState->electricDoorSystem = (ElectricDoorSystem *)BumpAlloc(gameMemory->persistentStorage, sizeof (ElectricDoorSystem));
     }
 
-    gameState->electricDoorSystem->sourceIndices.Add(gameState->electricDoorSystem->entityIndices.Add(entityResult.entityIndex));
+    Source_Indices.Add(Cable_Indices.Add(entityResult.entityIndex));
     
     return entityResult;
 }
@@ -131,7 +130,7 @@ AddConnection(IVec2 tilePos, SpriteID spriteID)
         gameState->electricDoorSystem = (ElectricDoorSystem *)BumpAlloc(gameMemory->persistentStorage, sizeof (ElectricDoorSystem));
     }
 
-    gameState->electricDoorSystem->connectionPointIndices.Add(gameState->electricDoorSystem->entityIndices.Add(entityResult.entityIndex));
+    CP_Indices.Add(Cable_Indices.Add(entityResult.entityIndex));
 
     return entityResult;
 }
@@ -150,7 +149,7 @@ void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
     // entity->positionSetMarker = true;
     
     entity->tilePos = tilePos;
-    entity->pivot = GetTilePivot(tilePos, entity->tileSize);
+    entity->pivot = GetTilePivot(entity);
 
     if (touchingEntity && touchingEntity && (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE))
     {

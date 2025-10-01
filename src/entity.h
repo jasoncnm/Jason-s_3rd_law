@@ -8,6 +8,9 @@
    ======================================================================== */
 
 #include "electric_door.h"
+#include "move_animation.h"
+
+using MoveAnimationQueue = Array<MoveAnimation, 5>;
 
 enum EntityLayer
 {
@@ -51,6 +54,9 @@ struct Entity
 
     ActionState actionState = MOVE_STATE;
 
+    
+    MoveAnimationQueue moveAniQueue;
+    
     Sprite sprite;
     SpriteID spriteID;
     IVec2 tilePos;
@@ -86,8 +92,6 @@ struct Entity
     bool hover = false;
     
     bool active = false;
-
-    bool positionSetMarker = false;
     
 };
 
