@@ -33,6 +33,21 @@
 //              NOTE: Game Functions (internal)
 //  ========================================================================
 
+void AddMoveAnimateQueue(MoveAnimationQueue & queue, MoveAnimation ani)
+{
+    MoveAnimationQueue tempQueue = queue;
+    queue.Clear();
+    for (int i = 0; i < tempQueue.count; i++)
+    {
+        MoveAnimation & a = tempQueue[i];
+        if (a.playing)
+        {
+            queue.Add(a);
+        }
+    }
+    queue.Add(ani);
+}
+
 inline bool JustPressed(GameInputType type)
 {
     KeyMapping & mapping = gameState->keyMappings[type];
@@ -117,13 +132,13 @@ inline bool CheckBounce(IVec2 tilePos, IVec2 pushDir)
     return true;
 }
 
-MoveAnimation GetMoveAnimation(Vector2 moveStart, Vector2 moveEnd)
+MoveAnimation GetMoveAnimation(Vector2 moveStart, Vector2 moveEnd, float animateSpeed = 6.0f)
 {
     MoveAnimation ani;
     ani.playing = true;
     ani.move_t = 0;
     ani.move_target_t = 1;
-    ani.move_dt = 6.0f;
+    ani.move_dt = animateSpeed;
     ani.moveStart = moveStart;
     ani.moveEnd = moveEnd;
 
@@ -510,7 +525,7 @@ bool MoveAction(IVec2 actionDir)
                     Vector2 startPos = GetTilePivot(mother);
                     SetAttach(mother, pushResult.blockedEntity, actionDir);
                     Vector2 endPos = GetTilePivot(mother);
-                    mother->moveAniQueue.Add(GetMoveAnimation(startPos, endPos));
+                    AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(startPos, endPos));
                     
                     return true;
                 }
@@ -518,10 +533,15 @@ bool MoveAction(IVec2 actionDir)
             }
 
             // IMPORTANT: mother entity changed
-            Vector2 startPos = GetTilePivot(mother);
+            Vector2 moveStart = GetTilePivot(mother);
+
+            Vector2 moveMiddle =
+                Vector2Add(moveStart, Vector2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f *(MAP_TILE_SIZE - mother->tileSize)));
+            
             SetAttach(mother, pushResult.blockedEntity, actionDir);
-            Vector2 endPos = GetTilePivot(mother);
-            mother->moveAniQueue.Add(GetMoveAnimation(startPos, endPos));
+            Vector2 moveEnd = GetTilePivot(mother);
+            AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(moveStart, moveMiddle, 12.0f));
+            AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(moveMiddle, moveEnd, 12.0f));
             return true;
         }
 
@@ -585,7 +605,7 @@ bool MoveAction(IVec2 actionDir)
                 Vector2 moveStart = GetTilePivot(mother);
                 SetEntityPosition(mother, findResult.entity, actionTilePos);
                 Vector2 moveEnd = GetTilePivot(mother);
-                mother->moveAniQueue.Add(GetMoveAnimation(moveStart, moveEnd));
+                AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(moveStart, moveEnd));
 
                 
             }
@@ -612,9 +632,9 @@ bool MoveAction(IVec2 actionDir)
                 SetEntityPosition(mother, attachedEntity, newTile);
                 Vector2 moveEnd = GetTilePivot(mother);
 
-                mother->moveAniQueue.Add(GetMoveAnimation(moveStart, movemiddle));
+                AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(moveStart, movemiddle, 7.0f));
                 
-                mother->moveAniQueue.Add(GetMoveAnimation(movemiddle, moveEnd));
+                AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(movemiddle, moveEnd, 7.0f));
             }
             else 
             {

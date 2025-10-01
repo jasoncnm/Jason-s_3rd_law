@@ -10,7 +10,7 @@
 #include "electric_door.h"
 #include "move_animation.h"
 
-using MoveAnimationQueue = Array<MoveAnimation, 5>;
+using MoveAnimationQueue = Array<MoveAnimation, 10>;
 
 enum EntityLayer
 {
