@@ -53,7 +53,6 @@ struct Entity
     CableType cableType;
 
     ActionState actionState = MOVE_STATE;
-
     
     MoveAnimationQueue moveAniQueue;
     

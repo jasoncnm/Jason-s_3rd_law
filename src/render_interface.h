@@ -55,7 +55,9 @@ void DrawTileMap(IVec2 startPos, IVec2 dim, Color tileColor, Color gridColor)
                 tileSize,
                 tileSize,
                 tileColor);
-                    
+
+            Rectangle source = { (float)x * tileSize, (float)y * tileSize, (float)tileSize, (float)tileSize };
+            DrawRectangleLinesEx(source, .5f, gridColor);
             // DrawRectangleLines(x * tileSize, y * tileSize, tileSize, tileSize, gridColor);
                     
         }

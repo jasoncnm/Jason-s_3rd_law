@@ -48,6 +48,28 @@ void AddMoveAnimateQueue(MoveAnimationQueue & queue, MoveAnimation ani)
     queue.Add(ani);
 }
 
+bool IsAnimationPlaying(Entity * entity)
+{
+    bool result = false;
+    for (int animationIndex = 0; animationIndex < entity->moveAniQueue.count; animationIndex++)
+    {
+        MoveAnimation & ani = entity->moveAniQueue[animationIndex];
+        result |= ani.playing;
+    }
+
+    return result;
+}
+
+void AdjustAnimatingSpeed(Entity * entity, float ratio)
+{
+    for (int animationIndex = 0; animationIndex < entity->moveAniQueue.count; animationIndex++)
+    {
+        MoveAnimation & ani = entity->moveAniQueue[animationIndex];
+        ani.move_dt *= ratio;
+    }
+    
+}
+
 inline bool JustPressed(GameInputType type)
 {
     KeyMapping & mapping = gameState->keyMappings[type];
@@ -57,6 +79,12 @@ inline bool JustPressed(GameInputType type)
     }
     
     return false;
+}
+
+inline bool JustPressedMoveKey()
+{
+    bool result = JustPressed(UP_KEY) || JustPressed(DOWN_KEY) || JustPressed(LEFT_KEY) || JustPressed(RIGHT_KEY);
+    return result;
 }
 
 inline bool IsDown(GameInputType type)
@@ -298,7 +326,6 @@ PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                 }
                 case ENTITY_TYPE_ELECTRIC_DOOR:
                 {
-                    // TODO: fix
                     if (target->cableType == CABLE_TYPE_DOOR) //  && SameSide(target, blockNextPos, pushDir))
                     {
                         result.blocked = true;
@@ -335,7 +362,6 @@ PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                     int newAccumulatedMass = accumulatedMass + target->mass;
                     if (newAccumulatedMass > startEntity->mass)
                     {
-                        // (Update, not understand this todo ?) TODO: NOT DONE if entity is slime then attach to wall
 
                         result.blockedEntity = target;
                         result.blocked = true;
@@ -372,8 +398,8 @@ PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec
     return result;
 }
 
-
-inline bool UpdateCameraPosition()
+// TODO: Camera is not 2D pixel perfect smooth. If we want to keep the pixel art style, we need to implement a pixel perfect camera
+inline bool UpdateCamera()
 {
     bool updated = false;
     
@@ -398,7 +424,10 @@ inline bool UpdateCameraPosition()
                     map.firstEnter = true;
                 }
                 gameState->currentMapIndex = i;
-                gameState->camera.target = pos;
+
+                gameState->cameraAnimation = GetMoveAnimation(gameState->camera.target, pos, 4.0f);
+                
+                // gameState->camera.target = pos;
 
                 updated =  true;
             }
@@ -413,6 +442,13 @@ inline bool UpdateCameraPosition()
         gameState->camera.offset = { newWidth / 2.0f, newHeight / 2.0f };
         gameState->camera.zoom = (newWidth < newHeight) ? newWidth * 1.7f / SCREEN_WIDTH : newHeight * 1.7f / SCREEN_WIDTH;
         
+    }
+
+    gameState->cameraAnimation.Update();
+
+    if (gameState->cameraAnimation.playing)
+    {
+        gameState->camera.target = gameState->cameraAnimation.GetPosition(EaseInOutSine);        
     }
     
     return updated;
@@ -563,7 +599,6 @@ bool MoveAction(IVec2 actionDir)
             }
         }
 
-        // TODO: Check connection point at actiontile
         for (int i = 0; i < CP_Indices.count; i++)
         {
             Entity * connection = GetEntity(Cable_Indices[CP_Indices[i]]);
@@ -698,7 +733,10 @@ inline void DrawSpriteLayer(EntityLayer layer)
                 MoveAnimation & ani = entity->moveAniQueue[aniIndex];
                 if (ani.playing)
                 {
-                    Vector2 pos = ani.GetPosition();
+
+                    Vector2 pos = ani.GetPosition(easeOutCubic);
+
+                                        
                     DrawSprite(texture, entity->sprite, pos, entity->tileSize, entity->color);
                     goto NextLoop;
                 }
@@ -822,6 +860,7 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
     }
     
 #if 0
+    // TODO
     // NOTE: Level Hot Reloading
     for (int i = 0; i < tileMapSources.count; i++)
     {
@@ -881,7 +920,7 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         }
         else
         {
-            UpdateCameraPosition();
+            UpdateCamera();
         }
         
     }
@@ -916,173 +955,117 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
     // NOTE SlimeSelection
     stateChanged = SlimeSelection(player);
 
-    if (!animationPlaying) {
-        switch(player->actionState)
-        {
-            case MOVE_STATE:
-            {
-                
-                // NOTE: read input
-                gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = false;
-                
-                IVec2 actionDir = { 0 };
-                
-                if (timeSinceLastPress < 0)
-                {
-                    bool isPressed = false;
-                    
-                    if (IsDown(LEFT_KEY))
-                    {
-                        actionDir = {-1 , 0};                    
-                        isPressed = true;
-                    }
-                    
-                    if (IsDown(RIGHT_KEY))
-                    {
-                        actionDir = {1, 0};
-                        isPressed = true;
-                    }
-                    
-                    if (IsDown(UP_KEY))
-                    {
-                        actionDir = {0, -1};
-                        isPressed = true;
-                    }
-                    
-                    if (IsDown(DOWN_KEY))
-                    {
-                        actionDir = {0, 1};
-                        isPressed = true;
-                    }
-                    
-                    if (isPressed)
-                    {
-                        timeSinceLastPress = pressFreq;
-                        stateChanged |= MoveAction(actionDir);
-                    }
-                }
-                
-                break;
-            }
-            case SPLIT_STATE:
-            {
-                // NOTE: Split Arrow Buttons
-                gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = true;
-
-                bool split = false;
-                
-                if (JustPressed(MOUSE_LEFT))
-                {
-                    
-                    if (gameState->leftArrow.hover)
-                    {
-                        // IMPORTANT shoot left and bounce right
-                        split = SplitAction(player, { 1, 0 });
-                    }
-                    
-                    if (gameState->rightArrow.hover)
-                    {
-                        // IMPORTANT shoot right and bounce left
-                        split = SplitAction(player, { -1, 0 });
-                    }
-                    
-                    if (gameState->upArrow.hover)
-                    {
-                        // IMPORTANT shoot up and bounce down
-                        split = SplitAction(player, { 0, 1 });
-                    }
-                    
-                    if (gameState->downArrow.hover)
-                    {
-                        // IMPORTANT shoot down and bounce up
-                        split = SplitAction(player, { 0, -1 });
-                    }
-
-                    if (split)
-                    {
-                        stateChanged |= split;
-                        player->actionState = MOVE_STATE;
-                    }
-                    
-                }
-                break;
-            }
-        }
-
-        if (gameState->electricDoorSystem)
-        {
-            UpdateElectricDoor();
-        }
-        
-        if (stateChanged)
-        {
-            gameState->animateTime = 0;
-            UpdateSlimes();                        
-       
-            undoStack.push_back(prevState);
-        }
-    }
-    else
+    switch(player->actionState)
     {
-        // TODO
-        // NOTE: Simulate
-#if 0
-        if (gameState->animateTime <= gameState->duration)
+        case MOVE_STATE:
         {
-            SM_ASSERT(gameState->duration > 0, "Animation time is zero!");
-            
-            gameState->animateTime += GetFrameTime();
-            
-            float x = gameState->animateTime / gameState->duration;
-            
-            if (x > 1)  x = 1;
-            float t = EaseOutSine(x);
-            
-            for (int i = 0; i < animateSlimeCount; i++)
+                
+            // NOTE: read input
+            gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = false;
+                
+            IVec2 actionDir = { 0 };
+
+            if (JustPressedMoveKey())
             {
-                SlimeAnimation & sa = animateSlimes[i];
-                
-                Vector2 startPivot = GetTilePivot(sa.startTilePos.x, sa.startTilePos.y);
-                Vector2 endPivot = GetTilePivot(sa.endTilePos.x, sa.endTilePos.y);
-                
-                sa.currentSlime->pivot = Vector2Lerp(startPivot, endPivot, t);
-                
-                Merge(entities.dynamicEnt.player, sa);
+                AdjustAnimatingSpeed(player, 2);
+                //player->moveAniQueue.Clear();
             }
-            
-        }
-        else
-        {
-            animateSlimeCount = 0;
-            gameState->animateTime = 0;
-            animationPlaying = false;
-            
-            entities.dynamicEnt.player.slimes[entities.dynamicEnt.player.motherIndex].split = false;
-            
-            int maxIndex = -1;
-            int maxMass = 0;
-            
-            for (int i = 0; i < entities.dynamicEnt.player.slimes.count; i++)
+                
+            if (!IsAnimationPlaying(player)) //timeSinceLastPress < 0) // // )
             {
-                Slime * child = &entities.dynamicEnt.player.slimes[i];
-                child->split = false;
-                if (child->mass > maxMass)
+                bool isPressed = false;
+                    
+                if (IsDown(LEFT_KEY))
                 {
-                    maxMass = child->mass;
-                    maxIndex = i;
+                    actionDir = {-1 , 0};                    
+                    isPressed = true;
+                }
+                    
+                if (IsDown(RIGHT_KEY))
+                {
+                    actionDir = {1, 0};
+                    isPressed = true;
+                }
+                    
+                if (IsDown(UP_KEY))
+                {
+                    actionDir = {0, -1};
+                    isPressed = true;
+                }
+                    
+                if (IsDown(DOWN_KEY))
+                {
+                    actionDir = {0, 1};
+                    isPressed = true;
+                }
+                    
+                if (isPressed)
+                {
+                    //timeSinceLastPress = pressFreq;
+                    stateChanged |= MoveAction(actionDir);
                 }
             }
-            
-            SM_ASSERT(maxIndex >= 0, "should not be nullptr");
-            
-            if (maxMass > entities.dynamicEnt.player.slimes[entities.dynamicEnt.player.motherIndex].mass)
-            {
-                // Posses(entities.dynamicEnt.player, maxIndex);
-            }
-            
+                
+            break;
         }
-#endif
+        case SPLIT_STATE:
+        {
+            // NOTE: Split Arrow Buttons
+            gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = true;
+
+            bool split = false;
+                
+            if (JustPressed(MOUSE_LEFT))
+            {
+                    
+                if (gameState->leftArrow.hover)
+                {
+                    // IMPORTANT shoot left and bounce right
+                    split = SplitAction(player, { 1, 0 });
+                }
+                    
+                if (gameState->rightArrow.hover)
+                {
+                    // IMPORTANT shoot right and bounce left
+                    split = SplitAction(player, { -1, 0 });
+                }
+                    
+                if (gameState->upArrow.hover)
+                {
+                    // IMPORTANT shoot up and bounce down
+                    split = SplitAction(player, { 0, 1 });
+                }
+                    
+                if (gameState->downArrow.hover)
+                {
+                    // IMPORTANT shoot down and bounce up
+                    split = SplitAction(player, { 0, -1 });
+                }
+
+                if (split)
+                {
+                    stateChanged |= split;
+                    player->actionState = MOVE_STATE;
+                }
+                    
+            }
+            break;
+        }
     }
+
+    if (gameState->electricDoorSystem)
+    {
+        UpdateElectricDoor();
+    }
+        
+    if (stateChanged)
+    {
+        gameState->animateTime = 0;
+        UpdateSlimes();                        
+       
+        undoStack.push_back(prevState);
+    }
+
 
     // NOTE: Undo and Restart
     {
@@ -1174,7 +1157,7 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         {
             Map & map = gameState->tileMaps[i];
         
-            DrawTileMap(map.tilePos, { map.width, map.height }, BLUE, Fade(DARKBLUE, 0.5f));
+            DrawTileMap(map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
         }
 
         DrawSpriteLayer(LAYER_GROUND);
@@ -1240,95 +1223,3 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
     
 }
 
-
-#if 0
-
-for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
-{
-    Entity * entity = GetEntity(gameState->slimeEntityIndices[i]);
-    if (entity && entity->attach)
-    {
-        IVec2 t = entity->tilePos + entity->attachDir;                        
-        Vector2 pos = TilePositionToPixelPosition((float)t.x, (float)t.y);
-        DrawCircleV(pos, 5.0f, RED);                              // Draw a color-filled circle
-    }
-}                
-
-    
-    Player & player = gameState->entities.dynamicEnt.player;
-
-    IVec2 prevPos = player.slimes[player.motherIndex].tile;
-
-    bool bounce = false;
-    IVec2 bouncePos;
-
-    // NOTE: Bounce Position
-    if (player.slimes[player.motherIndex].mass > 1)
-    {
-        
-        for ( IVec2 tilePos = player.slimes[player.motherIndex].tile + bounceDir;
-              !CheckOutOfBound(tilePos);
-              tilePos = tilePos + bounceDir)
-        {
-            // TODO: check block not implimented
-            if (!CheckWalls(tilePos))
-            {
-                bounce = true;
-                bouncePos = tilePos;
-                continue;
-            }
-            break;
-        }
-    }
-
-    bool split = false;
-    IVec2 splitPos;
-    
-    // NOTE: Split Positions
-    if (player.slimes[player.motherIndex].mass > 1)
-    {
-        IVec2 splitDir = - bounceDir;
-
-        for (IVec2 tilePos = player.slimes[player.motherIndex].tile + splitDir;
-             !CheckOutOfBound(tilePos);
-             tilePos = tilePos + splitDir)
-        {
-            // TODO: check block not implimented
-            if (!CheckWalls(tilePos))
-            {
-                split = true;
-                splitPos = tilePos;
-                continue;
-            }
-            break;
-        }
-    }
-
-    stateChanged = split || bounce;
-    
-    if (stateChanged)
-    {
-        player.slimes[player.motherIndex].mass--;
-
-        int mass = player.slimes[player.motherIndex].mass;
-
-        if (bounce)
-        {
-            BounceSlime(player, bouncePos);
-        }
-        else if (split)
-        {
-            player.slimes[player.motherIndex].pivot = GetTilePivot(player.slimes[player.motherIndex].tile);            
-        }
-
-        if (split)
-        {
-            SplitSlime(player, splitPos, prevPos);
-        }
-        else if (bounce)
-        {
-            SplitSlime(player, prevPos, prevPos);
-        }
-                
-    }
-#endif

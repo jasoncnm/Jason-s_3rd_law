@@ -18,12 +18,21 @@ struct MoveAnimation
     float move_dt;
 
     void Update();
-    Vector2 GetPosition();
+    Vector2 GetPosition(float (*Easing)(float));
+    
 };
 
-Vector2 MoveAnimation::GetPosition()
+Vector2 MoveAnimation::GetPosition(float (*Easing)(float))
 {
-    return Vector2Scale(moveStart, 1.0f - move_t) + Vector2Scale(moveEnd, move_t);
+    // TODO: Implement generic easing function
+    
+    float t = move_t;
+
+    if (Easing)
+    {
+        t = easeOutCubic(t);
+    }    
+    return Vector2Scale(moveStart, 1.0f - t) + Vector2Scale(moveEnd, t);
 }
 
 void MoveAnimation::Update()

@@ -464,7 +464,6 @@ inline void MoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir)
                     {
                         switch(target->cableType)
                         {
-                            // TODO
                             case CABLE_TYPE_DOOR:
                             {
                                 if (SameSide(target, pos, dir))

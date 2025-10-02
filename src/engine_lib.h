@@ -594,6 +594,10 @@ float EaseInOutSine(float x)
     return -(cosf(PI * x) - 1) / 2;
 }
 
+float easeOutCubic(float x) {
+    return 1 - pow(1 - x, 3);
+}
+
 bool SameSign(int x, int y)
 {
     if (x == 0 || y == 0) return x == y;

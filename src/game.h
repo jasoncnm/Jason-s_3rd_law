@@ -100,7 +100,8 @@ struct GameState
     State state;
     
     IVec2 tileMin, tileMax;
-    
+
+    MoveAnimation cameraAnimation;
     Camera2D camera;
 
     ElectricDoorSystem * electricDoorSystem = nullptr;
@@ -165,7 +166,7 @@ PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec
 
 void BounceEntity(Entity * entity, IVec2 dir);
 
-inline bool UpdateCameraPosition();
+inline bool UpdateCamera();
 
 inline void Undo();
 
