@@ -398,7 +398,6 @@ PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec
     return result;
 }
 
-// TODO: Camera is not 2D pixel perfect smooth. If we want to keep the pixel art style, we need to implement a pixel perfect camera
 inline bool UpdateCamera()
 {
     bool updated = false;

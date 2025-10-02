@@ -69,8 +69,8 @@ void DrawSprite(Texture2D & texture, Sprite & sprite, Vector2 topLeft, float til
             
     Rectangle source =
         {
-            (float)sprite.altasOffset.x, (float)sprite.altasOffset.y,
-            (float)sprite.spriteSize.x, (float)sprite.spriteSize.y
+            (float)sprite.altasOffset.x + 1, (float)sprite.altasOffset.y + 1,
+            (float)sprite.spriteSize.x - 2, (float)sprite.spriteSize.y -2
         };
 
     Rectangle dest =
