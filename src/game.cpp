@@ -424,7 +424,7 @@ inline bool UpdateCamera()
                 }
                 gameState->currentMapIndex = i;
 
-                gameState->cameraAnimation = GetMoveAnimation(gameState->camera.target, pos, 4.0f);
+                gameState->cameraAnimation = GetMoveAnimation(gameState->camera.target, pos, 3.0f);
                 
                 // gameState->camera.target = pos;
 
@@ -1072,9 +1072,8 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         {
             // NOTE: Undo
             Undo();
-                        
             timeSinceLastPress = pressFreq;
-
+            repeat = false;
         }
         // NOTE: Restart States
         repeat &= !stateChanged;

@@ -371,10 +371,7 @@ inline void UpdateElectricDoor()
                     Array<bool, MAX_CABLE> visited;
                     for (int i = 0; i < Cable_Indices.count; i++) visited.Add(false);
                     OnSourcePowerOn(visited, connection->sourceIndex);
-
-                    return;
                 }
-
             }
         }
     }
@@ -384,14 +381,11 @@ inline void UpdateElectricDoor()
         int sourceIndex = Source_Indices[i];
         Entity * source = GetEntity(Cable_Indices[sourceIndex]);
         SM_ASSERT(source, "Entity is not active");
-
         if (source->conductive) continue;
-
         auto & table = gameState->entityTable[LAYER_BLOCKS];
         for (int blockIndex = 0; blockIndex < table.count; blockIndex++)
         {
             Entity * block = GetEntity(table[blockIndex]);
-            
             if (block && block->type == ENTITY_TYPE_BLOCK && source->tilePos == block->tilePos)
             {
                 
@@ -402,4 +396,5 @@ inline void UpdateElectricDoor()
         }
         
     }
+    
 }
