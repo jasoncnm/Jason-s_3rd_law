@@ -40,4 +40,4 @@ JasonLaw.pdb
 !/third_party/lib/raylib.dll
 !/third_party/lib/raylib.lib
 !/third_party/lib/raylibdll.lib
-
+!/JasonLaw.exe
