@@ -26,7 +26,7 @@
          "name":"Overlap",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":11,
          "x":0,
          "y":0
@@ -48,7 +48,7 @@
          "name":"Blocks",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":11,
          "x":0,
          "y":0
@@ -70,7 +70,7 @@
          "name":"Player",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":11,
          "x":0,
          "y":0

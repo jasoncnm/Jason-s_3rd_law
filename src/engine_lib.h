@@ -457,7 +457,6 @@ struct IVec2
     {
         return x * x + y * y;
     }
-
     
     bool IsBetween(IVec2 a, IVec2 b)
     {
@@ -471,6 +470,11 @@ struct IVec2
         
     }
 };
+
+float Distance(IVec2 a, IVec2 b)
+{
+    return Distance(IVec2ToVec2(a), IVec2ToVec2(b));
+}
 
 int Sign(int x)
 {
@@ -594,8 +598,14 @@ float EaseInOutSine(float x)
     return -(cosf(PI * x) - 1) / 2;
 }
 
-float easeOutCubic(float x) {
+float EaseOutCubic(float x)
+{
     return 1 - pow(1 - x, 3);
+}
+
+float EaseInQuint(float x)
+{
+    return x * x * x * x * x;
 }
 
 bool SameSign(int x, int y)
@@ -607,6 +617,5 @@ bool SameSign(int x, int y)
 
     return a == b;
 }
-
 #define ENGINE_LIB_H
 #endif

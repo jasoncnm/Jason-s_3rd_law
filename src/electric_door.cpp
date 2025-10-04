@@ -7,6 +7,7 @@
    ======================================================================== */
 
 #include "electric_door.h"
+#include "move_animation.h"
 
 inline bool CanFreezeSlime(Entity * connection)
 {
@@ -154,14 +155,23 @@ inline void PowerOnCable(Entity * cable, bool & end)
             Entity * entity = FindEntityByLocationAndLayer(cable->tilePos + bounceDir, LAYER_BLOCKS);
             if (entity)
             {
-                BounceEntity(entity, bounceDir);
+                Vector2 moveStart = GetTilePivot(entity);
+                BounceEntity(cable, entity, bounceDir);
+                Vector2 moveEnd = GetTilePivot(entity);
+                
+                float dist = Vector2Distance(moveStart, moveEnd);
+                float iDist = dist / MAP_TILE_SIZE;
+
+                AddMoveAnimateQueue(entity->moveAniQueue,
+                                    GetMoveAnimation(nullptr, moveStart, moveEnd, 20.0f, iDist, true, 0));
+                
             }
             else
             {
                 entity = FindEntityByLocationAndLayer(cable->tilePos + bounceDir, LAYER_PLAYER);
                 if (entity)
                 {
-                    BounceEntity(entity, bounceDir);
+                    BounceEntity(cable, entity, bounceDir);
                 }
             }
 

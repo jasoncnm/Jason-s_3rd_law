@@ -15,6 +15,11 @@ inline Entity * GetEntity(int i)
     return entity;
 }
 
+inline Entity * GetPlayer()
+{
+    return GetEntity(gameState->playerEntityIndex);
+}
+
 inline bool IsSlime(Entity * entity)
 {
     return entity->type == ENTITY_TYPE_CLONE || entity->type == ENTITY_TYPE_PLAYER;
@@ -71,6 +76,9 @@ inline AddEntityResult
 AddDoor(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool down)
 {
     AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, spriteID);
+
+    entityResult.entity->movable = true;
+    entityResult.entity->mass = 100;
     
     entityResult.entity->conductive = false;
     entityResult.entity->open = false;
@@ -379,7 +387,18 @@ inline void UpdateSlimes()
                     dir.y = dir.y == 0 ? 0 : Sign(dir.y);
                 
                     SM_ASSERT(dir.SqrMagnitude() == 1, "Invalid bounce direction");
+
+                    Vector2 moveStart = GetTilePivot(slime);
                     MoveTowardsUntilBlocked(slime, newPos, dir);
+                    Vector2 moveEnd = GetTilePivot(slime);
+
+                    float dist = Vector2Distance(moveStart, moveEnd);
+                    float iDist = dist / MAP_TILE_SIZE;
+
+                    AddMoveAnimateQueue(slime->moveAniQueue,
+                                        GetMoveAnimation(nullptr, moveStart, moveEnd, BLOCK_ANI_SPEED, iDist, true, 0));
+
+                    
                 }
             }
         }

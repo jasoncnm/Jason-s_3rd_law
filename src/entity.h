@@ -10,8 +10,6 @@
 #include "electric_door.h"
 #include "move_animation.h"
 
-using MoveAnimationQueue = Array<MoveAnimation, 10>;
-
 enum EntityLayer
 {
  
@@ -54,12 +52,14 @@ struct Entity
 
     ActionState actionState = MOVE_STATE;
     
+    Entity * interact;
     MoveAnimationQueue moveAniQueue;
+
     
     Sprite sprite;
     SpriteID spriteID;
     IVec2 tilePos;
-    IVec2 attachDir;
+    IVec2 attachDir = {0,0};
     Color color;
 
     Vector2 pivot;

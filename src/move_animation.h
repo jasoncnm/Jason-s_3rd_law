@@ -7,6 +7,8 @@
    $Notice: $
    ======================================================================== */
 
+
+
 struct MoveAnimation
 {
     bool playing = false;
@@ -17,40 +19,28 @@ struct MoveAnimation
     float move_target_t = 1;
     float move_dt;
 
+    float delay;
+
     void Update();
-    Vector2 GetPosition(float (*Easing)(float));
+    Vector2 GetPosition();
+
+    float (*Easing)(float);
     
 };
 
-Vector2 MoveAnimation::GetPosition(float (*Easing)(float))
-{
-    // TODO: Implement generic easing function
+using MoveAnimationQueue = Array<MoveAnimation, 10>;
+
+void AddMoveAnimateQueue(MoveAnimationQueue & queue, MoveAnimation ani);
+
+bool IsAnimationPlaying(Entity * entity);
+
+void AdjustAnimatingSpeed(Entity * entity, float ratio);
+
+MoveAnimation GetMoveAnimation(float (*Easing)(float), Vector2 moveStart, Vector2 moveEnd,
+                               float animateSpeed, float target_t, bool startPlay, float delay);
+
+float GetDelay(Entity * pushedEntity, Entity * pushEntity, float speed, IVec2 pushDir);
+
     
-    float t = move_t;
-
-    if (Easing)
-    {
-        t = easeOutCubic(t);
-    }    
-    return Vector2Scale(moveStart, 1.0f - t) + Vector2Scale(moveEnd, t);
-}
-
-void MoveAnimation::Update()
-{
-    float delta = GetFrameTime() * move_dt;
-
-    if (move_t < move_target_t)
-    {
-        move_t += delta;
-        if (move_t > move_target_t)
-        {
-            move_t = move_target_t;
-            playing = false;
-        }
-    }
-}
-
-
-
 #define MOVEANIMATION_H
 #endif

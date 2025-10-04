@@ -8,12 +8,12 @@
 
 #include "game.h"
 #include "render_interface.h"
-#include "move_animation.h"
 #include "game_util.h"
 
 #include "entity.cpp"
 #include "electric_door.cpp"
 #include "level_loader.cpp"
+#include "move_animation.cpp"
 
 //  ========================================================================
 //              NOTE: Game Constants
@@ -32,43 +32,6 @@
 //  ========================================================================
 //              NOTE: Game Functions (internal)
 //  ========================================================================
-
-void AddMoveAnimateQueue(MoveAnimationQueue & queue, MoveAnimation ani)
-{
-    MoveAnimationQueue tempQueue = queue;
-    queue.Clear();
-    for (int i = 0; i < tempQueue.count; i++)
-    {
-        MoveAnimation & a = tempQueue[i];
-        if (a.playing)
-        {
-            queue.Add(a);
-        }
-    }
-    queue.Add(ani);
-}
-
-bool IsAnimationPlaying(Entity * entity)
-{
-    bool result = false;
-    for (int animationIndex = 0; animationIndex < entity->moveAniQueue.count; animationIndex++)
-    {
-        MoveAnimation & ani = entity->moveAniQueue[animationIndex];
-        result |= ani.playing;
-    }
-
-    return result;
-}
-
-void AdjustAnimatingSpeed(Entity * entity, float ratio)
-{
-    for (int animationIndex = 0; animationIndex < entity->moveAniQueue.count; animationIndex++)
-    {
-        MoveAnimation & ani = entity->moveAniQueue[animationIndex];
-        ani.move_dt *= ratio;
-    }
-    
-}
 
 inline bool JustPressed(GameInputType type)
 {
@@ -160,20 +123,7 @@ inline bool CheckBounce(IVec2 tilePos, IVec2 pushDir)
     return true;
 }
 
-MoveAnimation GetMoveAnimation(Vector2 moveStart, Vector2 moveEnd, float animateSpeed = 6.0f)
-{
-    MoveAnimation ani;
-    ani.playing = true;
-    ani.move_t = 0;
-    ani.move_target_t = 1;
-    ani.move_dt = animateSpeed;
-    ani.moveStart = moveStart;
-    ani.moveEnd = moveEnd;
-
-    return ani;
-}
-
-void BounceEntity(Entity * entity, IVec2 dir)
+void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
 {
     SM_ASSERT(entity->active, "entity does not exists");
     SM_ASSERT(entity->movable, "entitiy is static");
@@ -241,7 +191,7 @@ void BounceEntity(Entity * entity, IVec2 dir)
                     {
                         // IMPORTANT: entity changed
                         PushActionResult result = 
-                            PushActionCheck(entity, entity, pos, dir, 0);
+                            PushActionCheck(startEntity, entity, pos, dir, 0);
 
                         if (isSlime)
                         {
@@ -372,15 +322,40 @@ PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                     
                     if (!result.blocked)
                     {
+                        if (pushEntity) pushEntity->interact = target;
+                        float blockSpeed = 20.0f;                        
                         result.pushed = true;
+                        // IMPORTANT: target Entity changed
                         if (CheckBounce(target->tilePos, pushDir))
                         {
-                            BounceEntity(target, pushDir);
+                            //float delay = GetDelay(target, pushEntity, blockSpeed, pushDir);
+                            float delay = GetDelay(target, startEntity, blockSpeed, pushDir);
+                            
+                            Vector2 moveStart = GetTilePivot(target);
+                            BounceEntity(startEntity, target, pushDir);
+                            Vector2 moveEnd = GetTilePivot(target);
+
+                            float distPerSecond = MAP_TILE_SIZE / blockSpeed;
+                            float dist = Vector2Distance(moveStart, moveEnd);
+                            float tileDist = dist / MAP_TILE_SIZE;
+
+                            AddMoveAnimateQueue(target->moveAniQueue,
+                                                GetMoveAnimation(nullptr, moveStart, moveEnd, blockSpeed, tileDist, true, delay));
+                            //GetMoveAnimation(moveStart, moveEnd, 6.0f / Distance(blockNextPos, target->tilePos), delay));
                         }
                         else
                         {
-                            // IMPORTANT: target Entity changed
+                            float delay = GetDelay(target, startEntity, blockSpeed, pushDir);
+
+                            Vector2 moveStart = GetTilePivot(target);
                             SetEntityPosition(target, nullptr, blockNextPos + pushDir);
+                            Vector2 moveEnd = GetTilePivot(target);
+
+                            float dist = Vector2Distance(moveStart, moveEnd);
+                            float iDist = dist / MAP_TILE_SIZE;
+
+                            AddMoveAnimateQueue(target->moveAniQueue,
+                                                GetMoveAnimation(nullptr, moveStart, moveEnd, blockSpeed, iDist, true, delay));
                         }
                         return result;
                     }
@@ -424,10 +399,8 @@ inline bool UpdateCamera()
                 }
                 gameState->currentMapIndex = i;
 
-                gameState->cameraAnimation = GetMoveAnimation(gameState->camera.target, pos, 3.0f);
+                gameState->cameraAnimation = GetMoveAnimation(EaseOutCubic, gameState->camera.target, pos, 2.0f);
                 
-                // gameState->camera.target = pos;
-
                 updated =  true;
             }
             break;
@@ -447,7 +420,7 @@ inline bool UpdateCamera()
 
     if (gameState->cameraAnimation.playing)
     {
-        gameState->camera.target = gameState->cameraAnimation.GetPosition(EaseInOutSine);        
+        gameState->camera.target = gameState->cameraAnimation.GetPosition();        
     }
     
     return updated;
@@ -560,7 +533,7 @@ bool MoveAction(IVec2 actionDir)
                     Vector2 startPos = GetTilePivot(mother);
                     SetAttach(mother, pushResult.blockedEntity, actionDir);
                     Vector2 endPos = GetTilePivot(mother);
-                    AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(startPos, endPos));
+                    AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, startPos, endPos));
                     
                     return true;
                 }
@@ -569,14 +542,12 @@ bool MoveAction(IVec2 actionDir)
 
             // IMPORTANT: mother entity changed
             Vector2 moveStart = GetTilePivot(mother);
-
             Vector2 moveMiddle =
                 Vector2Add(moveStart, Vector2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f *(MAP_TILE_SIZE - mother->tileSize)));
-            
             SetAttach(mother, pushResult.blockedEntity, actionDir);
             Vector2 moveEnd = GetTilePivot(mother);
-            AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(moveStart, moveMiddle, 12.0f));
-            AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(moveMiddle, moveEnd, 12.0f));
+            AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, moveStart, moveMiddle, 6.0f));
+            AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, moveMiddle, moveEnd, 12.0f));
             return true;
         }
 
@@ -639,7 +610,7 @@ bool MoveAction(IVec2 actionDir)
                 Vector2 moveStart = GetTilePivot(mother);
                 SetEntityPosition(mother, findResult.entity, actionTilePos);
                 Vector2 moveEnd = GetTilePivot(mother);
-                AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(moveStart, moveEnd));
+                AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, moveStart, moveEnd));
 
                 
             }
@@ -666,9 +637,8 @@ bool MoveAction(IVec2 actionDir)
                 SetEntityPosition(mother, attachedEntity, newTile);
                 Vector2 moveEnd = GetTilePivot(mother);
 
-                AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(moveStart, movemiddle, 7.0f));
-                
-                AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(movemiddle, moveEnd, 7.0f));
+                AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, moveStart, movemiddle, 6.0f));
+                AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, movemiddle, moveEnd, 7.0f));
             }
             else 
             {
@@ -702,8 +672,8 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
     
     Entity * clone = CreateSlimeClone(player->tilePos);
 
-    BounceEntity(player, bounceDir);
-    BounceEntity(clone, -bounceDir);
+    BounceEntity(player, player, bounceDir);
+    BounceEntity(clone, clone, -bounceDir);
 
     if (player->tilePos == clone->tilePos)
     {
@@ -726,16 +696,16 @@ inline void DrawSpriteLayer(EntityLayer layer)
 
         if (entity)
         {
-
             for (int aniIndex = 0; aniIndex < entity->moveAniQueue.count; aniIndex++)
             {
                 MoveAnimation & ani = entity->moveAniQueue[aniIndex];
                 if (ani.playing)
                 {
-
-                    Vector2 pos = ani.GetPosition(easeOutCubic);
-
-                                        
+                    Vector2 pos = ani.GetPosition();
+                    if (IsSlime(entity))
+                    {
+                        pos = ani.GetPosition();
+                    }
                     DrawSprite(texture, entity->sprite, pos, entity->tileSize, entity->color);
                     goto NextLoop;
                 }
@@ -970,7 +940,7 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
                 //player->moveAniQueue.Clear();
             }
                 
-            if (!IsAnimationPlaying(player)) //timeSinceLastPress < 0) // // )
+            if (timeSinceLastPress < 0) //!IsAnimationPlaying(player) && )
             {
                 bool isPressed = false;
                     
@@ -1000,7 +970,7 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
                     
                 if (isPressed)
                 {
-                    //timeSinceLastPress = pressFreq;
+                    timeSinceLastPress = pressFreq;
                     stateChanged |= MoveAction(actionDir);
                 }
             }
@@ -1020,25 +990,25 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
                 if (gameState->leftArrow.hover)
                 {
                     // IMPORTANT shoot left and bounce right
-                    split = SplitAction(player, { 1, 0 });
+                    split = SplitAction(player, { -1, 0 });
                 }
                     
                 if (gameState->rightArrow.hover)
                 {
                     // IMPORTANT shoot right and bounce left
-                    split = SplitAction(player, { -1, 0 });
+                    split = SplitAction(player, { 1, 0 });
                 }
                     
                 if (gameState->upArrow.hover)
                 {
                     // IMPORTANT shoot up and bounce down
-                    split = SplitAction(player, { 0, 1 });
+                    split = SplitAction(player, { 0, -1 });
                 }
                     
                 if (gameState->downArrow.hover)
                 {
                     // IMPORTANT shoot down and bounce up
-                    split = SplitAction(player, { 0, -1 });
+                    split = SplitAction(player, { 0, 1 });
                 }
 
                 if (split)
@@ -1129,6 +1099,7 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         
         if (entity)
         {
+            
             for (int j = 0; j < entity->moveAniQueue.count; j++)
             {
                 MoveAnimation & ani = entity->moveAniQueue[j];

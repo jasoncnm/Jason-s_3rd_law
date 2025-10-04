@@ -9,6 +9,8 @@
 
 #define MAP_TILE_SIZE 32       // Tiles size
 #define MAX_ANIMATION 50
+#define DIST_ONE_TILE MAP_TILE_SIZE
+#define BLOCK_ANI_SPEED 20.0f
 
 #define MAX_ENTITIES 5000
 
@@ -93,7 +95,6 @@ struct Map
     bool firstEnter = false;
 };
 
-
 // NOTE: GameState
 struct GameState
 {
@@ -139,8 +140,8 @@ struct PushActionResult
 // ----------------------------------------------------
 // NOTE: Game Globals
 // ----------------------------------------------------
-static float timeSinceLastPress = 0.0f;
 static const float pressFreq = 0.2f;
+static float timeSinceLastPress = 0;
 static std::vector<UndoState> undoStack;
 
 static GameState * gameState;
@@ -164,7 +165,7 @@ inline bool CheckBounce(IVec2 tilePos, IVec2 pushDir);
 
 PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int accumulatedMass);
 
-void BounceEntity(Entity * entity, IVec2 dir);
+void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir);
 
 inline bool UpdateCamera();
 
