@@ -534,6 +534,7 @@ inline Entity * FindEntity(IVec2 pos)
     return result;
 }
 
+
 inline Entity * CreateSlimeClone(IVec2 tilePos)
 {
     Entity * freeEntity = nullptr;

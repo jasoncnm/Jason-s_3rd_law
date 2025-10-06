@@ -175,7 +175,7 @@ void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
                     }
                     case ENTITY_TYPE_GLASS:
                     {
-                        if (isSlime)
+                        if (!entity->broken && isSlime)
                         {
                             // IMPORTANT: entity changed
                             SetAttach(entity, target, dir);
@@ -206,7 +206,6 @@ void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
                             SetEntityPosition(entity, nullptr, pos - dir);
                         }
                         
-                        
                         return;
                     }
                     case ENTITY_TYPE_PLAYER:
@@ -215,10 +214,31 @@ void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
                         if (!isSlime)
                         {
                             // IMPORTANT: entity changed
-                            SetAttach(target, entity, dir);
+                            IVec2 attachDir = target->attachDir;
+
+                            PushActionResult result =
+                                PushActionCheck(startEntity, entity, pos, dir, 0);
+
+                            if (result.blocked)
+                            {
+                                if (result.blockedEntity != target)
+                                {
+                                    SetEntityPosition(target, result.blockedEntity, target->tilePos);
+                                }
+                            }
+                            else
+                            {
+                                Entity * attachEntity = FindEntityByLocationAndLayer(target->tilePos + attachDir, LAYER_BLOCKS);
+                                if (attachEntity && attachEntity != target)
+                                {
+                                    SetEntityPosition(target, attachEntity, target->tilePos);
+                                }
+
+                            }
+                            
                             SetEntityPosition(entity, nullptr, pos - dir);
-                            entity = target;
-                            break;
+
+                            return;
                         }
 
                         if (target->type == ENTITY_TYPE_PLAYER)
@@ -726,7 +746,7 @@ inline bool SlimeSelection(Entity * player)
 {
 
     bool stateChanged = false;
-
+#if 0
     for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
     {
         Entity * slime = GetEntity(gameState->slimeEntityIndices[i]);
@@ -763,7 +783,35 @@ inline bool SlimeSelection(Entity * player)
     }
 
     player->color = WHITE;
+#endif
 
+    if (JustPressed(POSSES_KEY))
+    {
+        Entity * nextPlayerEntity = nullptr;
+        for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
+        {
+            Entity * slime = GetEntity(gameState->slimeEntityIndices[i]);
+            if (slime == player)
+            {
+                int nextPlayerIndex = (i + 1) % gameState->slimeEntityIndices.count;
+                Entity * e = GetEntity(gameState->slimeEntityIndices[nextPlayerIndex]);
+                if (e)
+                {
+                    nextPlayerEntity = e;
+                }
+                break;
+            }
+        }
+        if (nextPlayerEntity)
+        {
+            player->color = GRAY;
+            gameState->playerEntityIndex = nextPlayerEntity->entityIndex;
+            player = GetEntity(gameState->playerEntityIndex);
+            player->color = WHITE;
+            stateChanged = true;
+        } 
+    }
+    
     return stateChanged;
 }
 
@@ -795,6 +843,7 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             gameState->keyMappings[DOWN_KEY].keys.Add(KEY_S);
             gameState->keyMappings[DOWN_KEY].keys.Add(KEY_DOWN);
             gameState->keyMappings[SPACE_KEY].keys.Add(KEY_SPACE);
+            gameState->keyMappings[POSSES_KEY].keys.Add(KEY_F);
         }
 
         gameState->tileMaps = (Map *)BumpAllocArray(gameMemory->persistentStorage, 100, sizeof(Map));

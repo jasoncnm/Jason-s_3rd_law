@@ -282,6 +282,7 @@ void LoadLevelToGameState(GameState & state, State loadState)
         {
             json map = *it;
             std::string fileName =  map["fileName"];
+            
             int mapWidth = (int)map["width"] / MAP_TILE_SIZE;
             int mapHeight = (int)map["height"] / MAP_TILE_SIZE;
             int startPosX = (int)map["x"] / MAP_TILE_SIZE + 1;
@@ -290,6 +291,12 @@ void LoadLevelToGameState(GameState & state, State loadState)
             Map tileMap = {};
             tileMap.tilePos = { startPosX, startPosY };
             tileMap.width = mapWidth, tileMap.height =  mapHeight;
+            
+            if (fileName == LEVEL_2_ROOM_NAME)
+            {
+                gameState->lv2Map = tileMap;
+            }
+
 
             int id = state.tileMapCount;
             state.tileMaps[state.tileMapCount++] = tileMap;

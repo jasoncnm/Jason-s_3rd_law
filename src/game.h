@@ -39,6 +39,7 @@ enum State
 enum GameInputType 
 {
     NO_INPUT,
+    POSSES_KEY,
     MOUSE_LEFT,
     MOUSE_RIGHT,
     LEFT_KEY,
@@ -113,6 +114,7 @@ struct GameState
 
     int tileMapCount = 0;
     Map * tileMaps;
+    Map lv2Map;
 
     Array<Entity, MAX_ENTITIES> entities;
 
