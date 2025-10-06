@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TileMap/Room_16.tmj",
+    "activeFile": "TileMap/Room_19.tmj",
     "console.history": [
         "\"W:/hm_hero_proj/gp/misc/emacs.bat\" %mapfilev",
         "Room_11.tmj",
@@ -27,8 +27,8 @@
             "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 623,
-                "y": 451
+                "x": 175,
+                "y": 175
             }
         },
         "TileMap/Room_1.tmx": {
@@ -79,24 +79,24 @@
             "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 127,
-                "y": 451
+                "x": 175,
+                "y": 175
             }
         },
         "TileMap/Room_15.tmj": {
             "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 285.5,
-                "y": 352.5
+                "x": 175.5,
+                "y": 175.5
             }
         },
         "TileMap/Room_16.tmj": {
-            "scale": 1,
-            "selectedLayer": 2,
+            "scale": 0.33,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 412.5,
-                "y": -741.5
+                "x": 356.060606060606,
+                "y": -237.87878787878776
             }
         },
         "TileMap/Room_17.tmj": {
@@ -119,8 +119,8 @@
             "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 1005.5,
-                "y": 0.5
+                "x": 679.5,
+                "y": -194.5
             }
         },
         "TileMap/Room_2.tmj": {
@@ -143,31 +143,31 @@
             "scale": 3,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -759.1666666666666,
-                "y": 460.83333333333326
+                "x": 176.16666666666666,
+                "y": 176.16666666666663
             }
         },
         "TileMap/Room_21.tmj": {
             "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -433,
-                "y": -253
+                "x": 175,
+                "y": 175
             }
         },
         "TileMap/Room_22.tmj": {
             "scale": 0.33,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 683.3333333333333,
-                "y": -1392.4242424242423
+                "x": 177.27272727272725,
+                "y": 177.27272727272725
             }
         },
         "TileMap/Room_23.tmj": {
             "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.5,
+                "x": 175.5,
                 "y": 175.5
             }
         },
@@ -175,8 +175,8 @@
             "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 1820.5,
-                "y": 585.5
+                "x": 175.5,
+                "y": 175.5
             }
         },
         "TileMap/Room_25.tmj": {
@@ -239,8 +239,8 @@
             "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 301.5,
-                "y": 0.5
+                "x": 175.5,
+                "y": 175.5
             }
         },
         "TileMap/Room_9.tmj": {
@@ -255,8 +255,8 @@
             "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 991,
-                "y": 643
+                "x": 319,
+                "y": 319
             }
         },
         "TileMap/Tunnel_1.tmx": {
@@ -299,10 +299,10 @@
     "last.exportedFilePath": "W:/RayLib_Games/Jason's_3rd_law/Assets/Level_Editor/TileMap",
     "last.imagePath": "W:/RayLib_Games/Jason's_3rd_law/Assets/Texture",
     "last.workingDirectory": "W:/",
-    "last.worldFilePath": "W:/RayLib_Games/Jason's_3rd_law/Assets/Level_Editor",
+    "last.worldFilePath": "C:/Users/h26ly/Documents/GitHub/Jason-s_3rd_law/Assets/Level_Editor",
     "lastUsedTilesetExportFilter": "JSON tileset files (*.tsj *.json)",
     "loadedWorlds": [
-        "W:/RayLib_Games/Jason's_3rd_law/Assets/Level_Editor/maps.world"
+        "C:/Users/h26ly/Documents/GitHub/Jason-s_3rd_law/Assets/Level_Editor/maps.world"
     ],
     "map.height": 11,
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
