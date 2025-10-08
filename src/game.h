@@ -16,6 +16,7 @@
 
 #define MAX_UNDO_RECORDS 2000    // IMPORTANT: This might need to be handle if released. I'm Using std::stack for now (dynamic alloc)
 
+
 #include "raylib.h"
 #include "raymath.h"
 
@@ -29,6 +30,7 @@
 // ----------------------------------------------------
 
 using UndoEntities = Array<Entity, MAX_UNDO_RECORDS>;
+
 
 enum State
 {

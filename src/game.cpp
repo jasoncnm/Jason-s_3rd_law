@@ -244,12 +244,12 @@ void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
                         if (target->type == ENTITY_TYPE_PLAYER)
                         {
                             // IMPORTANT: entity changed
-                            entity = MergeSlimes(target, entity);
+                            entity = MergeSlimes( entity, target);
                         }
                         else
                         {
                             // IMPORTANT: entity changed
-                            entity = MergeSlimes(entity, target);
+                            entity = MergeSlimes( target, entity);
                         }
                                                 
                         break;
@@ -317,7 +317,7 @@ PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                 {
                     if (pushEntity->type == ENTITY_TYPE_CLONE || pushEntity->type == ENTITY_TYPE_PLAYER)
                     {
-                        MergeSlimes(pushEntity, target);
+                        MergeSlimes( target, pushEntity);
                         return result;
                     }
 
@@ -611,7 +611,10 @@ bool MoveAction(IVec2 actionDir)
         {
             SetEntityPosition(mother, nullptr, actionTilePos);
             return true;
-        }            
+        }
+
+        if (!mother->active) return false;
+        
         // NOTE: no obsticale, move player
         {
             IVec2 standingPlatformPos = actionTilePos + mother->attachDir;
@@ -670,7 +673,7 @@ bool MoveAction(IVec2 actionDir)
                 Entity * slime = GetEntity(gameState->slimeEntityIndices[i]);
                 if (slime && slime != mother && slime->tilePos == mother->tilePos)
                 {
-                    MergeSlimes(mother, slime);
+                    mother = MergeSlimes(slime, mother);
                     break;
                 }
             }
@@ -697,7 +700,7 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
 
     if (player->tilePos == clone->tilePos)
     {
-        player = MergeSlimes(player, clone);
+        player = MergeSlimes( clone, player);
         return false;
     }
     
@@ -944,168 +947,168 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
     }
 
 
-    Entity * player = GetEntity(gameState->playerEntityIndex);
-    SM_ASSERT(player, "player is not active");
-
-    // NOTE: Recored if State Changes
-    bool stateChanged = false;
-
-        
-    // NOTE: Control Action State
-    if (JustPressed(SPACE_KEY))
     {
-        if (player->actionState == SPLIT_STATE)
-        {
-            player->actionState = MOVE_STATE;
-        }
-        else if (player->actionState == MOVE_STATE)
-        {
-            player->actionState = SPLIT_STATE;
-        }
-    }
+        // NOTE: Recored if State Changes
+        bool stateChanged = false;
+
+        Entity * player = GetEntity(gameState->playerEntityIndex);
     
-    timeSinceLastPress -= GetFrameTime();
-
-    UndoState prevState = { gameState->playerEntityIndex, gameState->entities.GetVectorSTD() };
-
-    // NOTE: Actions
-
-    // NOTE SlimeSelection
-    stateChanged = SlimeSelection(player);
-
-    switch(player->actionState)
-    {
-        case MOVE_STATE:
+        // NOTE: Control Action State
+        if (JustPressed(SPACE_KEY))
         {
-                
-            // NOTE: read input
-            gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = false;
-                
-            IVec2 actionDir = { 0 };
-
-            if (JustPressedMoveKey())
+            if (player->actionState == SPLIT_STATE)
             {
-                AdjustAnimatingSpeed(player, 2);
-                //player->moveAniQueue.Clear();
+                player->actionState = MOVE_STATE;
             }
-                
-            if (timeSinceLastPress < 0) //!IsAnimationPlaying(player) && )
+            else if (player->actionState == MOVE_STATE)
             {
-                bool isPressed = false;
-                    
-                if (IsDown(LEFT_KEY))
-                {
-                    actionDir = {-1 , 0};                    
-                    isPressed = true;
-                }
-                    
-                if (IsDown(RIGHT_KEY))
-                {
-                    actionDir = {1, 0};
-                    isPressed = true;
-                }
-                    
-                if (IsDown(UP_KEY))
-                {
-                    actionDir = {0, -1};
-                    isPressed = true;
-                }
-                    
-                if (IsDown(DOWN_KEY))
-                {
-                    actionDir = {0, 1};
-                    isPressed = true;
-                }
-                    
-                if (isPressed)
-                {
-                    timeSinceLastPress = pressFreq;
-                    stateChanged |= MoveAction(actionDir);
-                }
+                player->actionState = SPLIT_STATE;
             }
-                
-            break;
         }
-        case SPLIT_STATE:
+    
+        timeSinceLastPress -= GetFrameTime();
+
+        UndoState prevState = { gameState->playerEntityIndex, gameState->entities.GetVectorSTD() };
+
+        // NOTE: Actions
+
+        // NOTE SlimeSelection
+        stateChanged = SlimeSelection(player);
+
+        switch(player->actionState)
         {
-            // NOTE: Split Arrow Buttons
-            gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = true;
-
-            bool split = false;
-                
-            if (JustPressed(MOUSE_LEFT))
+            case MOVE_STATE:
             {
-                    
-                if (gameState->leftArrow.hover)
-                {
-                    // IMPORTANT shoot left and bounce right
-                    split = SplitAction(player, { -1, 0 });
-                }
-                    
-                if (gameState->rightArrow.hover)
-                {
-                    // IMPORTANT shoot right and bounce left
-                    split = SplitAction(player, { 1, 0 });
-                }
-                    
-                if (gameState->upArrow.hover)
-                {
-                    // IMPORTANT shoot up and bounce down
-                    split = SplitAction(player, { 0, -1 });
-                }
-                    
-                if (gameState->downArrow.hover)
-                {
-                    // IMPORTANT shoot down and bounce up
-                    split = SplitAction(player, { 0, 1 });
-                }
+                
+                // NOTE: read input
+                gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = false;
+                
+                IVec2 actionDir = { 0 };
 
-                if (split)
+                if (JustPressedMoveKey())
                 {
-                    stateChanged |= split;
-                    player->actionState = MOVE_STATE;
+                    AdjustAnimatingSpeed(player, 2);
+                    //player->moveAniQueue.Clear();
                 }
+                
+                if (timeSinceLastPress < 0) //!IsAnimationPlaying(player) && )
+                {
+                    bool isPressed = false;
                     
+                    if (IsDown(LEFT_KEY))
+                    {
+                        actionDir = {-1 , 0};                    
+                        isPressed = true;
+                    }
+                    
+                    if (IsDown(RIGHT_KEY))
+                    {
+                        actionDir = {1, 0};
+                        isPressed = true;
+                    }
+                    
+                    if (IsDown(UP_KEY))
+                    {
+                        actionDir = {0, -1};
+                        isPressed = true;
+                    }
+                    
+                    if (IsDown(DOWN_KEY))
+                    {
+                        actionDir = {0, 1};
+                        isPressed = true;
+                    }
+                    
+                    if (isPressed)
+                    {
+                        timeSinceLastPress = pressFreq;
+                        stateChanged |= MoveAction(actionDir);
+                    }
+                }
+                
+                break;
             }
-            break;
-        }
-    }
+            case SPLIT_STATE:
+            {
+                // NOTE: Split Arrow Buttons
+                gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = true;
 
-    if (gameState->electricDoorSystem)
-    {
-        UpdateElectricDoor();
-    }
+                bool split = false;
+                
+                if (JustPressed(MOUSE_LEFT))
+                {
+                    
+                    if (gameState->leftArrow.hover)
+                    {
+                        // IMPORTANT shoot left and bounce right
+                        split = SplitAction(player, { -1, 0 });
+                    }
+                    
+                    if (gameState->rightArrow.hover)
+                    {
+                        // IMPORTANT shoot right and bounce left
+                        split = SplitAction(player, { 1, 0 });
+                    }
+                    
+                    if (gameState->upArrow.hover)
+                    {
+                        // IMPORTANT shoot up and bounce down
+                        split = SplitAction(player, { 0, -1 });
+                    }
+                    
+                    if (gameState->downArrow.hover)
+                    {
+                        // IMPORTANT shoot down and bounce up
+                        split = SplitAction(player, { 0, 1 });
+                    }
+
+                    if (split)
+                    {
+                        stateChanged |= split;
+                        player->actionState = MOVE_STATE;
+                    }
+                    
+                }
+                break;
+            }
+        }
+
+        if (gameState->electricDoorSystem)
+        {
+            UpdateElectricDoor();
+        }
         
-    if (stateChanged)
-    {
-        gameState->animateTime = 0;
-        UpdateSlimes();                        
+        if (stateChanged)
+        {
+            gameState->animateTime = 0;
+            UpdateSlimes();                        
        
-        undoStack.push_back(prevState);
-    }
-
-
-    // NOTE: Undo and Restart
-    {
-        if (timeSinceLastPress < 0 && IsKeyDown(KEY_Z) && !undoStack.empty())
-        {
-            // NOTE: Undo
-            Undo();
-            timeSinceLastPress = pressFreq;
-            repeat = false;
+            undoStack.push_back(prevState);
         }
-        // NOTE: Restart States
-        repeat &= !stateChanged;
-        if (IsKeyPressed(KEY_R) && !repeat)
+
+        // NOTE: Undo and Restart
         {
-            repeat = true;
-            Restart();
+            if (timeSinceLastPress < 0 && IsKeyDown(KEY_Z) && !undoStack.empty())
+            {
+                // NOTE: Undo
+                Undo();
+                timeSinceLastPress = pressFreq;
+                repeat = false;
+            }
+            // NOTE: Restart States
+            repeat &= !stateChanged;
+            if (IsKeyPressed(KEY_R) && !repeat)
+            {
+                repeat = true;
+                Restart();
             
+            }
         }
     }
     
     // NOTE: Arrow Setup
     {
+        Entity * player = GetEntity(gameState->playerEntityIndex);
         Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
         IVec2 centerPos = player->tilePos;
         
@@ -1218,7 +1221,8 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         EndMode2D();
     
         // NOTE: UI Draw Game Informations
-    
+
+        Entity * player = GetEntity(gameState->playerEntityIndex);
         IVec2 centerPos = player->tilePos;
 
         Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);

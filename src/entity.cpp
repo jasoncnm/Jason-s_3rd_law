@@ -232,6 +232,12 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
     SM_ASSERT(mergeSlime->active && mergedSlime->active, "entity does not exist");
     SM_ASSERT(mergeSlime != mergedSlime, "Entity cannot merge itself");
 
+    if (mergedSlime->entityIndex == gameState->playerEntityIndex)
+    {
+        gameState->playerEntityIndex = mergeSlime->entityIndex;
+        mergeSlime->color = WHITE;
+    }
+
     mergeSlime->mass += mergedSlime->mass;
     DeleteEntity(mergedSlime);
 
