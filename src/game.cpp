@@ -175,7 +175,7 @@ void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
                     }
                     case ENTITY_TYPE_GLASS:
                     {
-                        if (!entity->broken && isSlime)
+                        if (!target->broken && isSlime)
                         {
                             // IMPORTANT: entity changed
                             SetAttach(entity, target, dir);
@@ -256,7 +256,7 @@ void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
                     }
                 }
                         
-                break;
+                // break;
             }
             
         }

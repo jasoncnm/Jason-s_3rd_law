@@ -234,6 +234,7 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
 
     if (mergedSlime->entityIndex == gameState->playerEntityIndex)
     {
+        mergeSlime->type = ENTITY_TYPE_PLAYER;
         gameState->playerEntityIndex = mergeSlime->entityIndex;
         mergeSlime->color = WHITE;
     }

@@ -175,12 +175,15 @@ inline void PowerOnCable(Entity * cable, bool & end)
                 }
             }
 
+            // TODO
+#if 0
             if (entity && (entity->tilePos == cable->tilePos + bounceDir))
             {
                 cable->open = false;
                 cable->sprite = GetSprite(cable->spriteID);
             }
             else
+#endif
             {
                 cable->tilePos = cable->tilePos + offset;
             }
