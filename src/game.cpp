@@ -193,11 +193,7 @@ void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
                         PushActionResult result = 
                             PushActionCheck(startEntity, entity, pos, dir, 0);
 
-                        if (isSlime)
-                        {
-                            SetEntityPosition(entity, target, target->tilePos - dir);
-                        }
-                        else if (result.blocked)
+                        if (result.blocked)
                         {
                             SetEntityPosition(entity, result.blockedEntity, pos - dir);
                         }
@@ -695,14 +691,22 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
     
     Entity * clone = CreateSlimeClone(player->tilePos);
 
+    Vector2 playerStart = GetTilePivot(player->tilePos, player->tileSize);
     BounceEntity(player, player, bounceDir);
-    BounceEntity(clone, clone, -bounceDir);
+    Vector2 playerEnd = GetTilePivot(player->tilePos, player->tileSize);
 
+    Vector2 cloneStart = GetTilePivot(clone->tilePos, clone->tileSize);
+    BounceEntity(clone, clone, -bounceDir);
+    Vector2 cloneEnd = GetTilePivot(clone->tilePos, clone->tileSize);
+    
     if (player->tilePos == clone->tilePos)
     {
         player = MergeSlimes( clone, player);
         return false;
     }
+
+    AddMoveAnimateQueue(player->moveAniQueue, GetMoveAnimation(nullptr, playerStart, playerEnd));
+    AddMoveAnimateQueue(clone->moveAniQueue, GetMoveAnimation(nullptr, cloneStart, cloneEnd));
     
     return true;
 }

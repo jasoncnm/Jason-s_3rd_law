@@ -25,10 +25,10 @@
         },
         "TileMap/Room_1.tmj": {
             "scale": 0.5,
-            "selectedLayer": 2,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 175,
-                "y": 176
+                "x": 149,
+                "y": 925
             }
         },
         "TileMap/Room_1.tmx": {
@@ -76,11 +76,11 @@
             }
         },
         "TileMap/Room_14.tmj": {
-            "scale": 0.75,
+            "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.66666666666669,
-                "y": 176
+                "x": 501,
+                "y": 925
             }
         },
         "TileMap/Room_15.tmj": {
@@ -95,8 +95,8 @@
             "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -41,
-                "y": 21
+                "x": 175,
+                "y": 176
             }
         },
         "TileMap/Room_17.tmj": {
@@ -111,16 +111,16 @@
             "scale": 4,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 181.875,
-                "y": -61.375
+                "x": 176.125,
+                "y": 176
             }
         },
         "TileMap/Room_19.tmj": {
-            "scale": 4,
+            "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 694.375,
-                "y": 510.875
+                "x": -458,
+                "y": -575.3333333333333
             }
         },
         "TileMap/Room_2.tmj": {
@@ -172,11 +172,11 @@
             }
         },
         "TileMap/Room_24.tmj": {
-            "scale": 0.5,
+            "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 819,
-                "y": -505
+                "x": -654,
+                "y": -551.3333333333333
             }
         },
         "TileMap/Room_25.tmj": {
@@ -252,11 +252,11 @@
             }
         },
         "TileMap/Test.tmj": {
-            "scale": 0.33,
+            "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 319.6969696969697,
-                "y": 321.21212121212113
+                "x": 1365,
+                "y": 1117
             }
         },
         "TileMap/Tunnel_1.tmx": {

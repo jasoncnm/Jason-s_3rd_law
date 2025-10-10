@@ -45,7 +45,7 @@ void AdjustAnimatingSpeed(Entity * entity, float ratio)
 }
 
 MoveAnimation GetMoveAnimation(float (*Easing)(float), Vector2 moveStart, Vector2 moveEnd,
-                               float animateSpeed = 6.0f, float target_t = 1.0f, bool startPlay = true, float delay = 0.0f)
+                               float animateSpeed = 5.0f, float target_t = 1.0f, bool startPlay = true, float delay = 0.0f)
 {
     MoveAnimation ani;
     ani.playing = startPlay;

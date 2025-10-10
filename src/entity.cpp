@@ -147,6 +147,7 @@ inline void DeleteEntity(Entity * entity)
 {
     entity->active = false;
     entity->type = ENTITY_TYPE_NULL;
+    entity->moveAniQueue.Clear();
 }
 
 void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
