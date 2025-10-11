@@ -14,9 +14,6 @@
 #include <sys/stat.h>
 #include <vector>
 
-#include "raylib.h"
-#include "raymath.h"
-
 
 //  ========================================================================
 // NOTE: Defines
@@ -37,6 +34,8 @@
 #define KB(x) (1024LL * x)
 #define MB(x) (1024LL * KB(x))
 #define GB(x) (1024LL * MB(x))
+
+#define PI 3.14159265358979323846f
 
 //  ========================================================================
 // NOTE: Logging
@@ -386,6 +385,21 @@ bool copy_file(char * fileName, char * outputName, BumpAllocator * ba)
 //  ========================================================================
 //              NOTE: Math Stuff
 //  ========================================================================
+struct Rectangle;
+struct Rect
+{
+    float x;                // Rectangle top-left corner position x
+    float y;                // Rectangle top-left corner position y
+    float width;            // Rectangle width
+    float height;           // Rectangle height
+
+    // NOTE: Override operator for raylib class
+    operator Rectangle() const;
+    
+};
+
+
+struct Vector2;
 struct Vec2
 {
     float x;
@@ -400,6 +414,17 @@ struct Vec2
     {
         return { x - other.x, y - other.y };
     }
+
+    // NOTE: Override operator for raylib class
+    operator Vector2() const;
+    
+};
+
+// Vec3, 3 components
+struct Vec3 {
+    float x;                // Vec x component
+    float y;                // Vec y component
+    float z;                // Vec z component
 };
 
 float Distance(Vec2 a, Vec2 b)
@@ -496,6 +521,7 @@ Vec2 IVec2ToVec2(IVec2 val)
     return Vec2 { (float)val.x, (float)val.y };
 }
 
+struct Color;
 struct Vec4
 {
     union
@@ -523,7 +549,15 @@ struct Vec4
     {
         return value[idx];
     }
+
+    operator Color() const;    
+    
 };
+
+
+// Quaternion, 4 components (Vec4 alias)
+using Quat = Vec4;
+
 
 struct Mat4
 {
@@ -617,5 +651,11 @@ bool SameSign(int x, int y)
 
     return a == b;
 }
+
+float DeltaTime();
+bool EngineIsWindowResized();
+int EngineGetScreenWidth();
+int EngineGetScreenHeight();
+
 #define ENGINE_LIB_H
 #endif

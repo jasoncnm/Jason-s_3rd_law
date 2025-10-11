@@ -27,8 +27,8 @@
             "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 149,
-                "y": 925
+                "x": 445,
+                "y": 755
             }
         },
         "TileMap/Room_1.tmx": {
@@ -76,11 +76,11 @@
             }
         },
         "TileMap/Room_14.tmj": {
-            "scale": 0.5,
+            "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 501,
-                "y": 925
+                "x": 759.5,
+                "y": 271.5
             }
         },
         "TileMap/Room_15.tmj": {
@@ -252,11 +252,11 @@
             }
         },
         "TileMap/Test.tmj": {
-            "scale": 0.5,
+            "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 1365,
-                "y": 1117
+                "x": 1623.5,
+                "y": 463.5
             }
         },
         "TileMap/Tunnel_1.tmx": {

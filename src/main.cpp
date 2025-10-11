@@ -17,7 +17,7 @@
 
 #include "game.cpp"
 
-#include "raylib.h"
+#include "raylib_wrapper.cpp"
 
 // NOTE: Program main entry point
 int main(void)

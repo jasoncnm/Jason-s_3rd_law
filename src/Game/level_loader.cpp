@@ -55,7 +55,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
         entityResult = AddEntity(ENTITY_TYPE_CLONE, tilePos, SPRITE_SLIME_1);
         entityResult.entity->mass = 1;
         entityResult.entity->tileSize = (float)MAP_TILE_SIZE / entityResult.entity->maxMass;
-        entityResult.entity->color = GRAY;
+        entityResult.entity->color = E_GRAY;
 
         entityResult.entity->movable = true;
         gameState->slimeEntityIndices.Add(entityResult.entityIndex);
@@ -329,7 +329,7 @@ void LoadLevelToGameState(GameState & state, State loadState)
         state.tileMax = max;
         
         // NOTE: Camera Setup
-        Vector2 pos = TilePositionToPixelPosition(6, 6);
+        Vec2 pos = TilePositionToPixelPosition(6, 6);
         
         state.camera.target = { pos.x, pos.y };
         state.camera.offset = { SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };

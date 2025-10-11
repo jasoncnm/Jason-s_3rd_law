@@ -7,13 +7,11 @@
    $Notice: $
    ======================================================================== */
 
-
-
 struct MoveAnimation
 {
     bool playing = false;
-    Vector2 moveStart;
-    Vector2 moveEnd;
+    Vec2 moveStart;
+    Vec2 moveEnd;
 
     float move_t = 0;
     float move_target_t = 1;
@@ -22,7 +20,7 @@ struct MoveAnimation
     float delay;
 
     void Update();
-    Vector2 GetPosition();
+    Vec2 GetPosition();
 
     float (*Easing)(float);
     
@@ -36,7 +34,7 @@ bool IsAnimationPlaying(Entity * entity);
 
 void AdjustAnimatingSpeed(Entity * entity, float ratio);
 
-MoveAnimation GetMoveAnimation(float (*Easing)(float), Vector2 moveStart, Vector2 moveEnd,
+MoveAnimation GetMoveAnimation(float (*Easing)(float), Vec2 moveStart, Vec2 moveEnd,
                                float animateSpeed, float target_t, bool startPlay, float delay);
 
 float GetDelay(Entity * pushedEntity, Entity * pushEntity, float speed, IVec2 pushDir);

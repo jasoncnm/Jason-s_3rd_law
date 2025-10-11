@@ -44,7 +44,7 @@ void AdjustAnimatingSpeed(Entity * entity, float ratio)
     
 }
 
-MoveAnimation GetMoveAnimation(float (*Easing)(float), Vector2 moveStart, Vector2 moveEnd,
+MoveAnimation GetMoveAnimation(float (*Easing)(float), Vec2 moveStart, Vec2 moveEnd,
                                float animateSpeed = 5.0f, float target_t = 1.0f, bool startPlay = true, float delay = 0.0f)
 {
     MoveAnimation ani;
@@ -60,7 +60,7 @@ MoveAnimation GetMoveAnimation(float (*Easing)(float), Vector2 moveStart, Vector
     return ani;
 }
 
-Vector2 MoveAnimation::GetPosition()
+Vec2 MoveAnimation::GetPosition()
 {
     SM_ASSERT(move_target_t, "Divide by zero");
     
@@ -71,7 +71,7 @@ Vector2 MoveAnimation::GetPosition()
         t = Easing(t);
     }
 
-    Vector2 result = Vector2Add(moveStart, Vector2Scale(Vector2Subtract(moveEnd, moveStart), t));
+    Vec2 result = Vec2Add(moveStart, Vec2Scale(Vec2Subtract(moveEnd, moveStart), t));
     
     return result;
 }
@@ -80,7 +80,7 @@ void MoveAnimation::Update()
 {
     if (delay <= 0)
     {
-        float delta = GetFrameTime() * move_dt;
+        float delta = DeltaTime() * move_dt;
 
         if (move_t < move_target_t)
         {
@@ -96,7 +96,7 @@ void MoveAnimation::Update()
     }
     else
     {
-        delay -= GetFrameTime();
+        delay -= DeltaTime();
     }
 }
 
@@ -105,8 +105,8 @@ float GetDelay(Entity * pushedEntity, Entity * pushEntity, float speed, IVec2 pu
     float delay = 0;
 
     IVec2 attachDir = pushEntity->attach ? pushEntity->attachDir : (IVec2){ 0, 0 };
-    Vector2 pointA = GetTilePivot(pushEntity);
-    Vector2 pointB = GetTilePivot(pushedEntity->tilePos - pushDir, pushEntity->tileSize, attachDir);
+    Vec2 pointA = GetTilePivot(pushEntity);
+    Vec2 pointB = GetTilePivot(pushedEntity->tilePos - pushDir, pushEntity->tileSize, attachDir);
 
     if (pushEntity->tilePos.x - pushedEntity->tilePos.x == 0)
     {

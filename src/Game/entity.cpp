@@ -26,7 +26,7 @@ inline bool IsSlime(Entity * entity)
 }
 
 inline AddEntityResult
-AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE, int tileSize = 32)
+AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Vec4 color = E_WHITE, int tileSize = 32)
 {
     AddEntityResult result;
 
@@ -237,7 +237,7 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
     {
         mergeSlime->type = ENTITY_TYPE_PLAYER;
         gameState->playerEntityIndex = mergeSlime->entityIndex;
-        mergeSlime->color = WHITE;
+        mergeSlime->color = E_WHITE;
     }
 
     mergeSlime->mass += mergedSlime->mass;
@@ -396,11 +396,11 @@ inline void UpdateSlimes()
                 
                     SM_ASSERT(dir.SqrMagnitude() == 1, "Invalid bounce direction");
 
-                    Vector2 moveStart = GetTilePivot(slime);
+                    Vec2 moveStart = GetTilePivot(slime);
                     MoveTowardsUntilBlocked(slime, newPos, dir);
-                    Vector2 moveEnd = GetTilePivot(slime);
+                    Vec2 moveEnd = GetTilePivot(slime);
 
-                    float dist = Vector2Distance(moveStart, moveEnd);
+                    float dist = Vec2Distance(moveStart, moveEnd);
                     float iDist = dist / MAP_TILE_SIZE;
 
                     AddMoveAnimateQueue(slime->moveAniQueue,
@@ -419,10 +419,10 @@ inline void UpdateSlimes()
         if (slime && slime != player && slime->mass > player->mass)
         {
             slime->type = ENTITY_TYPE_PLAYER;
-            slime->color = WHITE;
+            slime->color = E_WHITE;
 
             player->type = ENTITY_TYPE_CLONE;
-            player->color = GRAY;
+            player->color = E_GRAY;
 
             gameState->playerEntityIndex = slime->entityIndex;
         }
@@ -562,7 +562,7 @@ inline Entity * CreateSlimeClone(IVec2 tilePos)
     freeEntity->type = ENTITY_TYPE_CLONE;
     freeEntity->mass = 1;
     freeEntity->tileSize = ( MAP_TILE_SIZE / 3.0f);
-    freeEntity->color = GRAY;
+    freeEntity->color = E_GRAY;
     freeEntity->attach = false;    
 
     return freeEntity;

@@ -688,7 +688,7 @@ typedef enum {
     KEY_MENU            = 5,        // Key: Android menu button
     KEY_VOLUME_UP       = 24,       // Key: Android volume up button
     KEY_VOLUME_DOWN     = 25        // Key: Android volume down button
-} KeyboardKey;
+} EngineKeyboardKey;
 
 // Add backwards compatibility support for deprecated names
 #define MOUSE_LEFT_BUTTON   MOUSE_BUTTON_LEFT
@@ -697,60 +697,60 @@ typedef enum {
 
 // Mouse buttons
 typedef enum {
-    MOUSE_BUTTON_LEFT    = 0,       // Mouse button left
-    MOUSE_BUTTON_RIGHT   = 1,       // Mouse button right
-    MOUSE_BUTTON_MIDDLE  = 2,       // Mouse button middle (pressed wheel)
-    MOUSE_BUTTON_SIDE    = 3,       // Mouse button side (advanced mouse device)
-    MOUSE_BUTTON_EXTRA   = 4,       // Mouse button extra (advanced mouse device)
-    MOUSE_BUTTON_FORWARD = 5,       // Mouse button forward (advanced mouse device)
-    MOUSE_BUTTON_BACK    = 6,       // Mouse button back (advanced mouse device)
-} MouseButton;
+    E_MOUSE_BUTTON_LEFT    = 0,       // Mouse button left
+    E_MOUSE_BUTTON_RIGHT   = 1,       // Mouse button right
+    E_MOUSE_BUTTON_MIDDLE  = 2,       // Mouse button middle (pressed wheel)
+    E_MOUSE_BUTTON_SIDE    = 3,       // Mouse button side (advanced mouse device)
+    E_MOUSE_BUTTON_EXTRA   = 4,       // Mouse button extra (advanced mouse device)
+    E_MOUSE_BUTTON_FORWARD = 5,       // Mouse button forward (advanced mouse device)
+    E_MOUSE_BUTTON_BACK    = 6,       // Mouse button back (advanced mouse device)
+} EngineMouseButton;
 
 // Mouse cursor
 typedef enum {
-    MOUSE_CURSOR_DEFAULT       = 0,     // Default pointer shape
-    MOUSE_CURSOR_ARROW         = 1,     // Arrow shape
-    MOUSE_CURSOR_IBEAM         = 2,     // Text writing cursor shape
-    MOUSE_CURSOR_CROSSHAIR     = 3,     // Cross shape
-    MOUSE_CURSOR_POINTING_HAND = 4,     // Pointing hand cursor
-    MOUSE_CURSOR_RESIZE_EW     = 5,     // Horizontal resize/move arrow shape
-    MOUSE_CURSOR_RESIZE_NS     = 6,     // Vertical resize/move arrow shape
-    MOUSE_CURSOR_RESIZE_NWSE   = 7,     // Top-left to bottom-right diagonal resize/move arrow shape
-    MOUSE_CURSOR_RESIZE_NESW   = 8,     // The top-right to bottom-left diagonal resize/move arrow shape
-    MOUSE_CURSOR_RESIZE_ALL    = 9,     // The omnidirectional resize/move cursor shape
-    MOUSE_CURSOR_NOT_ALLOWED   = 10     // The operation-not-allowed shape
-} MouseCursor;
+    E_MOUSE_CURSOR_DEFAULT       = 0,     // Default pointer shape
+    E_MOUSE_CURSOR_ARROW         = 1,     // Arrow shape
+    E_MOUSE_CURSOR_IBEAM         = 2,     // Text writing cursor shape
+    E_MOUSE_CURSOR_CROSSHAIR     = 3,     // Cross shape
+    E_MOUSE_CURSOR_POINTING_HAND = 4,     // Pointing hand cursor
+    E_MOUSE_CURSOR_RESIZE_EW     = 5,     // Horizontal resize/move arrow shape
+    E_MOUSE_CURSOR_RESIZE_NS     = 6,     // Vertical resize/move arrow shape
+    E_MOUSE_CURSOR_RESIZE_NWSE   = 7,     // Top-left to bottom-right diagonal resize/move arrow shape
+    E_MOUSE_CURSOR_RESIZE_NESW   = 8,     // The top-right to bottom-left diagonal resize/move arrow shape
+    E_MOUSE_CURSOR_RESIZE_ALL    = 9,     // The omnidirectional resize/move cursor shape
+    E_MOUSE_CURSOR_NOT_ALLOWED   = 10     // The operation-not-allowed shape
+} EngineMouseCursor;
 
 // Gamepad buttons
 typedef enum {
-    GAMEPAD_BUTTON_UNKNOWN = 0,         // Unknown button, just for error checking
-    GAMEPAD_BUTTON_LEFT_FACE_UP,        // Gamepad left DPAD up button
-    GAMEPAD_BUTTON_LEFT_FACE_RIGHT,     // Gamepad left DPAD right button
-    GAMEPAD_BUTTON_LEFT_FACE_DOWN,      // Gamepad left DPAD down button
-    GAMEPAD_BUTTON_LEFT_FACE_LEFT,      // Gamepad left DPAD left button
-    GAMEPAD_BUTTON_RIGHT_FACE_UP,       // Gamepad right button up (i.e. PS3: Triangle, Xbox: Y)
-    GAMEPAD_BUTTON_RIGHT_FACE_RIGHT,    // Gamepad right button right (i.e. PS3: Circle, Xbox: B)
-    GAMEPAD_BUTTON_RIGHT_FACE_DOWN,     // Gamepad right button down (i.e. PS3: Cross, Xbox: A)
-    GAMEPAD_BUTTON_RIGHT_FACE_LEFT,     // Gamepad right button left (i.e. PS3: Square, Xbox: X)
-    GAMEPAD_BUTTON_LEFT_TRIGGER_1,      // Gamepad top/back trigger left (first), it could be a trailing button
-    GAMEPAD_BUTTON_LEFT_TRIGGER_2,      // Gamepad top/back trigger left (second), it could be a trailing button
-    GAMEPAD_BUTTON_RIGHT_TRIGGER_1,     // Gamepad top/back trigger right (first), it could be a trailing button
-    GAMEPAD_BUTTON_RIGHT_TRIGGER_2,     // Gamepad top/back trigger right (second), it could be a trailing button
-    GAMEPAD_BUTTON_MIDDLE_LEFT,         // Gamepad center buttons, left one (i.e. PS3: Select)
-    GAMEPAD_BUTTON_MIDDLE,              // Gamepad center buttons, middle one (i.e. PS3: PS, Xbox: XBOX)
-    GAMEPAD_BUTTON_MIDDLE_RIGHT,        // Gamepad center buttons, right one (i.e. PS3: Start)
-    GAMEPAD_BUTTON_LEFT_THUMB,          // Gamepad joystick pressed button left
-    GAMEPAD_BUTTON_RIGHT_THUMB          // Gamepad joystick pressed button right
-} GamepadButton;
+    E_GAMEPAD_BUTTON_UNKNOWN = 0,         // Unknown button, just for error checking
+    E_GAMEPAD_BUTTON_LEFT_FACE_UP,        // Gamepad left DPAD up button
+    E_GAMEPAD_BUTTON_LEFT_FACE_RIGHT,     // Gamepad left DPAD right button
+    E_GAMEPAD_BUTTON_LEFT_FACE_DOWN,      // Gamepad left DPAD down button
+    E_GAMEPAD_BUTTON_LEFT_FACE_LEFT,      // Gamepad left DPAD left button
+    E_GAMEPAD_BUTTON_RIGHT_FACE_UP,       // Gamepad right button up (i.e. PS3: Triangle, Xbox: Y)
+    E_GAMEPAD_BUTTON_RIGHT_FACE_RIGHT,    // Gamepad right button right (i.e. PS3: Circle, Xbox: B)
+    E_GAMEPAD_BUTTON_RIGHT_FACE_DOWN,     // Gamepad right button down (i.e. PS3: Cross, Xbox: A)
+    E_GAMEPAD_BUTTON_RIGHT_FACE_LEFT,     // Gamepad right button left (i.e. PS3: Square, Xbox: X)
+    E_GAMEPAD_BUTTON_LEFT_TRIGGER_1,      // Gamepad top/back trigger left (first), it could be a trailing button
+    E_GAMEPAD_BUTTON_LEFT_TRIGGER_2,      // Gamepad top/back trigger left (second), it could be a trailing button
+    E_GAMEPAD_BUTTON_RIGHT_TRIGGER_1,     // Gamepad top/back trigger right (first), it could be a trailing button
+    E_GAMEPAD_BUTTON_RIGHT_TRIGGER_2,     // Gamepad top/back trigger right (second), it could be a trailing button
+    E_GAMEPAD_BUTTON_MIDDLE_LEFT,         // Gamepad center buttons, left one (i.e. PS3: Select)
+    E_GAMEPAD_BUTTON_MIDDLE,              // Gamepad center buttons, middle one (i.e. PS3: PS, Xbox: XBOX)
+    E_GAMEPAD_BUTTON_MIDDLE_RIGHT,        // Gamepad center buttons, right one (i.e. PS3: Start)
+    E_GAMEPAD_BUTTON_LEFT_THUMB,          // Gamepad joystick pressed button left
+    E_GAMEPAD_BUTTON_RIGHT_THUMB          // Gamepad joystick pressed button right
+} EngineGamepadButton;
 
 // Gamepad axis
 typedef enum {
-    GAMEPAD_AXIS_LEFT_X        = 0,     // Gamepad left stick X axis
-    GAMEPAD_AXIS_LEFT_Y        = 1,     // Gamepad left stick Y axis
-    GAMEPAD_AXIS_RIGHT_X       = 2,     // Gamepad right stick X axis
-    GAMEPAD_AXIS_RIGHT_Y       = 3,     // Gamepad right stick Y axis
-    GAMEPAD_AXIS_LEFT_TRIGGER  = 4,     // Gamepad back trigger left, pressure level: [1..-1]
-    GAMEPAD_AXIS_RIGHT_TRIGGER = 5      // Gamepad back trigger right, pressure level: [1..-1]
+    E_GAMEPAD_AXIS_LEFT_X        = 0,     // Gamepad left stick X axis
+    E_GAMEPAD_AXIS_LEFT_Y        = 1,     // Gamepad left stick Y axis
+    E_GAMEPAD_AXIS_RIGHT_X       = 2,     // Gamepad right stick X axis
+    E_GAMEPAD_AXIS_RIGHT_Y       = 3,     // Gamepad right stick Y axis
+    E_GAMEPAD_AXIS_LEFT_TRIGGER  = 4,     // Gamepad back trigger left, pressure level: [1..-1]
+    E_GAMEPAD_AXIS_RIGHT_TRIGGER = 5      // Gamepad back trigger right, pressure level: [1..-1]
 } GamepadAxis;
 
 // Material map index

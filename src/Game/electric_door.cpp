@@ -155,11 +155,11 @@ inline void PowerOnCable(Entity * cable, bool & end)
             Entity * entity = FindEntityByLocationAndLayer(cable->tilePos + bounceDir, LAYER_BLOCKS);
             if (entity)
             {
-                Vector2 moveStart = GetTilePivot(entity);
+                Vec2 moveStart = GetTilePivot(entity);
                 BounceEntity(cable, entity, bounceDir);
-                Vector2 moveEnd = GetTilePivot(entity);
+                Vec2 moveEnd = GetTilePivot(entity);
                 
-                float dist = Vector2Distance(moveStart, moveEnd);
+                float dist = Vec2Distance(moveStart, moveEnd);
                 float iDist = dist / MAP_TILE_SIZE;
 
                 AddMoveAnimateQueue(entity->moveAniQueue,
@@ -246,7 +246,7 @@ void OnSourcePowerOn(Array<bool, MAX_CABLE> & visited, int currentIndex)
 
 inline bool DoorBlocked(IVec2 tilePos, IVec2 reachDir)
 {
-    SM_ASSERT(reachDir.SqrMagnitude() <= 1, "Directional Vector should be a unit vector");
+    SM_ASSERT(reachDir.SqrMagnitude() <= 1, "Directional Vec should be a unit vector");
     
     bool result = false;
     for (int i = 0; i < Door_Indices.count; i++)

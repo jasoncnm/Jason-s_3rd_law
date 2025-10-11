@@ -38,7 +38,7 @@ inline bool JustPressed(GameInputType type)
     KeyMapping & mapping = gameState->keyMappings[type];
     for (int idx = 0; idx < mapping.keys.count; idx++)
     {
-        if (IsKeyPressed(mapping.keys[idx]) || IsMouseButtonPressed(mapping.keys[idx])) return true;
+        if (EngineIsKeyPressed(mapping.keys[idx]) || EngineIsMouseButtonPressed(mapping.keys[idx])) return true;
     }
     
     return false;
@@ -55,7 +55,7 @@ inline bool IsDown(GameInputType type)
     KeyMapping mapping = gameState->keyMappings[type];
     for (int idx = 0; idx < mapping.keys.count; idx++)
     {
-        if (IsKeyDown(mapping.keys[idx]) || IsMouseButtonDown(mapping.keys[idx])) return true;
+        if (EngineIsKeyDown(mapping.keys[idx]) || EngineIsMouseButtonDown(mapping.keys[idx])) return true;
     }
     return false;
 }
@@ -347,12 +347,12 @@ PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                             //float delay = GetDelay(target, pushEntity, blockSpeed, pushDir);
                             float delay = GetDelay(target, startEntity, blockSpeed, pushDir);
                             
-                            Vector2 moveStart = GetTilePivot(target);
+                            Vec2 moveStart = GetTilePivot(target);
                             BounceEntity(startEntity, target, pushDir);
-                            Vector2 moveEnd = GetTilePivot(target);
+                            Vec2 moveEnd = GetTilePivot(target);
 
                             float distPerSecond = MAP_TILE_SIZE / blockSpeed;
-                            float dist = Vector2Distance(moveStart, moveEnd);
+                            float dist = Vec2Distance(moveStart, moveEnd);
                             float tileDist = dist / MAP_TILE_SIZE;
 
                             AddMoveAnimateQueue(target->moveAniQueue,
@@ -363,11 +363,11 @@ PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                         {
                             float delay = GetDelay(target, startEntity, blockSpeed, pushDir);
 
-                            Vector2 moveStart = GetTilePivot(target);
+                            Vec2 moveStart = GetTilePivot(target);
                             SetEntityPosition(target, nullptr, blockNextPos + pushDir);
-                            Vector2 moveEnd = GetTilePivot(target);
+                            Vec2 moveEnd = GetTilePivot(target);
 
-                            float dist = Vector2Distance(moveStart, moveEnd);
+                            float dist = Vec2Distance(moveStart, moveEnd);
                             float iDist = dist / MAP_TILE_SIZE;
 
                             AddMoveAnimateQueue(target->moveAniQueue,
@@ -405,8 +405,8 @@ inline bool UpdateCamera()
             playerTile.y > map.tilePos.y && playerTile.y <= (map.tilePos.y + map.height))
         {
             
-            Vector2 pos = TilePositionToPixelPosition(map.width * 0.5f + map.tilePos.x + 0.5f, map.height * 0.5f + map.tilePos.y + 0.5f);
-            if (!Vector2Equals(pos, gameState->camera.target))
+            Vec2 pos = TilePositionToPixelPosition(map.width * 0.5f + map.tilePos.x + 0.5f, map.height * 0.5f + map.tilePos.y + 0.5f);
+            if (!Vec2Equals(pos, gameState->camera.target))
             {
                 if (!map.firstEnter)
                 {
@@ -423,10 +423,10 @@ inline bool UpdateCamera()
         }
     }
     
-    if (IsWindowResized())
+    if (EngineIsWindowResized())
     {
-        int newWidth = GetScreenWidth();
-        int newHeight = GetScreenHeight();
+        int newWidth = EngineGetScreenWidth();
+        int newHeight = EngineGetScreenHeight();
         gameState->camera.offset = { newWidth / 2.0f, newHeight / 2.0f };
         gameState->camera.zoom = (newWidth < newHeight) ? newWidth * 1.7f / SCREEN_WIDTH : newHeight * 1.7f / SCREEN_WIDTH;
         
@@ -546,9 +546,9 @@ bool MoveAction(IVec2 actionDir)
                 if (result.blocked)
                 {
                     // IMPORTANT: mother entity changed
-                    Vector2 startPos = GetTilePivot(mother);
+                    Vec2 startPos = GetTilePivot(mother);
                     SetAttach(mother, pushResult.blockedEntity, actionDir);
-                    Vector2 endPos = GetTilePivot(mother);
+                    Vec2 endPos = GetTilePivot(mother);
                     AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, startPos, endPos));
                     
                     return true;
@@ -557,11 +557,11 @@ bool MoveAction(IVec2 actionDir)
             }
 
             // IMPORTANT: mother entity changed
-            Vector2 moveStart = GetTilePivot(mother);
-            Vector2 moveMiddle =
-                Vector2Add(moveStart, Vector2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f *(MAP_TILE_SIZE - mother->tileSize)));
+            Vec2 moveStart = GetTilePivot(mother);
+            Vec2 moveMiddle =
+                Vec2Add(moveStart, Vec2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f *(MAP_TILE_SIZE - mother->tileSize)));
             SetAttach(mother, pushResult.blockedEntity, actionDir);
-            Vector2 moveEnd = GetTilePivot(mother);
+            Vec2 moveEnd = GetTilePivot(mother);
             AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, moveStart, moveMiddle, 6.0f));
             AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, moveMiddle, moveEnd, 12.0f));
             return true;
@@ -626,9 +626,9 @@ bool MoveAction(IVec2 actionDir)
                 }
                 
                 // IMPORTANT: mother entity changed
-                Vector2 moveStart = GetTilePivot(mother);
+                Vec2 moveStart = GetTilePivot(mother);
                 SetEntityPosition(mother, findResult.entity, actionTilePos);
-                Vector2 moveEnd = GetTilePivot(mother);
+                Vec2 moveEnd = GetTilePivot(mother);
                 AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, moveStart, moveEnd));
 
                 
@@ -649,12 +649,12 @@ bool MoveAction(IVec2 actionDir)
                 }
                 
                 // IMPORTANT: mother entity changed
-                Vector2 moveStart = GetTilePivot(mother);
-                Vector2 movemiddle =
-                    Vector2Add(moveStart, Vector2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f * (MAP_TILE_SIZE + mother->tileSize)));
+                Vec2 moveStart = GetTilePivot(mother);
+                Vec2 movemiddle =
+                    Vec2Add(moveStart, Vec2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f * (MAP_TILE_SIZE + mother->tileSize)));
                 
                 SetEntityPosition(mother, attachedEntity, newTile);
-                Vector2 moveEnd = GetTilePivot(mother);
+                Vec2 moveEnd = GetTilePivot(mother);
 
                 AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, moveStart, movemiddle, 6.0f));
                 AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, movemiddle, moveEnd, 7.0f));
@@ -691,13 +691,13 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
     
     Entity * clone = CreateSlimeClone(player->tilePos);
 
-    Vector2 playerStart = GetTilePivot(player->tilePos, player->tileSize);
+    Vec2 playerStart = GetTilePivot(player->tilePos, player->tileSize);
     BounceEntity(player, player, bounceDir);
-    Vector2 playerEnd = GetTilePivot(player->tilePos, player->tileSize);
+    Vec2 playerEnd = GetTilePivot(player->tilePos, player->tileSize);
 
-    Vector2 cloneStart = GetTilePivot(clone->tilePos, clone->tileSize);
+    Vec2 cloneStart = GetTilePivot(clone->tilePos, clone->tileSize);
     BounceEntity(clone, clone, -bounceDir);
-    Vector2 cloneEnd = GetTilePivot(clone->tilePos, clone->tileSize);
+    Vec2 cloneEnd = GetTilePivot(clone->tilePos, clone->tileSize);
     
     if (player->tilePos == clone->tilePos)
     {
@@ -728,7 +728,7 @@ inline void DrawSpriteLayer(EntityLayer layer)
                 MoveAnimation & ani = entity->moveAniQueue[aniIndex];
                 if (ani.playing)
                 {
-                    Vector2 pos = ani.GetPosition();
+                    Vec2 pos = ani.GetPosition();
                     if (IsSlime(entity))
                     {
                         pos = ani.GetPosition();
@@ -740,7 +740,7 @@ inline void DrawSpriteLayer(EntityLayer layer)
 
             entity->moveAniQueue.Clear();
             {
-                Vector2 topleft = GetTilePivot(entity);
+                Vec2 topleft = GetTilePivot(entity);
                 DrawSprite(texture, entity->sprite, topleft, entity->tileSize, entity->color);
             }
         }
@@ -759,9 +759,9 @@ inline bool SlimeSelection(Entity * player)
         Entity * slime = GetEntity(gameState->slimeEntityIndices[i]);
         if (!slime) continue;
 
-        Vector2 topLeft = GetTilePivot(slime->tilePos, MAP_TILE_SIZE);
+        Vec2 topLeft = GetTilePivot(slime->tilePos, MAP_TILE_SIZE);
         Rectangle rect = { (float)topLeft.x, (float)topLeft.y, MAP_TILE_SIZE, MAP_TILE_SIZE };
-        Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
+        Vec2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
 
         if (slime != player && CheckCollisionPointRec(mousePos, rect) && slime->mass == player->mass)
         {
@@ -811,10 +811,10 @@ inline bool SlimeSelection(Entity * player)
         }
         if (nextPlayerEntity)
         {
-            player->color = GRAY;
+            player->color = E_GRAY;
             gameState->playerEntityIndex = nextPlayerEntity->entityIndex;
             player = GetEntity(gameState->playerEntityIndex);
-            player->color = WHITE;
+            player->color = E_WHITE;
             stateChanged = true;
         } 
     }
@@ -841,16 +841,16 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         {
             gameState->keyMappings[MOUSE_LEFT].keys.Add(MOUSE_BUTTON_LEFT);
             gameState->keyMappings[MOUSE_RIGHT].keys.Add(MOUSE_BUTTON_RIGHT);
-            gameState->keyMappings[LEFT_KEY].keys.Add(KEY_A);
-            gameState->keyMappings[LEFT_KEY].keys.Add(KEY_LEFT);
-            gameState->keyMappings[RIGHT_KEY].keys.Add(KEY_D);
-            gameState->keyMappings[RIGHT_KEY].keys.Add(KEY_RIGHT);
-            gameState->keyMappings[UP_KEY].keys.Add(KEY_W);
-            gameState->keyMappings[UP_KEY].keys.Add(KEY_UP);
-            gameState->keyMappings[DOWN_KEY].keys.Add(KEY_S);
-            gameState->keyMappings[DOWN_KEY].keys.Add(KEY_DOWN);
-            gameState->keyMappings[SPACE_KEY].keys.Add(KEY_SPACE);
-            gameState->keyMappings[POSSES_KEY].keys.Add(KEY_F);
+            gameState->keyMappings[LEFT_KEY].keys.Add(E_KEY_A);
+            gameState->keyMappings[LEFT_KEY].keys.Add(E_KEY_LEFT);
+            gameState->keyMappings[RIGHT_KEY].keys.Add(E_KEY_D);
+            gameState->keyMappings[RIGHT_KEY].keys.Add(E_KEY_RIGHT);
+            gameState->keyMappings[UP_KEY].keys.Add(E_KEY_W);
+            gameState->keyMappings[UP_KEY].keys.Add(E_KEY_UP);
+            gameState->keyMappings[DOWN_KEY].keys.Add(E_KEY_S);
+            gameState->keyMappings[DOWN_KEY].keys.Add(E_KEY_DOWN);
+            gameState->keyMappings[SPACE_KEY].keys.Add(E_KEY_SPACE);
+            gameState->keyMappings[POSSES_KEY].keys.Add(E_KEY_F);
         }
 
         gameState->tileMaps = (Map *)BumpAllocArray(gameMemory->persistentStorage, 100, sizeof(Map));
@@ -905,12 +905,12 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         // NOTE: CameraZoom
         // Camera zoom controls
         // Uses log scaling to provide consistent zoom speed
-        gameState->camera.zoom = expf(logf(gameState->camera.zoom) + ((float)GetMouseWheelMove()*0.1f));
+        gameState->camera.zoom = expf(logf(gameState->camera.zoom) + ((float)EngineGetMouseWheelMove()*0.1f));
         
         // NOTE: Camera Drag
-        if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
+        if (EngineIsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
         {
-            Vector2 mouseDelta = GetMouseDelta();
+            Vec2 mouseDelta = EngineGetMouseDelta();
             gameState->camera.target.x -= mouseDelta.x;
             gameState->camera.target.y -= mouseDelta.y;
         }
@@ -925,21 +925,21 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         {
             if (IsDown(UP_KEY))
             {
-                gameState->camera.target.y -= moveSpeed * GetFrameTime();
+                gameState->camera.target.y -= moveSpeed * DeltaTime();
             }
             if (IsDown(DOWN_KEY))
             {
-                gameState->camera.target.y += moveSpeed * GetFrameTime();
+                gameState->camera.target.y += moveSpeed * DeltaTime();
                 
             }
             if (IsDown(LEFT_KEY))
             {
-                gameState->camera.target.x -= moveSpeed * GetFrameTime();
+                gameState->camera.target.x -= moveSpeed * DeltaTime();
                 
             }
             if (IsDown(RIGHT_KEY))
             {
-                gameState->camera.target.x += moveSpeed * GetFrameTime();
+                gameState->camera.target.x += moveSpeed * DeltaTime();
             }
             
         }
@@ -970,7 +970,7 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             }
         }
     
-        timeSinceLastPress -= GetFrameTime();
+        timeSinceLastPress -= DeltaTime();
 
         UndoState prevState = { gameState->playerEntityIndex, gameState->entities.GetVectorSTD() };
 
@@ -1092,7 +1092,7 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
 
         // NOTE: Undo and Restart
         {
-            if (timeSinceLastPress < 0 && IsKeyDown(KEY_Z) && !undoStack.empty())
+            if (timeSinceLastPress < 0 && EngineIsKeyDown(E_KEY_Z) && !undoStack.empty())
             {
                 // NOTE: Undo
                 Undo();
@@ -1101,7 +1101,7 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             }
             // NOTE: Restart States
             repeat &= !stateChanged;
-            if (IsKeyPressed(KEY_R) && !repeat)
+            if (EngineIsKeyPressed(E_KEY_R) && !repeat)
             {
                 repeat = true;
                 Restart();
@@ -1113,7 +1113,7 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
     // NOTE: Arrow Setup
     {
         Entity * player = GetEntity(gameState->playerEntityIndex);
-        Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
+        Vec2 mousePos = EngineGetScreenToWorld2D(EngineGetMousePosition(), gameState->camera);
         IVec2 centerPos = player->tilePos;
         
         IVec2 upPos    = { centerPos.x, (centerPos.y-1) };
@@ -1130,10 +1130,10 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             
             ArrowButton * arrow = arrows[i];
 
-            Vector2 topLeft  = GetTilePivot(tilePos, arrow->tileSize);
+            Vec2 topLeft  = GetTilePivot(tilePos, arrow->tileSize);
             
-            Rectangle rect = { (float)topLeft.x, (float)topLeft.y, MAP_TILE_SIZE, MAP_TILE_SIZE };
-            if (CheckCollisionPointRec(mousePos, rect))
+            Rect rect = { (float)topLeft.x, (float)topLeft.y, MAP_TILE_SIZE, MAP_TILE_SIZE };
+            if (EngineCheckCollisionPointRec(mousePos, rect))
             {
                 arrow->hover = true;
                 arrow->sprite = GetSprite(GetArrowHoverSpriteID(arrow->id));
@@ -1172,17 +1172,17 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
     {
     
         // NOTE: Draw
-        BeginDrawing();
+        EngineBeginDrawing();
 
-        ClearBackground(GRAY);
+        EngineClearBackground(E_GRAY);
     
-        BeginMode2D(gameState->camera);
+        EngineBeginMode2D(gameState->camera);
     
         for (int i = 0; i < gameState->tileMapCount; i++)
         {
             Map & map = gameState->tileMaps[i];
         
-            DrawTileMap(map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
+            DrawTileMap(map.tilePos, { map.width, map.height }, E_SKYBLUE, EngineFade(E_DARKGRAY, 0.2f));
         }
 
         DrawSpriteLayer(LAYER_GROUND);
@@ -1222,28 +1222,28 @@ void GameUpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             }
         }
     
-        EndMode2D();
+        EngineEndMode2D();
     
         // NOTE: UI Draw Game Informations
 
         Entity * player = GetEntity(gameState->playerEntityIndex);
         IVec2 centerPos = player->tilePos;
 
-        Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
+        Vec2 mousePos = EngineGetScreenToWorld2D(EngineGetMousePosition(), gameState->camera);
 
-        DrawText(TextFormat("Player pivot (%.2f, %.2f), mouse world (%.2f, %.2f)",
-                            player->pivot.x, player->pivot.y, mousePos.x, mousePos.y ), 10, 200, 20, GREEN);
-        DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Entity Count: %i",
+        EngineDrawText(EngineTextFormat("Player pivot (%.2f, %.2f), mouse world (%.2f, %.2f)",
+                            player->pivot.x, player->pivot.y, mousePos.x, mousePos.y ), 10, 200, 20, E_GREEN);
+        EngineDrawText(EngineTextFormat("Player Points at tile (%i, %i), Player Mass: %i, Entity Count: %i",
                             centerPos.x, centerPos.y,
-                            player->mass, gameState->entities.count), 10, 140, 20, GREEN);
-        DrawText(TextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f",
+                            player->mass, gameState->entities.count), 10, 140, 20, E_GREEN);
+        EngineDrawText(EngineTextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f",
                             gameState->camera.target.x, gameState->camera.target.y,
-                            gameState->camera.offset.x, gameState->camera.offset.y, gameState->camera.zoom), 10, 50, 20, RAYWHITE);
-        DrawText("Arrow Direction to Shoot, R KEY to Restart, Z KEY to undo", 10, 10, 20, RAYWHITE);
-        DrawFPS(10, 300);
+                            gameState->camera.offset.x, gameState->camera.offset.y, gameState->camera.zoom), 10, 50, 20, E_RAYWHITE);
+        EngineDrawText("Arrow Direction to Shoot, R KEY to Restart, Z KEY to undo", 10, 10, 20, E_RAYWHITE);
 
+        EngineDrawFPS(10, 300);
         
-        EndDrawing();
+        EngineEndDrawing();
 
     }
     

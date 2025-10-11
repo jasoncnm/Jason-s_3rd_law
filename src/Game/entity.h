@@ -60,9 +60,9 @@ struct Entity
     SpriteID spriteID;
     IVec2 tilePos;
     IVec2 attachDir = {0,0};
-    Color color;
+    Vec4 color;
 
-    Vector2 pivot;
+    Vec2 pivot;
     
     int entityIndex;
     int attachedEntityIndex;
@@ -110,7 +110,7 @@ struct FindAttachableResult
 inline Entity * GetEntity(int i);
 
 inline AddEntityResult
-AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color, int tileSize);
+AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Vec4 color, int tileSize);
 
 inline AddEntityResult
 AddCable(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool down);

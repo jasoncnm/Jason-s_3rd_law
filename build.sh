@@ -2,7 +2,7 @@
 
 defines="-DENGINE"
 warnings="-Wno-writable-strings -Wno-format-security -Wno-deprecated-declarations -Wno-switch"
-includes="-Ithird_party -Ithird_party/include"
+includes="-Ithird_party -Ithird_party/include -Isrc -Isrc/Engine -Isrc/Game"
 libs="-Lthird_party/lib -lraylib -luser32 -lgdi32 -lshell32 -lmsvcrt -lwinmm -nostdlib "
 
 outputFile=JasonLaw.exe
