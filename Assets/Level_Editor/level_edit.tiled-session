@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TileMap/Room_19.tmj",
+    "activeFile": "TileMap/Room_24.tmj",
     "console.history": [
         "\"W:/hm_hero_proj/gp/misc/emacs.bat\" %mapfilev",
         "Room_11.tmj",
@@ -16,8 +16,8 @@
         "/?"
     ],
     "expandedProjectPaths": [
-        ".",
-        "TileMap"
+        "TileMap",
+        "."
     ],
     "fileStates": {
         "": {
@@ -172,11 +172,11 @@
             }
         },
         "TileMap/Room_24.tmj": {
-            "scale": 0.75,
+            "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": -654,
-                "y": -551.3333333333333
+                "x": 445,
+                "y": -301
             }
         },
         "TileMap/Room_25.tmj": {
@@ -336,13 +336,13 @@
         "TileMap/Room_14.tmj",
         "TileMap/Test.tmj",
         "TileMap/Room_5.tmj",
-        "TileMap/Room_24.tmj",
-        "TileMap/Room_4.tmj",
-        "TileMap/Room_3.tmj",
-        "TileMap/Room_21.tmj",
-        "TileMap/Room_15.tmj",
-        "TileMap/Room_16.tmj",
-        "TileMap/Room_23.tmj"
+        "TileMap/Room_20.tmj",
+        "TileMap/Room_12.tmj",
+        "TileMap/Room_13.tmj",
+        "TileMap/Room_18.tmj",
+        "TileMap/Room_19.tmj",
+        "TileMap/Room_17.tmj",
+        "TileMap/Room_25.tmj"
     ],
     "tileset.lastUsedFormat": "tsx"
 }

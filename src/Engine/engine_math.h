@@ -1,4 +1,4 @@
-#if !defined(RAYLIB_WRAPPER_H)
+#if !defined(ENGINE_MATH_H)
 /* ========================================================================
    $File: $
    $Date: $
@@ -131,5 +131,5 @@ Vec3 QuatToEuler(Quat q);                                    // Get the Euler an
 Quat QuatTransform(Quat q, Mat4 mat);                   // Transform a quaternion given a transformation matrix
 int QuatEquals(Quat p, Quat q);                           // Check whether two given quaternions are almost equal
 
-#define RAYLIB_WRAPPER_H
+#define ENGINE_MATH_H
 #endif
