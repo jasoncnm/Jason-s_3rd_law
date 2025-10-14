@@ -167,8 +167,14 @@ void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
                     case ENTITY_TYPE_BLOCK:
                     {
                         // IMPORTANT: entity changed
+
+                        
+                        // NOTE: make a fakeStartEntity copy 
+                        Entity fakeEntity = *startEntity;
+                        fakeEntity.mass = entity->mass;
+                        
                         PushActionResult result = 
-                            PushActionCheck(startEntity, entity, pos, dir, 0);
+                            PushActionCheck(&fakeEntity, entity, pos, dir, 0);
 
                         if (result.blocked)
                         {
@@ -189,8 +195,12 @@ void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
                             // IMPORTANT: entity changed
                             IVec2 attachDir = target->attachDir;
 
+                            // NOTE: make a fakeStartEntity copy 
+                            Entity fakeEntity = *startEntity;
+                            fakeEntity.mass = entity->mass;
+                            
                             PushActionResult result =
-                                PushActionCheck(startEntity, entity, pos, dir, 0);
+                                PushActionCheck(&fakeEntity, entity, pos, dir, 0);
 
                             if (result.blocked)
                             {
@@ -302,42 +312,46 @@ PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                 }
                 case ENTITY_TYPE_BLOCK:
                 {
-                    int newAccumulatedMass = accumulatedMass + target->mass;
-                    if (newAccumulatedMass > startEntity->mass)
+                    float blockSpeed = 20.0f;                        
+                    if (CheckBounce(target->tilePos, pushDir))
                     {
+                        //float delay = GetDelay(target, pushEntity, blockSpeed, pushDir);
+                        float delay = GetDelay(target, startEntity, blockSpeed, pushDir);
+                            
+                        Vector2 moveStart = GetTilePivot(target);
+                        BounceEntity(startEntity, target, pushDir);
+                        Vector2 moveEnd = GetTilePivot(target);
 
-                        result.blockedEntity = target;
-                        result.blocked = true;
+                        float distPerSecond = MAP_TILE_SIZE / blockSpeed;
+                        float dist = Vector2Distance(moveStart, moveEnd);
+                        float tileDist = dist / MAP_TILE_SIZE;
+
+                        AddMoveAnimateQueue(target->moveAniQueue,
+                                            GetMoveAnimation(nullptr, moveStart, moveEnd, blockSpeed, tileDist, true, delay));
+                        //GetMoveAnimation(moveStart, moveEnd, 6.0f / Distance(blockNextPos, target->tilePos), delay));
+
+                        result.pushed = true;
                         return result;
                     }
-
-                    result = PushActionCheck(startEntity, target, blockNextPos + pushDir, pushDir, newAccumulatedMass);
-                    
-                    if (!result.blocked)
+                    else
                     {
-                        if (pushEntity) pushEntity->interact = target;
-                        float blockSpeed = 20.0f;                        
-                        result.pushed = true;
-                        // IMPORTANT: target Entity changed
-                        if (CheckBounce(target->tilePos, pushDir))
-                        {
-                            //float delay = GetDelay(target, pushEntity, blockSpeed, pushDir);
-                            float delay = GetDelay(target, startEntity, blockSpeed, pushDir);
                             
-                            Vector2 moveStart = GetTilePivot(target);
-                            BounceEntity(startEntity, target, pushDir);
-                            Vector2 moveEnd = GetTilePivot(target);
-
-                            float distPerSecond = MAP_TILE_SIZE / blockSpeed;
-                            float dist = Vector2Distance(moveStart, moveEnd);
-                            float tileDist = dist / MAP_TILE_SIZE;
-
-                            AddMoveAnimateQueue(target->moveAniQueue,
-                                                GetMoveAnimation(nullptr, moveStart, moveEnd, blockSpeed, tileDist, true, delay));
-                            //GetMoveAnimation(moveStart, moveEnd, 6.0f / Distance(blockNextPos, target->tilePos), delay));
-                        }
-                        else
+                        int newAccumulatedMass = accumulatedMass + target->mass;
+                        if (newAccumulatedMass > startEntity->mass)
                         {
+
+                            result.blockedEntity = target;
+                            result.blocked = true;
+                            return result;
+                        }
+
+                        result = PushActionCheck(startEntity, target, blockNextPos + pushDir, pushDir, newAccumulatedMass);
+                    
+                        if (!result.blocked)
+                        {
+                            if (pushEntity) pushEntity->interact = target;
+                            result.pushed = true;
+                            // IMPORTANT: target Entity changed
                             float delay = GetDelay(target, startEntity, blockSpeed, pushDir);
 
                             Vector2 moveStart = GetTilePivot(target);
@@ -350,11 +364,9 @@ PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                             AddMoveAnimateQueue(target->moveAniQueue,
                                                 GetMoveAnimation(nullptr, moveStart, moveEnd, blockSpeed, iDist, true, delay));
                         }
+                        result.blockedEntity = target;
                         return result;
                     }
-
-                    result.blockedEntity = target;
-                    return result;
                     
                     break;
                 }
