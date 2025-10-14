@@ -13,7 +13,7 @@ window:
   size: 3072.000000 1670.400024
   panels:
   {
-    0.85:
+    0.740078:
     {
       0.80:
       {
@@ -43,21 +43,9 @@ window:
         }
         0.75:
         {
-          selected
           getting_started
           text:
           {
-            expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/electric_door.cpp\".data"
-            auto: 1
-            query: input: ""
-            cursor_line: 240
-            cursor_column: 6
-            mark_line: 240
-            mark_column: 6
-          }
-          text:
-          {
-            selected
             expression: "file:\"W:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/game.cpp\".data"
             project: "C:\\Users\\Jason\\AppData\\Roaming/raddbg/default.raddbg_project"
             query:
@@ -72,6 +60,7 @@ window:
           }
           text:
           {
+            selected
             expression: "file:\"W:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/level_loader.cpp\".data"
             project: "C:\\Users\\Jason\\AppData\\Roaming/raddbg/default.raddbg_project"
             query:
@@ -79,10 +68,20 @@ window:
               input: lv2
               cmd: search
             }
-            cursor_line: 334
-            cursor_column: 56
-            mark_line: 334
-            mark_column: 56
+            cursor_line: 252
+            cursor_column: 1
+            mark_line: 252
+            mark_column: 1
+          }
+          text:
+          {
+            expression: "file:\"d:/os/obj/amd64fre/minkernel/crts/ucrt/src/appcrt/startup/mt/objfre/amd64/minkernel/crts/ucrt/src/appcrt/startup/abort.cpp\".data"
+            auto: 1
+            cursor_line: 1
+            cursor_column: 1
+            mark_line: 1
+            mark_column: 1
+            query: input: ""
           }
         }
       }
@@ -90,6 +89,7 @@ window:
       {
         0.60:
         {
+          selected
           watch:
           {
             expression: ""
@@ -97,6 +97,7 @@ window:
             watch: "gameState->lv2Map"
             watch: "typeof state.tileMaps + state.tileMapCount - 1"
             watch: "state.tileMaps + state.tileMapCount - 1"
+            watch: fileName
           }
           watch: expression: "query:locals"
           watch: expression: "query:registers"
@@ -118,7 +119,7 @@ window:
         }
       }
     }
-    0.15:
+    0.259922:
     {
       0.50: watch:
       {
@@ -127,12 +128,8 @@ window:
       }
       0.50:
       {
-        watch:
-        {
-          expression: "query:threads"
-          selected
-        }
-        watch: expression: "query:processes"
+        watch: expression: "query:threads"
+        watch: selected expression: "query:processes"
         watch: expression: "query:machines"
       }
     }

@@ -358,7 +358,7 @@ PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                             if (pushEntity) pushEntity->interact = target;
                             result.pushed = true;
                             // IMPORTANT: target Entity changed
-                            float delay = GetDelay(target, startEntity, blockSpeed, pushDir);
+                            float delay = GetDelay(target, startEntity, BOUNCE_SPEED, pushDir);
 
                             Vector2 moveStart = GetTilePivot(target);
                             SetEntityPosition(target, nullptr, blockNextPos + pushDir);
@@ -528,8 +528,20 @@ bool MoveAction(IVec2 actionDir)
         {
             return false;
         }
-
+#if 1
+        Entity * door = FindEntityByLocationAndLayer(currentPos, LAYER_DOOR);
+        if (door)
+        {
+            if (DoorBlocked(door, -actionDir))
+            {
+                return false;
+            }
+        }
+#endif
+        
+        //PushActionResult pushResult = PushActionCheck(mother, mother, actionTilePos, actionDir, 0);
         PushActionResult pushResult = PushActionCheck(mother, mother, actionTilePos, actionDir, 0);
+        
         if (pushResult.blocked)
         {
             if (pushResult.blockedEntity->type == ENTITY_TYPE_PIT ||
@@ -740,24 +752,33 @@ inline void DrawSpriteLayer(EntityLayer layer)
 
         if (entity)
         {
+            entity->pivot = GetTilePivot(entity);
             for (int aniIndex = 0; aniIndex < entity->moveAniQueue.count; aniIndex++)
             {
                 MoveAnimation & ani = entity->moveAniQueue[aniIndex];
                 if (ani.playing)
                 {
-                    Vector2 pos = ani.GetPosition();
+                    entity->pivot = ani.GetPosition();
                     if (IsSlime(entity))
                     {
-                        pos = ani.GetPosition();
+                        entity->pivot = ani.GetPosition();
                     }
-                    DrawSprite(entity->sprite, pos, entity->tileSize, entity->color);
+                    DrawSprite(entity->sprite, entity->pivot, entity->tileSize, entity->color);
                     goto NextLoop;
                 }
             }
 
+            entity->actionState = MOVE_STATE;
             entity->moveAniQueue.Clear();
+
             {
-                Vector2 topleft = GetTilePivot(entity);
+                if (layer == LAYER_SLIME &&
+                    entity->attach       &&
+                    GetEntity(entity->attachedEntityIndex)->tilePos == entity->tilePos)
+                {
+                    Vector2 offset = { (float)entity->attachDir.x, (float)entity->attachDir.y };
+                    entity->pivot = Vector2Subtract(entity->pivot, Vector2Scale(offset, 3.0f));
+                }
 
 #if 0
                 if (layer == LAYER_DOOR)
@@ -793,7 +814,7 @@ inline void DrawSpriteLayer(EntityLayer layer)
                     }
                 }
 #endif
-                DrawSprite(entity->sprite, topleft, entity->tileSize, entity->color);
+                DrawSprite(entity->sprite, entity->pivot, entity->tileSize, entity->color);
             }
         }
 
@@ -937,7 +958,14 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn, Texture2D *
         gameState->rightArrow.sprite = GetSprite(SPRITE_ARROW_RIGHT);
         gameState->rightArrow.id = SPRITE_ARROW_RIGHT;
         gameState->rightArrow.tileSize = 16;
-        
+
+        auto & entityIndexArray = gameState->entityTable[LAYER_SLIME];
+
+        for (int i = 0; i < entityIndexArray.count; i++)
+        {
+            Entity * slime = GetEntity(entityIndexArray[i]);
+            slime->pivot = GetTilePivot(slime);
+        }
     }
     
 #if 0
@@ -950,6 +978,12 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn, Texture2D *
         
         if (currentTimeStamp > tileMapSources[i].timestamp)
         {
+            Array<Entity, 3> slimes;
+            for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
+            {
+                slimes[i] = *GetEntity(gameState->slimeEntityIndices[i]);
+            }
+            
             LoadLevelToGameState(*gameState, gameState->state);
             undoRecords = std::stack<Record>();
         }
@@ -1263,6 +1297,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn, Texture2D *
                 MoveAnimation & ani = entity->moveAniQueue[j];
                 if (ani.playing)
                 {
+                    entity->actionState = ANIMATE_STATE;
                     ani.Update();
                     break;
                 }

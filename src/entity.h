@@ -41,6 +41,7 @@ enum ActionState
     NULL_STATE,
     MOVE_STATE,
     SPLIT_STATE,
+    ANIMATE_STATE,
     FREEZE_STATE,
 };
 

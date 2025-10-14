@@ -32,6 +32,7 @@
 
 #include "electric_door.h"
 #include "entity.h"
+#include "move_animation.h"
 
 // ----------------------------------------------------
 // NOTE: Game Structs

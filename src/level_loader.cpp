@@ -238,6 +238,8 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
 
 inline void GenerateTileMap(std::string fileName, IVec2 startPos, int width, int height)
 {
+    TileMapSrc & currentSrc = tileMapSources.last();
+    
     // NOTE: Offsets start position
     startPos = startPos;
     
@@ -286,12 +288,15 @@ inline void GenerateTileMap(std::string fileName, IVec2 startPos, int width, int
                             gameState->slimeEntityIndices.Add(result.entityIndex);
 
                             gameState->entityTable[LAYER_SLIME].Add(result.entityIndex);
+
+                            currentSrc.mapEntitiesIndex.Add(result.entityIndex);
                                 
                             SM_TRACE("Player generated (tile location: %i, %i)", result.entity->tilePos.x, result.entity->tilePos.y);
                         }
                         else
                         {
                             result = LoadGameObject(tileId, tilePos);
+                            currentSrc.mapEntitiesIndex.Add(result.entityIndex);
                         }
                     }
                 }
@@ -345,7 +350,7 @@ void LoadLevelToGameState(GameState & state, State loadState)
             
             std::string path = LEVELS_PATH + fileName;
             char * c_str = (char *)path.data();
-            tileMapSources.Add({id, c_str, GetTimestamp(c_str)});
+            tileMapSources.Add({id, mapWidth, mapHeight, c_str, GetTimestamp(c_str)});
 
             IVec2 startPos = { startPosX + 1, startPosY + 1 };
 

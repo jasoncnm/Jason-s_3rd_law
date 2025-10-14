@@ -38,6 +38,7 @@ AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE
     entity.color = color;
     entity.active = true;
     entity.tileSize = (float)tileSize;
+    entity.pivot = GetTilePivot(tilePos, (float)tileSize);    
         
     result.entityIndex = gameState->entities.Add(entity);
     result.entity = &gameState->entities[result.entityIndex];
@@ -384,7 +385,7 @@ inline void UpdateSlimes()
         if (slime && slime->attach)
         {
             Entity * attach = GetEntity(slime->attachedEntityIndex);
-            if (attach)
+            if (attach && attach->type != ENTITY_TYPE_ELECTRIC_DOOR)
             {
                 IVec2 oldPos = slime->tilePos;
                 IVec2 newPos = attach->tilePos - slime->attachDir;
@@ -403,9 +404,11 @@ inline void UpdateSlimes()
                     float dist = Vector2Distance(moveStart, moveEnd);
                     float iDist = dist / MAP_TILE_SIZE;
 
+#if 1
+                    slime->moveAniQueue.Clear();
+#endif                    
                     AddMoveAnimateQueue(slime->moveAniQueue,
                                         GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist, true, 0));
-
                     
                 }
             }

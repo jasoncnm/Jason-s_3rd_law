@@ -64,8 +64,12 @@ struct TileMapSrc
 {
     int mapID;
 
+    int width, height;
+
     char * fileName;
     long long timestamp;
+
+    Array<int, 500> mapEntitiesIndex;
 };
 
 //  ========================================================================
@@ -80,6 +84,8 @@ static Array<TileMapSrc, 100> tileMapSources;
 inline AddEntityResult LoadGameObject(int id, IVec2 tilePos);
 
 inline void GenerateTileMap(std::string fileName, IVec2 startPos, int width, int height);
+
+void ReloadTileMap(TileMapSrc & mapSrc);
 
 void LoadLevelToGameState(GameState & state, State loadState);
 

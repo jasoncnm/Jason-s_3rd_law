@@ -167,7 +167,7 @@ inline void PowerOnCable(Entity * cable, bool & end)
                 float iDist = dist / MAP_TILE_SIZE;
 
                 AddMoveAnimateQueue(entity->moveAniQueue,
-                                    GetMoveAnimation(nullptr, moveStart, moveEnd, 20.0f, iDist, true, 0));
+                                    GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist, true, 0));
                 
             }
             else
@@ -175,7 +175,15 @@ inline void PowerOnCable(Entity * cable, bool & end)
                 entity = FindEntityByLocationAndLayer(cable->tilePos + bounceDir, LAYER_SLIME);
                 if (entity)
                 {
+                    Vector2 moveStart = GetTilePivot(entity);
                     BounceEntity(cable, entity, bounceDir);
+                    Vector2 moveEnd = GetTilePivot(entity);
+                
+                    float dist = Vector2Distance(moveStart, moveEnd);
+                    float iDist = dist / MAP_TILE_SIZE;
+
+                    AddMoveAnimateQueue(entity->moveAniQueue,
+                                        GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist, true, 0));
                 }
             }
 
