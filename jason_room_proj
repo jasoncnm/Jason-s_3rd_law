@@ -43,6 +43,7 @@ window:
         }
         0.75:
         {
+          selected
           getting_started
           text:
           {
@@ -50,10 +51,10 @@ window:
             expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/electric_door.cpp\".data"
             auto: 1
             query: input: ""
-            cursor_line: 249
-            cursor_column: 1
-            mark_line: 249
-            mark_column: 1
+            cursor_line: 240
+            cursor_column: 6
+            mark_line: 240
+            mark_column: 6
           }
           text:
           {
@@ -75,7 +76,6 @@ window:
       {
         0.60:
         {
-          selected
           watch:
           {
             expression: ""

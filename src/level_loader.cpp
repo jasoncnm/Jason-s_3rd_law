@@ -378,7 +378,9 @@ void LoadLevelToGameState(GameState & state, State loadState)
         state.camera.target = { pos.x, pos.y };
         state.camera.offset = { SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
         state.camera.rotation = 0.0f;
-        state.camera.zoom = 1.75f;
+        int newWidth = SCREEN_WIDTH;
+        int newHeight = SCREEN_HEIGHT;
+        gameState->camera.zoom = (newWidth < newHeight) ? newWidth * ZOOM_PER_SIZE : newHeight * ZOOM_PER_SIZE;
     } 
 
     // NOTE: Attatch slimes

@@ -7,8 +7,10 @@
    $Notice: $
    ======================================================================== */
 
-#define SCREEN_WIDTH 600
-#define SCREEN_HEIGHT 600
+#define SCREEN_WIDTH 1000
+#define SCREEN_HEIGHT 1000
+
+#define ZOOM_PER_SIZE 1.7f / 600.0f
 
 #define MAP_TILE_SIZE 32       // Tiles size
 #define MAX_ANIMATION 50

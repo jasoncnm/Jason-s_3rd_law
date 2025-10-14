@@ -417,7 +417,7 @@ inline bool UpdateCamera()
         int newWidth = GetScreenWidth();
         int newHeight = GetScreenHeight();
         gameState->camera.offset = { newWidth / 2.0f, newHeight / 2.0f };
-        gameState->camera.zoom = (newWidth < newHeight) ? newWidth * 1.7f / SCREEN_WIDTH : newHeight * 1.7f / SCREEN_WIDTH;
+        gameState->camera.zoom = (newWidth < newHeight) ? newWidth * ZOOM_PER_SIZE : newHeight * ZOOM_PER_SIZE;
         
     }
 
@@ -927,6 +927,20 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn, Texture2D *
         }
     }
 #endif
+
+    // NOTE: Debug Switch Monitor
+    if (GetMonitorCount() > 1)
+    {
+        if (IsKeyPressed(KEY_ONE))
+        {
+            SetWindowMonitor(1);
+        }
+
+        if (IsKeyPressed(KEY_TWO))
+        {
+            SetWindowMonitor(0);
+        }
+    }
     
     // NOTE: Debug Camera Control
     {
@@ -1292,10 +1306,12 @@ void Initialize(GameState *gameStateIn, Texture2D * textureIn)
     else SetWindowState(FLAG_VSYNC_HINT);
 
     SetWindowState(FLAG_WINDOW_RESIZABLE);
+
+    SetWindowMonitor(0);
     
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
 
-    MaximizeWindow();
+    // MaximizeWindow();
     SetExitKey(KEY_Q);
     
     InitTexture();
