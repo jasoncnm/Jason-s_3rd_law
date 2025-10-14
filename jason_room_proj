@@ -43,6 +43,7 @@ window:
         }
         0.75:
         {
+          selected
           getting_started
           text:
           {
@@ -68,10 +69,10 @@ window:
               input: lv2
               cmd: search
             }
-            cursor_line: 252
-            cursor_column: 1
-            mark_line: 252
-            mark_column: 1
+            cursor_line: 311
+            cursor_column: 62
+            mark_line: 311
+            mark_column: 62
           }
           text:
           {
@@ -89,7 +90,6 @@ window:
       {
         0.60:
         {
-          selected
           watch:
           {
             expression: ""

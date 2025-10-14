@@ -51,4 +51,11 @@ src/raylib/rmem.h
 src/raylib/raylib.h  
 src/raylib/physac.h  
 src/raylib/raymath.h
-/bin
+
+!/bin/game.*
+!/bin/game_code.*
+!/bin/main.*
+!/bin/hotloaded_main.*
+!/bin/raylib.*
+
+/bin/.vs
