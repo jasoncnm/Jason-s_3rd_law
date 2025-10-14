@@ -211,7 +211,13 @@ void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
                             }
                             else
                             {
-                                Entity * attachEntity = FindEntityByLocationAndLayer(target->tilePos + attachDir, LAYER_BLOCK);
+                                Entity * attachEntity = nullptr;
+                                FindAttachableResult result = FindAttachable(target->tilePos + attachDir, attachDir);
+                                if (result.has)
+                                {
+                                    attachEntity = result.entity;
+                                }
+                                
                                 if (attachEntity && attachEntity != target)
                                 {
                                     SetEntityPosition(target, attachEntity, target->tilePos);
@@ -327,7 +333,7 @@ PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                         float tileDist = dist / MAP_TILE_SIZE;
 
                         AddMoveAnimateQueue(target->moveAniQueue,
-                                            GetMoveAnimation(nullptr, moveStart, moveEnd, blockSpeed, tileDist, true, delay));
+                                            GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, tileDist, true, delay));
                         //GetMoveAnimation(moveStart, moveEnd, 6.0f / Distance(blockNextPos, target->tilePos), delay));
 
                         result.pushed = true;
@@ -438,6 +444,12 @@ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
     {
         Entity e = undoEntities[i];
         gameState->entities[i] = e;
+
+        if (IsSlime(&e))
+        {
+            gameState->entities[i].actionState = MOVE_STATE;
+        }
+        
     }
 }
 
@@ -679,14 +691,18 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
     player->tileSize = player->mass * ( MAP_TILE_SIZE / 3.0f );
     
     Entity * clone = CreateSlimeClone(player->tilePos);
-
+    IVec2 playerStartTile = player->tilePos;
+    IVec2 cloneStartTile = playerStartTile;
+    
     Vector2 playerStart = GetTilePivot(player->tilePos, player->tileSize);
     BounceEntity(player, player, bounceDir);
-    Vector2 playerEnd = GetTilePivot(player->tilePos, player->tileSize);
+    Vector2 playerEnd = player->attach ?
+        GetTilePivot(player->tilePos, player->tileSize, player->attachDir) : GetTilePivot(player->tilePos, player->tileSize);
 
     Vector2 cloneStart = GetTilePivot(clone->tilePos, clone->tileSize);
     BounceEntity(clone, clone, -bounceDir);
-    Vector2 cloneEnd = GetTilePivot(clone->tilePos, clone->tileSize);
+    Vector2 cloneEnd = clone->attach ?
+        GetTilePivot(clone->tilePos, clone->tileSize, clone->attachDir) : GetTilePivot(clone->tilePos, clone->tileSize);
     
     if (player->tilePos == clone->tilePos)
     {
@@ -694,9 +710,21 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
         return false;
     }
 
-    AddMoveAnimateQueue(player->moveAniQueue, GetMoveAnimation(nullptr, playerStart, playerEnd));
-    AddMoveAnimateQueue(clone->moveAniQueue, GetMoveAnimation(nullptr, cloneStart, cloneEnd));
-    
+    if (playerStartTile != player->tilePos)
+    {
+        float dist = Vector2Distance(playerStart, playerEnd);
+        float tileDist = dist / MAP_TILE_SIZE;
+
+        AddMoveAnimateQueue(player->moveAniQueue, GetMoveAnimation(EaseInOutSine, playerStart, playerEnd, BOUNCE_SPEED, tileDist));
+    }
+
+    if (cloneStartTile != clone->tilePos)
+    {
+        float dist = Vector2Distance(cloneStart, cloneEnd);
+        float tileDist = dist / MAP_TILE_SIZE;
+        
+        AddMoveAnimateQueue(clone->moveAniQueue, GetMoveAnimation(EaseInOutSine, cloneStart, cloneEnd, BOUNCE_SPEED, tileDist));
+    }
     return true;
 }
 
@@ -816,7 +844,7 @@ inline bool SlimeSelection(Entity * player)
     player->color = WHITE;
 #endif
 
-    if (JustPressed(POSSES_KEY))
+    if (JustPressed(POSSES_KEY) && gameState->lv2Map && gameState->lv2Map->firstEnter)
     {
         Entity * nextPlayerEntity = nullptr;
         for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
@@ -1080,7 +1108,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn, Texture2D *
                 gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = true;
 
                 bool split = false;
-                
+#if 0
                 if (JustPressed(MOUSE_LEFT))
                 {
                     
@@ -1115,6 +1143,38 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn, Texture2D *
                     }
                     
                 }
+#else
+                if (JustPressed(LEFT_KEY))
+                {
+                    // IMPORTANT shoot left and bounce right
+                    split = SplitAction(player, { -1, 0 });
+                }
+                    
+                if (JustPressed(RIGHT_KEY))
+                {
+                    // IMPORTANT shoot right and bounce left
+                    split = SplitAction(player, { 1, 0 });
+                }
+                    
+                if (JustPressed(UP_KEY))
+                {
+                    // IMPORTANT shoot up and bounce down
+                    split = SplitAction(player, { 0, -1 });
+                }
+                    
+                if (JustPressed(DOWN_KEY))
+                {
+                    // IMPORTANT shoot down and bounce up
+                    split = SplitAction(player, { 0, 1 });
+                }
+
+                if (split)
+                {
+                    stateChanged |= split;
+                    player->actionState = MOVE_STATE;
+                }
+
+#endif
                 break;
             }
         }

@@ -404,7 +404,7 @@ inline void UpdateSlimes()
                     float iDist = dist / MAP_TILE_SIZE;
 
                     AddMoveAnimateQueue(slime->moveAniQueue,
-                                        GetMoveAnimation(nullptr, moveStart, moveEnd, BLOCK_ANI_SPEED, iDist, true, 0));
+                                        GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist, true, 0));
 
                     
                 }

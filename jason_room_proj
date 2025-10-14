@@ -47,7 +47,6 @@ window:
           getting_started
           text:
           {
-            selected
             expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/electric_door.cpp\".data"
             auto: 1
             query: input: ""
@@ -58,6 +57,7 @@ window:
           }
           text:
           {
+            selected
             expression: "file:\"W:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/game.cpp\".data"
             project: "C:\\Users\\Jason\\AppData\\Roaming/raddbg/default.raddbg_project"
             query:
@@ -65,10 +65,24 @@ window:
               input: pushactiiion
               cmd: search
             }
-            cursor_line: 282
+            cursor_line: 204
             cursor_column: 1
-            mark_line: 282
+            mark_line: 204
             mark_column: 1
+          }
+          text:
+          {
+            expression: "file:\"W:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/level_loader.cpp\".data"
+            project: "C:\\Users\\Jason\\AppData\\Roaming/raddbg/default.raddbg_project"
+            query:
+            {
+              input: lv2
+              cmd: search
+            }
+            cursor_line: 334
+            cursor_column: 56
+            mark_line: 334
+            mark_column: 56
           }
         }
       }
@@ -80,9 +94,9 @@ window:
           {
             expression: ""
             selected
-            watch: target
-            watch: reachDir
-            watch: door
+            watch: "gameState->lv2Map"
+            watch: "typeof state.tileMaps + state.tileMapCount - 1"
+            watch: "state.tileMaps + state.tileMapCount - 1"
           }
           watch: expression: "query:locals"
           watch: expression: "query:registers"

@@ -16,6 +16,7 @@
 #define MAX_ANIMATION 50
 #define DIST_ONE_TILE MAP_TILE_SIZE
 #define BLOCK_ANI_SPEED 20.0f
+#define BOUNCE_SPEED 10.0f
 
 #define MAX_ENTITIES 5000
 
@@ -126,7 +127,7 @@ struct GameState
 
     int tileMapCount = 0;
     Map * tileMaps;
-    Map lv2Map;
+    Map * lv2Map;
 
     Array<Entity, MAX_ENTITIES> entities;
     

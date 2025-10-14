@@ -333,15 +333,15 @@ void LoadLevelToGameState(GameState & state, State loadState)
             Map tileMap = {};
             tileMap.tilePos = { startPosX, startPosY };
             tileMap.width = mapWidth, tileMap.height =  mapHeight;
-            
-            if (fileName == LEVEL_2_ROOM_NAME)
-            {
-                gameState->lv2Map = tileMap;
-            }
 
 
             int id = state.tileMapCount;
             state.tileMaps[state.tileMapCount++] = tileMap;
+            
+            if (fileName == LEVEL_2_ROOM_NAME)
+            {
+                gameState->lv2Map = state.tileMaps + state.tileMapCount - 1;
+            }
             
             std::string path = LEVELS_PATH + fileName;
             char * c_str = (char *)path.data();
