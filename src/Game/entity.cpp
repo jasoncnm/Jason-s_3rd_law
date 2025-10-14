@@ -26,7 +26,7 @@ inline bool IsSlime(Entity * entity)
 }
 
 inline AddEntityResult
-AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Vec4 color = E_WHITE, int tileSize = 32)
+AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE, int tileSize = 32)
 {
     AddEntityResult result;
 
@@ -147,7 +147,6 @@ inline void DeleteEntity(Entity * entity)
 {
     entity->active = false;
     entity->type = ENTITY_TYPE_NULL;
-    entity->moveAniQueue.Clear();
 }
 
 void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
@@ -235,9 +234,8 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
 
     if (mergedSlime->entityIndex == gameState->playerEntityIndex)
     {
-        mergeSlime->type = ENTITY_TYPE_PLAYER;
         gameState->playerEntityIndex = mergeSlime->entityIndex;
-        mergeSlime->color = E_WHITE;
+        mergeSlime->color = WHITE;
     }
 
     mergeSlime->mass += mergedSlime->mass;
@@ -396,11 +394,11 @@ inline void UpdateSlimes()
                 
                     SM_ASSERT(dir.SqrMagnitude() == 1, "Invalid bounce direction");
 
-                    Vec2 moveStart = GetTilePivot(slime);
+                    Vector2 moveStart = GetTilePivot(slime);
                     MoveTowardsUntilBlocked(slime, newPos, dir);
-                    Vec2 moveEnd = GetTilePivot(slime);
+                    Vector2 moveEnd = GetTilePivot(slime);
 
-                    float dist = Vec2Distance(moveStart, moveEnd);
+                    float dist = Vector2Distance(moveStart, moveEnd);
                     float iDist = dist / MAP_TILE_SIZE;
 
                     AddMoveAnimateQueue(slime->moveAniQueue,
@@ -419,10 +417,10 @@ inline void UpdateSlimes()
         if (slime && slime != player && slime->mass > player->mass)
         {
             slime->type = ENTITY_TYPE_PLAYER;
-            slime->color = E_WHITE;
+            slime->color = WHITE;
 
             player->type = ENTITY_TYPE_CLONE;
-            player->color = E_GRAY;
+            player->color = GRAY;
 
             gameState->playerEntityIndex = slime->entityIndex;
         }
@@ -562,7 +560,7 @@ inline Entity * CreateSlimeClone(IVec2 tilePos)
     freeEntity->type = ENTITY_TYPE_CLONE;
     freeEntity->mass = 1;
     freeEntity->tileSize = ( MAP_TILE_SIZE / 3.0f);
-    freeEntity->color = E_GRAY;
+    freeEntity->color = GRAY;
     freeEntity->attach = false;    
 
     return freeEntity;

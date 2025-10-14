@@ -16,18 +16,14 @@
 
 #define MAX_UNDO_RECORDS 2000    // IMPORTANT: This might need to be handle if released. I'm Using std::stack for now (dynamic alloc)
 
-// TODO: Make a raylib wrapper
-#include "engine_lib.h"
-#include "engine_math.h"
-#include "engine_input.h"
-#include "render_interface.h"
-#include "engine_collision.h"
-#include "engine_text.h"
 
+#include "raylib.h"
+#include "raymath.h"
+
+#include "engine_lib.h"
 #include "assets.h"
 #include "electric_door.h"
 #include "entity.h"
-
 
 // ----------------------------------------------------
 // NOTE: Game Structs
@@ -74,7 +70,7 @@ struct ArrowButton
 
     int tileSize;
     
-    Vec2 topLeftPos;
+    Vector2 topLeftPos;
     
     bool seletable = false;
     bool hover = false;
@@ -110,7 +106,7 @@ struct GameState
     IVec2 tileMin, tileMax;
 
     MoveAnimation cameraAnimation;
-    EngineCamera2D camera;
+    Camera2D camera;
 
     ElectricDoorSystem * electricDoorSystem = nullptr;
 
@@ -161,7 +157,6 @@ static bool repeat = false;
 //  ========================================================================
 //              NOTE: Game Functions 
 //  ========================================================================
-
 inline bool JustPressed(GameInputType type);
 
 inline bool IsDown(GameInputType type);
