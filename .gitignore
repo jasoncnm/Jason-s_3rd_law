@@ -36,8 +36,19 @@ JasonLaw.ilk
 JasonLaw.pdb
 /.vs
 
-#include raylib libary
-!/third_party/lib/raylib.dll
-!/third_party/lib/raylib.lib
-!/third_party/lib/raylibdll.lib
-!/JasonLaw.exe
+.vscode/
+*.dll
+*.exe
+*.pdb
+*.obj
+*.ilk
+*.exp
+*.lib
+*.a
+*.o
+
+src/raylib/rmem.h    
+src/raylib/raylib.h  
+src/raylib/physac.h  
+src/raylib/raymath.h
+/bin

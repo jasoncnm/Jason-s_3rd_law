@@ -1,44 +1,42 @@
-/* ========================================================================
-   $File: $
-   $Date: $
-   $Revision: $
-   $Creator: Junjie Mao $
-   $Notice: $
-   ======================================================================== */
+#include "game.h"
+#include "win32_hot_reload.c"
+#define PATH_SIZE 2048
 
-#define SCREEN_WIDTH 600
-#define SCREEN_HEIGHT 600
+// NOTE: This file should be cross-compatible, one thing you need to provide
+// if you want to do a linux version of this is providing a "Sleep(time)" function
 
-
-#include <cassert>
-#include <stack>   
-#include <sstream>
-#include <iostream>
-
-#include "game.cpp"
-
-#include "raylib_wrapper.cpp"
-
-// NOTE: Program main entry point
-int main(void)
+int main(int argumentCount, char *argumentArray[])
 {
-    if (IsWindowState(FLAG_VSYNC_HINT)) ClearWindowState(FLAG_VSYNC_HINT);
-    else SetWindowState(FLAG_VSYNC_HINT);
+    // NOTE: first argument of the argumentArray is the relative path
+    //      to the executable
+    const char *basePath = GetDirectoryPath(argumentArray[0]);
+    char mainDllPath[PATH_SIZE];
+    char tempDllPath[PATH_SIZE];
+    char lockFilePath[PATH_SIZE];
 
-    SetWindowState(FLAG_WINDOW_RESIZABLE);
-    
-    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+    // NOTE: build paths to our runtime library and the lockfile
+    {
+        int bytesCopied;
+        bytesCopied = TextCopy(mainDllPath, basePath);
+        TextAppend(mainDllPath, "/game_code.dll", &bytesCopied);
+        bytesCopied = TextCopy(tempDllPath, basePath);
+        TextAppend(tempDllPath, "/game_code_temp.dll", &bytesCopied);
+        bytesCopied = TextCopy(lockFilePath, basePath);
+        TextAppend(lockFilePath, "/lock.file", &bytesCopied);
 
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jason's 3rd law");
-    MaximizeWindow();
-    SetExitKey(KEY_Q);
+        TraceLog(LOG_INFO, basePath);
+        TraceLog(LOG_INFO, mainDllPath);
+        TraceLog(LOG_INFO, tempDllPath);
+        TraceLog(LOG_INFO, lockFilePath);
+    }
 
-    InitTexture();
+    GameCode gameCode = {0};
+    gameCode = GameCodeLoad(mainDllPath, tempDllPath, lockFilePath);
     
     BumpAllocator transientStorage = MakeBumpAllocator(MB(64));
     BumpAllocator persistentStorage = MakeBumpAllocator(MB(64));
 
-    Memory gameMemory = { &transientStorage,  &persistentStorage };
+    Memory memory = { &transientStorage,  &persistentStorage };
 
     gameState = (GameState *)BumpAlloc(&persistentStorage, sizeof(GameState));
     if (!gameState)
@@ -46,21 +44,37 @@ int main(void)
         SM_ERROR("Failed to allocate gameState");
         return -1;
     }
+
+    texture = (Texture2D *)BumpAlloc(&persistentStorage, sizeof(Texture2D));
     
-    // NOTE: Main game loop
-    while (!WindowShouldClose())    // Detect window close button or ESC key
+    gameCode.initialize(gameState, texture);
+
+    while(!WindowShouldClose())
     {
-        transientStorage.used = 0;
-        // NOTE: Update
-        GameUpdateAndRender(gameState, &gameMemory);        
+        // NOTE: Check if the code got recompiled
+        long dllFileWriteTime = GetFileModTime(mainDllPath);
+        if (dllFileWriteTime != gameCode.lastDllWriteTime)
+        {
+            
+// gameCode.hotUnload(gameState);
+
+            DeInitTexture();
+            GameCodeUnload(&gameCode);
+            gameCode = GameCodeLoad(mainDllPath, tempDllPath, lockFilePath);
+            InitTexture();            
+//gameCode.hotReload(gameState);
+            
+        }
+
+        gameCode.updateAndRender(gameState, &memory, texture);
     }
 
+    
     // De-Initialization
     //--------------------------------------------------------------------------------------
     DeInitTexture();
 
-    CloseWindow();          // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
+    CloseWindow();
 
     return 0;
 }
