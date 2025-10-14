@@ -111,6 +111,7 @@ inline void PowerOnCable(Entity * cable, bool & end)
                     bounceDir = { 1, 0 };
                     cable->left = cable->right = false;
                     cable->up = cable->down = true;
+                    cable->spriteID = SPRITE_DOOR_LEFT_OPEN;
                     cable->sprite = GetSprite(SPRITE_DOOR_LEFT_OPEN);
                     break;
                 }
@@ -118,6 +119,7 @@ inline void PowerOnCable(Entity * cable, bool & end)
                 {
                     offset = { -1, 1 };
                     bounceDir = { -1, 0 };
+                    cable->spriteID = SPRITE_DOOR_RIGHT_OPEN;
                     cable->sprite = GetSprite(SPRITE_DOOR_RIGHT_OPEN);
                     cable->left = cable->right = false;
                     cable->up = cable->down = true;
@@ -128,6 +130,7 @@ inline void PowerOnCable(Entity * cable, bool & end)
                 {
                     offset = { -1, 1 };
                     bounceDir = { 0, 1 };
+                    cable->spriteID = SPRITE_DOOR_TOP_OPEN;
                     cable->sprite = GetSprite(SPRITE_DOOR_TOP_OPEN);
                     cable->left = cable->right = true;
                     cable->up = cable->down = false;
@@ -138,6 +141,7 @@ inline void PowerOnCable(Entity * cable, bool & end)
                 {
                     offset = { 1, -1 };
                     bounceDir = { 0, -1 };
+                    cable->spriteID = SPRITE_DOOR_DOWN_OPEN;
                     cable->sprite = GetSprite(SPRITE_DOOR_DOWN_OPEN);
                     cable->left = cable->right = true;
                     cable->up = cable->down = false;
@@ -152,7 +156,7 @@ inline void PowerOnCable(Entity * cable, bool & end)
                 
             }
 
-            Entity * entity = FindEntityByLocationAndLayer(cable->tilePos + bounceDir, LAYER_BLOCKS);
+            Entity * entity = FindEntityByLocationAndLayer(cable->tilePos + bounceDir, LAYER_BLOCK);
             if (entity)
             {
                 Vector2 moveStart = GetTilePivot(entity);
@@ -168,7 +172,7 @@ inline void PowerOnCable(Entity * cable, bool & end)
             }
             else
             {
-                entity = FindEntityByLocationAndLayer(cable->tilePos + bounceDir, LAYER_PLAYER);
+                entity = FindEntityByLocationAndLayer(cable->tilePos + bounceDir, LAYER_SLIME);
                 if (entity)
                 {
                     BounceEntity(cable, entity, bounceDir);
@@ -244,19 +248,30 @@ void OnSourcePowerOn(Array<bool, MAX_CABLE> & visited, int currentIndex)
 }
 
 
-inline bool DoorBlocked(IVec2 tilePos, IVec2 reachDir)
+inline bool DoorBlocked(Entity * door, IVec2 reachDir)
 {
     SM_ASSERT(reachDir.SqrMagnitude() <= 1, "Directional Vector should be a unit vector");
     
     bool result = false;
-    for (int i = 0; i < Door_Indices.count; i++)
-    {
-        Entity * door = GetEntity(Cable_Indices[Door_Indices[i]]);
-        SM_ASSERT(door, "entity is not active");
 
-        if (SameSide(door, tilePos, reachDir)) return true;
-            
+    if (reachDir.x == 1)
+    {
+        result = door->spriteID == SPRITE_DOOR_RIGHT_CLOSE;
     }
+    else if (reachDir.x == -1)
+    {
+        result = door->spriteID == SPRITE_DOOR_LEFT_CLOSE;
+    }
+    else if (reachDir.y == 1)
+    {
+        result = door->spriteID == SPRITE_DOOR_DOWN_CLOSE;
+        
+    }
+    else if (reachDir.y == -1)
+    {
+        result = door->spriteID == SPRITE_DOOR_TOP_CLOSE;
+    }
+    
     return result;
 }
 
@@ -361,7 +376,7 @@ inline void UpdateElectricDoor()
         
         if (!connection->conductive)
         {
-            Entity * entity = FindEntityByLocationAndLayer(connection->tilePos, LAYER_PLAYER);
+            Entity * entity = FindEntityByLocationAndLayer(connection->tilePos, LAYER_SLIME);
             bool has = false;
             if (entity)
             {
@@ -369,7 +384,7 @@ inline void UpdateElectricDoor()
             }
             else
             {
-                entity = FindEntityByLocationAndLayer(connection->tilePos, LAYER_BLOCKS);
+                entity = FindEntityByLocationAndLayer(connection->tilePos, LAYER_BLOCK);
                 if (entity)
                 {
                     has = true;                    
@@ -395,7 +410,7 @@ inline void UpdateElectricDoor()
         Entity * source = GetEntity(Cable_Indices[sourceIndex]);
         SM_ASSERT(source, "Entity is not active");
         if (source->conductive) continue;
-        auto & table = gameState->entityTable[LAYER_BLOCKS];
+        auto & table = gameState->entityTable[LAYER_BLOCK];
         for (int blockIndex = 0; blockIndex < table.count; blockIndex++)
         {
             Entity * block = GetEntity(table[blockIndex]);

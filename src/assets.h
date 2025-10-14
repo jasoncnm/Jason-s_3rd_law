@@ -105,6 +105,7 @@ struct Sprite
 //  ========================================================================
 //              NOTE: Assets Functions
 //  ========================================================================
+
 SpriteID GetArrowHoverSpriteID(SpriteID spriteID)
 {
     SM_ASSERT((spriteID >= SPRITE_ARROW_UP) && (spriteID <= SPRITE_ARROW_RIGHT), "Given sprite is not an arrow");

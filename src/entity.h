@@ -12,11 +12,11 @@
 
 enum EntityLayer
 {
- 
-    LAYER_PLAYER,
-    LAYER_BLOCKS,
-    LAYER_OVERLAP,
-    LAYER_GROUND,
+    LAYER_SLIME,
+    LAYER_BLOCK,
+    LAYER_WALL,
+    LAYER_CABLE,
+    LAYER_DOOR,
     
     LAYER_COUNT,
 };
@@ -24,6 +24,7 @@ enum EntityLayer
 enum EntityType
 {
     ENTITY_TYPE_NULL,
+
     ENTITY_TYPE_PLAYER,
     ENTITY_TYPE_CLONE,
     ENTITY_TYPE_WALL,

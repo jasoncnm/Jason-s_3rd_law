@@ -211,7 +211,7 @@ void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
                             }
                             else
                             {
-                                Entity * attachEntity = FindEntityByLocationAndLayer(target->tilePos + attachDir, LAYER_BLOCKS);
+                                Entity * attachEntity = FindEntityByLocationAndLayer(target->tilePos + attachDir, LAYER_BLOCK);
                                 if (attachEntity && attachEntity != target)
                                 {
                                     SetEntityPosition(target, attachEntity, target->tilePos);
@@ -279,7 +279,7 @@ PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                 }
                 case ENTITY_TYPE_ELECTRIC_DOOR:
                 {
-                    if (target->cableType == CABLE_TYPE_DOOR) //  && SameSide(target, blockNextPos, pushDir))
+                    if (target->cableType == CABLE_TYPE_DOOR && DoorBlocked(target, pushDir))
                     {
                         result.blocked = true;
                         result.blockedEntity = target;
@@ -730,6 +730,41 @@ inline void DrawSpriteLayer(EntityLayer layer)
             entity->moveAniQueue.Clear();
             {
                 Vector2 topleft = GetTilePivot(entity);
+
+#if 0
+                if (layer == LAYER_DOOR)
+                {
+                    switch(entity->spriteID)
+                    {
+                        case (SPRITE_DOOR_LEFT_CLOSE):
+                        {
+                            topleft.x += 1.5f;
+                            break;
+                        }
+                        case SPRITE_DOOR_RIGHT_CLOSE:
+                        {
+                            topleft.x -= 1.5f;                    
+                            break;
+                        }
+                        case SPRITE_DOOR_TOP_CLOSE:
+                        {
+                            topleft.y += 1.5f;
+                            break;
+                        }
+                        case SPRITE_DOOR_DOWN_CLOSE:
+                        {
+                            topleft.y -= 1.5f;
+                            break;
+                        }
+
+                        default:
+                        {
+                            SM_ASSERT(false, "door has no sprite");
+                        }
+                
+                    }
+                }
+#endif
                 DrawSprite(entity->sprite, topleft, entity->tileSize, entity->color);
             }
         }
@@ -1178,13 +1213,15 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn, Texture2D *
             DrawTileMap(map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
         }
 
-        DrawSpriteLayer(LAYER_GROUND);
+        DrawSpriteLayer(LAYER_CABLE);
 
-        DrawSpriteLayer(LAYER_BLOCKS);
+        DrawSpriteLayer(LAYER_BLOCK);
         
-        DrawSpriteLayer(LAYER_OVERLAP);
+        DrawSpriteLayer(LAYER_WALL);
+
+        DrawSpriteLayer(LAYER_DOOR);
         
-        DrawSpriteLayer(LAYER_PLAYER);
+        DrawSpriteLayer(LAYER_SLIME);
 
     
         if (!animationPlaying)

@@ -116,6 +116,9 @@ struct GameState
     ElectricDoorSystem * electricDoorSystem = nullptr;
 
     Array<int, MAX_ENTITIES> entityTable[LAYER_COUNT];
+
+    int playerEntityIndex;
+    Array<int, MAX_ENTITIES> slimeEntityIndices = entityTable[LAYER_SLIME];
         
     KeyMapping keyMappings[GAME_INPUT_COUNT];
 
@@ -124,9 +127,6 @@ struct GameState
     Map lv2Map;
 
     Array<Entity, MAX_ENTITIES> entities;
-
-    int playerEntityIndex;
-    Array<int, 3> slimeEntityIndices;
     
     ArrowButton upArrow, downArrow, leftArrow, rightArrow;
     
