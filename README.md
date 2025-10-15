@@ -2,7 +2,11 @@
 
 Application should be able to run on windows without build.
 
-Just clone the repo and run command
+Just clone the repo with command
+
+$ git clone --recurse-submodules
+
+and run command
 
 $ hotrun.bat
 
