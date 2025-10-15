@@ -156,6 +156,7 @@ inline bool HasPit(IVec2 tilePos);
 
 inline bool IsSlime(Entity * entity);
 
+void ShiftEntities(IVec2 startPos, IVec2 bounceDir);
 
 #define ENTITY_H
 #endif

@@ -571,3 +571,30 @@ inline Entity * CreateSlimeClone(IVec2 tilePos)
     return freeEntity;
     
 }
+
+
+
+void ShiftEntities(IVec2 startPos, IVec2 bounceDir)
+{
+    Entity * last = nullptr;
+    for (IVec2 pos = startPos; ; pos = pos + bounceDir)
+    {
+        bool empty = true;
+        for (int i = 0; i < gameState->entities.count; i++)
+        {
+            Entity * entity = GetEntity(i);
+            if (entity && entity != last && entity->movable && entity->tilePos == pos)
+            {
+                last = entity;
+                entity->tilePos += bounceDir;
+                empty = false;
+                break;
+            }
+        }
+
+        if (empty)
+        {
+            break;            
+        }
+    }
+}

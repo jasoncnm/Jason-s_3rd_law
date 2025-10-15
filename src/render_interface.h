@@ -86,5 +86,11 @@ void DrawSprite(Sprite & sprite, Vector2 topLeft, float tileSize = 32, Color col
     DrawTexturePro(*texture,  source,  dest, { dest.width, dest.height }, 0, color);
 }
 
+
+void DrawError()
+{
+    DrawText("SOMETHING IS WRONG PLEASE UNDO(Z) OR RESET(R)", GetScreenWidth() / 2, GetScreenHeight() / 2, 20, RED);
+}
+
 #define RENDER_INTERFACE_H
 #endif

@@ -10,7 +10,7 @@ target:
 }
 window:
 {
-  size: 3072.000000 1670.400024
+  size: 3072 1670
   panels:
   {
     0.740078:
@@ -51,22 +51,21 @@ window:
             project: "C:\\Users\\Jason\\AppData\\Roaming/raddbg/default.raddbg_project"
             query:
             {
-              input: pushactiiion
+              input: ""
               cmd: search
             }
-            cursor_line: 204
-            cursor_column: 1
-            mark_line: 204
-            mark_column: 1
+            cursor_line: 737
+            cursor_column: 9
+            mark_line: 737
+            mark_column: 9
           }
           text:
           {
-            selected
             expression: "file:\"W:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/level_loader.cpp\".data"
             project: "C:\\Users\\Jason\\AppData\\Roaming/raddbg/default.raddbg_project"
             query:
             {
-              input: lv2
+              input: ""
               cmd: search
             }
             cursor_line: 311
@@ -76,47 +75,40 @@ window:
           }
           text:
           {
-            expression: "file:\"d:/os/obj/amd64fre/minkernel/crts/ucrt/src/appcrt/startup/mt/objfre/amd64/minkernel/crts/ucrt/src/appcrt/startup/abort.cpp\".data"
+            selected
+            expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/entity.cpp\".data"
             auto: 1
-            cursor_line: 1
-            cursor_column: 1
-            mark_line: 1
-            mark_column: 1
+            cursor_line: 591
+            cursor_column: 10
+            mark_line: 591
+            mark_column: 10
             query: input: ""
           }
         }
       }
-      0.20:
+      0.200000:
       {
-        0.60:
+        watch:
         {
-          watch:
-          {
-            expression: ""
-            selected
-            watch: "gameState->lv2Map"
-            watch: "typeof state.tileMaps + state.tileMapCount - 1"
-            watch: "state.tileMaps + state.tileMapCount - 1"
-            watch: fileName
-          }
-          watch: expression: "query:locals"
-          watch: expression: "query:registers"
-          watch: expression: "query:globals"
-          watch: expression: "query:thread_locals"
-          watch: expression: "query:types"
-          watch: expression: "query:procedures"
-          tabs_on_bottom
+          expression: ""
+          selected
+          watch: "gameState->lv2Map"
+          watch: "typeof state.tileMaps + state.tileMapCount - 1"
+          watch: "state.tileMaps + state.tileMapCount - 1"
+          watch: fileName
+          watch: pos
+          watch: empty
+          watch: entity
+          watch: "entity->movable"
+          watch: "entity->tilePos"
         }
-        0.40:
-        {
-          watch:
-          {
-            expression: "query:call_stack"
-            selected
-          }
-          watch: expression: "query:modules"
-          tabs_on_bottom
-        }
+        watch: expression: "query:locals"
+        watch: expression: "query:registers"
+        watch: expression: "query:globals"
+        watch: expression: "query:thread_locals"
+        watch: expression: "query:types"
+        watch: expression: "query:procedures"
+        tabs_on_bottom
       }
     }
     0.259922:
@@ -129,14 +121,15 @@ window:
       0.50:
       {
         watch: expression: "query:threads"
-        watch: selected expression: "query:processes"
+        watch: expression: "query:processes"
         watch: expression: "query:machines"
+        watch: selected expression: "query:call_stack"
       }
     }
   }
   split_x
-  pos: 384 209
-  monitor: "\\\\.\\DISPLAY1"
+  pos: -85 380
+  monitor: "\\\\.\\DISPLAY2"
   font_size: 14
   maximized
 }

@@ -1002,6 +1002,14 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn, Texture2D *
         {
             SetWindowMonitor(0);
         }
+
+        if (GetMonitorCount() > 2)
+        {
+            if (IsKeyPressed(KEY_THREE))
+            {
+                SetWindowMonitor(2);
+            }
+        }
     }
     
     // NOTE: Debug Camera Control

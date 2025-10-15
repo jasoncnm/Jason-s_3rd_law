@@ -162,13 +162,19 @@ inline void PowerOnCable(Entity * cable, bool & end)
                 Vector2 moveStart = GetTilePivot(entity);
                 BounceEntity(cable, entity, bounceDir);
                 Vector2 moveEnd = GetTilePivot(entity);
-                
-                float dist = Vector2Distance(moveStart, moveEnd);
-                float iDist = dist / MAP_TILE_SIZE;
 
-                AddMoveAnimateQueue(entity->moveAniQueue,
-                                    GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist, true, 0));
-                
+                if (!Vector2Equals(moveStart, moveEnd))
+                {
+                    float dist = Vector2Distance(moveStart, moveEnd);
+                    float iDist = dist / MAP_TILE_SIZE;
+
+                    AddMoveAnimateQueue(entity->moveAniQueue,
+                                        GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist, true, 0));
+                }
+                else
+                {
+                    ShiftEntities(entity->tilePos, bounceDir);                    
+                }
             }
             else
             {
@@ -178,12 +184,19 @@ inline void PowerOnCable(Entity * cable, bool & end)
                     Vector2 moveStart = GetTilePivot(entity);
                     BounceEntity(cable, entity, bounceDir);
                     Vector2 moveEnd = GetTilePivot(entity);
+                    if (!Vector2Equals(moveStart, moveEnd))
+                    {
                 
-                    float dist = Vector2Distance(moveStart, moveEnd);
-                    float iDist = dist / MAP_TILE_SIZE;
+                        float dist = Vector2Distance(moveStart, moveEnd);
+                        float iDist = dist / MAP_TILE_SIZE;
 
-                    AddMoveAnimateQueue(entity->moveAniQueue,
-                                        GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist, true, 0));
+                        AddMoveAnimateQueue(entity->moveAniQueue,
+                                            GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist, true, 0));
+                    }
+                    else
+                    {
+                        ShiftEntities(entity->tilePos, bounceDir);                    
+                    }
                 }
             }
 
