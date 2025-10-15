@@ -6,18 +6,18 @@ set RAYLIB_DEFINES=/DBUILD_LIBTYPE_SHARED /DPLATFORM_DESKTOP
 
 call msvc_upgrade_cmd_64.bat
 
-cd ..
-mkdir bin
-cd src\vendor\raylib\src
+set LIBPATH=..\src\vendor\raylib\src
+
+mkdir ..\bin
+
+pushd %LIBPATH%
 
 cl /LD %RAYLIB_DEFINES%  /Fe: "raylib" %RAYLIB% /link %LIBRARIES%
 
-copy raylib.h        ..
-copy rmem.h          ..
-copy physac.h        ..
-copy raymath.h       ..
+popd
 
-copy raylib.dll ..\..\..\bin
-copy raylib.lib ..\..\..\bin
+copy %LIBPATH%\raylib.h   %LIBPATH%\..
+copy %LIBPATH%\raymath.h  %LIBPATH%\..
 
-cd ..\..\..\scripts
+copy %LIBPATH%\raylib.dll ..\bin
+copy %LIBPATH%\raylib.lib ..\bin
