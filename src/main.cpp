@@ -1,5 +1,11 @@
 #include "game.h"
+
+
+#include "platform.h"
+#if defined _WIN32
 #include "win32_hot_reload.c"
+#endif
+
 #define PATH_SIZE 2048
 
 // NOTE: This file should be cross-compatible, one thing you need to provide
@@ -45,36 +51,58 @@ int main(int argumentCount, char *argumentArray[])
         return -1;
     }
 
-    texture = (Texture2D *)BumpAlloc(&persistentStorage, sizeof(Texture2D));
-    
-    gameCode.initialize(gameState, texture);
+    // NOTE: Initialization
+    {
+        InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jason's 3rd law");
 
+        if (IsWindowState(FLAG_VSYNC_HINT)) ClearWindowState(FLAG_VSYNC_HINT);
+        else SetWindowState(FLAG_VSYNC_HINT);
+
+        SetWindowState(FLAG_WINDOW_RESIZABLE);
+
+        SetWindowMonitor(0);
+    
+        SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+
+        SetExitKey(KEY_Q);
+
+        // MaximizeWindow();
+
+        InitAudioDevice();      // Initialize audio device
+        if (!IsAudioDeviceReady())
+        {
+            SM_ERROR("Unable to initialize Audio Device");
+            return -1;
+        }
+                
+        gameState->texture = LoadTexture(TEXTURE_PATH); // Initialize Texture
+        if (IsTextureValid(gameState->texture))
+        {
+            SM_ERROR("Unable to load file (%s) to texture", TEXTURE_PATH);
+        }
+
+    }
+
+    
     while(!WindowShouldClose())
     {
         // NOTE: Check if the code got recompiled
         long dllFileWriteTime = GetFileModTime(mainDllPath);
         if (dllFileWriteTime != gameCode.lastDllWriteTime)
         {
-            
-// gameCode.hotUnload(gameState);
-
-            DeInitTexture();
             GameCodeUnload(&gameCode);
             gameCode = GameCodeLoad(mainDllPath, tempDllPath, lockFilePath);
-            InitTexture();            
-//gameCode.hotReload(gameState);
-            
         }
 
-        gameCode.updateAndRender(gameState, &memory, texture);
+        gameCode.updateAndRender(gameState, &memory);
     }
 
     
-    // De-Initialization
+    // NOTE: De-Initialization
     //--------------------------------------------------------------------------------------
-    DeInitTexture();
-
-    CloseWindow();
-
-    return 0;
+    {
+        CloseAudioDevice();
+        CloseWindow();
+        UnloadTexture(gameState->texture);
+    } 
 }

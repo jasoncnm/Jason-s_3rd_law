@@ -21,21 +21,10 @@
 //  ========================================================================
 //              NOTE: Render Globals
 //  ========================================================================
-static Texture2D * texture;
 
 //  ========================================================================
 //              NOTE: Render Functions
 //  ========================================================================
-void InitTexture()
-{
-    *texture = LoadTexture(TEXTURE_PATH);
-    SM_ASSERT(IsTextureValid(*texture), "Unable to load file (%s) to texture", TEXTURE_PATH);
-}
-
-void DeInitTexture()
-{
-    UnloadTexture(*texture);
-}
 
 void DrawTileMap(IVec2 startPos, IVec2 dim, Color tileColor, Color gridColor)
 {
@@ -64,10 +53,10 @@ void DrawTileMap(IVec2 startPos, IVec2 dim, Color tileColor, Color gridColor)
     }
 }
 
-void DrawSprite(Sprite & sprite, Vector2 topLeft, float tileSize = 32, Color color = WHITE)
+void DrawSprite(Texture2D texture, Sprite & sprite, Vector2 topLeft, float tileSize = 32, Color color = WHITE)
 {
 
-    SM_ASSERT(IsTextureValid(*texture), "Texture is not valid");
+    SM_ASSERT(IsTextureValid(texture), "Texture is not valid");
             
     Rectangle source =
         {
@@ -81,9 +70,8 @@ void DrawSprite(Sprite & sprite, Vector2 topLeft, float tileSize = 32, Color col
             tileSize, tileSize
         };
         
-    
- // Draw a part of a texture defined by a rectangle with 'pro' parameters
-    DrawTexturePro(*texture,  source,  dest, { dest.width, dest.height }, 0, color);
+    // Draw a part of a texture defined by a rectangle with 'pro' parameters
+    DrawTexturePro(texture,  source,  dest, { dest.width, dest.height }, 0, color);
 }
 
 

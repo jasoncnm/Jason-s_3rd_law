@@ -1,37 +1,8 @@
+#include "platform.h"
+
 #include "WinDef.h"
 #include "winbase.h"
 #include "libloaderapi.h"
-
-#if 0
-typedef void HotReload(GameState *gameStateIn); // called when you recompile the program while its running
-typedef void HotUnload(GameState *gameStateIn); // called before the dynamic libraries getswapped
-void HotReloadStub(GameState * gameStateIn){}
-void HotUnloadStub(GameState *gameStateIn){} 
-#endif
-
-// NOTE: prototypes for function pointers
-typedef void Initialize(GameState *gameStateIn, Texture2D * textureIn); // called at the beginning of the app
-typedef void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn, Texture2D * textureIn); // called on every frame
-
-// NOTE: empty functions meant to be replacements when
-// functions from the dll fail to load
-void InitializeStub(GameState * gameStateIn, Texture2D * textureIn){}
-void UpdateAndRenderStub(GameState * gameStateIn, Memory * gameMemoryIn, Texture2D * textureIn){}
-typedef struct GameCode
-{
-#if 0
-    HotReload *hotReload;
-    HotUnload *hotUnload;
-#endif
-    
-    HMODULE library;
-    long lastDllWriteTime;
-    bool isValid;
-
-    // NOTE: pointers to functions from the dll
-    Initialize *initialize;
-    UpdateAndRender *updateAndRender;
-} GameCode;
 
 // Creates a copy of the main dll, and loads that copy
 // if load fails it substitutes the loaded function with a stub(empty function)
@@ -62,12 +33,12 @@ GameCodeLoad(char *mainDllPath, char *tempDllPath, char *lockFilePath)
 #if 0
         result.hotReload = (HotReload *)GetProcAddress(result.library, "HotReload");
         result.hotUnload = (HotUnload *)GetProcAddress(result.library, "HotUnload");
+        result.initialize = (Initialize *)GetProcAddress(result.library, "Initialize");
 #endif
         
-        result.initialize = (Initialize *)GetProcAddress(result.library, "Initialize");
-        result.updateAndRender = (UpdateAndRender *)GetProcAddress(result.library, "UpdateAndRender");
+        result.updateAndRender = (UpdateAndRender *)GetProcAddress((HMODULE)result.library, "UpdateAndRender");
 
-        result.isValid = (result.updateAndRender != 0) && (result.initialize != 0);
+        result.isValid = (result.updateAndRender != 0);
     }
 
     // NOTE: if functions failed to load, load the empty functions
@@ -77,10 +48,10 @@ GameCodeLoad(char *mainDllPath, char *tempDllPath, char *lockFilePath)
 #if 0
         result.hotReload = HotReloadStub;
         result.hotUnload = HotUnloadStub;
+        result.initialize = InitializeStub;
 #endif
         
         result.updateAndRender = UpdateAndRenderStub;
-        result.initialize = InitializeStub;
         
         TraceLog(LOG_ERROR, "FAILED TO LOAD LIBRARY");
     }
@@ -98,10 +69,10 @@ GameCodeUnload(GameCode *GameCode)
 #if 0
         GameCode->hotReload = HotReloadStub;
         GameCode->hotUnload = HotUnloadStub;
-#endif
-        FreeLibrary(GameCode->library);
-        GameCode->library = 0;
         GameCode->initialize = InitializeStub;
+#endif
+        FreeLibrary((HMODULE)GameCode->library);
+        GameCode->library = 0;
         GameCode->updateAndRender = UpdateAndRenderStub;
         TraceLog(LOG_DEBUG, "Unload game code");
     }

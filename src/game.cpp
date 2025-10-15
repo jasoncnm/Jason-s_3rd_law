@@ -763,7 +763,7 @@ inline void DrawSpriteLayer(EntityLayer layer)
                     {
                         entity->pivot = ani.GetPosition();
                     }
-                    DrawSprite(entity->sprite, entity->pivot, entity->tileSize, entity->color);
+                    DrawSprite(gameState->texture, entity->sprite, entity->pivot, entity->tileSize, entity->color);
                     goto NextLoop;
                 }
             }
@@ -814,7 +814,7 @@ inline void DrawSpriteLayer(EntityLayer layer)
                     }
                 }
 #endif
-                DrawSprite(entity->sprite, entity->pivot, entity->tileSize, entity->color);
+                DrawSprite(gameState->texture, entity->sprite, entity->pivot, entity->tileSize, entity->color);
             }
         }
 
@@ -902,18 +902,17 @@ inline bool SlimeSelection(Entity * player)
 //  ========================================================================
 
 // Called on every frame
-void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn, Texture2D * textureIn)
+void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
 {
     
     if (gameState != gameStateIn) gameState = gameStateIn;
     if (gameMemory != gameMemoryIn) gameMemory = gameMemoryIn;
-    if (textureIn != texture) texture = textureIn;
     
     if (!gameState->initialized)
     {
         // NOTE: Initialization
         gameState->initialized = true;
-
+            
         // NOTE: Key Mappings
         {
             gameState->keyMappings[MOUSE_LEFT].keys.Add(MOUSE_BUTTON_LEFT);
@@ -966,6 +965,17 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn, Texture2D *
             Entity * slime = GetEntity(entityIndexArray[i]);
             slime->pivot = GetTilePivot(slime);
         }
+
+#if 0
+        Sound testSound = LoadSound("Assets/Sound/jump.wav");
+        if (!IsSoundValid(testSound))
+        {
+            SM_ERROR("Cannot load sound");
+            UnloadSound(testSound);
+        }
+        SetSoundVolume(testSound, 0.5f);
+        gameState->testSound = testSound;
+#endif        
     }
     
 #if 0
@@ -1347,25 +1357,25 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn, Texture2D *
             // Left
             if (gameState->leftArrow.show)
             {
-                DrawSprite(gameState->leftArrow.sprite, gameState->leftArrow.topLeftPos, (float)gameState->leftArrow.tileSize);
+                DrawSprite(gameState->texture, gameState->leftArrow.sprite, gameState->leftArrow.topLeftPos, (float)gameState->leftArrow.tileSize);
             }
         
             // Right
             if (gameState->rightArrow.show)
             {
-                DrawSprite(gameState->rightArrow.sprite, gameState->rightArrow.topLeftPos, (float)gameState->rightArrow.tileSize);
+                DrawSprite(gameState->texture, gameState->rightArrow.sprite, gameState->rightArrow.topLeftPos, (float)gameState->rightArrow.tileSize);
             }
         
             // Up
             if (gameState->upArrow.show)
             {
-                DrawSprite(gameState->upArrow.sprite, gameState->upArrow.topLeftPos, (float)gameState->upArrow.tileSize);
+                DrawSprite(gameState->texture, gameState->upArrow.sprite, gameState->upArrow.topLeftPos, (float)gameState->upArrow.tileSize);
             }
         
             // Down
             if (gameState->downArrow.show)
             {
-                DrawSprite(gameState->downArrow.sprite, gameState->downArrow.topLeftPos, (float)gameState->downArrow.tileSize);
+                DrawSprite(gameState->texture, gameState->downArrow.sprite, gameState->downArrow.topLeftPos, (float)gameState->downArrow.tileSize);
             }
         }
     
@@ -1395,27 +1405,4 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn, Texture2D *
         EndDrawing();
 
     }
-}
-
-// Called at the the start of the program
-void Initialize(GameState *gameStateIn, Texture2D * textureIn)
-{
-    if (gameStateIn != gameState) gameState = gameStateIn;
-    if (textureIn != texture) texture = textureIn;
-
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jason's 3rd law");
-
-    if (IsWindowState(FLAG_VSYNC_HINT)) ClearWindowState(FLAG_VSYNC_HINT);
-    else SetWindowState(FLAG_VSYNC_HINT);
-
-    SetWindowState(FLAG_WINDOW_RESIZABLE);
-
-    SetWindowMonitor(0);
-    
-    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
-
-    // MaximizeWindow();
-    SetExitKey(KEY_Q);
-    
-    InitTexture();
 }

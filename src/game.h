@@ -117,6 +117,8 @@ struct GameState
     MoveAnimation cameraAnimation;
     Camera2D camera;
 
+    Texture2D texture;
+
     ElectricDoorSystem * electricDoorSystem = nullptr;
 
     Array<int, MAX_ENTITIES> entityTable[LAYER_COUNT];
@@ -153,8 +155,11 @@ struct PushActionResult
 // ----------------------------------------------------
 // NOTE: Game Globals
 // ----------------------------------------------------
+// TODO: Make this contain
 static const float pressFreq = 0.2f;
 static float timeSinceLastPress = 0;
+
+// TODO: Very piggy undo stack, each move we push a copy of the entire game entities 
 static std::vector<UndoState> undoStack;
 
 static GameState * gameState;

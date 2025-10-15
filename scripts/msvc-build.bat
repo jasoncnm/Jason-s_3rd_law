@@ -3,7 +3,7 @@ REM /EXPORT:HotReload /EXPORT:HotUnload
 
 
 set LINKER_FLAGS=/link raylib.lib kernel32.lib user32.lib shell32.lib winmm.lib gdi32.lib opengl32.lib -incremental:no -opt:ref
-set EXPORTED_FUNCTIONS=/EXPORT:UpdateAndRender /EXPORT:Initialize 
+set EXPORTED_FUNCTIONS=/EXPORT:UpdateAndRender
 set COMMON_FLAGS=/Zi /nologo -GR- -Od -Oi -WX -W4 -wd4456 -wd4505 -wd4201 -wd4100 -wd4189 -wd4996 -FC
 set EXE_NAME=game.exe
 set DLL_NAME=game_code.dll
