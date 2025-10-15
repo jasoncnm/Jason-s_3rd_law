@@ -17,6 +17,10 @@
 
 int main(int argumentCount, char *argumentArray[])
 {
+
+    //--------------------------------------------------------------------------------------
+    // NOTE: Game Code DLL Setup
+    //--------------------------------------------------------------------------------------
     // NOTE: first argument of the argumentArray is the relative path
     //      to the executable
     const char *basePath = GetDirectoryPath(argumentArray[0]);
@@ -39,23 +43,28 @@ int main(int argumentCount, char *argumentArray[])
         TraceLog(LOG_INFO, tempDllPath);
         TraceLog(LOG_INFO, lockFilePath);
     }
-
+    
     GameCode gameCode = {0};
     gameCode = GameCodeLoad(mainDllPath, tempDllPath, lockFilePath);
+
+
     
+    //--------------------------------------------------------------------------------------
+    // NOTE: Memory Allocation
+    //--------------------------------------------------------------------------------------
     BumpAllocator transientStorage = MakeBumpAllocator(MB(64));
     BumpAllocator persistentStorage = MakeBumpAllocator(MB(64));
-
-    Memory memory = { &transientStorage,  &persistentStorage };
-
     gameState = (GameState *)BumpAlloc(&persistentStorage, sizeof(GameState));
     if (!gameState)
     {
         SM_ERROR("Failed to allocate gameState");
         return -1;
     }
+    Memory memory = { &transientStorage,  &persistentStorage };
 
+    //--------------------------------------------------------------------------------------
     // NOTE: Initialization
+    //--------------------------------------------------------------------------------------
     {
         InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jason's 3rd law");
 
@@ -87,7 +96,10 @@ int main(int argumentCount, char *argumentArray[])
 
     }
 
-    
+
+    //--------------------------------------------------------------------------------------
+    // NOTE: Update Loop
+    //--------------------------------------------------------------------------------------
     while(!WindowShouldClose())
     {
         // NOTE: Check if the code got recompiled
@@ -102,6 +114,7 @@ int main(int argumentCount, char *argumentArray[])
     }
 
     
+    //--------------------------------------------------------------------------------------
     // NOTE: De-Initialization
     //--------------------------------------------------------------------------------------
     {

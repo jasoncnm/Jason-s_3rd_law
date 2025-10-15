@@ -68,8 +68,6 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
         entityResult.entity->color = GRAY;
 
         entityResult.entity->movable = true;
-        gameState->slimeEntityIndices.Add(entityResult.entityIndex);
-
         gameState->entityTable[LAYER_SLIME].Add(entityResult.entityIndex);
                                 
         SM_TRACE("CLONE 1 generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
@@ -285,7 +283,6 @@ inline void GenerateTileMap(std::string fileName, IVec2 startPos, int width, int
                             result.entity->movable = true;
 
                             gameState->playerEntityIndex = result.entityIndex;
-                            gameState->slimeEntityIndices.Add(result.entityIndex);
 
                             gameState->entityTable[LAYER_SLIME].Add(result.entityIndex);
 
@@ -390,9 +387,11 @@ void LoadLevelToGameState(GameState & state, State loadState)
 
     // NOTE: Attatch slimes
     {
-        for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
+        auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
+        
+        for (int i = 0; i < slimeEntityIndices.count; i++)
         {
-            int index = gameState->slimeEntityIndices[i];
+            int index = slimeEntityIndices[i];
             Entity * entity = GetEntity(index);
             SM_ASSERT(entity, "Entity is just created but not activate");
             
@@ -410,167 +409,4 @@ void LoadLevelToGameState(GameState & state, State loadState)
     if (gameState->electricDoorSystem) SetUpElectricDoor();
 
 }
-
  
-
-        
-#if 0
-        // NOTE: Create Level with string
-        int size;
-        unsigned char * fileData = LoadFileData(LEVELS_PATH, &size);
-        levelsTimestamp = GetTimestamp(LEVELS_PATH);
-
-        
-        const char * level;
-
-        state.state = loadState;
-        bool loading = false;
-        std::string l = "";
-
-        int col = 0, row = 0;
-            
-        for (int i = 0; i < size; i++)
-        {
-            char c = fileData[i];
-
-            if (loading)
-            {
-                if (c == ';') break;
-
-                
-                col++;
-
-                switch(c)
-                {
-                    case '#':
-                    {
-                        // NOTE: Set Wall Inital States
-                        currentRecord.wallSize = MAP_TILE_SIZE;
-                        Wall wall1 = { 0 };
-                        wall1.wallX = col;
-                        wall1.wallY = row + 1;
-                        currentRecord.walls[currentRecord.wallCount++] = wall1;
-                        break;
-                    }
-                    case '@':
-                    {
-                        // NOTE: Set Player Inital States
-                        Slime mother = { 0 };
-                        
-                        mother.tileX = col;
-                        mother.tileY = row + 1;
-                        mother.mass = 1;
-                        mother.pivot = GetTilePivot(mother.tileX, mother.tileY, mother.tileSize);
-                        
-                        currentRecord.player.mother = mother;
-                        
-                        break;
-                    }
-                    case '1':
-                    {
-
-                        Slime child = { 0 };
-
-                        child.tileX = col;
-                        child.tileY = row + 1;
-                        child.mass = 1;
-                        child.tileSize = GetSlimeTileSize(currentRecord.player.maxTileSize, child.mass);
-                        child.pivot = GetTilePivot(child.tileX, child.tileY, child.tileSize);
-
-                        SM_ASSERT(currentRecord.player.childrenCount < (MAX_SLIME - 1), "Out of child capacity!!");
-                        currentRecord.player.children[currentRecord.player.childrenCount++] = child;
-                        
-                        break;
-                    }
-                    case 'g':
-                    {
-                        
-                        // NOTE:Set Goals Inital States
-                        currentRecord.goalSize = MAP_TILE_SIZE / 4;
-
-                        Goal goal = { 0 };
-                        goal.goalX = col;
-                        goal.goalY = row + 1;
-
-                        currentRecord.goals[currentRecord.goalCount++] = goal;
-                        break;
-
-                    }
-                    case 't':
-                    {
-
-                        // NOTE:Set Goals Inital States
-                        currentRecord.goalSize = MAP_TILE_SIZE / 2;
-
-                        Goal goal = { 0 };
-                        goal.goalX = col;
-                        goal.goalY = row + 1;
-                        goal.cover = true;
-                        currentRecord.goals[currentRecord.goalCount++] = goal;
-                        
-                        // NOTE: Set Block Inital States
-                        currentRecord.blockSize = MAP_TILE_SIZE;
-
-                        Block block1 = { 0 };
-                        block1.blockX = col;
-                        block1.blockY = row + 1;
-                        block1.color = DARKGREEN;
-    
-                        currentRecord.blocks[currentRecord.blockCount++] = block1;
-                        break;
-                    }
-                    case 'b':
-                    {
-                        // NOTE: Set Block Inital States
-                        currentRecord.blockSize = MAP_TILE_SIZE;
-
-                        Block block1 = { 0 };
-                        block1.blockX = col;
-                        block1.blockY = row + 1;
-
-                        block1.color = GREEN;
-    
-                        currentRecord.blocks[currentRecord.blockCount++] = block1;
-                        break;
-                    }
-                    case '\r':
-                    case '\n':
-                    {
-                        if (fileData[i + 1] == '\n') i++; 
-                        tileCountX = col - 1;
-                        tileCountY++;
-                        row++;
-                        col = 0;
-                        break;
-                    }
-                }
-                            
-            }
-            else
-            {
-                if (c == '\r')
-                {
-                    switch(loadState)
-                    {
-                        case STATE_TEST_LEVEL:
-                        {
-                            if (l == "TestLevel")
-                            {
-                                loading = true;
-                            }
-                            break;
-                        }
-                    }
-                    if (fileData[i + 1] == '\n') i++; 
-                    l = "";
-                }
-                else
-                {
-                    l += c;
-                }
-            }
-        }
-
-        UnloadFileData(fileData);
-#endif
-

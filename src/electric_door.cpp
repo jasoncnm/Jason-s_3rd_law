@@ -78,9 +78,11 @@ inline void UnfreezeSlimes(Entity * door)
     }
 #else
 
-    for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
+    auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
+    
+    for (int i = 0; i < slimeEntityIndices.count; i++)
     {
-        Entity * slime = GetEntity(gameState->slimeEntityIndices[i]);
+        Entity * slime = GetEntity(slimeEntityIndices[i]);
         if (slime)
         {
             SetActionState(slime, MOVE_STATE);

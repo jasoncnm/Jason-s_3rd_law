@@ -403,9 +403,11 @@ bool MoveAction(IVec2 actionDir)
                 return false;
             }
 
-            for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
+            auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
+            
+            for (int i = 0; i < slimeEntityIndices.count; i++)
             {
-                Entity * slime = GetEntity(gameState->slimeEntityIndices[i]);
+                Entity * slime = GetEntity(slimeEntityIndices[i]);
                 if (slime && slime != mother && slime->tilePos == mother->tilePos)
                 {
                     mother = MergeSlimes(slime, mother);
@@ -431,14 +433,14 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
     Entity * clone = CreateSlimeClone(player->tilePos);
     IVec2 playerStartTile = player->tilePos;
     IVec2 cloneStartTile = playerStartTile;
-    
     Vector2 playerStart = GetTilePivot(player->tilePos, player->tileSize);
+    Vector2 cloneStart = GetTilePivot(clone->tilePos, clone->tileSize);
+
     BounceEntity(player, player, bounceDir);
+    BounceEntity(clone, clone, -bounceDir);
+
     Vector2 playerEnd = player->attach ?
         GetTilePivot(player->tilePos, player->tileSize, player->attachDir) : GetTilePivot(player->tilePos, player->tileSize);
-
-    Vector2 cloneStart = GetTilePivot(clone->tilePos, clone->tileSize);
-    BounceEntity(clone, clone, -bounceDir);
     Vector2 cloneEnd = clone->attach ?
         GetTilePivot(clone->tilePos, clone->tileSize, clone->attachDir) : GetTilePivot(clone->tilePos, clone->tileSize);
     
@@ -515,19 +517,20 @@ NextLoop:;
 
 inline bool SlimeSelection(Entity * player)
 {
+    auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
 
     bool stateChanged = false;
 
     if (JustPressed(POSSES_KEY) && gameState->lv2Map && gameState->lv2Map->firstEnter)
     {
         Entity * nextPlayerEntity = nullptr;
-        for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
+        for (int i = 0; i < slimeEntityIndices.count; i++)
         {
-            Entity * slime = GetEntity(gameState->slimeEntityIndices[i]);
+            Entity * slime = GetEntity(slimeEntityIndices[i]);
             if (slime == player)
             {
-                int nextPlayerIndex = (i + 1) % gameState->slimeEntityIndices.count;
-                Entity * e = GetEntity(gameState->slimeEntityIndices[nextPlayerIndex]);
+                int nextPlayerIndex = (i + 1) % slimeEntityIndices.count;
+                Entity * e = GetEntity(slimeEntityIndices[nextPlayerIndex]);
                 if (e)
                 {
                     nextPlayerEntity = e;
@@ -629,9 +632,9 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         if (currentTimeStamp > tileMapSources[i].timestamp)
         {
             Array<Entity, 3> slimes;
-            for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
+            for (int i = 0; i < slimeEntityIndices.count; i++)
             {
-                slimes[i] = *GetEntity(gameState->slimeEntityIndices[i]);
+                slimes[i] = *GetEntity(slimeEntityIndices[i]);
             }
             
             LoadLevelToGameState(*gameState, gameState->state);
@@ -726,7 +729,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             {
                 player->actionState = MOVE_STATE;
             }
-            else if (player->actionState == MOVE_STATE)
+            else if (player->actionState == MOVE_STATE && player->mass > 1)
             {
                 player->actionState = SPLIT_STATE;
             }
@@ -868,9 +871,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
     
     // NOTE: Arrow Setup
     {
-        Entity * player = GetEntity(gameState->playerEntityIndex);
-        Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
-        IVec2 centerPos = player->tilePos;
+        IVec2 centerPos = GetPlayer()->tilePos;
         
         IVec2 upPos    = { centerPos.x, (centerPos.y-1) };
         IVec2 downPos  = { centerPos.x, (centerPos.y+1) };
@@ -879,28 +880,18 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         
         IVec2 dir[4] = { upPos, downPos, leftPos, rightPos };
         Arrow * arrows[4] = { &gameState->upArrow, &gameState->downArrow, &gameState->leftArrow, &gameState->rightArrow };
-        
         for (int i = 0; i < 4; i++)
         {
-            IVec2 tilePos = dir[i];
-            
             Arrow * arrow = arrows[i];
-
-            Vector2 topLeft  = GetTilePivot(tilePos, (float)arrow->tileSize);
-            arrow->sprite = GetSprite(arrow->id);
-            
-            arrow->topLeftPos = topLeft;
-            
+            arrow->topLeftPos = GetTilePivot(dir[i], (float)arrow->tileSize);
         }
     }
 
     for (int i = 0; i < gameState->entities.count; i++)
     {
         Entity * entity = GetEntity(i);
-        
         if (entity)
         {
-            
             for (int j = 0; j < entity->moveAniQueue.count; j++)
             {
                 MoveAnimation & ani = entity->moveAniQueue[j];
@@ -942,32 +933,26 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         DrawSpriteLayer(LAYER_SLIME);
 
     
-        if (!animationPlaying)
+        // Left
+        if (gameState->leftArrow.show)
         {
-            // NOTE: Arrow sprite
-            // Left
-            if (gameState->leftArrow.show)
-            {
-                DrawSprite(gameState->texture, gameState->leftArrow.sprite, gameState->leftArrow.topLeftPos, (float)gameState->leftArrow.tileSize);
-            }
+            DrawSprite(gameState->texture, gameState->leftArrow.sprite, gameState->leftArrow.topLeftPos, (float)gameState->leftArrow.tileSize);
+        }
+        // Right
+        if (gameState->rightArrow.show)
+        {
+            DrawSprite(gameState->texture, gameState->rightArrow.sprite, gameState->rightArrow.topLeftPos, (float)gameState->rightArrow.tileSize);
+        }
         
-            // Right
-            if (gameState->rightArrow.show)
-            {
-                DrawSprite(gameState->texture, gameState->rightArrow.sprite, gameState->rightArrow.topLeftPos, (float)gameState->rightArrow.tileSize);
-            }
-        
-            // Up
-            if (gameState->upArrow.show)
-            {
-                DrawSprite(gameState->texture, gameState->upArrow.sprite, gameState->upArrow.topLeftPos, (float)gameState->upArrow.tileSize);
-            }
-        
-            // Down
-            if (gameState->downArrow.show)
-            {
-                DrawSprite(gameState->texture, gameState->downArrow.sprite, gameState->downArrow.topLeftPos, (float)gameState->downArrow.tileSize);
-            }
+        // Up
+        if (gameState->upArrow.show)
+        {
+            DrawSprite(gameState->texture, gameState->upArrow.sprite, gameState->upArrow.topLeftPos, (float)gameState->upArrow.tileSize);
+        }
+        // Down
+        if (gameState->downArrow.show)
+        {
+            DrawSprite(gameState->texture, gameState->downArrow.sprite, gameState->downArrow.topLeftPos, (float)gameState->downArrow.tileSize);
         }
     
         EndMode2D();

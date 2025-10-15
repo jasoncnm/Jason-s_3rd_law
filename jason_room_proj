@@ -37,19 +37,20 @@ window:
         }
         0.75:
         {
-          text:
-          {
-            expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/engine_lib.h\".data"
-            auto: 1
-            query: input: ""
-            cursor_line: 121
-            cursor_column: 1
-            mark_line: 121
-            mark_column: 1
-          }
+          selected
           text:
           {
             selected
+            expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/level_loader.cpp\".data"
+            auto: 1
+            query: input: ""
+            cursor_line: 389
+            cursor_column: 6
+            mark_line: 389
+            mark_column: 6
+          }
+          text:
+          {
             expression: "file:\"W:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/game.cpp\".data"
             project: "C:\\Users\\Jason\\AppData\\Roaming/raddbg/default.raddbg_project"
             query:
@@ -57,16 +58,15 @@ window:
               input: ""
               cmd: search
             }
-            cursor_line: 942
-            cursor_column: 1
-            mark_line: 942
-            mark_column: 1
+            cursor_line: 933
+            cursor_column: 16
+            mark_line: 933
+            mark_column: 16
           }
         }
       }
       0.200000:
       {
-        selected
         watch:
         {
           expression: ""
@@ -76,6 +76,7 @@ window:
           watch: "gameState->entities.elements[gameState.playerEntityIndex].actionState"
           watch: "entity->actionState"
           watch: "entity->lastState"
+          watch: "gameState->slimeEntityIndices"
         }
         watch: expression: "query:locals"
         watch: expression: "query:registers"
@@ -227,4 +228,4 @@ keybindings:
   { log_marker m ctrl shift alt }
   { toggle_dev_menu d ctrl shift alt }
 }
-current_path: "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/src"
+current_path: "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/bin"

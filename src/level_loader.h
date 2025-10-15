@@ -11,11 +11,10 @@
 #include <vector>
 
 #include "game.h"
-#include "Json/json.hpp"
+#include "vendor/Json/json.hpp"
 
 using json = nlohmann::json;
 
-// #define LEVELS_PATH "Assets/Level/levels.lv"
 #define WORLD_PATH "Assets/Level_Editor/maps.world"
 #define LEVELS_PATH "Assets/Level_Editor/"
 #define LEVEL_2_ROOM_NAME "TileMap/Room_24.tmj"

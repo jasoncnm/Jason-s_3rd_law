@@ -20,11 +20,9 @@
 
 #define MAX_ENTITIES 5000
 
-#define MAX_UNDO_RECORDS 2000    // IMPORTANT: This might need to be handle if released. I'm Using std::stack for now (dynamic alloc)
 
-
-#include "raylib/raylib.h"
-#include "raylib/raymath.h"
+#include "vendor/raylib/raylib.h"
+#include "vendor/raylib/raymath.h"
 
 #include "engine_lib.h"
 #include "assets.h"
@@ -37,8 +35,6 @@
 // ----------------------------------------------------
 // NOTE: Game Structs
 // ----------------------------------------------------
-
-using UndoEntities = Array<Entity, MAX_UNDO_RECORDS>;
 
 
 enum State
@@ -120,7 +116,6 @@ struct GameState
     Array<int, MAX_ENTITIES> entityTable[LAYER_COUNT];
 
     int playerEntityIndex;
-    Array<int, MAX_ENTITIES> slimeEntityIndices = entityTable[LAYER_SLIME];
         
     KeyMapping keyMappings[GAME_INPUT_COUNT];
 

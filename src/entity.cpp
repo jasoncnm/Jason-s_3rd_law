@@ -364,9 +364,10 @@ inline Entity * FindEntityByLocationAndLayer(IVec2 pos, EntityLayer layer)
 
 inline void UpdateSlimes()
 {
-    for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
+    auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
+    for (int i = 0; i < slimeEntityIndices.count; i++)
     {
-        Entity * slime = GetEntity(gameState->slimeEntityIndices[i]);
+        Entity * slime = GetEntity(slimeEntityIndices[i]);
         if (slime && slime->attach)
         {
             Entity * attach = GetEntity(slime->attachedEntityIndex);
@@ -401,9 +402,9 @@ inline void UpdateSlimes()
     }
 
     Entity * player = GetEntity(gameState->playerEntityIndex);
-    for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
+    for (int i = 0; i < slimeEntityIndices.count; i++)
     {
-        Entity * slime = GetEntity(gameState->slimeEntityIndices[i]);
+        Entity * slime = GetEntity(slimeEntityIndices[i]);
         if (slime && slime != player && slime->mass > player->mass)
         {
             slime->type = ENTITY_TYPE_PLAYER;
@@ -517,10 +518,11 @@ inline void SlimeMoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir)
 
 inline Entity * CreateSlimeClone(IVec2 tilePos)
 {
+    auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
     Entity * freeEntity = nullptr;
-    for (int i = 0; i < gameState->slimeEntityIndices.count; i++)
+    for (int i = 0; i < slimeEntityIndices.count; i++)
     {
-        Entity * entity = &gameState->entities[gameState->slimeEntityIndices[i]];
+        Entity * entity = &gameState->entities[slimeEntityIndices[i]];
         if (!entity->active)
         {
             freeEntity = entity;

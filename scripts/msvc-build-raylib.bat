@@ -8,7 +8,7 @@ call msvc_upgrade_cmd_64.bat
 
 cd ..
 mkdir bin
-cd src\raylib\src
+cd src\vendor\raylib\src
 
 cl /LD %RAYLIB_DEFINES%  /Fe: "raylib" %RAYLIB% /link %LIBRARIES%
 
