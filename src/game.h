@@ -72,7 +72,7 @@ struct Memory
     BumpAllocator * persistentStorage;
 };
 
-struct ArrowButton
+struct Arrow
 {
     Sprite sprite;
     SpriteID id;
@@ -80,10 +80,6 @@ struct ArrowButton
     int tileSize;
     
     Vector2 topLeftPos;
-    
-    bool seletable = false;
-    bool hover = false;
-    bool preseed = false;
     bool show = true;
 };
 
@@ -134,7 +130,7 @@ struct GameState
 
     Array<Entity, MAX_ENTITIES> entities;
     
-    ArrowButton upArrow, downArrow, leftArrow, rightArrow;
+    Arrow upArrow, downArrow, leftArrow, rightArrow;
     
     float animateTime = 0.0f;
     float duration = 1.0f;
@@ -145,7 +141,7 @@ struct GameState
 };
 
 
-struct PushActionResult
+struct MoveActionResult
 {
     bool blocked;
     bool pushed;
@@ -175,28 +171,19 @@ inline bool JustPressed(GameInputType type);
 
 inline bool IsDown(GameInputType type);
 
-inline bool CheckOutOfBound(int tileX, int tileY);
-
-inline bool CheckOutOfBound(IVec2 tilePos);
-
-inline bool CheckBounce(IVec2 tilePos, IVec2 pushDir);
-
-PushActionResult PushActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int accumulatedMass);
-
-void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir);
-
 inline bool UpdateCamera();
 
 inline void Undo();
 
 inline void Restart();
 
+MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int accumulatedMass);
+
 bool MoveAction(IVec2 actionDir);
 
 bool SplitAction(IVec2 bounceDir);
 
 inline void DrawSpriteLayer(EntityLayer layer);
-
 
 #define GAME_H
 #endif

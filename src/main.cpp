@@ -4,6 +4,10 @@
 #include "platform.h"
 #if defined _WIN32
 #include "win32_hot_reload.c"
+#elif defined __linux__
+#error Linux build not supported
+#elif defined __APPLE__
+#error Apple build not supported
 #endif
 
 #define PATH_SIZE 2048

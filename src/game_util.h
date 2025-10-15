@@ -7,9 +7,11 @@
    $Notice: $
    ======================================================================== */
 
-#include "game.h"
 #include "engine_lib.h"
 
+//  ========================================================================
+//              NOTE: Game Util Structs
+//  ========================================================================
 enum Direction
 {
     LEFT,
@@ -18,34 +20,24 @@ enum Direction
     DOWN,
 };
 
-template<typename T, int N>
-bool CheckTiles(IVec2 tilePos, Array<T, N> arr)
+//  ========================================================================
+//              NOTE: Game Util Functions
+//  ========================================================================
+
+inline bool CheckOutOfBound(int tileX, int tileY)
 {
-    bool result = false;
-
-    for (unsigned int index = 0; index < arr.count; index++)
-    {
-        if (arr[index].tile == tilePos)
-        {
-            result = true;
-            break;
-        }
-    }
-
+    bool result =
+    (tileX < gameState->tileMin.x)
+        || (tileX > gameState->tileMax.x)
+        || (tileY < gameState->tileMin.y)
+        || (tileY > gameState->tileMax.y);
+    
     return result;
 }
 
-template<typename T, int N>
-int GetTileIndex(IVec2 tilePos, Array<T, N> tiles)
+inline bool CheckOutOfBound(IVec2 tilePos)
 {
-    for (unsigned int index = 0; index < tiles.count; index++)
-    {
-        if (tilePos == tiles[index].tile)
-        {
-            return index;
-        }
-    }
-    return -1;
+    return CheckOutOfBound(tilePos.x, tilePos.y);
 }
 
 Vector2 TilePositionToPixelPosition(float tileX, float tileY)
@@ -76,7 +68,6 @@ Vector2 GetTilePivot(IVec2 tilePos, float tileSize, IVec2 attachDir = { 0, 0 })
 
     return topLeft;
 }
-
 
 
 Vector2 GetTilePivot(Entity * entity)

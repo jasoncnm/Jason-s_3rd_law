@@ -35,33 +35,47 @@ window:
             memory: expression: ""
           }
         }
-        0.75: selected text:
+        0.75:
         {
-          selected
-          expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/render_interface.h\".data"
-          auto: 1
-          query: input: ""
-          cursor_line: 19
-          cursor_column: 1
-          mark_line: 19
-          mark_column: 1
+          text:
+          {
+            expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/engine_lib.h\".data"
+            auto: 1
+            query: input: ""
+            cursor_line: 121
+            cursor_column: 1
+            mark_line: 121
+            mark_column: 1
+          }
+          text:
+          {
+            selected
+            expression: "file:\"W:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/game.cpp\".data"
+            project: "C:\\Users\\Jason\\AppData\\Roaming/raddbg/default.raddbg_project"
+            query:
+            {
+              input: ""
+              cmd: search
+            }
+            cursor_line: 942
+            cursor_column: 1
+            mark_line: 942
+            mark_column: 1
+          }
         }
       }
       0.200000:
       {
+        selected
         watch:
         {
           expression: ""
           selected
           watch: "gameState->lv2Map"
-          watch: "typeof state.tileMaps + state.tileMapCount - 1"
-          watch: "state.tileMaps + state.tileMapCount - 1"
-          watch: fileName
-          watch: pos
-          watch: empty
-          watch: entity
-          watch: "entity->movable"
-          watch: "entity->tilePos"
+          watch: "player->actionState"
+          watch: "gameState->entities.elements[gameState.playerEntityIndex].actionState"
+          watch: "entity->actionState"
+          watch: "entity->lastState"
         }
         watch: expression: "query:locals"
         watch: expression: "query:registers"
@@ -213,4 +227,4 @@ keybindings:
   { log_marker m ctrl shift alt }
   { toggle_dev_menu d ctrl shift alt }
 }
-current_path: "W:/RayLib_Games/Jason's_3rd_law/Version_0.2"
+current_path: "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/src"

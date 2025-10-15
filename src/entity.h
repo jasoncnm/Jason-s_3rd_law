@@ -134,29 +134,27 @@ inline void SetActionState(Entity * entity, ActionState state);
 
 inline void SetGlassBeBroken(Entity * glass);
 
-inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime);
+inline void UpdateSlimes();
 
 inline bool AttachSlime(Entity * slime, IVec2 dir);
+
+inline void SlimeMoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir);
+
+inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime);
 
 inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir);
 
 inline Entity * FindEntityByLocationAndLayer(IVec2 pos, EntityLayer layer);
 
-inline Entity * FindEntity(IVec2 pos);
-
-inline Entity * FindSlime(IVec2 pos);
-
-inline void UpdateSlimes();
-
-inline void MoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir);
+inline bool IsSlime(Entity * entity);
 
 void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos);
 
-inline bool HasPit(IVec2 tilePos);
-
-inline bool IsSlime(Entity * entity);
-
 void ShiftEntities(IVec2 startPos, IVec2 bounceDir);
+
+inline bool CheckBounce(IVec2 tilePos, IVec2 pushDir);
+
+void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir);
 
 #define ENTITY_H
 #endif
