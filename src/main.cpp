@@ -89,9 +89,10 @@ int main(int argumentCount, char *argumentArray[])
         }
                 
         gameState->texture = LoadTexture(TEXTURE_PATH); // Initialize Texture
-        if (IsTextureValid(gameState->texture))
+        if (!IsTextureValid(gameState->texture))
         {
             SM_ERROR("Unable to load file (%s) to texture", TEXTURE_PATH);
+            return -1;
         }
 
     }

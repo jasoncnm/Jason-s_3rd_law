@@ -44,10 +44,10 @@ window:
             expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/level_loader.cpp\".data"
             auto: 1
             query: input: ""
-            cursor_line: 389
-            cursor_column: 6
-            mark_line: 389
-            mark_column: 6
+            cursor_line: 374
+            cursor_column: 29
+            mark_line: 374
+            mark_column: 29
           }
           text:
           {
