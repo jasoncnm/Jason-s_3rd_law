@@ -28,22 +28,18 @@
 *.lib
 
 # Executables
-*.exe
 *.out
 *.app
 *.sln
-JasonLaw.ilk
-JasonLaw.pdb
 /.vs
 
 .vscode/
 *.dll
-*.exe
-*.pdb
 *.obj
 *.ilk
 *.exp
 *.lib
+*.pdb
 *.a
 *.o
 
@@ -51,11 +47,7 @@ src/raylib/rmem.h
 src/raylib/raylib.h  
 src/raylib/physac.h  
 src/raylib/raymath.h
-
-!/bin/game.*
-!/bin/game_code.*
-!/bin/main.*
-!/bin/hotloaded_main.*
-!/bin/raylib.*
-
-/bin/.vs
+*.vsidx
+*.ipch
+*.db
+bin/.vs/game/v17/.suo
