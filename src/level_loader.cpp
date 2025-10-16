@@ -316,6 +316,8 @@ void LoadLevelToGameState(GameState & state, State loadState)
 
     // NOTE: Retrive TileMaps from world
     {
+
+        state.currentMapIndex = -1;
         
         std::ifstream f(WORLD_PATH);
         json worldData = json::parse(f);
@@ -376,13 +378,11 @@ void LoadLevelToGameState(GameState & state, State loadState)
         
         // NOTE: Camera Setup
         Vector2 pos = TilePositionToPixelPosition(6, 6);
-        
+
         state.camera.target = { pos.x, pos.y };
         state.camera.offset = { SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
         state.camera.rotation = 0.0f;
-        int newWidth = SCREEN_WIDTH;
-        int newHeight = SCREEN_HEIGHT;
-        gameState->camera.zoom = (newWidth < newHeight) ? newWidth * ZOOM_PER_SIZE : newHeight * ZOOM_PER_SIZE;
+        
     } 
 
     // NOTE: Attatch slimes

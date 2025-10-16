@@ -17,8 +17,6 @@
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
 
-#define ZOOM_PER_SIZE 1.7f / 600.0f
-
 #define MAP_TILE_SIZE 32       // Tiles size
 #define MAX_ANIMATION 50
 #define DIST_ONE_TILE MAP_TILE_SIZE
@@ -26,6 +24,8 @@
 #define BOUNCE_SPEED 10.0f
 
 #define MAX_ENTITIES 5000
+
+constexpr float zoom_per_tile = 19.0f / 600.0f;
 
 
 #include "vendor/raylib/raylib.h"
@@ -118,7 +118,7 @@ struct GameState
 
     Texture2D texture;
 
-    ElectricDoorSystem * electricDoorSystem = nullptr;
+    ElectricDoorSystem * electricDoorSystem;
 
     Array<int, MAX_ENTITIES> entityTable[LAYER_COUNT];
 
@@ -126,7 +126,7 @@ struct GameState
         
     KeyMapping keyMappings[GAME_INPUT_COUNT];
 
-    int tileMapCount = 0;
+    int tileMapCount;
     Map * tileMaps;
     Map * lv2Map;
 
@@ -134,12 +134,9 @@ struct GameState
     
     Arrow upArrow, downArrow, leftArrow, rightArrow;
     
-    float animateTime = 0.0f;
-    float duration = 1.0f;
+    int currentMapIndex = -1;
     
-    int currentMapIndex = 0;
-    
-    bool initialized = false;
+    bool initialized;
 };
 
 
@@ -153,6 +150,8 @@ struct MoveActionResult
 // ----------------------------------------------------
 // NOTE: Game Globals
 // ----------------------------------------------------
+
+
 // TODO: Make this contain
 static const float pressFreq = 0.2f;
 static float timeSinceLastPress = 0;

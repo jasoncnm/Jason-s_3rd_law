@@ -160,9 +160,17 @@ inline bool UpdateCamera()
                     map.initUndoState = { gameState->playerEntityIndex, gameState->entities.GetVectorSTD() };
                     map.firstEnter = true;
                 }
-                gameState->currentMapIndex = i;
 
-                gameState->cameraAnimation = GetMoveAnimation(EaseOutCubic, gameState->camera.target, pos, 2.0f);
+                if (gameState->currentMapIndex == -1)
+                {
+                    gameState->camera.target = pos;                    
+                }
+                else
+                {
+                    gameState->cameraAnimation = GetMoveAnimation(EaseOutCubic, gameState->camera.target, pos, 2.0f);
+                }
+                
+                gameState->currentMapIndex = i;
                 
                 updated =  true;
             }
@@ -170,19 +178,20 @@ inline bool UpdateCamera()
         }
     }
     
-    if (IsWindowResized())
+    if (updated || IsWindowResized())
     {
         int newWidth = GetScreenWidth();
         int newHeight = GetScreenHeight();
+        Map & currentMap = gameState->tileMaps[gameState->currentMapIndex];
+        int mapMax = (currentMap.width > currentMap.height) ? currentMap.width : currentMap.height;
+        gameState->camera.zoom = (zoom_per_tile / mapMax);
+        (newWidth < newHeight) ? gameState->camera.zoom *= newWidth : gameState->camera.zoom *= newHeight;         
         gameState->camera.offset = { newWidth / 2.0f, newHeight / 2.0f };
-        gameState->camera.zoom = (newWidth < newHeight) ? newWidth * ZOOM_PER_SIZE : newHeight * ZOOM_PER_SIZE;
-        
     }
-
-    gameState->cameraAnimation.Update();
 
     if (gameState->cameraAnimation.playing)
     {
+        gameState->cameraAnimation.Update();
         gameState->camera.target = gameState->cameraAnimation.GetPosition();        
     }
     
@@ -214,10 +223,6 @@ inline void Undo()
     std::vector<Entity> & undoEntities = undoState.undoEntities;
     SetUndoEntities(undoEntities);        
     undoStack.pop_back();
-
-    // animateSlimeCount = 0;
-    gameState->animateTime = 0;
-    animationPlaying = false;
 }
 
 
@@ -233,10 +238,6 @@ inline void Restart()
     
     std::vector<Entity> & initEntities = initState.undoEntities;
     SetUndoEntities(initEntities);
-    
-    // animateSlimeCount = 0;
-    gameState->animateTime = 0;
-    animationPlaying = false;
     
 }
 
@@ -680,8 +681,8 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             gameState->camera.target.y -= mouseDelta.y;
         }
         
-        if (gameState->camera.zoom > 10.0f) gameState->camera.zoom = 10.0f;
-        else if (gameState->camera.zoom < 0.1f) gameState->camera.zoom = 0.1f;
+        //if (gameState->camera.zoom > 10.0f) gameState->camera.zoom = 10.0f;
+        if (gameState->camera.zoom < 0.1f) gameState->camera.zoom = 0.1f;
         
         float moveSpeed = 200.0f;
         
@@ -843,7 +844,6 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         
         if (stateChanged)
         {
-            gameState->animateTime = 0;
             UpdateSlimes();                        
        
             undoStack.push_back(prevState);
