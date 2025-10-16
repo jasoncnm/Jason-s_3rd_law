@@ -7,6 +7,13 @@
    $Notice: $
    ======================================================================== */
 
+/*
+  NOTE:
+  GAME_INTERNAL
+   0 - Build for developer only
+   1 - Build for pubilc release
+*/
+
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
 

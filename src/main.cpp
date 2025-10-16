@@ -18,6 +18,20 @@
 int main(int argumentCount, char *argumentArray[])
 {
 
+/*
+  NOTE:
+  GAME_INTERNAL
+  0 - Build for developer only
+  1 - Build for pubilc release
+*/
+    
+#if GAME_INTERNAL
+    SetTraceLogLevel(LOG_NONE);
+#else
+    SetTraceLogLevel(LOG_ALL);
+#endif
+
+
     //--------------------------------------------------------------------------------------
     // NOTE: Game Code DLL Setup
     //--------------------------------------------------------------------------------------
