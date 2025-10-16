@@ -52,8 +52,10 @@ src/raylib/raymath.h
 *.ipch
 *.db
 bin/.vs/game/v17/.suo
+setup
+jason_room_proj
 
 !/bin/game.exe
 !/bin/game_code.dll
 !/bin/raylib*
-
+jason_room_proj
