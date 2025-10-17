@@ -1,5 +1,21 @@
-#include "game.h"
+/*
+  NOTE:
+  GAME_INTERNAL
+  0 - Build for developer only
+  1 - Build for pubilc release
 
+  BUILD_GAME_STATIC
+    - if defined, build game code as a static library, and link game code manualy to main (i.e #include"game code files")
+    - otherwise, build game code as a dynamic library, load the game code using OS. 
+*/
+
+#if defined BUILD_GAME_STATIC
+
+#include "game.cpp"
+
+#else
+
+#include "game.h"
 
 #include "platform.h"
 #if defined _WIN32
@@ -10,6 +26,8 @@
 #error Apple build not supported
 #endif
 
+#endif
+
 #define PATH_SIZE 2048
 
 // NOTE: This file should be cross-compatible, one thing you need to provide
@@ -17,13 +35,6 @@
 
 int main(int argumentCount, char *argumentArray[])
 {
-
-/*
-  NOTE:
-  GAME_INTERNAL
-  0 - Build for developer only
-  1 - Build for pubilc release
-*/
     
 #if GAME_INTERNAL
     SetTraceLogLevel(LOG_NONE);
@@ -31,7 +42,9 @@ int main(int argumentCount, char *argumentArray[])
     SetTraceLogLevel(LOG_ALL);
 #endif
 
+#if defined BUILD_GAME_STATIC
 
+#else
     //--------------------------------------------------------------------------------------
     // NOTE: Game Code DLL Setup
     //--------------------------------------------------------------------------------------
@@ -61,7 +74,7 @@ int main(int argumentCount, char *argumentArray[])
     GameCode gameCode = {0};
     gameCode = GameCodeLoad(mainDllPath, tempDllPath, lockFilePath);
 
-
+#endif
     
     //--------------------------------------------------------------------------------------
     // NOTE: Memory Allocation
@@ -117,6 +130,11 @@ int main(int argumentCount, char *argumentArray[])
     //--------------------------------------------------------------------------------------
     while(!WindowShouldClose())
     {
+
+#if defined BUILD_GAME_STATIC
+        UpdateAndRender(gameState, &memory);
+#else
+        
         // NOTE: Check if the code got recompiled
         long dllFileWriteTime = GetFileModTime(mainDllPath);
         if (dllFileWriteTime != gameCode.lastDllWriteTime)
@@ -124,8 +142,9 @@ int main(int argumentCount, char *argumentArray[])
             GameCodeUnload(&gameCode);
             gameCode = GameCodeLoad(mainDllPath, tempDllPath, lockFilePath);
         }
-
         gameCode.updateAndRender(gameState, &memory);
+
+#endif
     }
 
     
