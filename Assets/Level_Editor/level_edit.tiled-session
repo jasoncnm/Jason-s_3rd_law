@@ -1,6 +1,8 @@
 {
-    "activeFile": "",
+    "activeFile": "TileMap/Test.tmj",
     "expandedProjectPaths": [
+        ".",
+        "TileMap"
     ],
     "fileStates": {
         "TileMap/Room_1.tmj": {
@@ -36,20 +38,33 @@
             }
         },
         "TileMap/Test.tmj": {
-            "scale": 0.33,
+            "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 2183.333333333333,
-                "y": -157.57575757575773
+                "x": 470,
+                "y": 164
             }
+        },
+        "TlieSet/tileSet.tsx": {
+            "scaleInDock": 1
         }
     },
     "loadedWorlds": [
         "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/maps.world"
     ],
     "openFiles": [
+        "TileMap/Room_3.tmj",
+        "TileMap/Test.tmj",
+        "TileMap/Room_14.tmj",
+        "TileMap/Room_1.tmj",
+        "TileMap/Room_13.tmj"
     ],
     "project": "level_edit.tiled-project",
     "recentFiles": [
+        "TileMap/Room_3.tmj",
+        "TileMap/Room_13.tmj",
+        "TileMap/Room_1.tmj",
+        "TileMap/Room_14.tmj",
+        "TileMap/Test.tmj"
     ]
 }

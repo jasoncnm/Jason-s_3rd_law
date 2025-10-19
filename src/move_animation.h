@@ -7,7 +7,14 @@
    $Notice: $
    ======================================================================== */
 
-
+enum AnimationState
+{
+    ASTATE_NONE,
+    ASTATE_START,
+    ASTATE_PLAYING,
+    ASTATE_END,
+    ASTATE_COUNT,
+};
 
 struct MoveAnimation
 {

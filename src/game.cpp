@@ -255,6 +255,7 @@ bool MoveAction(IVec2 actionDir)
         {
             return false;
         }
+
 #if 1
         Entity * door = FindEntityByLocationAndLayer(currentPos, LAYER_DOOR);
         if (door)
@@ -476,43 +477,11 @@ inline void DrawSpriteLayer(EntityLayer layer)
 
     for (int i = 0; i < entityIndexArray.count; i++)
     {
-    
         Entity * entity = GetEntity(entityIndexArray[i]);
-
         if (entity)
         {
-            entity->pivot = GetTilePivot(entity);
-            for (int aniIndex = 0; aniIndex < entity->moveAniQueue.count; aniIndex++)
-            {
-                MoveAnimation & ani = entity->moveAniQueue[aniIndex];
-                if (ani.playing)
-                {
-                    entity->pivot = ani.GetPosition();
-                    if (IsSlime(entity))
-                    {
-                        entity->pivot = ani.GetPosition();
-                    }
-                    DrawSprite(gameState->texture, entity->sprite, entity->pivot, entity->tileSize, entity->color);
-                    goto NextLoop;
-                }
-            }
-
-            if (entity->actionState == ANIMATE_STATE) SetActionState(entity, MOVE_STATE);
-            entity->moveAniQueue.Clear();
-            
-            {
-                if (layer == LAYER_SLIME &&
-                    entity->attach       &&
-                    GetEntity(entity->attachedEntityIndex)->tilePos == entity->tilePos)
-                {
-                    Vector2 offset = { (float)entity->attachDir.x, (float)entity->attachDir.y };
-                    entity->pivot = Vector2Subtract(entity->pivot, Vector2Scale(offset, 3.0f));
-                }
-                DrawSprite(gameState->texture, entity->sprite, entity->pivot, entity->tileSize, entity->color);
-            }
+            DrawSprite(gameState->texture, entity->sprite, entity->pivot, entity->tileSize, entity->color);
         }
-
-NextLoop:;
     }
 }
 
@@ -717,6 +686,8 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
     }
 
 
+
+    // NOTE: Actions
     {
         // NOTE: Recored if State Changes
         bool stateChanged = false;
@@ -739,8 +710,6 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         timeSinceLastPress -= GetFrameTime();
 
         UndoState prevState = { gameState->playerEntityIndex, gameState->entities.GetVectorSTD() };
-
-        // NOTE: Actions
 
         // NOTE SlimeSelection
         stateChanged = SlimeSelection(player);
@@ -845,7 +814,6 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         if (stateChanged)
         {
             UpdateSlimes();                        
-       
             undoStack.push_back(prevState);
         }
 
@@ -864,7 +832,6 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             {
                 repeat = true;
                 Restart();
-            
             }
         }
     }
@@ -887,6 +854,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         }
     }
 
+    // NOTE: Update: Entity
     for (int i = 0; i < gameState->entities.count; i++)
     {
         Entity * entity = GetEntity(i);
@@ -899,13 +867,18 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
                 {
                     SetActionState(entity, ANIMATE_STATE);
                     ani.Update();
-                    break;
+                    entity->pivot = ani.GetPosition();
+                    goto NextEntity;
                 }
             }
-        }
+            if (entity->actionState == ANIMATE_STATE) SetActionState(entity, MOVE_STATE);
+            entity->moveAniQueue.Clear();            
+            entity->pivot = GetTilePivot(entity);
+            
+        } NextEntity:;
     }
             
-    // NOTE: Render Step
+    // NOTE: Render
     {
     
         // NOTE: Draw

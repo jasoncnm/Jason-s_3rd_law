@@ -150,7 +150,7 @@ struct MoveActionResult
 // ----------------------------------------------------
 // NOTE: Game Globals
 // ----------------------------------------------------
-
+// static bool animationPlaying = false;
 
 // TODO: Make this contain
 static const float pressFreq = 0.2f;
@@ -162,7 +162,6 @@ static std::vector<UndoState> undoStack;
 static GameState * gameState;
 static Memory * gameMemory;
 
-static bool animationPlaying = false;
 static bool repeat = false;
 
 //  ========================================================================
@@ -183,6 +182,8 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
 bool MoveAction(IVec2 actionDir);
 
 bool SplitAction(IVec2 bounceDir);
+
+inline void UpdateTiles();
 
 inline void DrawSpriteLayer(EntityLayer layer);
 

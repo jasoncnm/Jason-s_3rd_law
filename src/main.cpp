@@ -4,9 +4,13 @@
   0 - Build for developer only
   1 - Build for pubilc release
 
+  NOTE:
   BUILD_GAME_STATIC
-    - if defined, build game code as a static library, and link game code manualy to main (i.e #include"game code files")
-    - otherwise, build game code as a dynamic library, load the game code using OS. 
+    - if defined, build game code as a static library
+        and link game code manualy to main (i.e #include"game code files")
+    - otherwise, build game code as a dynamic library
+        and load the game code using OS. 
+
 */
 
 #if defined BUILD_GAME_STATIC
