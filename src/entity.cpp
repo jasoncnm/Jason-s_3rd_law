@@ -750,6 +750,7 @@ void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
         
         if (CheckOutOfBound(pos))
         {
+            entity->tilePos = pos;
             // IMPORTANT: entity changed
             DeleteEntity(entity);
             return;

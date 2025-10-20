@@ -10,11 +10,11 @@
     ],
     "fileStates": {
         "TileMap/Room_1.tmj": {
-            "scale": 0.75,
+            "scale": 0.33,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 176,
-                "y": 176
+                "x": 259.09090909090946,
+                "y": 62.12121212121201
             }
         },
         "TileMap/Room_12.tmj": {
@@ -26,11 +26,11 @@
             }
         },
         "TileMap/Room_13.tmj": {
-            "scale": 0.5,
+            "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176,
-                "y": 176
+                "x": 44.5,
+                "y": 436.5
             }
         },
         "TileMap/Room_14.tmj": {
@@ -90,11 +90,11 @@
             }
         },
         "TileMap/Test.tmj": {
-            "scale": 0.5,
+            "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 320,
-                "y": 320
+                "x": 1260.5,
+                "y": -75.5
             }
         },
         "TlieSet/tileSet.tsx": {

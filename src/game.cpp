@@ -81,24 +81,28 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                         
                         BounceEntity(startEntity, target, pushDir);
 
-                        if (target->active)
+                        Vector2 moveEnd = GetTilePivot(target);
+                        float distPerSecond = MAP_TILE_SIZE / blockSpeed;
+                        float dist = Vector2Distance(moveStart, moveEnd);
+                        float tileDist = dist / MAP_TILE_SIZE;
+
+                        AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, tileDist));
+
+                        if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
                         {
-
-                            Vector2 moveEnd = GetTilePivot(target);
-                            float distPerSecond = MAP_TILE_SIZE / blockSpeed;
-                            float dist = Vector2Distance(moveStart, moveEnd);
-                            float tileDist = dist / MAP_TILE_SIZE;
-
-                            AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, tileDist));
-
-                            if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
-                            {
-                                pushEntity->aniController.endEvent = { &target->aniController, OnPlayEvent };
-                            }
-                            else
-                            {
-                                OnPlayEvent(&target->aniController);
-                            }
+                            pushEntity->aniController.endEvent.controller = &target->aniController;
+                            pushEntity->aniController.endEvent.OnPlayFunc = OnPlayEvent;
+                        }
+                        else
+                        {
+                            OnPlayEvent(&target->aniController);
+                        }
+                        
+                        if (!target->active)
+                        {
+                            target->active = true;
+                            target->aniController.endEvent.deleteEntity = target;
+                            target->aniController.endEvent.OnDeleteFunc = DeleteEntity;
                         }
 
                         return result;
@@ -133,7 +137,8 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
 
                             if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
                             {
-                                pushEntity->aniController.endEvent = { &target->aniController, OnPlayEvent };
+                                pushEntity->aniController.endEvent.controller = &target->aniController;
+                                pushEntity->aniController.endEvent.OnPlayFunc = OnPlayEvent;
                             }
                             else
                             {

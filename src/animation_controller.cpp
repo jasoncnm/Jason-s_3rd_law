@@ -40,12 +40,17 @@ void AnimationController::Update()
 // NOTE: Handle event end of animation
 void AnimationController::HandleAnimationNotPlaying()
 {
-    if (endEvent.controller && endEvent.EndAnimationFunc)
+    if (endEvent.controller && endEvent.OnPlayFunc)
     {
-        endEvent.EndAnimationFunc(endEvent.controller);
-        endEvent.Reset();
+        endEvent.OnPlayFunc(endEvent.controller);
     }
 
+    if (endEvent.deleteEntity && endEvent.OnDeleteFunc)
+    {
+        endEvent.OnDeleteFunc(endEvent.deleteEntity);
+    }
+
+    endEvent.Reset();
     Reset();
 }
 
@@ -61,4 +66,11 @@ void OnPlayEvent(AnimationController * controller)
     
     controller->playing = true;
     controller->currentQueueIndex = 0;
+}
+
+
+void OnDeleteEvent(Entity * deleteEntity)
+{
+    SM_ASSERT(deleteEntity, "entity is null");
+    DeleteEntity(deleteEntity);
 }
