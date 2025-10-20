@@ -8,6 +8,7 @@
 #include "electric_door.cpp"
 #include "level_loader.cpp"
 #include "move_animation.cpp"
+#include "animation_controller.cpp"
 
 //  ========================================================================
 //              NOTE: Game Functions (internal)
@@ -73,22 +74,29 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                     float blockSpeed = 20.0f;                        
                     if (CheckBounce(target->tilePos, pushDir))
                     {
-                        //float delay = GetDelay(target, pushEntity, blockSpeed, pushDir);
-                        float delay = GetDelay(target, startEntity, blockSpeed, pushDir);
-                            
+                        IVec2 startTile = target->tilePos;
                         Vector2 moveStart = GetTilePivot(target);
+                        
                         BounceEntity(startEntity, target, pushDir);
-                        Vector2 moveEnd = GetTilePivot(target);
 
+                        Vector2 moveEnd = GetTilePivot(target);
                         float distPerSecond = MAP_TILE_SIZE / blockSpeed;
                         float dist = Vector2Distance(moveStart, moveEnd);
                         float tileDist = dist / MAP_TILE_SIZE;
 
-                        AddMoveAnimateQueue(target->moveAniQueue,
-                                            GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, tileDist, true, delay));
-                        //GetMoveAnimation(moveStart, moveEnd, 6.0f / Distance(blockNextPos, target->tilePos), delay));
+                        AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, tileDist));
 
+                        if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
+                        {
+                            pushEntity->aniController.endEvent = { &target->aniController, OnPlayEvent };
+                        }
+                        else
+                        {
+                            OnPlayEvent(&target->aniController);
+                        }
+                        
                         result.pushed = true;
+
                         return result;
                     }
                     else
@@ -97,32 +105,42 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                         int newAccumulatedMass = accumulatedMass + target->mass;
                         if (newAccumulatedMass > startEntity->mass)
                         {
-
                             result.blockedEntity = target;
                             result.blocked = true;
                             return result;
                         }
 
+
                         result = MoveActionCheck(startEntity, target, blockNextPos + pushDir, pushDir, newAccumulatedMass);
                     
                         if (!result.blocked)
                         {
-                            if (pushEntity) pushEntity->interact = target;
+                            IVec2 startTile = target->tilePos;
                             result.pushed = true;
-                            // IMPORTANT: target Entity changed
-                            float delay = GetDelay(target, startEntity, BOUNCE_SPEED, pushDir);
 
                             Vector2 moveStart = GetTilePivot(target);
                             SetEntityPosition(target, nullptr, blockNextPos + pushDir);
-                            Vector2 moveEnd = GetTilePivot(target);
 
+                            Vector2 moveEnd = GetTilePivot(target);
                             float dist = Vector2Distance(moveStart, moveEnd);
                             float iDist = dist / MAP_TILE_SIZE;
 
-                            AddMoveAnimateQueue(target->moveAniQueue,
-                                                GetMoveAnimation(nullptr, moveStart, moveEnd, blockSpeed, iDist, true, delay));
+                            AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, blockSpeed, iDist));
+
+                            if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
+                            {
+                                pushEntity->aniController.endEvent = { &target->aniController, OnPlayEvent };
+                            }
+                            else
+                            {
+                                OnPlayEvent(&target->aniController);
+                            }
                         }
-                        result.blockedEntity = target;
+                        else
+                        {
+                            result.blockedEntity = target;
+                        }
+                        
                         return result;
                     }
                     
@@ -134,6 +152,13 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
 
     // SM_ASSERT(false, "at leat one object is being pushed or blocked");
     return result;
+}
+
+inline bool InstancePush(Vector2 pushStart, Vector2 pushedStart)
+{
+    float dist = Vector2Distance(pushStart, pushedStart);
+    if (dist > MAP_TILE_SIZE) return true;
+    return false;
 }
 
 inline bool UpdateCamera()
@@ -167,7 +192,7 @@ inline bool UpdateCamera()
                 }
                 else
                 {
-                    gameState->cameraAnimation = GetMoveAnimation(EaseOutCubic, gameState->camera.target, pos, 2.0f);
+                    AddAnimation(gameState->cameraAniController, GetMoveAnimation(EaseOutCubic, gameState->camera.target, pos, 2.0f));
                 }
                 
                 gameState->currentMapIndex = i;
@@ -189,10 +214,10 @@ inline bool UpdateCamera()
         gameState->camera.offset = { newWidth / 2.0f, newHeight / 2.0f };
     }
 
-    if (gameState->cameraAnimation.playing)
+    if (gameState->cameraAniController.playing)
     {
-        gameState->cameraAnimation.Update();
-        gameState->camera.target = gameState->cameraAnimation.GetPosition();        
+        gameState->cameraAniController.Update();
+        gameState->camera.target = gameState->cameraAniController.moveAnimationQueue[gameState->cameraAniController.currentQueueIndex].GetPosition();        
     }
     
     return updated;
@@ -290,7 +315,9 @@ bool MoveAction(IVec2 actionDir)
                     Vector2 startPos = GetTilePivot(mother);
                     SetAttach(mother, moveResult.blockedEntity, actionDir);
                     Vector2 endPos = GetTilePivot(mother);
-                    AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, startPos, endPos));
+
+                    AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, startPos, endPos));
+                    OnPlayEvent(&mother->aniController);
                     
                     return true;
                 }
@@ -303,8 +330,11 @@ bool MoveAction(IVec2 actionDir)
                 Vector2Add(moveStart, Vector2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f *(MAP_TILE_SIZE - mother->tileSize)));
             SetAttach(mother, moveResult.blockedEntity, actionDir);
             Vector2 moveEnd = GetTilePivot(mother);
-            AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, moveStart, moveMiddle, 6.0f));
-            AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, moveMiddle, moveEnd, 12.0f));
+
+            AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveStart, moveMiddle, 6.0f));
+            AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveMiddle, moveEnd, 12.0f));
+            OnPlayEvent(&mother->aniController);
+            
             return true;
         }
 
@@ -370,8 +400,8 @@ bool MoveAction(IVec2 actionDir)
                 Vector2 moveStart = GetTilePivot(mother);
                 SetEntityPosition(mother, findResult.entity, actionTilePos);
                 Vector2 moveEnd = GetTilePivot(mother);
-                AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, moveStart, moveEnd));
-
+                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveStart, moveEnd));
+                OnPlayEvent(&mother->aniController);
                 
             }
             else if ((!findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
@@ -397,8 +427,11 @@ bool MoveAction(IVec2 actionDir)
                 SetEntityPosition(mother, attachedEntity, newTile);
                 Vector2 moveEnd = GetTilePivot(mother);
 
-                AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, moveStart, movemiddle, 6.0f));
-                AddMoveAnimateQueue(mother->moveAniQueue, GetMoveAnimation(EaseOutCubic, movemiddle, moveEnd, 7.0f));
+                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveStart, movemiddle, 6.0f));
+                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, movemiddle, moveEnd, 7.0f));
+
+                OnPlayEvent(&mother->aniController);                
+
             }
             else 
             {
@@ -457,15 +490,18 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
         float dist = Vector2Distance(playerStart, playerEnd);
         float tileDist = dist / MAP_TILE_SIZE;
 
-        AddMoveAnimateQueue(player->moveAniQueue, GetMoveAnimation(EaseInOutSine, playerStart, playerEnd, BOUNCE_SPEED, tileDist));
+        AddAnimation(player->aniController, GetMoveAnimation(EaseInOutSine, playerStart, playerEnd, BOUNCE_SPEED, tileDist));
+        OnPlayEvent(&player->aniController);
     }
 
     if (cloneStartTile != clone->tilePos)
     {
         float dist = Vector2Distance(cloneStart, cloneEnd);
         float tileDist = dist / MAP_TILE_SIZE;
-        
-        AddMoveAnimateQueue(clone->moveAniQueue, GetMoveAnimation(EaseInOutSine, cloneStart, cloneEnd, BOUNCE_SPEED, tileDist));
+
+        AddAnimation(clone->aniController, GetMoveAnimation(EaseInOutSine, cloneStart, cloneEnd, BOUNCE_SPEED, tileDist));
+        OnPlayEvent(&clone->aniController);
+
     }
     return true;
 }
@@ -536,22 +572,8 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
     {
         // NOTE: Initialization
         gameState->initialized = true;
-            
-        // NOTE: Key Mappings
-        {
-            gameState->keyMappings[MOUSE_LEFT].keys.Add(MOUSE_BUTTON_LEFT);
-            gameState->keyMappings[MOUSE_RIGHT].keys.Add(MOUSE_BUTTON_RIGHT);
-            gameState->keyMappings[LEFT_KEY].keys.Add(KEY_A);
-            gameState->keyMappings[LEFT_KEY].keys.Add(KEY_LEFT);
-            gameState->keyMappings[RIGHT_KEY].keys.Add(KEY_D);
-            gameState->keyMappings[RIGHT_KEY].keys.Add(KEY_RIGHT);
-            gameState->keyMappings[UP_KEY].keys.Add(KEY_W);
-            gameState->keyMappings[UP_KEY].keys.Add(KEY_UP);
-            gameState->keyMappings[DOWN_KEY].keys.Add(KEY_S);
-            gameState->keyMappings[DOWN_KEY].keys.Add(KEY_DOWN);
-            gameState->keyMappings[SPACE_KEY].keys.Add(KEY_SPACE);
-            gameState->keyMappings[POSSES_KEY].keys.Add(KEY_F);
-        }
+
+        InitKeyMapping();
 
         gameState->tileMaps = (Map *)BumpAllocArray(gameMemory->persistentStorage, 100, sizeof(Map));
         
@@ -805,30 +827,34 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
                 break;
             }
         }
-
-        if (gameState->electricDoorSystem)
-        {
-            UpdateElectricDoor();
-        }
         
         if (stateChanged)
         {
+
+            if (gameState->electricDoorSystem)
+            {
+                UpdateElectricDoor();
+            }
+            
             UpdateSlimes();                        
             undoStack.push_back(prevState);
         }
 
         // NOTE: Undo and Restart
         {
-            if (timeSinceLastPress < 0 && IsKeyDown(KEY_Z) && !undoStack.empty())
+            static bool repeat = false;
+
+            if (timeSinceLastPress < 0 && IsDown(UNDO_KEY) && !undoStack.empty())
             {
                 // NOTE: Undo
                 Undo();
                 timeSinceLastPress = pressFreq;
                 repeat = false;
             }
+            
             // NOTE: Restart States
             repeat &= !stateChanged;
-            if (IsKeyPressed(KEY_R) && !repeat)
+            if (JustPressed(RESET_KEY) && !repeat)
             {
                 repeat = true;
                 Restart();
@@ -860,22 +886,19 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         Entity * entity = GetEntity(i);
         if (entity)
         {
-            for (int j = 0; j < entity->moveAniQueue.count; j++)
+            if (!entity->aniController.moveAnimationQueue.IsEmpty())
             {
-                MoveAnimation & ani = entity->moveAniQueue[j];
-                if (ani.playing)
-                {
-                    SetActionState(entity, ANIMATE_STATE);
-                    ani.Update();
-                    entity->pivot = ani.GetPosition();
-                    goto NextEntity;
-                }
+                SetActionState(entity, ANIMATE_STATE);
+                entity->aniController.Update();
+                entity->pivot = entity->aniController.currentPosition;
             }
-            if (entity->actionState == ANIMATE_STATE) SetActionState(entity, MOVE_STATE);
-            entity->moveAniQueue.Clear();            
-            entity->pivot = GetTilePivot(entity);
-            
-        } NextEntity:;
+            else
+            {
+                if (entity->actionState == ANIMATE_STATE) SetActionState(entity, MOVE_STATE);
+                entity->pivot = GetTilePivot(entity);
+                entity->aniController.HandleEndOfAnimation();
+            }
+        } 
     }
             
     // NOTE: Render

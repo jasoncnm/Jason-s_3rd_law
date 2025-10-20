@@ -9,24 +9,49 @@
 
 #include "move_animation.h"
 
+struct AnimationController;
+
+struct EndAnimationEvent
+{
+    AnimationController * controller = nullptr;
+    void (*EndAnimationFunc)(AnimationController * controller) = nullptr;
+
+    void Reset()
+    {
+        controller = nullptr;
+        EndAnimationFunc = nullptr;
+    }
+    
+};
+
 struct AnimationController
 {
     
     bool playing = false;
+    int currentQueueIndex = 0;
     Array<MoveAnimation, 10> moveAnimationQueue;
+    Vector2 currentPosition;
+    
+    EndAnimationEvent endEvent;
 
-    template<typename T>
-    void AddAnimation(T animation);
+    inline MoveAnimation & GetMoveAni(int index)
+    {
+        return moveAnimationQueue[index];        
+    }
 
+    void Reset();
+    
     // NOTE: UpdateAnimation Every frame
     void Update();
 
-    // NOTE: Get a play event to play    
-    void OnPlayEvent();
+    // NOTE: Handle event end of animation
+    void HandleEndOfAnimation();
+};
+    
+void AddAnimation(AnimationController & controller, MoveAnimation animation);
 
-    // NOTE: publish event end of animation
-    void PublishEndOfAnimation();
-}
+// NOTE: Get a play event to play    
+void OnPlayEvent(AnimationController * controller);
 
 
 #define ANIMATION_CONTROLLER_H

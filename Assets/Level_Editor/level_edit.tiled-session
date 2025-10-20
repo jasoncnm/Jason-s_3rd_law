@@ -9,40 +9,40 @@
             "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": -357,
-                "y": -151
+                "x": 176,
+                "y": 176
             }
         },
         "TileMap/Room_13.tmj": {
             "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 407,
-                "y": 631
+                "x": 176,
+                "y": 176
             }
         },
         "TileMap/Room_14.tmj": {
             "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 403,
-                "y": -270
+                "x": 176,
+                "y": 176
             }
         },
         "TileMap/Room_3.tmj": {
             "scale": 0.75,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -804.6666666666667,
-                "y": 247.33333333333326
+                "x": 218.66666666666663,
+                "y": 174.66666666666663
             }
         },
         "TileMap/Test.tmj": {
             "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 470,
-                "y": 164
+                "x": 320,
+                "y": 320
             }
         },
         "TlieSet/tileSet.tsx": {

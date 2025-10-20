@@ -61,6 +61,8 @@ enum GameInputType
     UP_KEY,
     DOWN_KEY,
     SPACE_KEY,
+    UNDO_KEY,
+    RESET_KEY,
     GAME_INPUT_COUNT,
 };
 
@@ -113,7 +115,7 @@ struct GameState
     
     IVec2 tileMin, tileMax;
 
-    MoveAnimation cameraAnimation;
+    AnimationController cameraAniController;
     Camera2D camera;
 
     Texture2D texture;
@@ -162,8 +164,6 @@ static std::vector<UndoState> undoStack;
 static GameState * gameState;
 static Memory * gameMemory;
 
-static bool repeat = false;
-
 //  ========================================================================
 //              NOTE: Game Functions 
 //  ========================================================================
@@ -183,9 +183,9 @@ bool MoveAction(IVec2 actionDir);
 
 bool SplitAction(IVec2 bounceDir);
 
-inline void UpdateTiles();
-
 inline void DrawSpriteLayer(EntityLayer layer);
+
+inline bool InstancePush(Vector2 pushStart, Vector2 pushedStart);
 
 #define GAME_H
 #endif

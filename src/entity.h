@@ -8,7 +8,7 @@
    ======================================================================== */
 
 #include "electric_door.h"
-#include "move_animation.h"
+#include "animation_controller.h"
 
 enum EntityLayer
 {
@@ -53,10 +53,8 @@ struct Entity
     CableType cableType;
 
     ActionState actionState = MOVE_STATE;
-    
-    Entity * interact;
-    MoveAnimationQueue moveAniQueue;
 
+    AnimationController aniController;
     
     Sprite sprite;
     SpriteID spriteID;
@@ -148,7 +146,7 @@ inline Entity * FindEntityByLocationAndLayer(IVec2 pos, EntityLayer layer);
 
 inline bool IsSlime(Entity * entity);
 
-void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos);
+inline void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos);
 
 void ShiftEntities(IVec2 startPos, IVec2 bounceDir);
 

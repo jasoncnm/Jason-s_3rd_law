@@ -18,7 +18,6 @@ enum AnimationState
 
 struct MoveAnimation
 {
-    bool playing = false;
     Vector2 moveStart;
     Vector2 moveEnd;
 
@@ -26,27 +25,17 @@ struct MoveAnimation
     float move_target_t = 1;
     float move_dt;
 
-    float delay;
-
-    void Update();
+    bool Update();
     Vector2 GetPosition();
 
     float (*Easing)(float);
     
 };
 
-using MoveAnimationQueue = Array<MoveAnimation, 10>;
-
-void AddMoveAnimateQueue(MoveAnimationQueue & queue, MoveAnimation ani);
-
-bool IsAnimationPlaying(Entity * entity);
-
 void AdjustAnimatingSpeed(Entity * entity, float ratio);
 
 MoveAnimation GetMoveAnimation(float (*Easing)(float), Vector2 moveStart, Vector2 moveEnd,
-                               float animateSpeed, float target_t, bool startPlay, float delay);
-
-float GetDelay(Entity * pushedEntity, Entity * pushEntity, float speed, IVec2 pushDir);
+                               float animateSpeed, float target_t);
 
     
 #define MOVEANIMATION_H

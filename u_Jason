@@ -21,7 +21,15 @@ window:
         }
         0.687719:
         {
-          watch: selected expression: ""
+          selected
+          watch:
+          {
+            selected
+            expression: ""
+            normal: 0.350000 0.650000
+            watch: pushEntity
+            watch: target
+          }
           watch: expression: "query:locals"
           watch: expression: "query:types"
           watch: expression: "query:procedures"
@@ -46,27 +54,44 @@ window:
     }
     0.434691:
     {
-      selected
-      text:
-      {
-        expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/game.cpp\".data"
-        project: "C:\\Users\\Jason\\AppData\\Roaming/raddbg/default.raddbg_project"
-        query: input: ""
-        cursor_line: 32
-        cursor_column: 47
-        mark_line: 32
-        mark_column: 47
-      }
       text:
       {
         selected
-        expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/engine_lib.h\".data"
+        expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/game.cpp\".data"
+        project: "C:\\Users\\Jason\\AppData\\Roaming/raddbg/default.raddbg_project"
+        query:
+        {
+          input: "update:"
+          cmd: search
+        }
+        cursor_line: 132
+        cursor_column: 1
+        mark_line: 132
+        mark_column: 1
+      }
+      text:
+      {
+        expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/animation_controller.cpp\".data"
         auto: 1
         query: input: ""
-        cursor_line: 467
-        cursor_column: 37
-        mark_line: 467
-        mark_column: 37
+        cursor_line: 27
+        cursor_column: 6
+        mark_line: 27
+        mark_column: 6
+      }
+      text:
+      {
+        expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/entity.cpp\".data"
+        project: "C:\\Users\\Jason\\AppData\\Roaming/raddbg/default.raddbg_project"
+        query:
+        {
+          input: bounceen
+          cmd: search
+        }
+        cursor_line: 673
+        cursor_column: 25
+        mark_line: 673
+        mark_column: 25
       }
     }
     0.252318:
@@ -85,8 +110,8 @@ window:
       }
       0.441239:
       {
-        watch: expression: "query:call_stack"
-        watch: selected expression: "query:modules"
+        watch: selected expression: "query:call_stack"
+        watch: expression: "query:modules"
       }
     }
   }
@@ -214,4 +239,4 @@ keybindings:
   { log_marker m ctrl shift alt }
   { toggle_dev_menu d ctrl shift alt }
 }
-current_path: "w:/RayLib_Games/Jason's_3rd_law/Version_0.2"
+current_path: "w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src"

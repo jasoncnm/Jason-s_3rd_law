@@ -148,10 +148,10 @@ inline void DeleteEntity(Entity * entity)
 {
     entity->active = false;
     entity->type = ENTITY_TYPE_NULL;
-    entity->moveAniQueue.Clear();
+    entity->aniController.Reset();
 }
 
-void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
+inline void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
 {
     SM_ASSERT(entity->active, "entity does not exist");
     SM_ASSERT(entity->movable, "entity cannot be moved");
@@ -174,24 +174,6 @@ void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
         entity->attach = false;
     }
 
-#if 0
-    if (entity->attach)
-    {
-        Entity * attachedEntity = GetEntity(entity->attachedEntityIndex);
-        if (attachedEntity->movable && !entity->positionSetMarker)
-        {
-            SetEntityPosition(attachedEntity, tilePos + entity->attachDir);
-        }
-        else if (attachedEntity->movable)
-        {
-            attachedEntity->attach = false;
-            attachedEntity->attachedEntityIndex = -1;
-        }
-    }
-    
-    entity->positionSetMarker = false;
-
-#endif
 }
 
 inline void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir)
@@ -391,10 +373,11 @@ inline void UpdateSlimes()
                     float iDist = dist / MAP_TILE_SIZE;
 
 #if 1
-                    slime->moveAniQueue.Clear();
-#endif                    
-                    AddMoveAnimateQueue(slime->moveAniQueue,
-                                        GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist, true, 0));
+                    slime->aniController.Reset();
+#endif
+                    // TODO: Instance for now, need change
+                    AddAnimation(slime->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist));
+                    OnPlayEvent(&slime->aniController);
                     
                 }
             }

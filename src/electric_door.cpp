@@ -170,8 +170,8 @@ inline void PowerOnCable(Entity * cable, bool & end)
                     float dist = Vector2Distance(moveStart, moveEnd);
                     float iDist = dist / MAP_TILE_SIZE;
 
-                    AddMoveAnimateQueue(entity->moveAniQueue,
-                                        GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist, true, 0));
+                    AddAnimation(entity->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist));
+                    OnPlayEvent(&entity->aniController);
                 }
                 else
                 {
@@ -192,8 +192,8 @@ inline void PowerOnCable(Entity * cable, bool & end)
                         float dist = Vector2Distance(moveStart, moveEnd);
                         float iDist = dist / MAP_TILE_SIZE;
 
-                        AddMoveAnimateQueue(entity->moveAniQueue,
-                                            GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist, true, 0));
+                        AddAnimation(entity->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist));
+                        OnPlayEvent(&entity->aniController);
                     }
                     else
                     {
