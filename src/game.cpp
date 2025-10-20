@@ -896,7 +896,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             {
                 if (entity->actionState == ANIMATE_STATE) SetActionState(entity, MOVE_STATE);
                 entity->pivot = GetTilePivot(entity);
-                entity->aniController.HandleEndOfAnimation();
+                entity->aniController.HandleAnimationNotPlaying();
             }
         } 
     }

@@ -39,7 +39,7 @@ void AnimationController::Update()
     else
     {
         playing = false;       
-        HandleEndOfAnimation();      
+        HandleAnimationNotPlaying();      
     }
 }
 
@@ -52,7 +52,7 @@ void OnPlayEvent(AnimationController * controller)
 }
 
 // NOTE: Handle event end of animation
-void AnimationController::HandleEndOfAnimation()
+void AnimationController::HandleAnimationNotPlaying()
 {
     if (endEvent.controller && endEvent.EndAnimationFunc)
     {

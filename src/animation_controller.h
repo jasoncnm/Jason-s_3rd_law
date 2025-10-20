@@ -45,7 +45,7 @@ struct AnimationController
     void Update();
 
     // NOTE: Handle event end of animation
-    void HandleEndOfAnimation();
+    void HandleAnimationNotPlaying();
 };
     
 void AddAnimation(AnimationController & controller, MoveAnimation animation);
