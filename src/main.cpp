@@ -149,6 +149,7 @@ int main(int argumentCount, char *argumentArray[])
             if (!IsTextureValid(gameState->texture))
             {
                 SM_ERROR("Unable to load file (%s) to texture", TEXTURE_PATH);
+                SM_ASSERT(false, "");
                 return -1;
             }
             lastTextureWriteTime = textureFileWriteTime;            

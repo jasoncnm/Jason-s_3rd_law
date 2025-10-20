@@ -573,6 +573,187 @@ inline bool SlimeSelection(Entity * player)
     return stateChanged;
 }
 
+void UpdateSprite(EntityLayer layer)
+{
+    auto & entityIndexArray = gameState->entityTable[layer];
+    IVec2 dir[4] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
+
+    for (int i = 0; i < entityIndexArray.count; i++)
+    {
+        Entity * entity = GetEntity(entityIndexArray[i]);
+        if (entity)
+        {
+            
+            entity->sprite = GetSprite(entity->spriteID);
+
+            IVec2 entityPos = entity->tilePos;
+            
+            Entity * left = FindEntityByLocationAndLayer(entityPos + dir[LEFT], layer);
+            Entity * right = FindEntityByLocationAndLayer(entityPos + dir[RIGHT], layer);
+            Entity * up = FindEntityByLocationAndLayer(entityPos + dir[UP], layer);
+            Entity * down = FindEntityByLocationAndLayer(entityPos + dir[DOWN], layer);
+            Entity * downRight = FindEntityByLocationAndLayer(entityPos + dir[DOWN] + dir[RIGHT], layer);
+            Entity * downLeft = FindEntityByLocationAndLayer(entityPos + dir[DOWN] + dir[LEFT], layer);
+            Entity * upRight = FindEntityByLocationAndLayer(entityPos + dir[UP] + dir[RIGHT], layer);
+            Entity * upLeft = FindEntityByLocationAndLayer(entityPos + dir[UP] + dir[LEFT], layer);
+
+            if (layer == LAYER_GLASS)
+            {
+                if (left && left->broken) left = nullptr;
+                if (right && right->broken) right = nullptr;
+                if (up && up->broken) up = nullptr;
+                if (down && down->broken) down = nullptr;
+                if (downRight && downRight->broken) downRight = nullptr;
+                if (downLeft && downLeft->broken) downLeft = nullptr;
+                if (upRight && upRight->broken) upRight = nullptr;
+                if (upLeft && upLeft->broken) upLeft = nullptr;
+            }
+
+            IVec2 offset = { 0 };
+            int spriteSizeX = entity->sprite.spriteSize.x;
+            int spriteSizeY = entity->sprite.spriteSize.y;
+            switch(layer)
+            {
+                case LAYER_GLASS:
+                case LAYER_WALL:
+                {
+                    if (up && down && !left && right && !downRight)
+                    {
+                        offset = { 0, 10 * spriteSizeY };
+                    }
+                    else if (up && down && left && !right && !downLeft)
+                    {
+                        offset = { spriteSizeX, 10 * spriteSizeY };
+                    }
+                    else if (up && down && !left && right && !upRight)
+                    {
+                        offset = { 0, 11 * spriteSizeY };
+                    }
+                    else if (up && down && left && !right && !upLeft)
+                    {
+                        offset = { spriteSizeX, 11 * spriteSizeY };
+                    }
+                    else if (left && right && !up && down && !downRight)
+                    {
+                        offset = { 2 * spriteSizeX, 10 * spriteSizeY };
+                    }
+                    else if (left && right && !up && down && !downLeft)
+                    {
+                        offset = { 3 * spriteSizeX, 10 * spriteSizeY };
+                    }
+
+                    else if (left && right && up && !down && !upRight)
+                    {
+                        offset = { 2 * spriteSizeX, 11 * spriteSizeY };
+                    }
+                    else if (left && right && up && !down && !upLeft)
+                    {
+                        offset = { 3 * spriteSizeX, 11 * spriteSizeY };
+                    }
+
+                    else if (!left && right && !up && down && !downRight)
+                    {
+                        offset = { 2 * spriteSizeX , 8 * spriteSizeY }; 
+                    }
+                    else if (left && !right && !up && down && !downLeft)
+                    {
+                        offset = { 3 * spriteSizeX , 8 * spriteSizeY }; 
+                    }
+                    else if (!left && right && up && !down && !upRight)
+                    {
+                        offset = { 2 * spriteSizeX , 9 * spriteSizeY }; 
+                    }
+                    else if (left && !right && up && !down && !upLeft)
+                    {
+                        offset = { 3 * spriteSizeX , 9 * spriteSizeY }; 
+                    }
+                    else if (left && right && up && down && !downRight)
+                    {
+                        offset = { 0 , 4 * spriteSizeY }; 
+                    }
+                    else if (left && right && up && down && !downLeft)
+                    {
+                        offset = { spriteSizeX, 4 * spriteSizeY };
+                    }
+                    else if (left && right && up && down && !upRight)
+                    {
+                        offset = { 0, 5 * spriteSizeY };
+                    }
+                    else if (left && right && up && down && !upLeft)
+                    {
+                        offset = { spriteSizeX, 5 * spriteSizeY };
+                    }
+                    else if (right && !up && !down && !left)
+                    {
+                        offset = { 0, 6 * spriteSizeY };
+                    }
+                    else if (left && right && !up && !down)
+                    {
+                        offset = { spriteSizeX, 6 * spriteSizeY };
+                    }
+                    else if (left && !right && !up && !down)
+                    {
+                        offset = { 2 * spriteSizeX, 6 * spriteSizeY };
+                    }
+                    else if (!left && !right && !up && down)
+                    {
+                        offset = { 0, 7 * spriteSizeY };
+                    }
+                    else if (!left && !right && up && down)
+                    {
+                        offset = { 0, 8 * spriteSizeY };
+                    }
+                    else if (!left && !right && up && !down)
+                    {
+                        offset = { 0, 9 * spriteSizeY };
+                    }
+                    else if (left && right && !up)
+                    {
+                        offset = { spriteSizeX, 0  };
+                    }
+                    else if (left && down && !up && !right)
+                    {
+                        offset = { 2 * spriteSizeX, 0 };
+                    }
+                    else if (up && down && !left)
+                    {
+                        offset = { 0, spriteSizeY };
+                    }
+                    else if (up && down && left && right)
+                    {
+                        offset = { spriteSizeX, spriteSizeY };
+                    }
+                    else if (up && down && !right)
+                    {
+                        offset = { 2 * spriteSizeX, spriteSizeY };
+                    }
+                    else if (up && right && !left && !down)
+                    {
+                        offset = { 0, 2 * spriteSizeY };
+                    }
+                    else if (left && right && !down)
+                    {
+                        offset = { spriteSizeX, 2 * spriteSizeY };
+                    }
+                    else if (up && left && !right && !down)
+                    {
+                        offset = { 2 * spriteSizeX, 2 * spriteSizeY };
+                    }
+                    else if (!up && !down && !left && !right)
+                    {
+                        offset = { spriteSizeX, 7 * spriteSizeY };   
+                    }
+                    
+                    break;
+                }
+            }
+
+            entity->sprite.altasOffset = entity->sprite.altasOffset + offset;
+            
+        }
+    }
+}
+
 //  ========================================================================
 //              NOTE: Game Functions (exposed)
 //  ========================================================================
@@ -627,6 +808,12 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             Entity * slime = GetEntity(entityIndexArray[i]);
             slime->pivot = GetTilePivot(slime);
         }
+
+#if 1        
+        UpdateSprite(LAYER_WALL);
+        UpdateSprite(LAYER_GLASS);
+#endif
+        
     }
     
 #if 0
@@ -920,12 +1107,17 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         
             DrawTileMap(map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
         }
+        
 
         DrawSpriteLayer(LAYER_CABLE);
 
         DrawSpriteLayer(LAYER_BLOCK);
         
         DrawSpriteLayer(LAYER_WALL);
+        
+        DrawSpriteLayer(LAYER_PIT);
+
+        DrawSpriteLayer(LAYER_GLASS);
 
         DrawSpriteLayer(LAYER_DOOR);
         

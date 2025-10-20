@@ -19,7 +19,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddEntity(ENTITY_TYPE_PIT, tilePos, SPRITE_PIT);
 
-        gameState->entityTable[LAYER_WALL].Add(entityResult.entityIndex);
+        gameState->entityTable[LAYER_PIT].Add(entityResult.entityIndex);
 
         SM_TRACE("Pit generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -56,7 +56,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddEntity(ENTITY_TYPE_GLASS, tilePos, SPRITE_GLASS);
 
-        gameState->entityTable[LAYER_WALL].Add(entityResult.entityIndex);
+        gameState->entityTable[LAYER_GLASS].Add(entityResult.entityIndex);
 
         SM_TRACE("GLASS generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
