@@ -75,7 +75,7 @@ struct Entity
     float tileSize = 32.0f;
 
     int mass = 1;
-    int maxMass = 3;
+    int maxMass = 2;
     
     bool movable = false;
     

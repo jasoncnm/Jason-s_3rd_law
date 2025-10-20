@@ -210,6 +210,11 @@ inline void SetGlassBeBroken(Entity * glass)
     glass->sprite = GetSprite(SPRITE_GLASS_BROKEN);
 }
 
+inline float GetSlimeSize(Entity * slime)
+{
+    return slime->mass == 1 ? 0.5f * MAP_TILE_SIZE : 0.8f * MAP_TILE_SIZE;
+}
+
 inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
 {
     SM_ASSERT(mergeSlime->active && mergedSlime->active, "entity does not exist");
@@ -225,7 +230,7 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
     mergeSlime->mass += mergedSlime->mass;
     DeleteEntity(mergedSlime);
 
-    mergeSlime->tileSize = mergeSlime->mass * ( MAP_TILE_SIZE / 3.0f);
+    mergeSlime->tileSize = GetSlimeSize(mergeSlime);
 
     return mergeSlime;
     
@@ -521,7 +526,7 @@ inline Entity * CreateSlimeClone(IVec2 tilePos)
     freeEntity->tilePos = tilePos;
     freeEntity->type = ENTITY_TYPE_CLONE;
     freeEntity->mass = 1;
-    freeEntity->tileSize = ( MAP_TILE_SIZE / 3.0f);
+    freeEntity->tileSize = GetSlimeSize(freeEntity);
     freeEntity->color = GRAY;
     freeEntity->attach = false;    
 

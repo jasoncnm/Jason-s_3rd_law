@@ -477,7 +477,7 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
     if (player->mass < 2) return false;
 
     player->mass--;
-    player->tileSize = player->mass * ( MAP_TILE_SIZE / 3.0f );
+    player->tileSize = GetSlimeSize(player);
     
     Entity * clone = CreateSlimeClone(player->tilePos);
     IVec2 playerStartTile = player->tilePos;
@@ -573,6 +573,7 @@ inline bool SlimeSelection(Entity * player)
     return stateChanged;
 }
 
+// TODO: Use Tile Bitmasking
 void UpdateSprite(EntityLayer layer)
 {
     auto & entityIndexArray = gameState->entityTable[layer];
@@ -584,8 +585,11 @@ void UpdateSprite(EntityLayer layer)
         if (entity)
         {
             
+            IVec2 offset = { 0 };
+            int spriteSizeX = entity->sprite.spriteSize.x;
+            int spriteSizeY = entity->sprite.spriteSize.y;
             entity->sprite = GetSprite(entity->spriteID);
-
+    #if 0
             IVec2 entityPos = entity->tilePos;
             
             Entity * left = FindEntityByLocationAndLayer(entityPos + dir[LEFT], layer);
@@ -609,9 +613,6 @@ void UpdateSprite(EntityLayer layer)
                 if (upLeft && upLeft->broken) upLeft = nullptr;
             }
 
-            IVec2 offset = { 0 };
-            int spriteSizeX = entity->sprite.spriteSize.x;
-            int spriteSizeY = entity->sprite.spriteSize.y;
             switch(layer)
             {
                 case LAYER_GLASS:
@@ -641,7 +642,6 @@ void UpdateSprite(EntityLayer layer)
                     {
                         offset = { 3 * spriteSizeX, 10 * spriteSizeY };
                     }
-
                     else if (left && right && up && !down && !upRight)
                     {
                         offset = { 2 * spriteSizeX, 11 * spriteSizeY };
@@ -749,7 +749,11 @@ void UpdateSprite(EntityLayer layer)
             }
 
             entity->sprite.altasOffset = entity->sprite.altasOffset + offset;
-            
+#else
+            if (layer == LAYER_WALL) offset = { spriteSizeX, spriteSizeY };
+            if (layer == LAYER_GLASS) offset = { spriteSizeX, 7 * spriteSizeY };   
+            entity->sprite.altasOffset = entity->sprite.altasOffset + offset;
+#endif
         }
     }
 }
@@ -775,10 +779,6 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         gameState->tileMaps = (Map *)BumpAllocArray(gameMemory->persistentStorage, 100, sizeof(Map));
         
         LoadLevelToGameState(*gameState, STATE_TEST_LEVEL);
-        
-        // NOTE: Initalize undoStack record
-        undoStack = std::vector<UndoState>();
-        undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });
         
         // NOTE: Arrow Buttons
         // UP
@@ -813,6 +813,10 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         UpdateSprite(LAYER_WALL);
         UpdateSprite(LAYER_GLASS);
 #endif
+        
+        // NOTE: Initalize undoStack record
+        undoStack = std::vector<UndoState>();
+        undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });
         
     }
     

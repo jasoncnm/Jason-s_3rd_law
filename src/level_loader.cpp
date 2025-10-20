@@ -64,7 +64,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddEntity(ENTITY_TYPE_CLONE, tilePos, SPRITE_SLIME_1);
         entityResult.entity->mass = 1;
-        entityResult.entity->tileSize = (float)MAP_TILE_SIZE / entityResult.entity->maxMass;
+        entityResult.entity->tileSize = GetSlimeSize(entityResult.entity);
         entityResult.entity->color = GRAY;
 
         entityResult.entity->movable = true;
@@ -279,7 +279,7 @@ inline void GenerateTileMap(std::string fileName, IVec2 startPos, int width, int
                         {
                             result = AddEntity(ENTITY_TYPE_PLAYER, tilePos, SPRITE_SLIME_1);
                             result.entity->mass = 1;
-                            result.entity->tileSize = (float)MAP_TILE_SIZE / result.entity->maxMass; 
+                            result.entity->tileSize = GetSlimeSize(result.entity); 
                             result.entity->movable = true;
 
                             gameState->playerEntityIndex = result.entityIndex;
