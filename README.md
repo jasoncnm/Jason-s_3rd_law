@@ -15,7 +15,7 @@ If you want to build the project make sure your have msvc 2019 or 2022 installed
 build.bat
 ```
 
-Note that the first time you buid this project you need to build the raylib first, change the following line in build.bat
+Note that the first time you buid this project you need to build the raylib first, change the following line in ```build.bat```
 ```
 REM call scripts\msvc-build-raylib.bat
 ```
