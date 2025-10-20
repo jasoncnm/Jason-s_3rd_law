@@ -110,6 +110,11 @@ int main(int argumentCount, char *argumentArray[])
 
         SetExitKey(KEY_Q);
 
+        Image icon = LoadImage("Assets/ICON/ICON.png");
+        if (IsImageValid(icon))
+        {
+            SetWindowIcon(icon); 
+        } 
         // MaximizeWindow();
 
         InitAudioDevice();      // Initialize audio device
