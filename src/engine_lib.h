@@ -609,6 +609,11 @@ float EaseOutCubic(float x)
     return 1 - powf(1 - x, 3);
 }
 
+float EaseInOutCubic(float x)
+{
+    return x < 0.5 ? 4 * x * x * x : 1 - powf(-2 * x + 2, 3) / 2;
+}
+
 float EaseInQuint(float x)
 {
     return x * x * x * x * x;

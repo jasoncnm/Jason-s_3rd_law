@@ -54,6 +54,7 @@ window:
     }
     0.434691:
     {
+      selected
       text:
       {
         selected
@@ -64,10 +65,10 @@ window:
           input: "update:"
           cmd: search
         }
-        cursor_line: 199
-        cursor_column: 1
-        mark_line: 199
-        mark_column: 1
+        cursor_line: 161
+        cursor_column: 22
+        mark_line: 161
+        mark_column: 22
       }
       text:
       {
@@ -110,7 +111,6 @@ window:
       }
       0.441239:
       {
-        selected
         watch: selected expression: "query:call_stack"
         watch: expression: "query:modules"
       }

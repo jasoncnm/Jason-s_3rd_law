@@ -198,7 +198,7 @@ inline bool UpdateCamera()
                 if (gameState->currentMapIndex != i)
                 {
                     gameState->cameraAniController.Reset();
-                    AddAnimation(gameState->cameraAniController, GetMoveAnimation(EaseOutCubic, gameState->camera.target, pos, 2.0f));
+                    AddAnimation(gameState->cameraAniController, GetMoveAnimation(EaseOutCubic, gameState->camera.target, pos, 1.5f));
                     OnPlayEvent(&gameState->cameraAniController);
                     gameState->currentMapIndex = i;
                 }
@@ -322,7 +322,7 @@ bool MoveAction(IVec2 actionDir)
                     SetAttach(mother, moveResult.blockedEntity, actionDir);
                     Vector2 endPos = GetTilePivot(mother);
 
-                    AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, startPos, endPos));
+                    AddAnimation(mother->aniController, GetMoveAnimation(EaseOutSine, startPos, endPos));
                     OnPlayEvent(&mother->aniController);
                     
                     return true;
@@ -337,8 +337,8 @@ bool MoveAction(IVec2 actionDir)
             SetAttach(mother, moveResult.blockedEntity, actionDir);
             Vector2 moveEnd = GetTilePivot(mother);
 
-            AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveStart, moveMiddle, 6.0f));
-            AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveMiddle, moveEnd, 12.0f));
+            AddAnimation(mother->aniController, GetMoveAnimation(EaseOutSine, moveStart, moveMiddle, 12.0f));
+            AddAnimation(mother->aniController, GetMoveAnimation(EaseOutSine, moveMiddle, moveEnd, 12.0f));
             OnPlayEvent(&mother->aniController);
             
             return true;
@@ -406,7 +406,7 @@ bool MoveAction(IVec2 actionDir)
                 Vector2 moveStart = GetTilePivot(mother);
                 SetEntityPosition(mother, findResult.entity, actionTilePos);
                 Vector2 moveEnd = GetTilePivot(mother);
-                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveStart, moveEnd));
+                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutSine, moveStart, moveEnd, 6.0f));
                 OnPlayEvent(&mother->aniController);
                 
             }
@@ -433,8 +433,8 @@ bool MoveAction(IVec2 actionDir)
                 SetEntityPosition(mother, attachedEntity, newTile);
                 Vector2 moveEnd = GetTilePivot(mother);
 
-                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveStart, movemiddle, 6.0f));
-                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, movemiddle, moveEnd, 7.0f));
+                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutSine, moveStart, movemiddle, 6.0f));
+                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutSine, movemiddle, moveEnd, 6.0f));
 
                 OnPlayEvent(&mother->aniController);                
 
