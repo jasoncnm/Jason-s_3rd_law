@@ -137,8 +137,22 @@ int main(int argumentCount, char *argumentArray[])
     //--------------------------------------------------------------------------------------
     // NOTE: Update Loop
     //--------------------------------------------------------------------------------------
+    long lastTextureWriteTime = GetFileModTime(TEXTURE_PATH);
     while(!WindowShouldClose())
     {
+
+        long textureFileWriteTime = GetFileModTime(TEXTURE_PATH);
+        if (textureFileWriteTime != lastTextureWriteTime)
+        {
+            UnloadTexture(gameState->texture);
+            gameState->texture = LoadTexture(TEXTURE_PATH);
+            if (!IsTextureValid(gameState->texture))
+            {
+                SM_ERROR("Unable to load file (%s) to texture", TEXTURE_PATH);
+                return -1;
+            }
+            lastTextureWriteTime = textureFileWriteTime;            
+        }
 
 #if defined BUILD_GAME_STATIC
         UpdateAndRender(gameState, &memory);
@@ -152,7 +166,6 @@ int main(int argumentCount, char *argumentArray[])
             gameCode = GameCodeLoad(mainDllPath, tempDllPath, lockFilePath);
         }
         gameCode.updateAndRender(gameState, &memory);
-
 #endif
     }
 

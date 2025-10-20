@@ -153,9 +153,7 @@ struct MoveActionResult
 // ----------------------------------------------------
 // NOTE: Game Globals
 // ----------------------------------------------------
-// static bool animationPlaying = false;
-
-// TODO: Very piggy undo stack, each move we push a copy of the entire game entities 
+// TODO: Very piggy undo stack, each action we push a copy of the entire game entities to the stack
 static std::vector<UndoState> undoStack;
 
 static GameState * gameState;
@@ -164,10 +162,6 @@ static Memory * gameMemory;
 //  ========================================================================
 //              NOTE: Game Functions 
 //  ========================================================================
-inline bool JustPressed(GameInputType type);
-
-inline bool IsDown(GameInputType type);
-
 inline bool UpdateCamera();
 
 inline void Undo();
