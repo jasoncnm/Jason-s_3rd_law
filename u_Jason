@@ -3,7 +3,7 @@
 recent_project: path: "C:\\Users\\Jason\\AppData\\Roaming/raddbg/default.raddbg_project"
 window:
 {
-  size: 3072.000000 1670.400024
+  size: 3072 1670
   panels:
   {
     0.312990:
@@ -62,13 +62,13 @@ window:
         project: "C:\\Users\\Jason\\AppData\\Roaming/raddbg/default.raddbg_project"
         query:
         {
-          input: "update:"
+          input: ""
           cmd: search
         }
-        cursor_line: 211
-        cursor_column: 19
-        mark_line: 211
-        mark_column: 19
+        cursor_line: 199
+        cursor_column: 18
+        mark_line: 199
+        mark_column: 18
       }
       text:
       {
@@ -117,8 +117,8 @@ window:
     }
   }
   split_x
-  pos: 384 209
-  monitor: "\\\\.\\DISPLAY1"
+  pos: 158 496
+  monitor: "\\\\.\\DISPLAY2"
   maximized
 }
 keybindings:
