@@ -106,7 +106,7 @@ int main(int argumentCount, char *argumentArray[])
 
         SetWindowMonitor(0);
     
-        SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+        SetTargetFPS(GetMonitorRefreshRate(0));               // Set our game to run at 60 frames-per-second
 
         SetExitKey(KEY_Q);
 

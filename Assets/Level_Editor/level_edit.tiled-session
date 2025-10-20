@@ -13,8 +13,8 @@
             "scale": 0.33,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 295.45454545454527,
-                "y": -722.7272727272727
+                "x": 1040.9090909090908,
+                "y": 549.9999999999998
             }
         },
         "TileMap/Room_12.tmj": {
@@ -37,8 +37,8 @@
             "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176,
-                "y": 176
+                "x": 175.5,
+                "y": 175.5
             }
         },
         "TileMap/Room_24.tmj": {
@@ -53,8 +53,8 @@
             "scale": 0.25,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176,
-                "y": 176
+                "x": 794,
+                "y": 790
             }
         },
         "TileMap/Room_26.tmx": {
@@ -69,8 +69,8 @@
             "scale": 0.33,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 175.75757575757575,
-                "y": 175.75757575757575
+                "x": 619.69696969697,
+                "y": 380.30303030303025
             }
         },
         "TileMap/Room_28.tmj": {
@@ -85,8 +85,8 @@
             "scale": 0.75,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 218.66666666666663,
-                "y": 174.66666666666663
+                "x": -372.66666666666663,
+                "y": 278
             }
         },
         "TileMap/Test.tmj": {
@@ -122,17 +122,18 @@
     ],
     "project": "level_edit.tiled-project",
     "recentFiles": [
-        "TlieSet/tileSet.tsx",
-        "TileMap/Room_3.tmj",
-        "TileMap/Test.tmj",
-        "TileMap/Room_14.tmj",
-        "TileMap/Room_1.tmj",
-        "TileMap/Room_13.tmj",
-        "TileMap/Room_12.tmj",
-        "TileMap/Room_24.tmj",
-        "TileMap/Room_26.tmj",
-        "TileMap/Room_27.tmj",
         "TileMap/Room_28.tmj",
+        "TileMap/Room_27.tmj",
+        "TileMap/Room_26.tmj",
+        "TileMap/Room_24.tmj",
+        "TileMap/Room_12.tmj",
+        "TileMap/Room_13.tmj",
+        "TileMap/Room_1.tmj",
+        "TileMap/Room_14.tmj",
+        "TileMap/Test.tmj",
+        "TileMap/Room_3.tmj",
+        "TlieSet/tileSet.tsx",
         "TileMap/Room_26.tmx"
-    ]
+    ],
+    "tileset.lastUsedFormat": "json"
 }
