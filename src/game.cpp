@@ -630,8 +630,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
     }
     
 #if 0
-    // TODO
-    // NOTE: Level Hot Reloading
+    // TODO:  Level Hot Reloading
     for (int i = 0; i < tileMapSources.count; i++)
     {
         char * fileName = tileMapSources[i].fileName;
@@ -723,8 +722,6 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         
     }
 
-
-
     // NOTE: Actions
     {
         // NOTE: Recored if State Changes
@@ -744,8 +741,6 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
                 player->actionState = SPLIT_STATE;
             }
         }
-    
-        timeSinceLastPress -= GetFrameTime();
 
         UndoState prevState = { gameState->playerEntityIndex, gameState->entities.GetVectorSTD() };
 
@@ -756,51 +751,40 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         {
             case MOVE_STATE:
             {
-                
                 // NOTE: read input
                 gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = false;
                 
                 IVec2 actionDir = { 0 };
-
-                if (JustPressedMoveKey())
-                {
-                    AdjustAnimatingSpeed(player, 2);
-                    //player->moveAniQueue.Clear();
-                }
                 
-                if (timeSinceLastPress < 0) //!IsAnimationPlaying(player) && )
+                bool isPressed = false;
+                    
+                if (IsDown(LEFT_KEY))
                 {
-                    bool isPressed = false;
+                    actionDir = {-1 , 0};                    
+                    isPressed = true;
+                }
                     
-                    if (IsDown(LEFT_KEY))
-                    {
-                        actionDir = {-1 , 0};                    
-                        isPressed = true;
-                    }
+                if (IsDown(RIGHT_KEY))
+                {
+                    actionDir = {1, 0};
+                    isPressed = true;
+                }
                     
-                    if (IsDown(RIGHT_KEY))
-                    {
-                        actionDir = {1, 0};
-                        isPressed = true;
-                    }
+                if (IsDown(UP_KEY))
+                {
+                    actionDir = {0, -1};
+                    isPressed = true;
+                }
                     
-                    if (IsDown(UP_KEY))
-                    {
-                        actionDir = {0, -1};
-                        isPressed = true;
-                    }
+                if (IsDown(DOWN_KEY))
+                {
+                    actionDir = {0, 1};
+                    isPressed = true;
+                }
                     
-                    if (IsDown(DOWN_KEY))
-                    {
-                        actionDir = {0, 1};
-                        isPressed = true;
-                    }
-                    
-                    if (isPressed)
-                    {
-                        timeSinceLastPress = pressFreq;
-                        stateChanged |= MoveAction(actionDir);
-                    }
+                if (isPressed)
+                {
+                    stateChanged |= MoveAction(actionDir);
                 }
                 
                 break;
@@ -859,6 +843,9 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         // NOTE: Undo and Restart
         {
             static bool repeat = false;
+            static float timeSinceLastPress = 0;
+
+            timeSinceLastPress -= GetFrameTime();
 
             if (timeSinceLastPress < 0 && IsDown(UNDO_KEY) && !undoStack.empty())
             {

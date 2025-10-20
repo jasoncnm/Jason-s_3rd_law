@@ -353,6 +353,9 @@ inline void UpdateSlimes()
         if (slime && slime->attach)
         {
             Entity * attach = GetEntity(slime->attachedEntityIndex);
+
+            // NOTE: Depends on the levels, there might be the case when the attached entity get destroyed along with the slime
+            //       Need to handle that case in here if necessary
             if (attach && attach->type != ENTITY_TYPE_ELECTRIC_DOOR)
             {
                 IVec2 oldPos = slime->tilePos;
@@ -372,10 +375,10 @@ inline void UpdateSlimes()
                     float dist = Vector2Distance(moveStart, moveEnd);
                     float iDist = dist / MAP_TILE_SIZE;
 
+                    // TODO: Play Instanly for now, need to blend the current animation with this animation
 #if 1
                     slime->aniController.Reset();
 #endif
-                    // TODO: Instance for now, need change
                     AddAnimation(slime->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist));
                     OnPlayEvent(&slime->aniController);
                     

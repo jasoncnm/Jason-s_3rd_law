@@ -26,6 +26,7 @@
 #define MAX_ENTITIES 5000
 
 constexpr float zoom_per_tile = 19.0f / 600.0f;
+constexpr float pressFreq = 0.2f;
 
 
 #include "vendor/raylib/raylib.h"
@@ -153,10 +154,6 @@ struct MoveActionResult
 // NOTE: Game Globals
 // ----------------------------------------------------
 // static bool animationPlaying = false;
-
-// TODO: Make this contain
-static const float pressFreq = 0.2f;
-static float timeSinceLastPress = 0;
 
 // TODO: Very piggy undo stack, each move we push a copy of the entire game entities 
 static std::vector<UndoState> undoStack;

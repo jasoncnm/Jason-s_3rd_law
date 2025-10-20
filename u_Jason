@@ -21,7 +21,6 @@ window:
         }
         0.687719:
         {
-          selected
           watch:
           {
             selected
@@ -57,6 +56,7 @@ window:
     }
     0.434691:
     {
+      selected
       text:
       {
         selected
@@ -67,10 +67,10 @@ window:
           input: ""
           cmd: search
         }
-        cursor_line: 89
-        cursor_column: 1
-        mark_line: 89
-        mark_column: 1
+        cursor_line: 82
+        cursor_column: 36
+        mark_line: 82
+        mark_column: 36
       }
       text:
       {
