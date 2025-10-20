@@ -244,11 +244,11 @@ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
     {
         Entity e = undoEntities[i];
         gameState->entities[i] = e;
+        gameState->entities[i].aniController.Reset();
 
         if (IsSlime(&e))
         {
             gameState->entities[i].actionState = MOVE_STATE;
-            
         }
         
     }
@@ -267,7 +267,6 @@ inline void Undo()
 
 inline void Restart()
 {
-
     undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });    
     
     Map & currentMap = gameState->tileMaps[gameState->currentMapIndex];
@@ -390,7 +389,15 @@ bool MoveAction(IVec2 actionDir)
 
         if (mother->actionState == FREEZE_STATE)
         {
-            SetEntityPosition(mother, nullptr, actionTilePos);
+            FindAttachableResult result = FindAttachable(actionTilePos, mother->attachDir);
+            if (result.has)
+            {
+                SetEntityPosition(mother, result.entity, actionTilePos);
+            }
+            else
+            {
+                SetEntityPosition(mother, nullptr, actionTilePos);
+            }
             return true;
         }
 
@@ -1018,16 +1025,16 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
                 break;
             }
         }
+
+        UpdateSlimes();                        
+        if (gameState->electricDoorSystem)
+        {
+            UpdateElectricDoor();
+        }
         
         if (stateChanged)
         {
-
-            if (gameState->electricDoorSystem)
-            {
-                UpdateElectricDoor();
-            }
             
-            UpdateSlimes();                        
             undoStack.push_back(prevState);
         }
 

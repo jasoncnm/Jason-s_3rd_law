@@ -3,26 +3,28 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TileMap/Room_28.tmj",
+    "activeFile": "TlieSet/tileSet.tsj",
     "expandedProjectPaths": [
         "TileMap",
-        "."
+        ".",
+        "TlieSet"
     ],
+    "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "TileMap/Room_1.tmj": {
-            "scale": 0.33,
+            "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 1040.9090909090908,
-                "y": 549.9999999999998
+                "x": 339,
+                "y": 833
             }
         },
         "TileMap/Room_12.tmj": {
-            "scale": 0.33,
-            "selectedLayer": 0,
+            "scale": 0.5,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 413.63636363636397,
-                "y": 659.0909090909092
+                "x": 365,
+                "y": 909
             }
         },
         "TileMap/Room_13.tmj": {
@@ -39,6 +41,14 @@
             "viewCenter": {
                 "x": 175.5,
                 "y": 175.5
+            }
+        },
+        "TileMap/Room_22.tmj": {
+            "scale": 0.5,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": -365,
+                "y": 129
             }
         },
         "TileMap/Room_24.tmj": {
@@ -82,11 +92,11 @@
             }
         },
         "TileMap/Room_3.tmj": {
-            "scale": 0.75,
+            "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -372.66666666666663,
-                "y": 278
+                "x": 13,
+                "y": 205
             }
         },
         "TileMap/Test.tmj": {
@@ -97,11 +107,16 @@
                 "y": -1628
             }
         },
+        "TlieSet/tileSet.tsj": {
+            "scaleInDock": 0.75,
+            "scaleInEditor": 1
+        },
         "TlieSet/tileSet.tsx": {
             "scaleInDock": 1,
             "scaleInEditor": 1
         }
     },
+    "last.externalTilesetPath": "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/TlieSet",
     "loadedWorlds": [
         "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/maps.world"
     ],
@@ -109,31 +124,24 @@
     "map.lastUsedFormat": "json",
     "map.width": 11,
     "openFiles": [
-        "TileMap/Room_3.tmj",
-        "TileMap/Test.tmj",
-        "TileMap/Room_14.tmj",
-        "TileMap/Room_1.tmj",
-        "TileMap/Room_13.tmj",
-        "TileMap/Room_12.tmj",
-        "TileMap/Room_24.tmj",
-        "TileMap/Room_26.tmj",
-        "TileMap/Room_27.tmj",
-        "TileMap/Room_28.tmj"
+        "TlieSet/tileSet.tsj",
+        "TlieSet/tileSet.tsx"
     ],
     "project": "level_edit.tiled-project",
     "recentFiles": [
+        "TileMap/Room_12.tmj",
+        "TileMap/Room_22.tmj",
+        "TlieSet/tileSet.tsj",
+        "TlieSet/tileSet.tsx",
         "TileMap/Room_28.tmj",
         "TileMap/Room_27.tmj",
         "TileMap/Room_26.tmj",
         "TileMap/Room_24.tmj",
-        "TileMap/Room_12.tmj",
         "TileMap/Room_13.tmj",
         "TileMap/Room_1.tmj",
         "TileMap/Room_14.tmj",
-        "TileMap/Test.tmj",
-        "TileMap/Room_3.tmj",
-        "TlieSet/tileSet.tsx",
-        "TileMap/Room_26.tmx"
+        "TileMap/Test.tmj"
     ],
+    "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
     "tileset.lastUsedFormat": "json"
 }

@@ -192,6 +192,7 @@ inline void PowerOnCable(Entity * cable, bool & end)
                         float dist = Vector2Distance(moveStart, moveEnd);
                         float iDist = dist / MAP_TILE_SIZE;
 
+                        // TODO: Play Door open event trigger 
                         AddAnimation(entity->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist));
                         OnPlayEvent(&entity->aniController);
                     }
@@ -390,14 +391,14 @@ inline void UpdateElectricDoor()
         {
             Entity * entity = FindEntityByLocationAndLayer(connection->tilePos, LAYER_SLIME);
             bool has = false;
-            if (entity)
+            if (entity && entity->aniController.moveAnimationQueue.IsEmpty())
             {
                 has = true;    
             }
             else
             {
                 entity = FindEntityByLocationAndLayer(connection->tilePos, LAYER_BLOCK);
-                if (entity)
+                if (entity && entity->aniController.moveAnimationQueue.IsEmpty())
                 {
                     has = true;                    
                 }
@@ -426,7 +427,7 @@ inline void UpdateElectricDoor()
         for (int blockIndex = 0; blockIndex < table.count; blockIndex++)
         {
             Entity * block = GetEntity(table[blockIndex]);
-            if (block && block->type == ENTITY_TYPE_BLOCK && source->tilePos == block->tilePos)
+            if (block && block->aniController.moveAnimationQueue.IsEmpty() && source->tilePos == block->tilePos)
             {
                 
                 Array<bool, MAX_CABLE> visited;

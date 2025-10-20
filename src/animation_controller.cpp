@@ -10,6 +10,7 @@
 
 void AnimationController::Reset()
 {
+    endEvent.Reset();
     currentQueueIndex = 0;
     moveAnimationQueue.Clear();
 }
