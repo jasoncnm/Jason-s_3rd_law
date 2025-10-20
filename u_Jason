@@ -65,10 +65,10 @@ window:
           input: "update:"
           cmd: search
         }
-        cursor_line: 161
-        cursor_column: 22
-        mark_line: 161
-        mark_column: 22
+        cursor_line: 211
+        cursor_column: 19
+        mark_line: 211
+        mark_column: 19
       }
       text:
       {

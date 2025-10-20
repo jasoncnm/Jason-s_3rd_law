@@ -168,17 +168,20 @@ inline bool InstancePush(Vector2 pushStart, Vector2 pushedStart)
 inline bool UpdateCamera()
 {
     bool updated = false;
+    Entity * player = GetEntity(gameState->playerEntityIndex);
+    SM_ASSERT(player, "Player is not active");
+            
+    Vector2 playerTile = player->pivot;
     
-    for  (int i = 0; i < gameState->tileMapCount; i++)
+    for (int i = 0; i < gameState->tileMapCount; i++)
     {
         Map & map = gameState->tileMaps[i];
-        Entity * player = GetEntity(gameState->playerEntityIndex);
-        SM_ASSERT(player, "Player is not active");
-        
-        IVec2 playerTile = player->tilePos;
-        
-        if (playerTile.x > map.tilePos.x && playerTile.x <= (map.tilePos.x + map.width) &&
-            playerTile.y > map.tilePos.y && playerTile.y <= (map.tilePos.y + map.height))
+        Vector2 mapMin = GetTilePivot(map.tilePos, MAP_TILE_SIZE);
+
+        Rectangle playerRec = { player->pivot.x, player->pivot.y, player->tileSize, player->tileSize };
+        Rectangle tileMapRec = { mapMin.x + MAP_TILE_SIZE, mapMin.y + MAP_TILE_SIZE, (float)map.width * (float)MAP_TILE_SIZE, (float)map.height * (float)MAP_TILE_SIZE };
+
+        if( CheckCollisionRecs(playerRec, tileMapRec) )
         {
             
             Vector2 pos = TilePositionToPixelPosition(map.width * 0.5f + map.tilePos.x + 0.5f, map.height * 0.5f + map.tilePos.y + 0.5f);
