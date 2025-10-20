@@ -74,28 +74,32 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                     float blockSpeed = 20.0f;                        
                     if (CheckBounce(target->tilePos, pushDir))
                     {
+                        result.pushed = true;
+
                         IVec2 startTile = target->tilePos;
                         Vector2 moveStart = GetTilePivot(target);
                         
                         BounceEntity(startEntity, target, pushDir);
 
-                        Vector2 moveEnd = GetTilePivot(target);
-                        float distPerSecond = MAP_TILE_SIZE / blockSpeed;
-                        float dist = Vector2Distance(moveStart, moveEnd);
-                        float tileDist = dist / MAP_TILE_SIZE;
-
-                        AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, tileDist));
-
-                        if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
+                        if (target->active)
                         {
-                            pushEntity->aniController.endEvent = { &target->aniController, OnPlayEvent };
+
+                            Vector2 moveEnd = GetTilePivot(target);
+                            float distPerSecond = MAP_TILE_SIZE / blockSpeed;
+                            float dist = Vector2Distance(moveStart, moveEnd);
+                            float tileDist = dist / MAP_TILE_SIZE;
+
+                            AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, tileDist));
+
+                            if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
+                            {
+                                pushEntity->aniController.endEvent = { &target->aniController, OnPlayEvent };
+                            }
+                            else
+                            {
+                                OnPlayEvent(&target->aniController);
+                            }
                         }
-                        else
-                        {
-                            OnPlayEvent(&target->aniController);
-                        }
-                        
-                        result.pushed = true;
 
                         return result;
                     }
@@ -190,14 +194,16 @@ inline bool UpdateCamera()
                 {
                     gameState->camera.target = pos;                    
                 }
-                else
+                
+                if (gameState->currentMapIndex != i)
                 {
+                    gameState->cameraAniController.Reset();
                     AddAnimation(gameState->cameraAniController, GetMoveAnimation(EaseOutCubic, gameState->camera.target, pos, 2.0f));
+                    OnPlayEvent(&gameState->cameraAniController);
+                    gameState->currentMapIndex = i;
                 }
                 
-                gameState->currentMapIndex = i;
-                
-                updated =  true;
+                updated = true;
             }
             break;
         }
@@ -214,10 +220,10 @@ inline bool UpdateCamera()
         gameState->camera.offset = { newWidth / 2.0f, newHeight / 2.0f };
     }
 
-    if (gameState->cameraAniController.playing)
+    if (!gameState->cameraAniController.moveAnimationQueue.IsEmpty())
     {
         gameState->cameraAniController.Update();
-        gameState->camera.target = gameState->cameraAniController.moveAnimationQueue[gameState->cameraAniController.currentQueueIndex].GetPosition();        
+        gameState->camera.target = gameState->cameraAniController.currentPosition;        
     }
     
     return updated;
@@ -474,8 +480,10 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
     BounceEntity(player, player, bounceDir);
     BounceEntity(clone, clone, -bounceDir);
 
+    
     Vector2 playerEnd = player->attach ?
         GetTilePivot(player->tilePos, player->tileSize, player->attachDir) : GetTilePivot(player->tilePos, player->tileSize);
+    
     Vector2 cloneEnd = clone->attach ?
         GetTilePivot(clone->tilePos, clone->tileSize, clone->attachDir) : GetTilePivot(clone->tilePos, clone->tileSize);
     

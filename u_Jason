@@ -21,14 +21,14 @@ window:
         }
         0.687719:
         {
-          selected
           watch:
           {
             selected
             expression: ""
             normal: 0.350000 0.650000
-            watch: pushEntity
             watch: target
+            watch: maxElements
+            watch: count
           }
           watch: expression: "query:locals"
           watch: expression: "query:types"
@@ -64,20 +64,20 @@ window:
           input: "update:"
           cmd: search
         }
-        cursor_line: 132
+        cursor_line: 199
         cursor_column: 1
-        mark_line: 132
+        mark_line: 199
         mark_column: 1
       }
       text:
       {
-        expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/animation_controller.cpp\".data"
+        expression: "file:\"w:/RayLib_Games/Jason's_3rd_law/Version_0.2/src/engine_lib.h\".data"
         auto: 1
         query: input: ""
-        cursor_line: 27
-        cursor_column: 6
-        mark_line: 27
-        mark_column: 6
+        cursor_line: 1
+        cursor_column: 1
+        mark_line: 1
+        mark_column: 1
       }
       text:
       {
@@ -88,10 +88,10 @@ window:
           input: bounceen
           cmd: search
         }
-        cursor_line: 673
-        cursor_column: 25
-        mark_line: 673
-        mark_column: 25
+        cursor_line: 674
+        cursor_column: 1
+        mark_line: 674
+        mark_column: 1
       }
     }
     0.252318:
@@ -110,6 +110,7 @@ window:
       }
       0.441239:
       {
+        selected
         watch: selected expression: "query:call_stack"
         watch: expression: "query:modules"
       }

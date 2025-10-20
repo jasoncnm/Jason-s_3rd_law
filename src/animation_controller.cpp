@@ -8,12 +8,6 @@
 
 #include "animation_controller.h"
 
-void AddAnimation(AnimationController & controller, MoveAnimation animation)
-{
-    controller.moveAnimationQueue.Add(animation);
-    controller.currentPosition = controller.moveAnimationQueue[controller.currentQueueIndex].GetPosition();
-}
-
 void AnimationController::Reset()
 {
     currentQueueIndex = 0;
@@ -43,14 +37,6 @@ void AnimationController::Update()
     }
 }
 
-void OnPlayEvent(AnimationController * controller)
-{
-    SM_ASSERT(controller, "controller is null");
-    
-    controller->playing = true;
-    controller->currentQueueIndex = 0;
-}
-
 // NOTE: Handle event end of animation
 void AnimationController::HandleAnimationNotPlaying()
 {
@@ -61,4 +47,18 @@ void AnimationController::HandleAnimationNotPlaying()
     }
 
     Reset();
+}
+
+void AddAnimation(AnimationController & controller, MoveAnimation animation)
+{
+    controller.moveAnimationQueue.Add(animation);
+    controller.currentPosition = controller.moveAnimationQueue[controller.currentQueueIndex].GetPosition();
+}
+
+void OnPlayEvent(AnimationController * controller)
+{
+    SM_ASSERT(controller, "controller is null");
+    
+    controller->playing = true;
+    controller->currentQueueIndex = 0;
 }
