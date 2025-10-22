@@ -44,6 +44,7 @@ Vector2 MoveAnimation::GetPosition()
         t = Easing(t);
     }
 
+    // A * t + (A - B) * t
     Vector2 result = Vector2Add(moveStart, Vector2Scale(Vector2Subtract(moveEnd, moveStart), t));
     
     return result;

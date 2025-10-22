@@ -62,6 +62,8 @@ void DrawSprite(Texture2D texture, Sprite & sprite, Vector2 topLeft, float tileS
         {
             (float)sprite.altasOffset.x + 1, (float)sprite.altasOffset.y + 1,
             (float)sprite.spriteSize.x - 2, (float)sprite.spriteSize.y -2
+            // (float)sprite.altasOffset.x + 0.5f, (float)sprite.altasOffset.y + 0.5f,
+            // (float)sprite.spriteSize.x - 1, (float)sprite.spriteSize.y - 1
         };
 
     Rectangle dest =
@@ -69,11 +71,10 @@ void DrawSprite(Texture2D texture, Sprite & sprite, Vector2 topLeft, float tileS
             topLeft.x + tileSize, topLeft.y + tileSize,
             tileSize, tileSize
         };
-        
+
     // Draw a part of a texture defined by a rectangle with 'pro' parameters
     DrawTexturePro(texture,  source,  dest, { dest.width, dest.height }, 0, color);
 }
-
 
 void DrawError()
 {

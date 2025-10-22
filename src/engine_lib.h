@@ -101,9 +101,9 @@ void _log(char * prefix, char * msg, TextColor textColor, Args... args)
 
 #else
 
-#define SM_TRACE(msg, ...) _log("Trace: ", msg, TEXT_COLOR_GREEN, ##__VA_ARGS__);
-#define SM_WARN(msg, ...) _log("Warning: ", msg, TEXT_COLOR_YELLOW, ##__VA_ARGS__);
-#define SM_ERROR(msg, ...) _log("Error: ", msg, TEXT_COLOR_RED, ##__VA_ARGS__);
+#define SM_TRACE(msg, ...) _log("Trace:   ", msg, TEXT_COLOR_GREEN, ##__VA_ARGS__);
+#define SM_WARN(msg, ...)  _log("Warning: ", msg, TEXT_COLOR_YELLOW, ##__VA_ARGS__);
+#define SM_ERROR(msg, ...) _log("Error:   ", msg, TEXT_COLOR_RED, ##__VA_ARGS__);
 #define SM_ASSERT(x, msg, ...)                    \
 {                                                 \
     if (!(x))                                     \
@@ -627,6 +627,92 @@ bool SameSign(int x, int y)
     int b = y > 0 ? 1 : -1;
 
     return a == b;
+}
+
+float EaseInOutBack(float x)
+{
+    float c1 = 1.70158f;
+    float c2 = c1 * 1.525f;
+
+    return x < 0.5
+        ? (powf(2 * x, 2) * ((c2 + 1) * 2 * x - c2)) / 2
+        : (powf(2 * x - 2, 2) * ((c2 + 1) * (x * 2 - 2) + c2) + 2) / 2;
+}
+
+float EaseOutElastic(float x)
+{
+    float c4 = (2.0f * PI) / 3.0f;
+
+    float result;
+    
+    if (FloatEquals(x, 0))
+    {
+        result = 0;
+    }
+    else if (FloatEquals(x, 1))
+    {
+        result = 1;
+    }
+    else
+    {
+        result = powf(2, -10 * x) * sinf((x * 10 - 0.75f) * c4) + 1;
+    }
+
+    return result;
+}
+
+float EaseInOutElastic(float x)
+{
+    float c5 = (2 * PI) / 4.5f;
+
+    float result;
+    
+    if (FloatEquals(x, 0))
+    {
+        result = 0;
+    }
+    else if (FloatEquals(x, 1))
+    {
+        result = 1;
+    }
+    else if (x < 0.5f)
+    {
+        result = -(powf(2, 20 * x - 10) * sinf((20 * x - 11.125f) * c5)) / 2.0f;
+    }
+    else
+    {
+        result = (powf(2, -20 * x + 10) * sinf((20 * x - 11.125f) * c5)) / 2.0f + 1.0f;
+    }
+
+    return result;
+}
+
+float EaseOutBounce(float x)
+{
+    float n1 = 7.5625f;
+    float d1 = 2.75f;
+
+    if (x < 1 / d1) {
+        return n1 * x * x;
+    } else if (x < 2 / d1) {
+        return n1 * (x -= 1.5f / d1) * x + 0.75f;
+    } else if (x < 2.5 / d1) {
+        return n1 * (x -= 2.25f / d1) * x + 0.9375f;
+    } else {
+        return n1 * (x -= 2.625f / d1) * x + 0.984375f;
+    }
+}
+
+float EaseInBounce(float x)
+{
+    return 1 - EaseOutBounce(1 - x);
+}
+
+float EaseInOutBounce(float x)
+{
+    return x < 0.5f
+        ? (1 - EaseOutBounce(1 - 2 * x)) / 2
+        : (1 + EaseOutBounce(2 * x - 1)) / 2;
 }
 #define ENGINE_LIB_H
 #endif

@@ -328,7 +328,7 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
         }
     } EndLoop:;
 
-    result.has = has;
+    result.has = has; 
     result.entity = entity;
     return result;
 }

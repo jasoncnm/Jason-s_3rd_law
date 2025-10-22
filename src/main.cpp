@@ -101,7 +101,6 @@ int main(int argumentCount, char *argumentArray[])
 
         if (IsWindowState(FLAG_VSYNC_HINT)) ClearWindowState(FLAG_VSYNC_HINT);
         else SetWindowState(FLAG_VSYNC_HINT);
-
         SetWindowState(FLAG_WINDOW_RESIZABLE);
 
         SetWindowMonitor(0);
