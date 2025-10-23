@@ -16,9 +16,8 @@
 MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int accumulatedMass)
 {
     SM_ASSERT(startEntity->movable, "Static entity cannot be pushing blocks!");
-
+    
     MoveActionResult result = { false, false, nullptr };
-
     for (int i = 0; i < gameState->entities.count; i++)
     {
         Entity * target = GetEntity(i);
@@ -59,6 +58,12 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                 {
                     if (pushEntity->type == ENTITY_TYPE_CLONE || pushEntity->type == ENTITY_TYPE_PLAYER)
                     {
+                        if (pushDir == -pushEntity->attachDir)
+                        {
+
+                            result.pushed = false;
+                            return result;
+                        }
                         MergeSlimes( target, pushEntity);
                         return result;
                     }
@@ -206,7 +211,7 @@ inline bool UpdateCamera()
                 if (gameState->currentMapIndex != i)
                 {
                     gameState->cameraAniController.Reset();
-                    AddAnimation(gameState->cameraAniController, GetMoveAnimation(EaseOutCubic, gameState->camera.target, pos, 1.5f));
+                    AddAnimation(gameState->cameraAniController, GetMoveAnimation(EaseOutCubic, gameState->camera.target, pos, 1.7f));
                     OnPlayEvent(&gameState->cameraAniController);
                     gameState->currentMapIndex = i;
                 }
@@ -284,6 +289,8 @@ bool MoveAction(IVec2 actionDir)
     Entity * mother = GetEntity(gameState->playerEntityIndex);
     SM_ASSERT(mother, "player is not active");
 
+    float moveSpeed = 3.5f;
+
     if (mother->attach)
     {
 
@@ -329,7 +336,7 @@ bool MoveAction(IVec2 actionDir)
                     SetAttach(mother, moveResult.blockedEntity, actionDir);
                     Vector2 endPos = GetTilePivot(mother);
 
-                    AddAnimation(mother->aniController, GetMoveAnimation(EaseOutSine, startPos, endPos));
+                    AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, startPos, endPos, moveSpeed));
                     OnPlayEvent(&mother->aniController);
                     
                     return true;
@@ -344,8 +351,8 @@ bool MoveAction(IVec2 actionDir)
             SetAttach(mother, moveResult.blockedEntity, actionDir);
             Vector2 moveEnd = GetTilePivot(mother);
 
-            AddAnimation(mother->aniController, GetMoveAnimation(EaseOutSine, moveStart, moveMiddle, 12.0f));
-            AddAnimation(mother->aniController, GetMoveAnimation(EaseOutSine, moveMiddle, moveEnd, 12.0f));
+            AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveStart, moveMiddle, moveSpeed * 2));
+            AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveMiddle, moveEnd, moveSpeed * 2));
             OnPlayEvent(&mother->aniController);
             
             return true;
@@ -421,7 +428,7 @@ bool MoveAction(IVec2 actionDir)
                 Vector2 moveStart = GetTilePivot(mother);
                 SetEntityPosition(mother, findResult.entity, actionTilePos);
                 Vector2 moveEnd = GetTilePivot(mother);
-                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutSine, moveStart, moveEnd, 6.0f));
+                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveStart, moveEnd, moveSpeed));
                 OnPlayEvent(&mother->aniController);
                 
             }
@@ -448,8 +455,8 @@ bool MoveAction(IVec2 actionDir)
                 SetEntityPosition(mother, attachedEntity, newTile);
                 Vector2 moveEnd = GetTilePivot(mother);
 
-                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutSine, moveStart, movemiddle, 6.0f));
-                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutSine, movemiddle, moveEnd, 6.0f));
+                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveStart, movemiddle, moveSpeed * 1.5f));
+                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, movemiddle, moveEnd, moveSpeed * 1.5f));
 
                 OnPlayEvent(&mother->aniController);                
 
@@ -591,14 +598,14 @@ void UpdateSprite(EntityLayer layer)
         Entity * entity = GetEntity(entityIndexArray[i]);
         if (entity)
         {
-            
             IVec2 offset = { 0 };
             int spriteSizeX = entity->sprite.spriteSize.x;
             int spriteSizeY = entity->sprite.spriteSize.y;
             entity->sprite = GetSprite(entity->spriteID);
+            
     #if 0
             IVec2 entityPos = entity->tilePos;
-            
+
             Entity * left = FindEntityByLocationAndLayer(entityPos + dir[LEFT], layer);
             Entity * right = FindEntityByLocationAndLayer(entityPos + dir[RIGHT], layer);
             Entity * up = FindEntityByLocationAndLayer(entityPos + dir[UP], layer);
@@ -816,7 +823,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             slime->pivot = GetTilePivot(slime);
         }
 
-#if 1        
+#if 0        
         UpdateSprite(LAYER_WALL);
         UpdateSprite(LAYER_GLASS);
 #endif
@@ -1158,7 +1165,8 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         }
     
         EndMode2D();
-    
+
+#if 0
         // NOTE: UI Draw Game Informations
 
         Entity * player = GetEntity(gameState->playerEntityIndex);
@@ -1178,9 +1186,11 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
 
         
         DrawFPS(10, 300);
-
+#endif
         
         EndDrawing();
 
     }
+
+    
 }

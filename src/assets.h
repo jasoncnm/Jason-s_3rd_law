@@ -198,8 +198,8 @@ Sprite GetSprite(SpriteID spriteID)
         }
         case SPRITE_WALL:
         {
-            //sprite.altasOffset = { 96, 96 };
-            sprite.altasOffset = { 64, 320 };
+            sprite.altasOffset = { 96, 96 };
+            //sprite.altasOffset = { 64, 320 };
             sprite.spriteSize  = { 32, 32 };
             break;
         }
@@ -450,7 +450,7 @@ Sprite GetSprite(SpriteID spriteID)
         }
         case SPRITE_GLASS:
         {
-            sprite.altasOffset = { 192, 320 };
+            sprite.altasOffset = { 160, 128 };
             sprite.spriteSize = { 32, 32 };
             break;
         }
