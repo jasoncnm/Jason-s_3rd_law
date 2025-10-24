@@ -70,7 +70,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
 
                     if (pushEntity->type == ENTITY_TYPE_BLOCK)
                     {
-                        SetAttach(target, pushEntity, -pushDir);
+                        // SetAttach(target, pushEntity, -pushDir);
                     }
                     
                 }
@@ -91,25 +91,34 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                         float dist = Vector2Distance(moveStart, moveEnd);
                         float tileDist = dist / MAP_TILE_SIZE;
 
-                        AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, tileDist));
-
-                        if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
+                        if (!Vector2Equals(moveStart, moveEnd))
                         {
-                            pushEntity->aniController.endEvent.controller = &target->aniController;
-                            pushEntity->aniController.endEvent.OnPlayFunc = OnPlayEvent;
+                            AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, tileDist));
+                        
+                            if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
+                            {
+                                pushEntity->aniController.endEvent.controller = &target->aniController;
+                                pushEntity->aniController.endEvent.OnPlayFunc = OnPlayEvent;
+                            }
+                            else
+                            {
+                                OnPlayEvent(&target->aniController);
+                            }
+                                                    
+                            if (!target->active)
+                            {
+                                target->active = true;
+                                target->aniController.endEvent.deleteEntity = target;
+                                target->aniController.endEvent.OnDeleteFunc = DeleteEntity;
+                            }
+
                         }
                         else
                         {
-                            OnPlayEvent(&target->aniController);
+                            result.pushed = false;
+                            result.blocked = true;
+                            result.blockedEntity = target;
                         }
-                        
-                        if (!target->active)
-                        {
-                            target->active = true;
-                            target->aniController.endEvent.deleteEntity = target;
-                            target->aniController.endEvent.OnDeleteFunc = DeleteEntity;
-                        }
-
                         return result;
                     }
                     else
@@ -289,7 +298,7 @@ bool MoveAction(IVec2 actionDir)
     Entity * mother = GetEntity(gameState->playerEntityIndex);
     SM_ASSERT(mother, "player is not active");
 
-    float moveSpeed = 3.5f;
+    float moveSpeed = 4.0f;
 
     if (mother->attach)
     {
@@ -557,8 +566,9 @@ inline bool SlimeSelection(Entity * player)
 
     bool stateChanged = false;
 
-    if (JustPressed(POSSES_KEY) && gameState->lv2Map && gameState->lv2Map->firstEnter)
+    if (JustPressed(POSSES_KEY))// TODO: UnComment // && gameState->lv2Map && gameState->lv2Map->firstEnter)
     {
+        
         Entity * nextPlayerEntity = nullptr;
         for (int i = 0; i < slimeEntityIndices.count; i++)
         {
@@ -989,7 +999,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
                     
                 if (isPressed)
                 {
-                    stateChanged |= MoveAction(actionDir);
+                    stateChanged = stateChanged || MoveAction(actionDir);
                 }
                 
                 break;
@@ -1026,7 +1036,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
 
                 if (split)
                 {
-                    stateChanged |= split;
+                    stateChanged = stateChanged || split;
                     player->actionState = MOVE_STATE;
                 }
                 break;
@@ -1061,7 +1071,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             }
             
             // NOTE: Restart States
-            repeat &= !stateChanged;
+            repeat = repeat && !stateChanged;
             if (JustPressed(RESET_KEY) && !repeat)
             {
                 repeat = true;
@@ -1127,11 +1137,11 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         }
         
 
-        DrawSpriteLayer(LAYER_CABLE);
-
         DrawSpriteLayer(LAYER_BLOCK);
         
         DrawSpriteLayer(LAYER_WALL);
+
+        DrawSpriteLayer(LAYER_CABLE);
         
         DrawSpriteLayer(LAYER_PIT);
 

@@ -673,7 +673,6 @@ void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
                     case ENTITY_TYPE_BLOCK:
                     {
                         // IMPORTANT: entity changed
-
                         
                         // NOTE: make a fakeStartEntity copy 
                         Entity fakeEntity = *startEntity;

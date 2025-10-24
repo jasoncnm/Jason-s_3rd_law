@@ -25,7 +25,7 @@ inline bool CanFreezeSlime(Entity * connection)
             {
                 Entity * cable = GetEntity(Cable_Indices[id]);
                 SM_ASSERT(cable, "Entity is not active");
-                result |= cable->conductive;
+                result = result || cable->conductive;
             }
         }
     }
