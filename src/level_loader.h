@@ -35,6 +35,11 @@ enum TileID
     DOOR_RIGHT = 83,
     DOOR_UP    = 84,
     DOOR_DOWN  = 85,
+    
+    DOOR_LEFT_R  = 92,
+    DOOR_RIGHT_R = 93,
+    DOOR_UP_R    = 94,
+    DOOR_DOWN_R  = 95,
 
     CABLE_DOWN_RIGHT = 6,
     CABLE_H          = 7,

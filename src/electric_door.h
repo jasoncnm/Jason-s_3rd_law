@@ -40,7 +40,7 @@ inline void UpdateElectricDoor();
     
 inline void SetUpElectricDoor();
 
-inline bool DoorBlocked(IVec2 tilepos, IVec2 reachDir);
+inline bool DoorBlocked(Entity * door, IVec2 reachDir);
     
 inline bool CheckDoor(IVec2 tilePos);
 

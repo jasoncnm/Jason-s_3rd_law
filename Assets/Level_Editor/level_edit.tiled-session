@@ -12,11 +12,11 @@
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "TileMap/Room_1.tmj": {
-            "scale": 2,
-            "selectedLayer": 1,
+            "scale": 1.5,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 843.75,
-                "y": 381.75
+                "x": -594.9999999999999,
+                "y": 319.66666666666663
             }
         },
         "TileMap/Room_10.tmj": {
@@ -76,11 +76,11 @@
             }
         },
         "TileMap/Room_2.tmj": {
-            "scale": 1.5,
+            "scale": 1,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 574.3333333333333,
-                "y": 539
+                "x": -619.5,
+                "y": 332.5
             }
         },
         "TileMap/Room_22.tmj": {
@@ -276,11 +276,11 @@
             }
         },
         "TileMap/Test.tmj": {
-            "scale": 0.25,
-            "selectedLayer": 0,
+            "scale": 1,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 318,
-                "y": 320
+                "x": 1316.5,
+                "y": 521.5
             }
         },
         "TlieSet/tileSet.tsj": {

@@ -313,7 +313,7 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
                 {
                     if (entity->cableType == CABLE_TYPE_DOOR) 
                     {
-                        has = true;
+                        has = DoorBlocked(entity, attachDir);
                     }
                     break;
                 }

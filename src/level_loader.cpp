@@ -91,6 +91,26 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
         
         SM_TRACE("DOOR generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
+    else if (id >= DOOR_LEFT_R && id <= DOOR_DOWN_R)
+    {
+        if (id == DOOR_LEFT_R || id == DOOR_RIGHT_R)
+        {
+            entityResult = AddDoor(tilePos, (SpriteID)(SPRITE_DOOR_LEFT_R_CLOSE + (id - DOOR_LEFT_R)), true, true, false, false);
+        }
+        else if (id == DOOR_UP_R || id == DOOR_DOWN_R)
+        {
+            entityResult = AddDoor(tilePos, (SpriteID)(SPRITE_DOOR_LEFT_R_CLOSE + (id - DOOR_LEFT_R)), false, false, true, true);
+        }
+        else
+        {
+            SM_ASSERT(false, "Possible Door id miss match (id %d)", id);
+        }
+
+        gameState->entityTable[LAYER_DOOR].Add(entityResult.entityIndex);
+        
+        SM_TRACE("DOOR generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+        
+    }
     else if (id == CABLE_DOWN_RIGHT || (id - 50) == CABLE_DOWN_RIGHT)
     {
         entityResult = AddCable(tilePos, SPRITE_CABLE_DOWN_RIGHT_OFF, false, true, false, true);

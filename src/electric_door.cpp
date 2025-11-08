@@ -107,6 +107,7 @@ inline void PowerOnCable(Entity * cable, bool & end)
             
             switch(cable->spriteID)
             {
+
                 case SPRITE_DOOR_LEFT_CLOSE:
                 {
                     offset = { 1, -1 };
@@ -145,6 +146,50 @@ inline void PowerOnCable(Entity * cable, bool & end)
                     bounceDir = { 0, -1 };
                     cable->spriteID = SPRITE_DOOR_DOWN_OPEN;
                     cable->sprite = GetSprite(SPRITE_DOOR_DOWN_OPEN);
+                    cable->left = cable->right = true;
+                    cable->up = cable->down = false;
+                    
+                    break;
+                }
+
+                case SPRITE_DOOR_LEFT_R_CLOSE:
+                {
+                    offset = { 1, 1 };
+                    bounceDir = { 1, 0 };
+                    cable->left = cable->right = false;
+                    cable->up = cable->down = true;
+                    cable->spriteID = SPRITE_DOOR_LEFT_R_OPEN;
+                    cable->sprite = GetSprite(SPRITE_DOOR_LEFT_R_OPEN);
+                    break;
+                }
+                case SPRITE_DOOR_RIGHT_R_CLOSE:
+                {
+                    offset = { -1, -1 };
+                    bounceDir = { -1, 0 };
+                    cable->spriteID = SPRITE_DOOR_RIGHT_R_OPEN;
+                    cable->sprite = GetSprite(SPRITE_DOOR_RIGHT_R_OPEN);
+                    cable->left = cable->right = false;
+                    cable->up = cable->down = true;
+                    
+                    break;
+                }
+                case SPRITE_DOOR_TOP_R_CLOSE:
+                {
+                    offset = { 1, 1 };
+                    bounceDir = { 0, 1 };
+                    cable->spriteID = SPRITE_DOOR_TOP_R_OPEN;
+                    cable->sprite = GetSprite(SPRITE_DOOR_TOP_R_OPEN);
+                    cable->left = cable->right = true;
+                    cable->up = cable->down = false;
+                    
+                    break;
+                }
+                case SPRITE_DOOR_DOWN_R_CLOSE:
+                {
+                    offset = { -1, -1 };
+                    bounceDir = { 0, -1 };
+                    cable->spriteID = SPRITE_DOOR_DOWN_R_OPEN;
+                    cable->sprite = GetSprite(SPRITE_DOOR_DOWN_R_OPEN);
                     cable->left = cable->right = true;
                     cable->up = cable->down = false;
                     
@@ -269,20 +314,20 @@ inline bool DoorBlocked(Entity * door, IVec2 reachDir)
 
     if (reachDir.x == 1)
     {
-        result = door->spriteID == SPRITE_DOOR_RIGHT_CLOSE;
+        result = (door->spriteID == SPRITE_DOOR_RIGHT_CLOSE || door->spriteID == SPRITE_DOOR_RIGHT_R_CLOSE);
     }
     else if (reachDir.x == -1)
     {
-        result = door->spriteID == SPRITE_DOOR_LEFT_CLOSE;
+        result = (door->spriteID == SPRITE_DOOR_LEFT_CLOSE || door->spriteID == SPRITE_DOOR_LEFT_R_CLOSE);
     }
     else if (reachDir.y == 1)
     {
-        result = door->spriteID == SPRITE_DOOR_DOWN_CLOSE;
+        result = (door->spriteID == SPRITE_DOOR_DOWN_CLOSE || door->spriteID == SPRITE_DOOR_DOWN_R_CLOSE);
         
     }
     else if (reachDir.y == -1)
     {
-        result = door->spriteID == SPRITE_DOOR_TOP_CLOSE;
+        result = (door->spriteID == SPRITE_DOOR_TOP_CLOSE || door->spriteID == SPRITE_DOOR_TOP_R_CLOSE);
     }
     
     return result;

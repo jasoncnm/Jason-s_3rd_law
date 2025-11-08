@@ -86,13 +86,22 @@ enum SpriteID
     SPRITE_DOOR_TOP_CLOSE,
     SPRITE_DOOR_DOWN_CLOSE,
 
-    SPRITE_COUNT,
+    SPRITE_DOOR_LEFT_R_CLOSE,
+    SPRITE_DOOR_RIGHT_R_CLOSE,
+    SPRITE_DOOR_TOP_R_CLOSE,
+    SPRITE_DOOR_DOWN_R_CLOSE,
 
+    SPRITE_COUNT,
     
     SPRITE_DOOR_LEFT_OPEN = SPRITE_DOOR_TOP_CLOSE,
     SPRITE_DOOR_RIGHT_OPEN = SPRITE_DOOR_DOWN_CLOSE,
     SPRITE_DOOR_TOP_OPEN = SPRITE_DOOR_LEFT_CLOSE,
     SPRITE_DOOR_DOWN_OPEN = SPRITE_DOOR_RIGHT_CLOSE,
+    
+    SPRITE_DOOR_LEFT_R_OPEN = SPRITE_DOOR_DOWN_R_CLOSE,
+    SPRITE_DOOR_RIGHT_R_OPEN = SPRITE_DOOR_TOP_R_CLOSE,
+    SPRITE_DOOR_TOP_R_OPEN = SPRITE_DOOR_RIGHT_R_CLOSE,
+    SPRITE_DOOR_DOWN_R_OPEN = SPRITE_DOOR_LEFT_R_CLOSE,
 
 };
 
@@ -351,6 +360,7 @@ Sprite GetSprite(SpriteID spriteID)
             sprite.spriteSize = { 32, 32 };
             break;
         }
+        
         case SPRITE_DOOR_LEFT_CLOSE:
         {
             sprite.altasOffset = { 32, 256 };
@@ -374,8 +384,33 @@ Sprite GetSprite(SpriteID spriteID)
             sprite.altasOffset = { 32 * 4, 256 };
             sprite.spriteSize = { 32, 32 };
             break;
-
         }
+        
+        case SPRITE_DOOR_LEFT_R_CLOSE:
+        {
+            sprite.altasOffset = { 32, 288 };
+            sprite.spriteSize = { 32, 32 };
+            break;
+        }
+        case SPRITE_DOOR_RIGHT_R_CLOSE:
+        {
+            sprite.altasOffset = { 32 * 2, 288 };
+            sprite.spriteSize = { 32, 32 };
+            break;
+        }
+        case SPRITE_DOOR_TOP_R_CLOSE:
+        {
+            sprite.altasOffset = { 32 * 3, 288 };
+            sprite.spriteSize = { 32, 32 };
+            break;
+        }
+        case SPRITE_DOOR_DOWN_R_CLOSE:
+        {
+            sprite.altasOffset = { 32 * 4, 288 };
+            sprite.spriteSize = { 32, 32 };
+            break;
+        }
+        
         case SPRITE_SOURCE_H_ON:
         {
             sprite.altasOffset = { 288, 64 };
