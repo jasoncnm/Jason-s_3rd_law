@@ -458,8 +458,6 @@ bool MoveAction(IVec2 actionDir)
                 if (slime)
                 {
                     mother = MergeSlimes(slime, mother);
-                    AddAnimation(mother->aniController, GetMoveAnimation(nullptr, mother->pivot, mother->pivot, moveSpeed));
-                    OnPlayEvent(&mother->aniController);
                 }
                 else if ((!findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
                          Abs(mother->attachDir) != Abs(actionDir))
@@ -914,7 +912,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             {
                 // NOTE: Undo
                 Undo();
-                timeSinceLastPress = pressFreq;
+                timeSinceLastPress = press_freq;
                 repeat = false;
             }
             

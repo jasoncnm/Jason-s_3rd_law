@@ -233,6 +233,9 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
     mergeSlime->tileSize = GetSlimeSize(mergeSlime);
     mergeSlime->pivot = GetTilePivot(mergeSlime);
 
+    AddAnimation(mergeSlime->aniController, GetMoveAnimation(nullptr, mergeSlime->pivot, mergeSlime->pivot));
+    OnPlayEvent(&mergeSlime->aniController);
+
     return mergeSlime;
     
 }

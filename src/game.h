@@ -26,7 +26,7 @@
 #define MAX_ENTITIES 5000
 
 constexpr float zoom_per_tile = 19.0f / 600.0f;
-constexpr float pressFreq = 0.2f;
+constexpr float press_freq = 0.2f;
 
 
 #include "vendor/raylib/raylib.h"

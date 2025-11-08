@@ -19,7 +19,7 @@ void AdjustAnimatingSpeed(Entity * entity, float ratio)
 }
 
 MoveAnimation GetMoveAnimation(float (*Easing)(float), Vector2 moveStart, Vector2 moveEnd,
-                               float animateSpeed = 5.0f, float target_t = 1.0f)
+                               float animateSpeed, float target_t)
 {
     
     MoveAnimation ani;
@@ -46,6 +46,9 @@ Vector2 MoveAnimation::GetPosition()
 
     // A * t + (A - B) * t
     Vector2 result = Vector2Add(moveStart, Vector2Scale(Vector2Subtract(moveEnd, moveStart), t));
+
+    result.x = floorf(result.x);
+    result.y = floorf(result.y);
     
     return result;
 }

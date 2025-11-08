@@ -70,13 +70,15 @@ void DrawSprite(Camera2D camera, Texture2D texture, Sprite & sprite, Vector2 top
 {
 
     SM_ASSERT(IsTextureValid(texture), "Texture is not valid");
+
+    float offset = 0.1f;
             
     Rectangle source =
         {
-            (float)sprite.altasOffset.x + 1, (float)sprite.altasOffset.y + 1,
-            (float)sprite.spriteSize.x - 2, (float)sprite.spriteSize.y -2
-            // (float)sprite.altasOffset.x + 0.5f, (float)sprite.altasOffset.y + 0.5f,
-            // (float)sprite.spriteSize.x - 1, (float)sprite.spriteSize.y - 1
+            // (float)sprite.altasOffset.x + 1, (float)sprite.altasOffset.y + 1,
+            // (float)sprite.spriteSize.x - 2, (float)sprite.spriteSize.y -2
+            (float)sprite.altasOffset.x + offset, (float)sprite.altasOffset.y + offset,
+            (float)sprite.spriteSize.x - 2 * offset, (float)sprite.spriteSize.y - 2 * offset
         };
 
     Rectangle dest =

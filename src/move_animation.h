@@ -35,7 +35,7 @@ struct MoveAnimation
 void AdjustAnimatingSpeed(Entity * entity, float ratio);
 
 MoveAnimation GetMoveAnimation(float (*Easing)(float), Vector2 moveStart, Vector2 moveEnd,
-                               float animateSpeed, float target_t);
+                               float animateSpeed = 5.0f, float target_t = 1.0f);
 
     
 #define MOVEANIMATION_H
