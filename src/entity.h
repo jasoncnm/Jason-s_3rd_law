@@ -154,7 +154,7 @@ void ShiftEntities(IVec2 startPos, IVec2 bounceDir);
 
 inline bool CheckBounce(IVec2 tilePos, IVec2 pushDir);
 
-void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir);
+void BounceEntity(Entity * entity, IVec2 dir);
 
 #define ENTITY_H
 #endif

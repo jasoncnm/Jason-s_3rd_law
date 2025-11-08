@@ -207,7 +207,7 @@ inline void PowerOnCable(Entity * cable, bool & end)
             if (entity)
             {
                 Vector2 moveStart = GetTilePivot(entity);
-                BounceEntity(cable, entity, bounceDir);
+                BounceEntity(entity, bounceDir);
                 Vector2 moveEnd = GetTilePivot(entity);
 
                 if (!Vector2Equals(moveStart, moveEnd))
@@ -229,7 +229,7 @@ inline void PowerOnCable(Entity * cable, bool & end)
                 if (entity)
                 {
                     Vector2 moveStart = GetTilePivot(entity);
-                    BounceEntity(cable, entity, bounceDir);
+                    BounceEntity(entity, bounceDir);
                     Vector2 moveEnd = GetTilePivot(entity);
                     if (!Vector2Equals(moveStart, moveEnd))
                     {

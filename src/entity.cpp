@@ -608,7 +608,7 @@ inline bool CheckBounce(IVec2 tilePos, IVec2 pushDir)
     return true;
 }
 
-void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
+void BounceEntity(Entity * entity, IVec2 dir)
 {
     SM_ASSERT(entity->active, "entity does not exists");
     SM_ASSERT(entity->movable, "entitiy is static");
@@ -673,15 +673,14 @@ void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
                     case ENTITY_TYPE_BLOCK:
                     {
                         // IMPORTANT: entity changed
-                        
-                        // NOTE: make a fakeStartEntity copy 
-                        Entity fakeEntity = *startEntity;
-                        fakeEntity.mass = entity->mass;
-                        
                         MoveActionResult result = 
-                            MoveActionCheck(&fakeEntity, entity, pos, dir, 0);
+                            MoveActionCheck(entity, entity, pos, dir, 0);
 
-                        if (result.blocked)
+                        if (IsSlime(entity))
+                        {
+                            SetEntityPosition(entity, target, target->tilePos - dir);
+                        }
+                        else if (result.blocked)
                         {
                             SetEntityPosition(entity, result.blockedEntity, pos - dir);
                         }
@@ -699,13 +698,9 @@ void BounceEntity(Entity * startEntity, Entity * entity, IVec2 dir)
                         {
                             // IMPORTANT: entity changed
                             IVec2 attachDir = target->attachDir;
-
-                            // NOTE: make a fakeStartEntity copy 
-                            Entity fakeEntity = *startEntity;
-                            fakeEntity.mass = entity->mass;
                             
                             MoveActionResult result =
-                                MoveActionCheck(&fakeEntity, entity, pos, dir, 0);
+                                MoveActionCheck(entity, entity, pos, dir, 0);
 
                             if (result.blocked)
                             {

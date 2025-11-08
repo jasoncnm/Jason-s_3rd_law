@@ -70,13 +70,25 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
 
                     if (pushEntity->type == ENTITY_TYPE_BLOCK)
                     {
+                        FindAttachableResult attachResult = FindAttachable(target->tilePos + pushDir, pushDir);
+                        if (attachResult.has)
+                        {
+                            SetAttach(target, attachResult.entity, pushDir);
+                        }
+                        else if (target->attach)
+                        {
+                            attachResult = FindAttachable(target->tilePos + target->attachDir, target->attachDir);
+                            if (attachResult.has)
+                            {
+                                SetAttach(target, attachResult.entity, target->attachDir);
+                            }
+                        }
                         // SetAttach(target, pushEntity, -pushDir);
                     }
                     
                 }
                 case ENTITY_TYPE_BLOCK:
                 {
-                    float blockSpeed = 20.0f;                        
                     if (CheckBounce(target->tilePos, pushDir))
                     {
                         result.pushed = true;
@@ -84,10 +96,9 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                         IVec2 startTile = target->tilePos;
                         Vector2 moveStart = GetTilePivot(target);
                         
-                        BounceEntity(startEntity, target, pushDir);
+                        BounceEntity(target, pushDir);
 
                         Vector2 moveEnd = GetTilePivot(target);
-                        float distPerSecond = MAP_TILE_SIZE / blockSpeed;
                         float dist = Vector2Distance(moveStart, moveEnd);
                         float tileDist = dist / MAP_TILE_SIZE;
 
@@ -147,7 +158,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                             float dist = Vector2Distance(moveStart, moveEnd);
                             float iDist = dist / MAP_TILE_SIZE;
 
-                            AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, blockSpeed, iDist));
+                            AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist));
 
                             if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
                             {
@@ -508,8 +519,8 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
     Vector2 playerStart = GetTilePivot(player->tilePos, player->tileSize);
     Vector2 cloneStart = GetTilePivot(clone->tilePos, clone->tileSize);
 
-    BounceEntity(player, player, bounceDir);
-    BounceEntity(clone, clone, -bounceDir);
+    BounceEntity(player, bounceDir);
+    BounceEntity(clone, -bounceDir);
 
     
     Vector2 playerEnd = player->attach ?
@@ -612,172 +623,9 @@ void UpdateSprite(EntityLayer layer)
             int spriteSizeX = entity->sprite.spriteSize.x;
             int spriteSizeY = entity->sprite.spriteSize.y;
             entity->sprite = GetSprite(entity->spriteID);
-            
-    #if 0
-            IVec2 entityPos = entity->tilePos;
-
-            Entity * left = FindEntityByLocationAndLayer(entityPos + dir[LEFT], layer);
-            Entity * right = FindEntityByLocationAndLayer(entityPos + dir[RIGHT], layer);
-            Entity * up = FindEntityByLocationAndLayer(entityPos + dir[UP], layer);
-            Entity * down = FindEntityByLocationAndLayer(entityPos + dir[DOWN], layer);
-            Entity * downRight = FindEntityByLocationAndLayer(entityPos + dir[DOWN] + dir[RIGHT], layer);
-            Entity * downLeft = FindEntityByLocationAndLayer(entityPos + dir[DOWN] + dir[LEFT], layer);
-            Entity * upRight = FindEntityByLocationAndLayer(entityPos + dir[UP] + dir[RIGHT], layer);
-            Entity * upLeft = FindEntityByLocationAndLayer(entityPos + dir[UP] + dir[LEFT], layer);
-
-            if (layer == LAYER_GLASS)
-            {
-                if (left && left->broken) left = nullptr;
-                if (right && right->broken) right = nullptr;
-                if (up && up->broken) up = nullptr;
-                if (down && down->broken) down = nullptr;
-                if (downRight && downRight->broken) downRight = nullptr;
-                if (downLeft && downLeft->broken) downLeft = nullptr;
-                if (upRight && upRight->broken) upRight = nullptr;
-                if (upLeft && upLeft->broken) upLeft = nullptr;
-            }
-
-            switch(layer)
-            {
-                case LAYER_GLASS:
-                case LAYER_WALL:
-                {
-                    if (up && down && !left && right && !downRight)
-                    {
-                        offset = { 0, 10 * spriteSizeY };
-                    }
-                    else if (up && down && left && !right && !downLeft)
-                    {
-                        offset = { spriteSizeX, 10 * spriteSizeY };
-                    }
-                    else if (up && down && !left && right && !upRight)
-                    {
-                        offset = { 0, 11 * spriteSizeY };
-                    }
-                    else if (up && down && left && !right && !upLeft)
-                    {
-                        offset = { spriteSizeX, 11 * spriteSizeY };
-                    }
-                    else if (left && right && !up && down && !downRight)
-                    {
-                        offset = { 2 * spriteSizeX, 10 * spriteSizeY };
-                    }
-                    else if (left && right && !up && down && !downLeft)
-                    {
-                        offset = { 3 * spriteSizeX, 10 * spriteSizeY };
-                    }
-                    else if (left && right && up && !down && !upRight)
-                    {
-                        offset = { 2 * spriteSizeX, 11 * spriteSizeY };
-                    }
-                    else if (left && right && up && !down && !upLeft)
-                    {
-                        offset = { 3 * spriteSizeX, 11 * spriteSizeY };
-                    }
-
-                    else if (!left && right && !up && down && !downRight)
-                    {
-                        offset = { 2 * spriteSizeX , 8 * spriteSizeY }; 
-                    }
-                    else if (left && !right && !up && down && !downLeft)
-                    {
-                        offset = { 3 * spriteSizeX , 8 * spriteSizeY }; 
-                    }
-                    else if (!left && right && up && !down && !upRight)
-                    {
-                        offset = { 2 * spriteSizeX , 9 * spriteSizeY }; 
-                    }
-                    else if (left && !right && up && !down && !upLeft)
-                    {
-                        offset = { 3 * spriteSizeX , 9 * spriteSizeY }; 
-                    }
-                    else if (left && right && up && down && !downRight)
-                    {
-                        offset = { 0 , 4 * spriteSizeY }; 
-                    }
-                    else if (left && right && up && down && !downLeft)
-                    {
-                        offset = { spriteSizeX, 4 * spriteSizeY };
-                    }
-                    else if (left && right && up && down && !upRight)
-                    {
-                        offset = { 0, 5 * spriteSizeY };
-                    }
-                    else if (left && right && up && down && !upLeft)
-                    {
-                        offset = { spriteSizeX, 5 * spriteSizeY };
-                    }
-                    else if (right && !up && !down && !left)
-                    {
-                        offset = { 0, 6 * spriteSizeY };
-                    }
-                    else if (left && right && !up && !down)
-                    {
-                        offset = { spriteSizeX, 6 * spriteSizeY };
-                    }
-                    else if (left && !right && !up && !down)
-                    {
-                        offset = { 2 * spriteSizeX, 6 * spriteSizeY };
-                    }
-                    else if (!left && !right && !up && down)
-                    {
-                        offset = { 0, 7 * spriteSizeY };
-                    }
-                    else if (!left && !right && up && down)
-                    {
-                        offset = { 0, 8 * spriteSizeY };
-                    }
-                    else if (!left && !right && up && !down)
-                    {
-                        offset = { 0, 9 * spriteSizeY };
-                    }
-                    else if (left && right && !up)
-                    {
-                        offset = { spriteSizeX, 0  };
-                    }
-                    else if (left && down && !up && !right)
-                    {
-                        offset = { 2 * spriteSizeX, 0 };
-                    }
-                    else if (up && down && !left)
-                    {
-                        offset = { 0, spriteSizeY };
-                    }
-                    else if (up && down && left && right)
-                    {
-                        offset = { spriteSizeX, spriteSizeY };
-                    }
-                    else if (up && down && !right)
-                    {
-                        offset = { 2 * spriteSizeX, spriteSizeY };
-                    }
-                    else if (up && right && !left && !down)
-                    {
-                        offset = { 0, 2 * spriteSizeY };
-                    }
-                    else if (left && right && !down)
-                    {
-                        offset = { spriteSizeX, 2 * spriteSizeY };
-                    }
-                    else if (up && left && !right && !down)
-                    {
-                        offset = { 2 * spriteSizeX, 2 * spriteSizeY };
-                    }
-                    else if (!up && !down && !left && !right)
-                    {
-                        offset = { spriteSizeX, 7 * spriteSizeY };   
-                    }
-                    
-                    break;
-                }
-            }
-
-            entity->sprite.altasOffset = entity->sprite.altasOffset + offset;
-#else
             if (layer == LAYER_WALL) offset = { spriteSizeX, spriteSizeY };
             if (layer == LAYER_GLASS) offset = { spriteSizeX, 7 * spriteSizeY };   
             entity->sprite.altasOffset = entity->sprite.altasOffset + offset;
-#endif
         }
     }
 }
@@ -1036,6 +884,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
 
                 if (split)
                 {
+                    gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = false;
                     stateChanged = stateChanged || split;
                     player->actionState = MOVE_STATE;
                 }
@@ -1180,7 +1029,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
     
         EndMode2D();
 
-#if 1
+#if GAME_INTERNAL
         // NOTE: UI Draw Game Informations
 
         Entity * player = GetEntity(gameState->playerEntityIndex);
@@ -1199,7 +1048,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         DrawText("Arrow Direction to Shoot, R KEY to Restart, Z KEY to undo", 10, 10, 20, RAYWHITE);
 
         
-        DrawFPS(10, 300);
+        DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
 #endif
         
         EndDrawing();
