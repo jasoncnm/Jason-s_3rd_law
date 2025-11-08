@@ -231,6 +231,7 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
     DeleteEntity(mergedSlime);
 
     mergeSlime->tileSize = GetSlimeSize(mergeSlime);
+    mergeSlime->pivot = GetTilePivot(mergeSlime);
 
     return mergeSlime;
     

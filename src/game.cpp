@@ -452,50 +452,49 @@ bool MoveAction(IVec2 actionDir)
                 OnPlayEvent(&mother->aniController);
                 
             }
-            else if ((!findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
-                     Abs(mother->attachDir) != Abs(actionDir))
+            else
             {
-                IVec2 newTile = standingPlatformPos;
-                IVec2 newAttach = - actionDir;
+                Entity * slime = FindEntityByLocationAndLayer(standingPlatformPos, LAYER_SLIME);
+                if (slime)
+                {
+                    mother = MergeSlimes(slime, mother);
+                    AddAnimation(mother->aniController, GetMoveAnimation(nullptr, mother->pivot, mother->pivot, moveSpeed));
+                    OnPlayEvent(&mother->aniController);
+                }
+                else if ((!findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
+                         Abs(mother->attachDir) != Abs(actionDir))
+                {
+                    IVec2 newTile = standingPlatformPos;
+                    IVec2 newAttach = - actionDir;
 
-                Entity * attachedEntity = GetEntity(mother->attachedEntityIndex);
+                    Entity * attachedEntity = GetEntity(mother->attachedEntityIndex);
 
-                if (attachedEntity && attachedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
-                    attachedEntity->cableType == CABLE_TYPE_DOOR &&
-                    !SameSide(attachedEntity, newTile, newAttach))
+                    if (attachedEntity && attachedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+                        attachedEntity->cableType == CABLE_TYPE_DOOR &&
+                        !SameSide(attachedEntity, newTile, newAttach))
+                    {
+                        return false;
+                    }
+                
+                    // IMPORTANT: mother entity changed
+                    Vector2 moveStart = GetTilePivot(mother);
+                    Vector2 movemiddle =
+                        Vector2Add(moveStart, Vector2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f * (MAP_TILE_SIZE + mother->tileSize)));
+                
+                    SetEntityPosition(mother, attachedEntity, newTile);
+                    Vector2 moveEnd = GetTilePivot(mother);
+
+                    AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveStart, movemiddle, moveSpeed * 1.5f));
+                    AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, movemiddle, moveEnd, moveSpeed * 1.5f));
+
+                    OnPlayEvent(&mother->aniController);                
+
+                }
+                else 
                 {
                     return false;
                 }
-                
-                // IMPORTANT: mother entity changed
-                Vector2 moveStart = GetTilePivot(mother);
-                Vector2 movemiddle =
-                    Vector2Add(moveStart, Vector2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f * (MAP_TILE_SIZE + mother->tileSize)));
-                
-                SetEntityPosition(mother, attachedEntity, newTile);
-                Vector2 moveEnd = GetTilePivot(mother);
 
-                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveStart, movemiddle, moveSpeed * 1.5f));
-                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, movemiddle, moveEnd, moveSpeed * 1.5f));
-
-                OnPlayEvent(&mother->aniController);                
-
-            }
-            else 
-            {
-                return false;
-            }
-
-            auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
-            
-            for (int i = 0; i < slimeEntityIndices.count; i++)
-            {
-                Entity * slime = GetEntity(slimeEntityIndices[i]);
-                if (slime && slime != mother && slime->tilePos == mother->tilePos)
-                {
-                    mother = MergeSlimes(slime, mother);
-                    break;
-                }
             }
             
             return true;
