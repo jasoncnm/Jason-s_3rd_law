@@ -44,9 +44,6 @@
 *.a
 *.o
 
-
-Assets/Level_Editor/level_edit.tiled-session
-
 src/raylib/rmem.h    
 src/raylib/raylib.h  
 src/raylib/physac.h  
