@@ -23,7 +23,6 @@ enum Direction
 //  ========================================================================
 //              NOTE: Game Util Functions
 //  ========================================================================
-
 inline bool CheckOutOfBound(int tileX, int tileY)
 {
     bool result =

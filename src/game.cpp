@@ -555,7 +555,7 @@ inline void DrawSpriteLayer(EntityLayer layer)
         Entity * entity = GetEntity(entityIndexArray[i]);
         if (entity)
         {
-            DrawSprite(gameState->texture, entity->sprite, entity->pivot, entity->tileSize, entity->color);
+            DrawSprite(gameState->camera, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, entity->color);
         }
     }
 }
@@ -1133,7 +1133,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         {
             Map & map = gameState->tileMaps[i];
         
-            DrawTileMap(map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
+            DrawTileMap(gameState->camera, map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
         }
         
 
@@ -1151,32 +1151,36 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         
         DrawSpriteLayer(LAYER_SLIME);
 
+
+        // Draw rectangle outline with extended parameters
+        // Rectangle cameraRect = GetCameraRect(gameState->camera);
+        // DrawRectangleLinesEx(cameraRect, 1, RED);
     
         // Left
         if (gameState->leftArrow.show)
         {
-            DrawSprite(gameState->texture, gameState->leftArrow.sprite, gameState->leftArrow.topLeftPos, (float)gameState->leftArrow.tileSize);
+            DrawSprite(gameState->camera, gameState->texture, gameState->leftArrow.sprite, gameState->leftArrow.topLeftPos, (float)gameState->leftArrow.tileSize);
         }
         // Right
         if (gameState->rightArrow.show)
         {
-            DrawSprite(gameState->texture, gameState->rightArrow.sprite, gameState->rightArrow.topLeftPos, (float)gameState->rightArrow.tileSize);
+            DrawSprite(gameState->camera, gameState->texture, gameState->rightArrow.sprite, gameState->rightArrow.topLeftPos, (float)gameState->rightArrow.tileSize);
         }
         
         // Up
         if (gameState->upArrow.show)
         {
-            DrawSprite(gameState->texture, gameState->upArrow.sprite, gameState->upArrow.topLeftPos, (float)gameState->upArrow.tileSize);
+            DrawSprite(gameState->camera, gameState->texture, gameState->upArrow.sprite, gameState->upArrow.topLeftPos, (float)gameState->upArrow.tileSize);
         }
         // Down
         if (gameState->downArrow.show)
         {
-            DrawSprite(gameState->texture, gameState->downArrow.sprite, gameState->downArrow.topLeftPos, (float)gameState->downArrow.tileSize);
+            DrawSprite(gameState->camera, gameState->texture, gameState->downArrow.sprite, gameState->downArrow.topLeftPos, (float)gameState->downArrow.tileSize);
         }
     
         EndMode2D();
 
-#if 0
+#if 1
         // NOTE: UI Draw Game Informations
 
         Entity * player = GetEntity(gameState->playerEntityIndex);

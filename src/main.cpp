@@ -1,26 +1,14 @@
 /*
   NOTE:
   GAME_INTERNAL
-  0 - Build for developer only
-  1 - Build for pubilc release
-
-  NOTE:
-  BUILD_GAME_STATIC
-    - if defined, build game code as a static library
-        and link game code manualy to main (i.e #include"game code files")
-    - otherwise, build game code as a dynamic library
-        and load the game code using OS. 
+  1 - Build for developer only
+  0 - Build for pubilc release
 
 */
 
-#if defined BUILD_GAME_STATIC
-
-#include "game.cpp"
-
-#else
+#if GAME_INTERNAL
 
 #include "game.h"
-
 #include "platform.h"
 #if defined _WIN32
 #include "win32_hot_reload.c"
@@ -30,25 +18,25 @@
 #error Apple build not supported
 #endif
 
+#else
+
+#include "game.cpp"
+
 #endif
 
-#define PATH_SIZE 2048
+#define PATH_SIZE 260
 
 // NOTE: This file should be cross-compatible, one thing you need to provide
 // if you want to do a linux version of this is providing a "Sleep(time)" function
 
 int main(int argumentCount, char *argumentArray[])
 {
-    
+
 #if GAME_INTERNAL
-    SetTraceLogLevel(LOG_NONE);
-#else
+
     SetTraceLogLevel(LOG_ALL);
-#endif
 
-#if defined BUILD_GAME_STATIC
-
-#else
+    
     //--------------------------------------------------------------------------------------
     // NOTE: Game Code DLL Setup
     //--------------------------------------------------------------------------------------
@@ -78,6 +66,8 @@ int main(int argumentCount, char *argumentArray[])
     GameCode gameCode = {0};
     gameCode = GameCodeLoad(mainDllPath, tempDllPath, lockFilePath);
 
+#else
+    SetTraceLogLevel(LOG_NONE);
 #endif
     
     //--------------------------------------------------------------------------------------
@@ -99,14 +89,14 @@ int main(int argumentCount, char *argumentArray[])
     {
         InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jason's 3rd law");
 
+#if 0
         if (IsWindowState(FLAG_VSYNC_HINT)) ClearWindowState(FLAG_VSYNC_HINT);
         else SetWindowState(FLAG_VSYNC_HINT);
-        SetWindowState(FLAG_WINDOW_RESIZABLE);
-
-        SetWindowMonitor(0);
     
-        SetTargetFPS(GetMonitorRefreshRate(0));               // Set our game to run at 60 frames-per-second
-
+        SetTargetFPS(GetMonitorRefreshRate(0));
+#endif
+        SetWindowState(FLAG_WINDOW_RESIZABLE);
+        SetWindowMonitor(0);
         SetExitKey(KEY_Q);
 
         Image icon = LoadImage("Assets/ICON/ICON.png");
@@ -129,6 +119,7 @@ int main(int argumentCount, char *argumentArray[])
             SM_ERROR("Unable to load file (%s) to texture", TEXTURE_PATH);
             return -1;
         }
+        UnloadImage(icon);
 
     }
 
@@ -136,28 +127,10 @@ int main(int argumentCount, char *argumentArray[])
     //--------------------------------------------------------------------------------------
     // NOTE: Update Loop
     //--------------------------------------------------------------------------------------
-    long lastTextureWriteTime = GetFileModTime(TEXTURE_PATH);
     while(!WindowShouldClose())
     {
 
-        long textureFileWriteTime = GetFileModTime(TEXTURE_PATH);
-        if (textureFileWriteTime != lastTextureWriteTime)
-        {
-            UnloadTexture(gameState->texture);
-            gameState->texture = LoadTexture(TEXTURE_PATH);
-            if (!IsTextureValid(gameState->texture))
-            {
-                SM_ERROR("Unable to load file (%s) to texture", TEXTURE_PATH);
-                SM_ASSERT(false, "");
-                return -1;
-            }
-            lastTextureWriteTime = textureFileWriteTime;            
-        }
-
-#if defined BUILD_GAME_STATIC
-        UpdateAndRender(gameState, &memory);
-#else
-        
+#if GAME_INTERNAL
         // NOTE: Check if the code got recompiled
         long dllFileWriteTime = GetFileModTime(mainDllPath);
         if (dllFileWriteTime != gameCode.lastDllWriteTime)
@@ -166,6 +139,9 @@ int main(int argumentCount, char *argumentArray[])
             gameCode = GameCodeLoad(mainDllPath, tempDllPath, lockFilePath);
         }
         gameCode.updateAndRender(gameState, &memory);
+#else
+        UpdateAndRender(gameState, &memory);
+
 #endif
     }
 
