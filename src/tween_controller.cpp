@@ -57,6 +57,7 @@ void TweenController::HandleEndOfTween()
 void AddTween(TweenController & controller, Tween tween)
 {
     controller.tweeningQueue.Add(tween);
+    controller.tweeningQueue[controller.currentQueueIndex].UpdateEntityVal();
 }
 
 void OnPlayEvent(TweenController * controller)

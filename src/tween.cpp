@@ -37,11 +37,11 @@ bool Tween::UpdateEntityVal()
 
     bool end = Update();
     
-    float current = t / target_t;
+    float current_t = t / target_t;
 
     if (Easing)
     {
-        current = Easing(current);
+        current_t = Easing(current_t);
     }
 
     // A + (B - A) * t
@@ -50,14 +50,14 @@ bool Tween::UpdateEntityVal()
         case PARAM_TYPE_FLOAT: 
         {
             SM_ASSERT(params.realF, "want to change realF but is null");
-            float value = params.startF + (params.endF - params.startF) * current;
+            float value = params.startF + (params.endF - params.startF) * current_t;
             *params.realF = floorf(value);
             break;
         }
         case PARAM_TYPE_VECTOR2:
         {
             SM_ASSERT(params.realVec2, "want to change realVec2 but is null");
-            Vector2 value = Vector2Add(params.startVec2, Vector2Scale(Vector2Subtract(params.endVec2, params.startVec2), current));
+            Vector2 value = Vector2Add(params.startVec2, Vector2Scale(Vector2Subtract(params.endVec2, params.startVec2), current_t));
             value.x = floorf(value.x);
             value.y = floorf(value.y);
             *params.realVec2 = value;
