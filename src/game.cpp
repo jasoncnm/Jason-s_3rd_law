@@ -13,7 +13,6 @@
 /*
 TODO: Things that I can do beside arts and design I guess
   - BUGS:
-    - (MoveActionCheck) When Door and block are in the same tile, we should check if the door is blocked first, then check if we can push the block
   - Change animation controller into a tweening controller that is able to tween arbitarty types of values using easing functions
   - Basic Scene Manager
   - smooth pixelperfect transition
@@ -25,6 +24,8 @@ TODO: Things that I can do beside arts and design I guess
 
 NOTE: done
   - Gamepad supports
+  - (MoveActionCheck) When Door and block are in the same tile, we should check if the door is blocked first, then check if we can push the block
+
 */
 
 //  ========================================================================
@@ -35,172 +36,190 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
     SM_ASSERT(startEntity->movable, "Static entity cannot be pushing blocks!");
     
     MoveActionResult result = { false, false, nullptr };
-    for (int i = 0; i < gameState->entities.count; i++)
+    for (int layer = 0; layer < LAYER_COUNT; layer++)
     {
-        Entity * target = GetEntity(i);
-        if (target && target->tilePos == blockNextPos)
+        auto & entityTable = gameState->entityTable[layer];
+        for (int i = 0; i < entityTable.count; i++)
         {
-            switch(target->type)
+            Entity * target = GetEntity(entityTable[i]);
+            if (target && target->tilePos == blockNextPos)
             {
-                case ENTITY_TYPE_GLASS:
+                switch(target->type)
                 {
-                    if (!target->broken)
+                    case ENTITY_TYPE_GLASS:
                     {
-                        result.blocked = true;
-                        result.blockedEntity = target;
-                        return result;
-                    }
-                    break;
-                }
-                case ENTITY_TYPE_ELECTRIC_DOOR:
-                {
-                    if (target->cableType == CABLE_TYPE_DOOR && DoorBlocked(target, pushDir))
-                    {
-                        result.blocked = true;
-                        result.blockedEntity = target;
-                        return result;
-                    }
-                    
-                    break;
-                }
-                case ENTITY_TYPE_PIT:
-                case ENTITY_TYPE_WALL:
-                {
-                    result.blocked = true;
-                    result.blockedEntity = target;
-                    return result;
-                }
-                case ENTITY_TYPE_PLAYER:
-                case ENTITY_TYPE_CLONE:
-                {
-                    if (pushEntity->type == ENTITY_TYPE_CLONE || pushEntity->type == ENTITY_TYPE_PLAYER)
-                    {
-                        if (pushDir == -pushEntity->attachDir)
+                        if (!target->broken)
                         {
-
-                            result.pushed = false;
+                            result.blocked = true;
+                            result.blockedEntity = target;
                             return result;
                         }
-                        MergeSlimes( target, pushEntity);
+                        break;
+                    }
+                    case ENTITY_TYPE_ELECTRIC_DOOR:
+                    {
+                        if (target->cableType == CABLE_TYPE_DOOR && DoorBlocked(target, pushDir))
+                        {
+                            result.blocked = true;
+                            result.blockedEntity = target;
+                            return result;
+                        }
+                    
+                        break;
+                    }
+                    case ENTITY_TYPE_PIT:
+                    case ENTITY_TYPE_WALL:
+                    {
+                        result.blocked = true;
+                        result.blockedEntity = target;
                         return result;
                     }
-
-                    if (pushEntity->type == ENTITY_TYPE_BLOCK)
+                    case ENTITY_TYPE_PLAYER:
+                    case ENTITY_TYPE_CLONE:
                     {
-                        FindAttachableResult attachResult = FindAttachable(target->tilePos + pushDir, pushDir);
-                        if (attachResult.has)
+                        if (pushEntity->type == ENTITY_TYPE_CLONE || pushEntity->type == ENTITY_TYPE_PLAYER)
                         {
-                            SetAttach(target, attachResult.entity, pushDir);
+                            if (pushDir == -pushEntity->attachDir)
+                            {
+
+                                result.pushed = false;
+                                return result;
+                            }
+                            MergeSlimes( target, pushEntity);
+                            return result;
                         }
-                        else if (target->attach)
+
+                        if (pushEntity->type == ENTITY_TYPE_BLOCK)
                         {
-                            attachResult = FindAttachable(target->tilePos + target->attachDir, target->attachDir);
+                            FindAttachableResult attachResult = FindAttachable(target->tilePos + pushDir, pushDir);
                             if (attachResult.has)
                             {
-                                SetAttach(target, attachResult.entity, target->attachDir);
+                                SetAttach(target, attachResult.entity, pushDir);
                             }
+                            else if (target->attach)
+                            {
+                                attachResult = FindAttachable(target->tilePos + target->attachDir, target->attachDir);
+                                if (attachResult.has)
+                                {
+                                    SetAttach(target, attachResult.entity, target->attachDir);
+                                }
+                            }
+                            // SetAttach(target, pushEntity, -pushDir);
                         }
-                        // SetAttach(target, pushEntity, -pushDir);
-                    }
                     
-                }
-                case ENTITY_TYPE_BLOCK:
-                {
-                    if (CheckBounce(target->tilePos, pushDir))
-                    {
-                        result.pushed = true;
-
-                        IVec2 startTile = target->tilePos;
-                        Vector2 moveStart = GetTilePivot(target);
-                        
-                        BounceEntity(target, pushDir);
-
-                        Vector2 moveEnd = GetTilePivot(target);
-                        float dist = Vector2Distance(moveStart, moveEnd);
-                        float tileDist = dist / MAP_TILE_SIZE;
-
-                        if (!Vector2Equals(moveStart, moveEnd))
-                        {
-                            AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, tileDist));
-                        
-                            if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
-                            {
-                                pushEntity->aniController.endEvent.controller = &target->aniController;
-                                pushEntity->aniController.endEvent.OnPlayFunc = OnPlayEvent;
-                            }
-                            else
-                            {
-                                OnPlayEvent(&target->aniController);
-                            }
-                                                    
-                            if (!target->active)
-                            {
-                                target->active = true;
-                                target->aniController.endEvent.deleteEntity = target;
-                                target->aniController.endEvent.OnDeleteFunc = DeleteEntity;
-                            }
-
-                        }
-                        else
-                        {
-                            result.pushed = false;
-                            result.blocked = true;
-                            result.blockedEntity = target;
-                        }
-                        return result;
                     }
-                    else
+                    case ENTITY_TYPE_BLOCK:
                     {
-                            
-                        int newAccumulatedMass = accumulatedMass + target->mass;
-                        if (newAccumulatedMass > startEntity->mass)
+                        Entity * door = FindEntityByLocationAndLayer(target->tilePos, LAYER_DOOR);
+                        if (door)
                         {
-                            result.blockedEntity = target;
-                            result.blocked = true;
-                            return result;
+                            if (DoorBlocked(door, -pushDir))
+                            {
+                                result.pushed = false;
+                                result.blocked = true;
+                                result.blockedEntity = target;
+                                
+                                return result;
+                            }
                         }
 
-
-                        result = MoveActionCheck(startEntity, target, blockNextPos + pushDir, pushDir, newAccumulatedMass);
-                    
-                        if (!result.blocked)
+                        
+                        if (CheckBounce(target->tilePos, pushDir))
                         {
-                            IVec2 startTile = target->tilePos;
                             result.pushed = true;
 
+                            IVec2 startTile = target->tilePos;
                             Vector2 moveStart = GetTilePivot(target);
-                            SetEntityPosition(target, nullptr, blockNextPos + pushDir);
+                        
+                            BounceEntity(target, pushDir);
 
                             Vector2 moveEnd = GetTilePivot(target);
                             float dist = Vector2Distance(moveStart, moveEnd);
-                            float iDist = dist / MAP_TILE_SIZE;
+                            float tileDist = dist / MAP_TILE_SIZE;
 
-                            AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist));
-
-                            if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
+                            if (!Vector2Equals(moveStart, moveEnd))
                             {
-                                pushEntity->aniController.endEvent.controller = &target->aniController;
-                                pushEntity->aniController.endEvent.OnPlayFunc = OnPlayEvent;
+                                AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, tileDist));
+                        
+                                if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
+                                {
+                                    pushEntity->aniController.endEvent.controller = &target->aniController;
+                                    pushEntity->aniController.endEvent.OnPlayFunc = OnPlayEvent;
+                                }
+                                else
+                                {
+                                    OnPlayEvent(&target->aniController);
+                                }
+                                                    
+                                if (!target->active)
+                                {
+                                    target->active = true;
+                                    target->aniController.endEvent.deleteEntity = target;
+                                    target->aniController.endEvent.OnDeleteFunc = DeleteEntity;
+                                }
+
                             }
                             else
                             {
-                                OnPlayEvent(&target->aniController);
+                                result.pushed = false;
+                                result.blocked = true;
+                                result.blockedEntity = target;
                             }
+                            return result;
                         }
                         else
                         {
-                            result.blockedEntity = target;
-                        }
-                        
-                        return result;
-                    }
+                            
+                            int newAccumulatedMass = accumulatedMass + target->mass;
+                            if (newAccumulatedMass > startEntity->mass)
+                            {
+                                result.blockedEntity = target;
+                                result.blocked = true;
+                                return result;
+                            }
+
+
+                            result = MoveActionCheck(startEntity, target, blockNextPos + pushDir, pushDir, newAccumulatedMass);
                     
-                    break;
+                            if (!result.blocked)
+                            {
+                                IVec2 startTile = target->tilePos;
+                                result.pushed = true;
+
+                                Vector2 moveStart = GetTilePivot(target);
+                                SetEntityPosition(target, nullptr, blockNextPos + pushDir);
+
+                                Vector2 moveEnd = GetTilePivot(target);
+                                float dist = Vector2Distance(moveStart, moveEnd);
+                                float iDist = dist / MAP_TILE_SIZE;
+
+                                AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist));
+
+                                if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
+                                {
+                                    pushEntity->aniController.endEvent.controller = &target->aniController;
+                                    pushEntity->aniController.endEvent.OnPlayFunc = OnPlayEvent;
+                                }
+                                else
+                                {
+                                    OnPlayEvent(&target->aniController);
+                                }
+                            }
+                            else
+                            {
+                                result.blockedEntity = target;
+                            }
+                        
+                            return result;
+                        }
+                    
+                        break;
+                    }
                 }
             }
         }
     }
-
+ 
     // SM_ASSERT(false, "at leat one object is being pushed or blocked");
     return result;
 }

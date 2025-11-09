@@ -12,12 +12,13 @@
 
 enum EntityLayer
 {
+    
+    LAYER_WALL,
+    LAYER_DOOR,
+    LAYER_CABLE,
+    LAYER_GLASS,
     LAYER_SLIME,
     LAYER_BLOCK,
-    LAYER_WALL,
-    LAYER_CABLE,
-    LAYER_DOOR,
-    LAYER_GLASS,
     LAYER_PIT,
     
     LAYER_COUNT,
