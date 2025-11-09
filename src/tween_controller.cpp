@@ -6,25 +6,24 @@
    $Notice: $
    ======================================================================== */
 
-#include "animation_controller.h"
+#include "tween_controller.h"
 
-void AnimationController::Reset()
+void TweenController::Reset()
 {
     endEvent.Reset();
     currentQueueIndex = 0;
-    moveAnimationQueue.Clear();
+    tweeningQueue.Clear();
 }
 
-// NOTE: UpdateAnimation Every frame
-void AnimationController::Update()
+// NOTE: Every frame
+void TweenController::Update()
 {
-    if (currentQueueIndex < moveAnimationQueue.count)
+    if (currentQueueIndex < tweeningQueue.count)
     {
         if (playing)
         {
-            MoveAnimation & ani = moveAnimationQueue[currentQueueIndex];
-            bool end = ani.Update();
-            currentPosition = ani.GetPosition();
+            Tween & tween = tweeningQueue[currentQueueIndex];
+            bool end = tween.UpdateEntityVal();
             if (end)
             {
                 currentQueueIndex++;
@@ -34,12 +33,12 @@ void AnimationController::Update()
     else
     {
         playing = false;       
-        HandleAnimationNotPlaying();      
+        HandleEndOfTween();      
     }
 }
 
 // NOTE: Handle event end of animation
-void AnimationController::HandleAnimationNotPlaying()
+void TweenController::HandleEndOfTween()
 {
     if (endEvent.controller && endEvent.OnPlayFunc)
     {
@@ -55,13 +54,12 @@ void AnimationController::HandleAnimationNotPlaying()
     Reset();
 }
 
-void AddAnimation(AnimationController & controller, MoveAnimation animation)
+void AddTween(TweenController & controller, Tween tween)
 {
-    controller.moveAnimationQueue.Add(animation);
-    controller.currentPosition = controller.moveAnimationQueue[controller.currentQueueIndex].GetPosition();
+    controller.tweeningQueue.Add(tween);
 }
 
-void OnPlayEvent(AnimationController * controller)
+void OnPlayEvent(TweenController * controller)
 {
     SM_ASSERT(controller, "controller is null");
     

@@ -8,7 +8,7 @@
    ======================================================================== */
 
 #include "electric_door.h"
-#include "animation_controller.h"
+#include "tween_controller.h"
 
 enum EntityLayer
 {
@@ -57,7 +57,7 @@ struct Entity
 
     ActionState actionState = MOVE_STATE;
 
-    AnimationController aniController;
+    TweenController tweenController;
     
     Sprite sprite;
     SpriteID spriteID;

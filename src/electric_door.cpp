@@ -7,7 +7,7 @@
    ======================================================================== */
 
 #include "electric_door.h"
-#include "move_animation.h"
+#include "tween_controller.h"
 
 inline bool CanFreezeSlime(Entity * connection)
 {
@@ -215,8 +215,15 @@ inline void PowerOnCable(Entity * cable, bool & end)
                     float dist = Vector2Distance(moveStart, moveEnd);
                     float iDist = dist / MAP_TILE_SIZE;
 
-                    AddAnimation(entity->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist));
-                    OnPlayEvent(&entity->aniController);
+                    TweenParams params = {};
+                    params.paramType = PARAM_TYPE_VECTOR2;
+                    params.startVec2 = moveStart;
+                    params.endVec2 = moveEnd;
+                    params.realVec2  = &entity->pivot;
+
+                                            
+                    AddTween(entity->tweenController, CreateTween(params, nullptr,  BOUNCE_SPEED, iDist));
+                    OnPlayEvent(&entity->tweenController);
                 }
                 else
                 {
@@ -237,9 +244,18 @@ inline void PowerOnCable(Entity * cable, bool & end)
                         float dist = Vector2Distance(moveStart, moveEnd);
                         float iDist = dist / MAP_TILE_SIZE;
 
-                        // TODO: Play Door open event trigger 
-                        AddAnimation(entity->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist));
-                        OnPlayEvent(&entity->aniController);
+                        // TODO: Play Door open event trigger
+
+                        TweenParams params = {};
+                        params.paramType = PARAM_TYPE_VECTOR2;
+                        params.startVec2 = moveStart;
+                        params.endVec2 = moveEnd;
+                        params.realVec2  = &entity->pivot;
+
+                                            
+                        AddTween(entity->tweenController, CreateTween(params, nullptr,  BOUNCE_SPEED, iDist));
+                        OnPlayEvent(&entity->tweenController);
+                        
                     }
                     else
                     {
@@ -436,14 +452,14 @@ inline void UpdateElectricDoor()
         {
             Entity * entity = FindEntityByLocationAndLayer(connection->tilePos, LAYER_SLIME);
             bool has = false;
-            if (entity && entity->aniController.moveAnimationQueue.IsEmpty())
+            if (entity && entity->tweenController.tweeningQueue.IsEmpty())
             {
                 has = true;    
             }
             else
             {
                 entity = FindEntityByLocationAndLayer(connection->tilePos, LAYER_BLOCK);
-                if (entity && entity->aniController.moveAnimationQueue.IsEmpty())
+                if (entity && entity->tweenController.tweeningQueue.IsEmpty())
                 {
                     has = true;                    
                 }
@@ -472,7 +488,7 @@ inline void UpdateElectricDoor()
         for (int blockIndex = 0; blockIndex < table.count; blockIndex++)
         {
             Entity * block = GetEntity(table[blockIndex]);
-            if (block && block->aniController.moveAnimationQueue.IsEmpty() && source->tilePos == block->tilePos)
+            if (block && block->tweenController.tweeningQueue.IsEmpty() && source->tilePos == block->tilePos)
             {
                 
                 Array<bool, MAX_CABLE> visited;

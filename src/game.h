@@ -42,7 +42,7 @@ constexpr float press_freq = 0.2f;
 
 #include "electric_door.h"
 #include "entity.h"
-#include "move_animation.h"
+#include "tween_controller.h"
 
 // ----------------------------------------------------
 // NOTE: Game Structs
@@ -124,7 +124,7 @@ struct GameState
     
     IVec2 tileMin, tileMax;
 
-    AnimationController cameraAniController;
+    TweenController cameraTweenController;
     Camera2D camera;
 
     Texture2D texture;

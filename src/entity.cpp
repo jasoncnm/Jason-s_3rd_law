@@ -148,7 +148,7 @@ inline void DeleteEntity(Entity * entity)
 {
     entity->active = false;
     entity->type = ENTITY_TYPE_NULL;
-    entity->aniController.Reset();
+    entity->tweenController.Reset();
 }
 
 inline void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
@@ -227,14 +227,24 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
         mergeSlime->color = WHITE;
     }
 
+    float startSize = GetSlimeSize(mergeSlime);
+
     mergeSlime->mass += mergedSlime->mass;
     DeleteEntity(mergedSlime);
 
-    mergeSlime->tileSize = GetSlimeSize(mergeSlime);
+    float endSize = GetSlimeSize(mergeSlime);
+    
+    mergeSlime->tileSize = endSize;
     mergeSlime->pivot = GetTilePivot(mergeSlime);
 
-    AddAnimation(mergeSlime->aniController, GetMoveAnimation(nullptr, mergeSlime->pivot, mergeSlime->pivot));
-    OnPlayEvent(&mergeSlime->aniController);
+    TweenParams params = {};
+    params.paramType = PARAM_TYPE_FLOAT;
+    params.startF = startSize;
+    params.endF = endSize;
+    params.realF = &mergeSlime->tileSize;
+    
+    AddTween(mergeSlime->tweenController, CreateTween(params));
+    OnPlayEvent(&mergeSlime->tweenController);
 
     return mergeSlime;
     
@@ -386,10 +396,16 @@ inline void UpdateSlimes()
 
                     // TODO: Play Instanly for now, need to blend the current animation with this animation
 #if 1
-                    slime->aniController.Reset();
+                    slime->tweenController.Reset();
 #endif
-                    AddAnimation(slime->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist));
-                    OnPlayEvent(&slime->aniController);
+                    TweenParams params = {};
+                    params.paramType = PARAM_TYPE_VECTOR2;
+                    params.startVec2 = moveStart;
+                    params.endVec2 = moveEnd;
+                    params.realVec2  = &slime->pivot;
+                        
+                    AddTween(slime->tweenController, CreateTween(params, nullptr,  BOUNCE_SPEED, iDist));
+                    OnPlayEvent(&slime->tweenController);
                     
                 }
             }

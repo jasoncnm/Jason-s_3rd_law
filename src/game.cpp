@@ -7,13 +7,11 @@
 #include "entity.cpp"
 #include "electric_door.cpp"
 #include "level_loader.cpp"
-#include "move_animation.cpp"
-#include "animation_controller.cpp"
+#include "tween.cpp"
+#include "tween_controller.cpp"
 
 /*
 TODO: Things that I can do beside arts and design I guess
-  - BUGS:
-  - Change animation controller into a tweening controller that is able to tween arbitarty types of values using easing functions
   - Basic Scene Manager
   - smooth pixelperfect transition
   - Viewport scaling
@@ -21,10 +19,12 @@ TODO: Things that I can do beside arts and design I guess
   - add particles
   - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
   - Texture filtering when zooming out (is mipmapping come handy here?)
+  - BUGS:
 
 NOTE: done
   - Gamepad supports
   - (MoveActionCheck) When Door and block are in the same tile, we should check if the door is blocked first, then check if we can push the block
+  - Change animation controller into a tweening controller that is able to tween arbitarty types of values using easing functions
 
 */
 
@@ -136,23 +136,29 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
 
                             if (!Vector2Equals(moveStart, moveEnd))
                             {
-                                AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, tileDist));
+                                TweenParams params = {};
+                                params.paramType = PARAM_TYPE_VECTOR2;
+                                params.startVec2 = moveStart;
+                                params.endVec2 = moveEnd;
+                                params.realVec2  = &target->pivot;
+                                    
+                                AddTween(target->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, tileDist));
                         
                                 if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
                                 {
-                                    pushEntity->aniController.endEvent.controller = &target->aniController;
-                                    pushEntity->aniController.endEvent.OnPlayFunc = OnPlayEvent;
+                                    pushEntity->tweenController.endEvent.controller = &target->tweenController;
+                                    pushEntity->tweenController.endEvent.OnPlayFunc = OnPlayEvent;
                                 }
                                 else
                                 {
-                                    OnPlayEvent(&target->aniController);
+                                    OnPlayEvent(&target->tweenController);
                                 }
                                                     
                                 if (!target->active)
                                 {
                                     target->active = true;
-                                    target->aniController.endEvent.deleteEntity = target;
-                                    target->aniController.endEvent.OnDeleteFunc = DeleteEntity;
+                                    target->tweenController.endEvent.deleteEntity = target;
+                                    target->tweenController.endEvent.OnDeleteFunc = DeleteEntity;
                                 }
 
                             }
@@ -190,16 +196,22 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                                 float dist = Vector2Distance(moveStart, moveEnd);
                                 float iDist = dist / MAP_TILE_SIZE;
 
-                                AddAnimation(target->aniController, GetMoveAnimation(nullptr, moveStart, moveEnd, BOUNCE_SPEED, iDist));
+                                TweenParams params = {};
+                                params.paramType = PARAM_TYPE_VECTOR2;
+                                params.startVec2 = moveStart;
+                                params.endVec2 = moveEnd;
+                                params.realVec2  = &target->pivot;
+
+                                AddTween(target->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, iDist));
 
                                 if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
                                 {
-                                    pushEntity->aniController.endEvent.controller = &target->aniController;
-                                    pushEntity->aniController.endEvent.OnPlayFunc = OnPlayEvent;
+                                    pushEntity->tweenController.endEvent.controller = &target->tweenController;
+                                    pushEntity->tweenController.endEvent.OnPlayFunc = OnPlayEvent;
                                 }
                                 else
                                 {
-                                    OnPlayEvent(&target->aniController);
+                                    OnPlayEvent(&target->tweenController);
                                 }
                             }
                             else
@@ -263,9 +275,16 @@ inline bool UpdateCamera()
                 
                 if (gameState->currentMapIndex != i)
                 {
-                    gameState->cameraAniController.Reset();
-                    AddAnimation(gameState->cameraAniController, GetMoveAnimation(EaseOutCubic, gameState->camera.target, pos, 1.7f));
-                    OnPlayEvent(&gameState->cameraAniController);
+                    gameState->cameraTweenController.Reset();
+                    
+                    TweenParams params = {};
+                    params.paramType = PARAM_TYPE_VECTOR2;
+                    params.startVec2 = gameState->camera.target;
+                    params.endVec2 = pos;
+                    params.realVec2  = &gameState->camera.target;
+                    
+                    AddTween(gameState->cameraTweenController, CreateTween(params, EaseOutCubic, 1.7f));
+                    OnPlayEvent(&gameState->cameraTweenController);
                     gameState->currentMapIndex = i;
                 }
                 
@@ -288,10 +307,10 @@ inline bool UpdateCamera()
         gameState->camera.offset = { newWidth / 2.0f, newHeight / 2.0f };
     }
 
-    if (!gameState->cameraAniController.moveAnimationQueue.IsEmpty())
+    if (!gameState->cameraTweenController.tweeningQueue.IsEmpty())
     {
-        gameState->cameraAniController.Update();
-        gameState->camera.target = gameState->cameraAniController.currentPosition;        
+        gameState->cameraTweenController.Update();
+        //gameState->camera.target = gameState->cameraTweenController.currentPosition;        
     }
     
     return updated;
@@ -304,7 +323,7 @@ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
     {
         Entity e = undoEntities[i];
         gameState->entities[i] = e;
-        gameState->entities[i].aniController.Reset();
+        gameState->entities[i].tweenController.Reset();
 
         if (IsSlime(&e))
         {
@@ -387,9 +406,15 @@ bool MoveAction(IVec2 actionDir)
                     Vector2 startPos = GetTilePivot(mother);
                     SetAttach(mother, moveResult.blockedEntity, actionDir);
                     Vector2 endPos = GetTilePivot(mother);
+                    
+                    TweenParams params = {};
+                    params.paramType = PARAM_TYPE_VECTOR2;
+                    params.startVec2 = startPos;
+                    params.endVec2 = endPos;
+                    params.realVec2  = &mother->pivot;
 
-                    AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, startPos, endPos, moveSpeed));
-                    OnPlayEvent(&mother->aniController);
+                    AddTween(mother->tweenController, CreateTween(params, EaseOutCubic, moveSpeed));
+                    OnPlayEvent(&mother->tweenController);
                     
                     return true;
                 }
@@ -402,10 +427,22 @@ bool MoveAction(IVec2 actionDir)
                 Vector2Add(moveStart, Vector2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f *(MAP_TILE_SIZE - mother->tileSize)));
             SetAttach(mother, moveResult.blockedEntity, actionDir);
             Vector2 moveEnd = GetTilePivot(mother);
+                    
+            TweenParams params1 = {};
+            params1.paramType = PARAM_TYPE_VECTOR2;
+            params1.startVec2 = moveStart;
+            params1.endVec2 = moveMiddle;
+            params1.realVec2  = &mother->pivot;
+                    
+            TweenParams params2 = {};
+            params2.paramType = PARAM_TYPE_VECTOR2;
+            params2.startVec2 = moveMiddle;
+            params2.endVec2 = moveEnd;
+            params2.realVec2  = &mother->pivot;
 
-            AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveStart, moveMiddle, moveSpeed * 2));
-            AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveMiddle, moveEnd, moveSpeed * 2));
-            OnPlayEvent(&mother->aniController);
+            AddTween(mother->tweenController, CreateTween(params1, EaseOutCubic, moveSpeed * 2));
+            AddTween(mother->tweenController, CreateTween(params2, EaseOutCubic, moveSpeed * 2));
+            OnPlayEvent(&mother->tweenController);
             
             return true;
         }
@@ -448,8 +485,15 @@ bool MoveAction(IVec2 actionDir)
                 Vector2 moveStart = GetTilePivot(mother);
                 SetEntityPosition(mother, findResult.entity, actionTilePos);
                 Vector2 moveEnd = GetTilePivot(mother);
-                AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveStart, moveEnd, moveSpeed));
-                OnPlayEvent(&mother->aniController);
+
+                TweenParams params = {};
+                params.paramType = PARAM_TYPE_VECTOR2;
+                params.startVec2 = moveStart;
+                params.endVec2 = moveEnd;
+                params.realVec2  = &mother->pivot;
+                
+                AddTween(mother->tweenController, CreateTween(params, EaseOutCubic, moveSpeed));
+                OnPlayEvent(&mother->tweenController);
                 
             }
             else
@@ -482,10 +526,22 @@ bool MoveAction(IVec2 actionDir)
                     SetEntityPosition(mother, attachedEntity, newTile);
                     Vector2 moveEnd = GetTilePivot(mother);
 
-                    AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, moveStart, movemiddle, moveSpeed * 1.5f));
-                    AddAnimation(mother->aniController, GetMoveAnimation(EaseOutCubic, movemiddle, moveEnd, moveSpeed * 1.5f));
+                    TweenParams params1 = {};
+                    params1.paramType = PARAM_TYPE_VECTOR2;
+                    params1.startVec2 = moveStart;
+                    params1.endVec2 = movemiddle;
+                    params1.realVec2  = &mother->pivot;
 
-                    OnPlayEvent(&mother->aniController);                
+                    TweenParams params2 = {};
+                    params2.paramType = PARAM_TYPE_VECTOR2;
+                    params2.startVec2 = movemiddle;
+                    params2.endVec2 = moveEnd;
+                    params2.realVec2  = &mother->pivot;
+
+                    AddTween(mother->tweenController, CreateTween(params1, EaseOutCubic, moveSpeed * 1.5f));
+                    AddTween(mother->tweenController, CreateTween(params2, EaseOutCubic, moveSpeed * 1.5f));
+
+                    OnPlayEvent(&mother->tweenController);                
 
                 }
                 else 
@@ -537,8 +593,14 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
         float dist = Vector2Distance(playerStart, playerEnd);
         float tileDist = dist / MAP_TILE_SIZE;
 
-        AddAnimation(player->aniController, GetMoveAnimation(EaseInOutSine, playerStart, playerEnd, BOUNCE_SPEED, tileDist));
-        OnPlayEvent(&player->aniController);
+        TweenParams params = {};
+        params.paramType = PARAM_TYPE_VECTOR2;
+        params.startVec2 = playerStart;
+        params.endVec2 = playerEnd;
+        params.realVec2  = &player->pivot;
+
+        AddTween(player->tweenController, CreateTween(params, EaseInOutSine, BOUNCE_SPEED, tileDist));
+        OnPlayEvent(&player->tweenController);
     }
 
     if (cloneStartTile != clone->tilePos)
@@ -546,8 +608,14 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
         float dist = Vector2Distance(cloneStart, cloneEnd);
         float tileDist = dist / MAP_TILE_SIZE;
 
-        AddAnimation(clone->aniController, GetMoveAnimation(EaseInOutSine, cloneStart, cloneEnd, BOUNCE_SPEED, tileDist));
-        OnPlayEvent(&clone->aniController);
+        TweenParams params = {};
+        params.paramType = PARAM_TYPE_VECTOR2;
+        params.startVec2 = cloneStart;
+        params.endVec2 = cloneEnd;
+        params.realVec2  = &clone->pivot;
+
+        AddTween(clone->tweenController, CreateTween(params, EaseInOutSine, BOUNCE_SPEED, tileDist));
+        OnPlayEvent(&clone->tweenController);
 
     }
     return true;
@@ -950,17 +1018,17 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         Entity * entity = GetEntity(i);
         if (entity)
         {
-            if (!entity->aniController.moveAnimationQueue.IsEmpty())
+            if (!entity->tweenController.tweeningQueue.IsEmpty())
             {
                 SetActionState(entity, ANIMATE_STATE);
-                entity->aniController.Update();
-                entity->pivot = entity->aniController.currentPosition;
+                entity->tweenController.Update();
+                // entity->pivot = entity->tweenController.currentPosition;
             }
             else
             {
                 if (entity->actionState == ANIMATE_STATE) SetActionState(entity, MOVE_STATE);
                 entity->pivot = GetTilePivot(entity);
-                entity->aniController.HandleAnimationNotPlaying();
+                // entity->tweenController.HandleAnimationNotPlaying();
             }
         } 
     }
