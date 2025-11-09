@@ -19,6 +19,7 @@ TODO: Things that I can do beside arts and design I guess
   - top down lights / spotlight rendering
   - add particles
   - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
+  - Texture filtering when zooming out (is mipmapping come handy here?)
  */
 
 //  ========================================================================
