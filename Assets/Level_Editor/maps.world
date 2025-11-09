@@ -300,6 +300,13 @@
             "width": 352,
             "x": 0,
             "y": 704
+        },
+        {
+            "fileName": "TileMap/room_43.tmj",
+            "height": 224,
+            "width": 224,
+            "x": 2112,
+            "y": 64
         }
     ],
     "onlyShowAdjacentMaps": false,
