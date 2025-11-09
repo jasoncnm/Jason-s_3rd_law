@@ -10,6 +10,17 @@
 #include "move_animation.cpp"
 #include "animation_controller.cpp"
 
+/*
+TODO: Things that I can do beside arts and design I guess
+  - Gamepad supports
+  - Basic Scene Manager
+  - smooth pixelperfect transition
+  - Viewport scaling
+  - top down lights / spotlight rendering
+  - add particles
+  - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
+ */
+
 //  ========================================================================
 //              NOTE: Game Functions (internal)
 //  ========================================================================
