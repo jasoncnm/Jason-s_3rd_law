@@ -11,20 +11,29 @@ enum ParamType
 {
     PARAM_TYPE_NONE,
     PARAM_TYPE_FLOAT,
-    PARAM_TYPE_VECTOR2
+    PARAM_TYPE_VECTOR2,
 };
 
 struct TweenParams
 {
     ParamType paramType;
-    
-    float startF;
-    float endF;
-    float * realF;
-    
-    Vector2 startVec2;
-    Vector2 endVec2;
-    Vector2 * realVec2;
+
+    union
+    {
+        struct
+        {
+            float startF;
+            float endF;
+            float * realF;
+        };
+
+        struct
+        {
+            Vector2 startVec2;
+            Vector2 endVec2;
+            Vector2 * realVec2;
+        };
+    };
 };
 
 struct Tween
