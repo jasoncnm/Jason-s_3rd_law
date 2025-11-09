@@ -1,4 +1,4 @@
-#if !defined(MOVEANIMATION_H)
+#if !defined(TWEEN_H)
 /* ========================================================================
    $File: $
    $Date: $
@@ -64,5 +64,5 @@ struct Tween
 Tween CreateTween(TweenParams params, float (*Easing)(float) = nullptr, float animateSpeed = 5.0f, float target_t = 1.0f);
 
     
-#define MOVEANIMATION_H
+#define TWEEN_H
 #endif
