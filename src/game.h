@@ -23,7 +23,11 @@
 #define BLOCK_ANI_SPEED 20.0f
 #define BOUNCE_SPEED 10.0f
 
+#define MAX_GAMEPAD 5
+
 #define MAX_ENTITIES 5000
+
+
 
 constexpr float zoom_per_tile = 19.0f / 600.0f;
 constexpr float press_freq = 0.2f;
@@ -54,14 +58,16 @@ enum State
 enum GameInputType 
 {
     NO_INPUT,
-    POSSES_KEY,
     MOUSE_LEFT,
     MOUSE_RIGHT,
     LEFT_KEY,
     RIGHT_KEY,
     UP_KEY,
     DOWN_KEY,
-    SPACE_KEY,
+
+    POSSES_KEY,
+    SPLIT_KEY,
+
     UNDO_KEY,
     RESET_KEY,
     GAME_INPUT_COUNT,
@@ -70,6 +76,8 @@ enum GameInputType
 struct KeyMapping
 {
     Array<int, 3> keys;
+    int gamepadButton;
+    int gamepadAxis;
 };
 
 struct Memory

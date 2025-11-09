@@ -12,7 +12,9 @@
 
 /*
 TODO: Things that I can do beside arts and design I guess
-  - Gamepad supports
+  - BUGS:
+    - (MoveActionCheck) When Door and block are in the same tile, we should check if the door is blocked first, then check if we can push the block
+  - Change animation controller into a tweening controller that is able to tween arbitarty types of values using easing functions
   - Basic Scene Manager
   - smooth pixelperfect transition
   - Viewport scaling
@@ -20,7 +22,10 @@ TODO: Things that I can do beside arts and design I guess
   - add particles
   - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
   - Texture filtering when zooming out (is mipmapping come handy here?)
- */
+
+NOTE: done
+  - Gamepad supports
+*/
 
 //  ========================================================================
 //              NOTE: Game Functions (internal)
@@ -256,6 +261,8 @@ inline bool UpdateCamera()
     
     if (updated || IsWindowResized())
     {
+        float oldZoom = gameState->camera.zoom;
+        
         int newWidth = GetScreenWidth();
         int newHeight = GetScreenHeight();
         Map & currentMap = gameState->tileMaps[gameState->currentMapIndex];
@@ -408,6 +415,7 @@ bool MoveAction(IVec2 actionDir)
             }
         }
 
+#if 0
         for (int i = 0; i < CP_Indices.count; i++)
         {
             Entity * connection = GetEntity(Cable_Indices[CP_Indices[i]]);
@@ -439,7 +447,7 @@ bool MoveAction(IVec2 actionDir)
             }
             return true;
         }
-
+#endif
         if (!mother->active) return false;
         
         // NOTE: no obsticale, move player
@@ -802,7 +810,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         Entity * player = GetEntity(gameState->playerEntityIndex);
     
         // NOTE: Control Action State
-        if (JustPressed(SPACE_KEY))
+        if (JustPressed(SPLIT_KEY))
         {
             if (player->actionState == SPLIT_STATE)
             {
