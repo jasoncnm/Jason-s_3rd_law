@@ -111,16 +111,13 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                     case ENTITY_TYPE_BLOCK:
                     {
                         Entity * door = FindEntityByLocationAndLayer(target->tilePos, LAYER_DOOR);
-                        if (door)
+                        if (door && DoorBlocked(door, -pushDir))
                         {
-                            if (DoorBlocked(door, -pushDir))
-                            {
-                                result.pushed = false;
-                                result.blocked = true;
-                                result.blockedEntity = target;
+                            result.pushed = false;
+                            result.blocked = true;
+                            result.blockedEntity = target;
                                 
-                                return result;
-                            }
+                            return result;
                         }
 
                         
@@ -361,12 +358,9 @@ bool MoveAction(IVec2 actionDir)
 
 #if 1
         Entity * door = FindEntityByLocationAndLayer(currentPos, LAYER_DOOR);
-        if (door)
+        if (door && DoorBlocked(door, -actionDir))
         {
-            if (DoorBlocked(door, -actionDir))
-            {
-                return false;
-            }
+            return false;
         }
 #endif
         
@@ -433,40 +427,7 @@ bool MoveAction(IVec2 actionDir)
                 return false;
             }
         }
-
-#if 0
-        for (int i = 0; i < CP_Indices.count; i++)
-        {
-            Entity * connection = GetEntity(Cable_Indices[CP_Indices[i]]);
-            SM_ASSERT(connection, "Entity is not active");
         
-            if (connection->tilePos == actionTilePos && CanFreezeSlime(connection))
-            {
-                SetActionState(mother, FREEZE_STATE);
-                connection->conductive = true;
-                Array<bool, MAX_CABLE> visited;
-                for (int i = 0; i < Cable_Indices.count; i++) visited.Add(false);
-                OnSourcePowerOn(visited, connection->sourceIndex);
-                UpdateElectricDoor();
-
-                break;
-            }
-        }
-
-        if (mother->actionState == FREEZE_STATE)
-        {
-            FindAttachableResult result = FindAttachable(actionTilePos, mother->attachDir);
-            if (result.has)
-            {
-                SetEntityPosition(mother, result.entity, actionTilePos);
-            }
-            else
-            {
-                SetEntityPosition(mother, nullptr, actionTilePos);
-            }
-            return true;
-        }
-#endif
         if (!mother->active) return false;
         
         // NOTE: no obsticale, move player
