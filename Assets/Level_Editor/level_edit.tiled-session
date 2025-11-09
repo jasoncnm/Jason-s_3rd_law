@@ -3,20 +3,20 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TileMap/Room_2.tmj",
+    "activeFile": "TileMap/Room_1.tmj",
     "expandedProjectPaths": [
         ".",
-        "TileMap",
-        "TlieSet"
+        "TlieSet",
+        "TileMap"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "TileMap/Room_1.tmj": {
-            "scale": 0.75,
+            "scale": 0.33,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 371.33333333333326,
-                "y": -19.333333333333258
+                "x": 1798.4848484848487,
+                "y": 1068.1818181818185
             }
         },
         "TileMap/Room_10.tmj": {
@@ -288,7 +288,7 @@
             "scaleInEditor": 1
         },
         "TlieSet/tileSet.tsx": {
-            "scaleInDock": 1,
+            "scaleInDock": 1.5,
             "scaleInEditor": 1
         }
     },
@@ -335,17 +335,17 @@
     "project": "level_edit.tiled-project",
     "recentFiles": [
         "TileMap/Room_3.tmj",
-        "TileMap/Room_1.tmj",
-        "TlieSet/tileSet.tsx",
-        "TileMap/Room_22.tmj",
-        "TileMap/Room_24.tmj",
-        "TileMap/Room_30.tmj",
-        "TileMap/Room_28.tmj",
         "TileMap/Room_26.tmj",
         "TileMap/Room_12.tmj",
         "TileMap/Room_25.tmj",
         "TileMap/Test.tmj",
-        "TileMap/Room_37.tmj"
+        "TileMap/Room_37.tmj",
+        "TileMap/Room_36.tmj",
+        "TileMap/Room_35.tmj",
+        "TileMap/Room_7.tmj",
+        "TileMap/Room_9.tmj",
+        "TileMap/Room_15.tmj",
+        "TileMap/Room_16.tmj"
     ],
     "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
     "tileset.lastUsedFormat": "json"
