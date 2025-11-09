@@ -12,11 +12,11 @@
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "TileMap/Room_1.tmj": {
-            "scale": 2,
+            "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 720.75,
-                "y": 91.75
+                "x": 243.33333333333326,
+                "y": 266
             }
         },
         "TileMap/Room_10.tmj": {
