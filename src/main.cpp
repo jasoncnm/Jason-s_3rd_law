@@ -31,7 +31,6 @@
 
 int main(int argumentCount, char *argumentArray[])
 {
-
 #if GAME_INTERNAL
 
     SetTraceLogLevel(LOG_ALL);
