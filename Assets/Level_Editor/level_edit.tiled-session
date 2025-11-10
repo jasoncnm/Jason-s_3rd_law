@@ -108,19 +108,19 @@
             }
         },
         "TileMap/Room_24.tmj": {
-            "scale": 1,
+            "scale": 0.33,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 928.5,
-                "y": -882.5
+                "x": -1083.333333333333,
+                "y": -877.272727272727
             }
         },
         "TileMap/Room_25.tmj": {
-            "scale": 0.75,
+            "scale": 0.33,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": -974,
-                "y": 192.66666666666674
+                "x": -195.4545454545455,
+                "y": 774.2424242424245
             }
         },
         "TileMap/Room_26.tmj": {
@@ -292,11 +292,11 @@
             }
         },
         "TileMap/Test.tmj": {
-            "scale": 0.5,
+            "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 1623,
-                "y": 805
+                "x": 3322.333333333333,
+                "y": 600.3333333333333
             }
         },
         "TileMap/room_43.tmj": {
