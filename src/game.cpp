@@ -12,9 +12,9 @@
 
 /*
 TODO: Things that I can do beside arts and design I guess
+  - Viewport scaling
   - Basic Scene Manager
   - smooth pixelperfect transition
-  - Viewport scaling
   - top down lights / spotlight rendering
   - add particles
   - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
@@ -141,7 +141,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                                 params.startVec2 = moveStart;
                                 params.endVec2 = moveEnd;
                                 params.realVec2  = &target->pivot;
-                                    
+
                                 AddTween(target->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, tileDist));
                         
                                 if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
@@ -240,6 +240,19 @@ inline bool InstancePush(Vector2 pushStart, Vector2 pushedStart)
     return false;
 }
 
+inline float GetCameraZoom(Map & currentMap)
+{
+    
+    int newWidth = GetScreenWidth();
+    int newHeight = GetScreenHeight();
+    int mapMax = (currentMap.width > currentMap.height) ? currentMap.width : currentMap.height;
+        
+    float zoom = (zoom_per_tile / mapMax);
+    (newWidth < newHeight) ? zoom *= newWidth : zoom *= newHeight;         
+
+    return zoom;
+}
+
 inline bool UpdateCamera()
 {
     bool updated = false;
@@ -270,7 +283,8 @@ inline bool UpdateCamera()
 
                 if (gameState->currentMapIndex == -1)
                 {
-                    gameState->camera.target = pos;                    
+                    gameState->camera.target = pos;
+                    gameState->camera.zoom = GetCameraZoom(map);
                 }
                 
                 if (gameState->currentMapIndex != i)
@@ -282,8 +296,21 @@ inline bool UpdateCamera()
                     params.startVec2 = gameState->camera.target;
                     params.endVec2 = pos;
                     params.realVec2  = &gameState->camera.target;
+                    AddTween(gameState->cameraTweenController, CreateTween(params, EaseOutCubic, 1.7f), 0);
+
+                    Map & lastMap = gameState->tileMaps[gameState->currentMapIndex];
+                    float oldZoom = GetCameraZoom(lastMap);
+                    float newZoom = GetCameraZoom(map);
+                    if (!FloatEquals(oldZoom, newZoom))
+                    {
+                        TweenParams params = {};
+                        params.paramType = PARAM_TYPE_FLOAT;
+                        params.startF = oldZoom;
+                        params.endF = newZoom;
+                        params.realF  = &gameState->camera.zoom;
+                        AddTween(gameState->cameraTweenController, CreateTween(params, EaseOutCubic, 1.7f), 1);
+                    }
                     
-                    AddTween(gameState->cameraTweenController, CreateTween(params, EaseOutCubic, 1.7f));
                     OnPlayEvent(&gameState->cameraTweenController);
                     gameState->currentMapIndex = i;
                 }
@@ -294,23 +321,20 @@ inline bool UpdateCamera()
         }
     }
     
-    if (updated || IsWindowResized())
+    if (IsWindowResized())
     {
-        float oldZoom = gameState->camera.zoom;
-        
-        int newWidth = GetScreenWidth();
-        int newHeight = GetScreenHeight();
-        Map & currentMap = gameState->tileMaps[gameState->currentMapIndex];
-        int mapMax = (currentMap.width > currentMap.height) ? currentMap.width : currentMap.height;
-        gameState->camera.zoom = (zoom_per_tile / mapMax);
-        (newWidth < newHeight) ? gameState->camera.zoom *= newWidth : gameState->camera.zoom *= newHeight;         
-        gameState->camera.offset = { newWidth / 2.0f, newHeight / 2.0f };
+        gameState->camera.zoom = GetCameraZoom(gameState->tileMaps[gameState->currentMapIndex]);
+        gameState->camera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
     }
-
-    if (!gameState->cameraTweenController.tweeningQueue.IsEmpty())
+    
+    if (!gameState->cameraTweenController.NoTweens())
     {
         gameState->cameraTweenController.Update();
         //gameState->camera.target = gameState->cameraTweenController.currentPosition;        
+    }
+    else
+    {
+        
     }
     
     return updated;
@@ -433,6 +457,7 @@ bool MoveAction(IVec2 actionDir)
             params1.startVec2 = moveStart;
             params1.endVec2 = moveMiddle;
             params1.realVec2  = &mother->pivot;
+            
                     
             TweenParams params2 = {};
             params2.paramType = PARAM_TYPE_VECTOR2;
@@ -754,7 +779,6 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         // NOTE: Initalize undoStack record
         undoStack = std::vector<UndoState>();
         undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });
-        
     }
     
 #if 0
@@ -1018,7 +1042,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         Entity * entity = GetEntity(i);
         if (entity)
         {
-            if (!entity->tweenController.tweeningQueue.IsEmpty())
+            if (!entity->tweenController.NoTweens())
             {
                 SetActionState(entity, ANIMATE_STATE);
                 entity->tweenController.Update();

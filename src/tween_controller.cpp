@@ -8,32 +8,48 @@
 
 #include "tween_controller.h"
 
+
+
 void TweenController::Reset()
 {
     endEvent.Reset();
-    currentQueueIndex = 0;
-    tweeningQueue.Clear();
 }
 
 // NOTE: Every frame
 void TweenController::Update()
 {
-    if (currentQueueIndex < tweeningQueue.count)
+    if (!NoTweens())
     {
         if (playing)
         {
+#if 0
             Tween & tween = tweeningQueue[currentQueueIndex];
             bool end = tween.UpdateEntityVal();
             if (end)
             {
                 currentQueueIndex++;
             }
+#else
+            for (int channel = 0; channel < MAX_CHANNEL; channel++)
+            {
+                TweeningQueue & queue = channels[channel];
+                if (!queue.IsEmpty())
+                {
+                    if (queue[0].UpdateEntityVal())
+                    {
+                        queue.RemoveIdxAndSwap(0);
+                    }
+                    
+                }
+            }
+
+            if (NoTweens())
+            {
+                playing = false;
+                HandleEndOfTween();                
+            }
+#endif
         }
-    }
-    else
-    {
-        playing = false;       
-        HandleEndOfTween();      
     }
 }
 
@@ -54,18 +70,15 @@ void TweenController::HandleEndOfTween()
     Reset();
 }
 
-void AddTween(TweenController & controller, Tween tween)
+void AddTween(TweenController & controller, Tween tween, int channel)
 {
-    controller.tweeningQueue.Add(tween);
-    controller.tweeningQueue[controller.currentQueueIndex].UpdateEntityVal();
+    controller.channels[channel].Add(tween);
 }
 
 void OnPlayEvent(TweenController * controller)
 {
     SM_ASSERT(controller, "controller is null");
-    
     controller->playing = true;
-    controller->currentQueueIndex = 0;
 }
 
 

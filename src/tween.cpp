@@ -51,20 +51,20 @@ bool Tween::UpdateEntityVal()
         {
             SM_ASSERT(params.realF, "want to change realF but is null");
             float value = params.startF + (params.endF - params.startF) * current_t;
-            *params.realF = floorf(value);
+            *params.realF = (value);
             break;
         }
         case PARAM_TYPE_VECTOR2:
         {
             SM_ASSERT(params.realVec2, "want to change realVec2 but is null");
             Vector2 value = Vector2Add(params.startVec2, Vector2Scale(Vector2Subtract(params.endVec2, params.startVec2), current_t));
-            value.x = floorf(value.x);
-            value.y = floorf(value.y);
+            // value.x = floorf(value.x);
+            // value.y = floorf(value.y);
             *params.realVec2 = value;
             break;
         }
     }
-
+    
     return end;
 
 }

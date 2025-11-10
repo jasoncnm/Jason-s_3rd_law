@@ -9,6 +9,8 @@
 
 #include "tween.h"
 
+#define MAX_CHANNEL 5
+
 struct TweenController;
 struct EndTweeningEvent
 {
@@ -17,7 +19,8 @@ struct EndTweeningEvent
 
     Entity * deleteEntity = nullptr;
     void (*OnDeleteFunc)(Entity * deleteEntity) = nullptr;
-
+    
+    
     void Reset()
     {
         controller = nullptr;
@@ -31,10 +34,12 @@ struct EndTweeningEvent
 
 struct TweenController
 {
+    using TweeningQueue = Array<Tween, 10>;
     
     bool playing = false;
     int currentQueueIndex = 0;
-    Array<Tween, 10> tweeningQueue;
+    
+    TweeningQueue channels[MAX_CHANNEL];
     
     EndTweeningEvent endEvent;
 
@@ -46,9 +51,25 @@ struct TweenController
     // NOTE: Handle event end
     void HandleEndOfTween();
 
+    bool NoTweens()
+    {
+        bool result = true;
+
+        for (int channel = 0; channel < MAX_CHANNEL; channel++)
+        {
+            TweeningQueue & queue = channels[channel];
+            if (!queue.IsEmpty())
+            {
+                result = false;
+            }
+        }
+
+        return result;
+    }
+    
 };
     
-void AddTween(TweenController & controller, Tween tween);
+void AddTween(TweenController & controller, Tween tween, int channel = 0);
 
 // NOTE: Get a play event to play    
 void OnPlayEvent(TweenController * controller);

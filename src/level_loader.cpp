@@ -399,6 +399,7 @@ void LoadLevelToGameState(GameState & state, State loadState)
         // NOTE: Camera Setup
         Vector2 pos = TilePositionToPixelPosition(6, 6);
 
+        state.camera.zoom = 2.0f;
         state.camera.target = { pos.x, pos.y };
         state.camera.offset = { SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
         state.camera.rotation = 0.0f;

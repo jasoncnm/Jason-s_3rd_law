@@ -452,14 +452,14 @@ inline void UpdateElectricDoor()
         {
             Entity * entity = FindEntityByLocationAndLayer(connection->tilePos, LAYER_SLIME);
             bool has = false;
-            if (entity && entity->tweenController.tweeningQueue.IsEmpty())
+            if (entity && entity->tweenController.NoTweens())
             {
                 has = true;    
             }
             else
             {
                 entity = FindEntityByLocationAndLayer(connection->tilePos, LAYER_BLOCK);
-                if (entity && entity->tweenController.tweeningQueue.IsEmpty())
+                if (entity && entity->tweenController.NoTweens())
                 {
                     has = true;                    
                 }
@@ -488,7 +488,7 @@ inline void UpdateElectricDoor()
         for (int blockIndex = 0; blockIndex < table.count; blockIndex++)
         {
             Entity * block = GetEntity(table[blockIndex]);
-            if (block && block->tweenController.tweeningQueue.IsEmpty() && source->tilePos == block->tilePos)
+            if (block && block->tweenController.NoTweens() && source->tilePos == block->tilePos)
             {
                 
                 Array<bool, MAX_CABLE> visited;

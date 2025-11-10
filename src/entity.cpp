@@ -159,7 +159,7 @@ inline void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 ti
     // entity->positionSetMarker = true;
     
     entity->tilePos = tilePos;
-    entity->pivot = GetTilePivot(entity);
+    // entity->pivot = GetTilePivot(entity);
 
     if (touchingEntity && touchingEntity && (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE))
     {
