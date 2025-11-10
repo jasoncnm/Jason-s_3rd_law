@@ -88,6 +88,10 @@ int main(int argumentCount, char *argumentArray[])
     //--------------------------------------------------------------------------------------
     {
         InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jason's 3rd law");
+        if (IsWindowState(FLAG_VSYNC_HINT)) ClearWindowState(FLAG_VSYNC_HINT);
+        else SetWindowState(FLAG_VSYNC_HINT);
+    
+        SetTargetFPS(GetMonitorRefreshRate(0));
 
 #if GAME_INTERNAL
 #else 
@@ -98,7 +102,7 @@ int main(int argumentCount, char *argumentArray[])
 #endif
         SetWindowState(FLAG_WINDOW_RESIZABLE);
         SetWindowMonitor(0);
-        SetExitKey(KEY_Q);
+        SetExitKey(KEY_Q);  // IMPORTANT: DEBUG ONLY !!
 
         Image icon = LoadImage("Assets/ICON/ICON.png");
         if (IsImageValid(icon))

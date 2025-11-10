@@ -13,10 +13,10 @@
 /*
 TODO: Things that I can do beside arts and design I guess
   - Viewport scaling
-  - Basic Scene Manager
   - smooth pixelperfect transition
   - top down lights / spotlight rendering
   - add particles
+  - Dropdown console commands 
   - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
   - Texture filtering when zooming out (is mipmapping come handy here?)
   - BUGS:
@@ -25,6 +25,7 @@ NOTE: done
   - Gamepad supports
   - (MoveActionCheck) When Door and block are in the same tile, we should check if the door is blocked first, then check if we can push the block
   - Change animation controller into a tweening controller that is able to tween arbitarty types of values using easing functions
+  - Basic Scene Manager
 
 */
 
@@ -720,87 +721,8 @@ void UpdateSprite(EntityLayer layer)
     }
 }
 
-//  ========================================================================
-//              NOTE: Game Functions (exposed)
-//  ========================================================================
-
-// Called on every frame
-void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
+void GameplayUpdateAndRender()
 {
-    
-    if (gameState != gameStateIn) gameState = gameStateIn;
-    if (gameMemory != gameMemoryIn) gameMemory = gameMemoryIn;
-    
-    if (!gameState->initialized)
-    {
-        // NOTE: Initialization
-        gameState->initialized = true;
-
-        InitKeyMapping();
-
-        gameState->tileMaps = (Map *)BumpAllocArray(gameMemory->persistentStorage, 100, sizeof(Map));
-        
-        LoadLevelToGameState(*gameState, STATE_TEST_LEVEL);
-        
-        // NOTE: Arrow Buttons
-        // UP
-        gameState->upArrow.sprite = GetSprite(SPRITE_ARROW_UP);
-        gameState->upArrow.id = SPRITE_ARROW_UP;
-        gameState->upArrow.tileSize = 16;
-        
-        // DOWN
-        gameState->downArrow.sprite = GetSprite(SPRITE_ARROW_DOWN);
-        gameState->downArrow.id = SPRITE_ARROW_DOWN;
-        gameState->downArrow.tileSize = 16;
-        
-        // LEFT
-        gameState->leftArrow.sprite = GetSprite(SPRITE_ARROW_LEFT);
-        gameState->leftArrow.id = SPRITE_ARROW_LEFT;
-        gameState->leftArrow.tileSize = 16;
-        
-        // RIGHT
-        gameState->rightArrow.sprite = GetSprite(SPRITE_ARROW_RIGHT);
-        gameState->rightArrow.id = SPRITE_ARROW_RIGHT;
-        gameState->rightArrow.tileSize = 16;
-
-        auto & entityIndexArray = gameState->entityTable[LAYER_SLIME];
-
-        for (int i = 0; i < entityIndexArray.count; i++)
-        {
-            Entity * slime = GetEntity(entityIndexArray[i]);
-            slime->pivot = GetTilePivot(slime);
-        }
-
-#if 0        
-        UpdateSprite(LAYER_WALL);
-        UpdateSprite(LAYER_GLASS);
-#endif
-        
-        // NOTE: Initalize undoStack record
-        undoStack = std::vector<UndoState>();
-        undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });
-    }
-    
-#if 0
-    // TODO:  Level Hot Reloading
-    for (int i = 0; i < tileMapSources.count; i++)
-    {
-        char * fileName = tileMapSources[i].fileName;
-        long long currentTimeStamp = GetTimestamp(fileName);
-        
-        if (currentTimeStamp > tileMapSources[i].timestamp)
-        {
-            Array<Entity, 3> slimes;
-            for (int i = 0; i < slimeEntityIndices.count; i++)
-            {
-                slimes[i] = *GetEntity(slimeEntityIndices[i]);
-            }
-            
-            LoadLevelToGameState(*gameState, gameState->state);
-            undoRecords = std::stack<Record>();
-        }
-    }
-#endif
 
     // NOTE: Debug Switch Monitor
     if (GetMonitorCount() > 1)
@@ -1141,8 +1063,128 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
 #endif
         
         EndDrawing();
+    }    
+}
 
+//  ========================================================================
+//              NOTE: Game Functions (exposed)
+//  ========================================================================
+
+// Called on every frame
+void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
+{
+    
+    if (gameState != gameStateIn) gameState = gameStateIn;
+    if (gameMemory != gameMemoryIn) gameMemory = gameMemoryIn;
+    
+    if (!gameState->initialized)
+    {
+        // NOTE: Initialization
+        gameState->initialized = true;
+
+        InitKeyMapping();
+
+        gameState->tileMaps = (Map *)BumpAllocArray(gameMemory->persistentStorage, 100, sizeof(Map));
+        
+        LoadLevelToGameState(*gameState);
+        gameState->currentScreen = TITLE_SCREEN;
+        
+        // NOTE: Arrow Buttons
+        // UP
+        gameState->upArrow.sprite = GetSprite(SPRITE_ARROW_UP);
+        gameState->upArrow.id = SPRITE_ARROW_UP;
+        gameState->upArrow.tileSize = 16;
+        
+        // DOWN
+        gameState->downArrow.sprite = GetSprite(SPRITE_ARROW_DOWN);
+        gameState->downArrow.id = SPRITE_ARROW_DOWN;
+        gameState->downArrow.tileSize = 16;
+        
+        // LEFT
+        gameState->leftArrow.sprite = GetSprite(SPRITE_ARROW_LEFT);
+        gameState->leftArrow.id = SPRITE_ARROW_LEFT;
+        gameState->leftArrow.tileSize = 16;
+        
+        // RIGHT
+        gameState->rightArrow.sprite = GetSprite(SPRITE_ARROW_RIGHT);
+        gameState->rightArrow.id = SPRITE_ARROW_RIGHT;
+        gameState->rightArrow.tileSize = 16;
+
+        auto & entityIndexArray = gameState->entityTable[LAYER_SLIME];
+
+        for (int i = 0; i < entityIndexArray.count; i++)
+        {
+            Entity * slime = GetEntity(entityIndexArray[i]);
+            slime->pivot = GetTilePivot(slime);
+        }
+        
+        // NOTE: Initalize undoStack record
+        undoStack = std::vector<UndoState>();
+        undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });
     }
 
+    switch(gameState->currentScreen)
+    {
+        case TITLE_SCREEN:
+        {
+
+            if (JustPressed(ANY_KEY))
+            {
+                gameState->currentScreen = GAMEPLAY_SCREEN;
+            }
+            
+            BeginDrawing();
+            ClearBackground(RAYWHITE);
+            DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), GREEN);
+
+            const char * Title = "TITLE SCREEN";
+            int TitleTextX = (GetScreenWidth() - MeasureText(Title, 40)) / 2;
+            int TitleTextY = (GetScreenHeight() - 40) / 2 - 100;
+            DrawText(Title, TitleTextX, TitleTextY, 40, DARKGREEN);
+
+            const char * Instructions = "PRESS Any Key to JUMP to GAMEPLAY SCREEN";
+            int InstructionsTextSize = MeasureText(Instructions, 20);
+            DrawText(Instructions, (GetScreenWidth() - InstructionsTextSize) / 2, (GetScreenHeight()) / 2, 20, DARKGREEN);
+            EndDrawing();
+
+            break;
+        }
+        case GAMEPLAY_SCREEN:
+        {
+            if (IsKeyPressed(KEY_ESCAPE))
+            {
+                gameState->currentScreen = ENDING_SCREEN;
+            }
+            GameplayUpdateAndRender();
+            break;
+        }
+        case ENDING_SCREEN:
+        {
+
+            if (JustPressed(ANY_KEY))
+            {
+                gameState->currentScreen = TITLE_SCREEN;
+            }
+            
+            BeginDrawing();
+            ClearBackground(RAYWHITE);
+            DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLUE);
+
+            const char * endText = "ENDING SCREEN";
+            int endTextX = (GetScreenWidth() - MeasureText(endText, 40)) / 2;
+            int endTextY = (GetScreenHeight() - 40) / 2 - 100;
+            DrawText(endText, endTextX, endTextY, 40, DARKBLUE);
+
+            const char * endInstructions = "PRESS Any Key to RETURN to TITLE SCREEN";
+            int endInstX = (GetScreenWidth() - MeasureText(endInstructions, 20)) / 2;
+            int endInstY = (GetScreenHeight()) / 2;
+            
+            DrawText(endInstructions, endInstX, endInstY, 20, DARKBLUE);
+
+            EndDrawing();
+
+            break;
+        }
+    }
     
 }

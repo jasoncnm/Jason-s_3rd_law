@@ -395,6 +395,7 @@ inline void UpdateSlimes()
                     float iDist = dist / MAP_TILE_SIZE;
 
                     // TODO: Play Instanly for now, need to blend the current animation with this animation
+                    //       How do I blend two motions
 #if 1
                     slime->tweenController.Reset();
 #endif

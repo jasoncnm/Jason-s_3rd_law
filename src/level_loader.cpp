@@ -325,7 +325,7 @@ inline void GenerateTileMap(std::string fileName, IVec2 startPos, int width, int
     }
 }
 
-void LoadLevelToGameState(GameState & state, State loadState)
+void LoadLevelToGameState(GameState & state)
 {
 
     unsigned int tileCountX = 0, tileCountY = 0;

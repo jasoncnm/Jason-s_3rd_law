@@ -48,13 +48,6 @@ constexpr float press_freq = 0.2f;
 // NOTE: Game Structs
 // ----------------------------------------------------
 
-
-enum State
-{
-    STATE_TEST_LEVEL,
-    STATE_COUNT,
-};
-
 enum GameInputType 
 {
     NO_INPUT,
@@ -70,7 +63,16 @@ enum GameInputType
 
     UNDO_KEY,
     RESET_KEY,
+
+    ANY_KEY,
     GAME_INPUT_COUNT,
+};
+
+enum GameScreen
+{
+    TITLE_SCREEN,
+    GAMEPLAY_SCREEN,
+    ENDING_SCREEN,
 };
 
 struct KeyMapping
@@ -117,10 +119,12 @@ struct Map
     bool firstEnter = false;
 };
 
+
 // NOTE: GameState
 struct GameState
 {
-    State state;
+    
+    GameScreen currentScreen;
     
     IVec2 tileMin, tileMax;
 

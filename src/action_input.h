@@ -81,6 +81,16 @@ inline bool ProccessJoysticks(GameInputType type, int gamepad)
 
 inline bool JustPressed(GameInputType type)
 {
+
+    if (type == ANY_KEY)
+    {
+        return !IsKeyDown(KEY_LEFT_ALT)  &&
+               !IsKeyDown(KEY_RIGHT_ALT) &&
+               !IsKeyDown(KEY_LEFT_SUPER) &&
+               !IsKeyDown(KEY_RIGHT_SUPER) &&
+               (GetKeyPressed() > 0 || GetGamepadButtonPressed() > 0);
+    }
+    
     KeyMapping & mapping = gameState->keyMappings[type];
     for (int idx = 0; idx < mapping.keys.count; idx++)
     {
@@ -102,8 +112,30 @@ inline bool JustPressedMoveKey()
     return result;
 }
 
+inline bool IsAnyGamepadButtonDown(int button)
+{
+    for (int gamepad = 0; gamepad < MAX_GAMEPAD; gamepad++)
+    {
+        if (IsGamepadButtonDown(gamepad, button)) return true;        
+    }
+
+    return false;
+}
+
 inline bool IsDown(GameInputType type)
 {
+    
+    if (type == ANY_KEY)
+    {
+        int keycode = GetKeyPressed();
+        int gamepadButton = GetGamepadButtonPressed();
+        return !IsKeyDown(KEY_LEFT_ALT)  &&
+               !IsKeyDown(KEY_RIGHT_ALT) &&
+               !IsKeyDown(KEY_LEFT_SUPER) &&
+               !IsKeyDown(KEY_RIGHT_SUPER) &&
+               (IsKeyDown(keycode) || IsAnyGamepadButtonDown(gamepadButton));
+    }
+    
     KeyMapping mapping = gameState->keyMappings[type];
     for (int idx = 0; idx < mapping.keys.count; idx++)
     {

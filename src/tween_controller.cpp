@@ -12,6 +12,10 @@
 
 void TweenController::Reset()
 {
+    for (int i = 0; i < MAX_CHANNEL; i++)
+    {
+        channels[i].Clear();
+    }
     endEvent.Reset();
 }
 
@@ -22,14 +26,6 @@ void TweenController::Update()
     {
         if (playing)
         {
-#if 0
-            Tween & tween = tweeningQueue[currentQueueIndex];
-            bool end = tween.UpdateEntityVal();
-            if (end)
-            {
-                currentQueueIndex++;
-            }
-#else
             for (int channel = 0; channel < MAX_CHANNEL; channel++)
             {
                 TweeningQueue & queue = channels[channel];
@@ -48,7 +44,6 @@ void TweenController::Update()
                 playing = false;
                 HandleEndOfTween();                
             }
-#endif
         }
     }
 }

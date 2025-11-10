@@ -91,7 +91,7 @@ inline void GenerateTileMap(std::string fileName, IVec2 startPos, int width, int
 
 void ReloadTileMap(TileMapSrc & mapSrc);
 
-void LoadLevelToGameState(GameState & state, State loadState);
+void LoadLevelToGameState(GameState & state);
 
 
 #define LEVEL_LOADER_H
