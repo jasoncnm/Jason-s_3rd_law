@@ -41,20 +41,8 @@ inline void UpdateElectricDoor();
 inline void SetUpElectricDoor();
 
 inline bool DoorBlocked(Entity * door, IVec2 reachDir);
-    
-inline bool CheckDoor(IVec2 tilePos);
-
-void Search(Array<bool, MAX_CABLE> & visited, int currentIndex, int sourceIndex);
-
-void OnSourcePowerOn(Array<bool, MAX_CABLE> & visited, int currentIndex);
 
 inline bool SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir);
-
-inline void PowerOnCable(Entity * cable, bool & end);
-
-inline void UnfreezeSlimes(Entity * door);
-
-inline bool CanFreezeSlime(Entity * connect);
 
 #define ELECTRIC_DOOR_H
 #endif

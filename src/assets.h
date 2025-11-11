@@ -123,7 +123,7 @@ SpriteID GetArrowHoverSpriteID(SpriteID spriteID)
 
 }
 
-SpriteID GetCablePowerONID(SpriteID spriteID)
+SpriteID GetCablePowerOnID(SpriteID spriteID)
 {
     SM_ASSERT((spriteID >= SPRITE_CABLE_H_OFF) && (spriteID <= SPRITE_SOURCE_UP_OFF),  "Given sprite is not a cable");
 

@@ -13,7 +13,6 @@
 /*
   
 TODO BUGS:
-  -  (UpdateElectricDoor) Connection point Logic needs to be refine. Check to TODO comments in the function 
 
 
 TODO: Things that I can do beside arts and design I guess
@@ -24,13 +23,14 @@ TODO: Things that I can do beside arts and design I guess
   - Dropdown console commands 
   - Texture filtering when zooming out (is mipmapping come handy here?)
   - Viewport scaling IMPORTANT: DO we really need this ?
+  - Assets Managment
 
 NOTE: done
   - Gamepad supports
   - (MoveActionCheck) When Door and block are in the same tile, we should check if the door is blocked first, then check if we can push the block
   - Change animation controller into a tweening controller that is able to tween arbitarty types of values using easing functions
   - Basic Scene Manager
-
+  -  (UpdateElectricDoor) Connection point Logic needs to be refine. Check comments in the function 
 */
 
 //  ========================================================================
@@ -120,7 +120,8 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                     }
                     case ENTITY_TYPE_BLOCK:
                     {
-                        Entity * door = FindEntityByLocationAndLayer(target->tilePos, LAYER_DOOR);
+                        EntityLayer layers[] = { LAYER_DOOR };
+                        Entity * door = FindEntityByLocationAndLayers(target->tilePos, layers, ArrayCount(layers));
                         if (door && DoorBlocked(door, -pushDir))
                         {
                             result.pushed = false;
@@ -259,7 +260,7 @@ inline float GetCameraZoom(Map & currentMap)
 inline bool UpdateCamera()
 {
     bool updated = false;
-    Entity * player = GetEntity(gameState->playerEntityIndex);
+    Entity * player = GetPlayer();
     SM_ASSERT(player, "Player is not active");
             
     Vector2 playerTile = player->pivot;
@@ -269,8 +270,14 @@ inline bool UpdateCamera()
         Map & map = gameState->tileMaps[i];
         Vector2 mapMin = GetTilePivot(map.tilePos, MAP_TILE_SIZE);
 
-        Rectangle playerRec = { player->pivot.x, player->pivot.y, player->tileSize, player->tileSize };
-        Rectangle tileMapRec = { mapMin.x + MAP_TILE_SIZE, mapMin.y + MAP_TILE_SIZE, (float)map.width * (float)MAP_TILE_SIZE, (float)map.height * (float)MAP_TILE_SIZE };
+        Rectangle playerRec = GetEntityRect(player);
+        Rectangle tileMapRec =
+            {
+                mapMin.x + MAP_TILE_SIZE,
+                mapMin.y + MAP_TILE_SIZE,
+                (float)map.width  * (float)MAP_TILE_SIZE,
+                (float)map.height * (float)MAP_TILE_SIZE
+            };
 
         if( CheckCollisionRecs(playerRec, tileMapRec) )
         {
@@ -400,7 +407,9 @@ bool MoveAction(IVec2 actionDir)
         return false;
     }
 
-    Entity * door = FindEntityByLocationAndLayer(currentPos, LAYER_DOOR);
+    EntityLayer layers[] = { LAYER_DOOR };
+    
+    Entity * door = FindEntityByLocationAndLayers(currentPos, layers, ArrayCount(layers));
     if (door && DoorBlocked(door, -actionDir))
     {
         return false;
@@ -509,7 +518,8 @@ bool MoveAction(IVec2 actionDir)
     }
     else
     {
-        Entity * slime = FindEntityByLocationAndLayer(standingPlatformPos, LAYER_SLIME);
+        EntityLayer layers[] = { LAYER_SLIME };
+        Entity * slime = FindEntityByLocationAndLayers(standingPlatformPos, layers, ArrayCount(layers));
         if (slime)
         {
             mother = MergeSlimes(slime, mother);
@@ -629,18 +639,23 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
 }
 
 
-inline void DrawSpriteLayer(EntityLayer layer)
+inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount)
 {
-    auto & entityIndexArray = gameState->entityTable[layer];
-
-    for (int i = 0; i < entityIndexArray.count; i++)
+    for (int layerIndex = 0; layerIndex < arrayCount; layerIndex++)
     {
-        Entity * entity = GetEntity(entityIndexArray[i]);
-        if (entity)
+        int layer = layers[layerIndex];
+    
+        auto & entityIndexArray = gameState->entityTable[layer];
+
+        for (int i = 0; i < entityIndexArray.count; i++)
         {
-            DrawSprite(gameState->camera, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, entity->color);
+            Entity * entity = GetEntity(entityIndexArray[i]);
+            if (entity)
+            {
+                DrawSprite(gameState->camera, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, entity->color);
+            }
         }
-    }
+    } 
 }
 
 inline bool SlimeSelection(Entity * player)
@@ -933,7 +948,7 @@ void GameplayUpdateAndRender()
             {
                 if (!entity->tweenController.NoTweens())
                 {
-                    SetActionState(entity, ANIMATE_STATE);
+                    if (entity->actionState == MOVE_STATE) SetActionState(entity, ANIMATE_STATE);
                     entity->tweenController.Update();
                     // entity->pivot = entity->tweenController.currentPosition;
                 }
@@ -981,22 +996,11 @@ void GameplayUpdateAndRender()
             Map & map = gameState->tileMaps[i];
             DrawTileMap(gameState->camera, map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
         }
-        
 
-        DrawSpriteLayer(LAYER_BLOCK);
-        
-        DrawSpriteLayer(LAYER_WALL);
+        EntityLayer orderedDrawLayers[] = { LAYER_BLOCK, LAYER_WALL, LAYER_CABLE, LAYER_PIT, LAYER_GLASS, LAYER_DOOR, LAYER_SLIME };
 
-        DrawSpriteLayer(LAYER_CABLE);
-        
-        DrawSpriteLayer(LAYER_PIT);
-
-        DrawSpriteLayer(LAYER_GLASS);
-
-        DrawSpriteLayer(LAYER_DOOR);
-        
-        DrawSpriteLayer(LAYER_SLIME);
-
+        int count = ArrayCount(orderedDrawLayers);
+        DrawSpriteLayers(orderedDrawLayers, count);
 
         // Draw rectangle outline with extended parameters
         // Rectangle cameraRect = GetCameraRect(gameState->camera);

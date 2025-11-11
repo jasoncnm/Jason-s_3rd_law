@@ -20,10 +20,17 @@ inline Entity * GetPlayer()
     return GetEntity(gameState->playerEntityIndex);
 }
 
+inline Rectangle GetEntityRect(Entity * entity)
+{
+    Rectangle rect = { entity->pivot.x, entity->pivot.y, entity->tileSize, entity->tileSize };
+    return rect;
+}
+
 inline bool IsSlime(Entity * entity)
 {
     return entity->type == ENTITY_TYPE_CLONE || entity->type == ENTITY_TYPE_PLAYER;
 }
+
 
 inline AddEntityResult
 AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE, int tileSize = 32)
@@ -347,16 +354,21 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
     return result;
 }
 
-inline Entity * FindEntityByLocationAndLayer(IVec2 pos, EntityLayer layer)
+
+inline Entity * FindEntityByLocationAndLayers(IVec2 pos, EntityLayer * layers, int arrayCount)
 {
-    auto & entityIndeices = gameState->entityTable[layer];
-    for (int i = 0; i < entityIndeices.count; i++)
+    for (int layerIndex = 0; layerIndex < arrayCount; layerIndex++)
     {
-        Entity * entity = GetEntity(entityIndeices[i]);
-        if (entity && entity->tilePos == pos)
+        int layer = layers[layerIndex];
+        auto & entityIndeices = gameState->entityTable[layer];
+        for (int i = 0; i < entityIndeices.count; i++)
         {
-            return entity;
-            break;
+            Entity * entity = GetEntity(entityIndeices[i]);
+            if (entity && entity->tilePos == pos)
+            {
+                return entity;
+                break;
+            }
         }
     }
     
@@ -652,13 +664,13 @@ void BounceEntity(Entity * entity, IVec2 dir)
                     {
                         if (target->cableType == CABLE_TYPE_DOOR && SameSide(target, pos, dir))
                         {
-                            // IMPORTANT: entity changed
+
                             SetEntityPosition(entity, target, pos - dir);
                             return;    
                         }
                         else if (isSlime && target->cableType == CABLE_TYPE_CONNECTION_POINT && target->conductive)
                         {
-                            // IMPORTANT:  entity changed
+
                             SetActionState(entity, FREEZE_STATE);
                             SetEntityPosition(entity, nullptr, pos - dir);
                             return;
@@ -668,7 +680,7 @@ void BounceEntity(Entity * entity, IVec2 dir)
                     case ENTITY_TYPE_PIT:
                     case ENTITY_TYPE_WALL:
                     {
-                        // IMPORTANT: entity changed
+
                         if (isSlime && target->type == ENTITY_TYPE_WALL)
                         {
                             SetAttach(entity, target, dir);
@@ -680,19 +692,19 @@ void BounceEntity(Entity * entity, IVec2 dir)
                     {
                         if (!target->broken && isSlime)
                         {
-                            // IMPORTANT: entity changed
+
                             SetAttach(entity, target, dir);
                             SetEntityPosition(entity, target, pos - dir);
                             return;
                         }
 
-                        // IMPORTANT: target changed
+
                         SetGlassBeBroken(target);
                         break;                        
                     }
                     case ENTITY_TYPE_BLOCK:
                     {
-                        // IMPORTANT: entity changed
+
                         MoveActionResult result = 
                             MoveActionCheck(entity, entity, pos, dir, 0);
 
@@ -716,9 +728,8 @@ void BounceEntity(Entity * entity, IVec2 dir)
                     {
                         if (!isSlime)
                         {
-                            // IMPORTANT: entity changed
+
                             IVec2 attachDir = target->attachDir;
-                            
                             MoveActionResult result =
                                 MoveActionCheck(entity, entity, pos, dir, 0);
 
@@ -752,12 +763,12 @@ void BounceEntity(Entity * entity, IVec2 dir)
 
                         if (target->type == ENTITY_TYPE_PLAYER)
                         {
-                            // IMPORTANT: entity changed
+
                             entity = MergeSlimes( entity, target);
                         }
                         else
                         {
-                            // IMPORTANT: entity changed
+
                             entity = MergeSlimes( target, entity);
                         }
                                                 
@@ -773,7 +784,7 @@ void BounceEntity(Entity * entity, IVec2 dir)
         if (CheckOutOfBound(pos))
         {
             entity->tilePos = pos;
-            // IMPORTANT: entity changed
+
             DeleteEntity(entity);
             return;
         }

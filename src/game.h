@@ -186,7 +186,7 @@ bool MoveAction(IVec2 actionDir);
 
 bool SplitAction(IVec2 bounceDir);
 
-inline void DrawSpriteLayer(EntityLayer layer);
+inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount);
 
 #define GAME_H
 #endif

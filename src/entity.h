@@ -90,6 +90,8 @@ struct Entity
     bool open = false;
     bool conductive = false;
     bool left = false, right = false, up = false, down = false;
+    bool sourceLit = false;
+    bool hasPower = false;
 
     bool hover = false;
     
@@ -109,8 +111,43 @@ struct FindAttachableResult
     bool has;
 };
 
-// NOTE: Get a pointer of the entity by entities array index 
+void BounceEntity(Entity * entity, IVec2 dir);
+
+void ShiftEntities(IVec2 startPos, IVec2 bounceDir);
+
+inline void DeleteEntity(Entity * entity);
+
+inline void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir);
+
+inline void SetActionState(Entity * entity, ActionState state);
+
+inline void SetGlassBeBroken(Entity * glass);
+
+inline void UpdateSlimes();
+
+inline void SlimeMoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir);
+
+inline void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos);
+
 inline Entity * GetEntity(int i);
+
+inline Entity * GetPlayer();
+
+inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime);
+
+inline Entity * FindEntityByLocationAndLayers(IVec2 pos, EntityLayer * layers, int arrayCount);
+
+inline Entity * CreateSlimeClone(IVec2 tilePos);
+
+inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir);
+
+inline bool AttachSlime(Entity * slime, IVec2 dir);
+
+inline bool IsSlime(Entity * entity);
+
+inline bool CheckBounce(IVec2 tilePos, IVec2 pushDir);
+
+inline Rectangle GetEntityRect(Entity * entity);
 
 inline AddEntityResult
 AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color, int tileSize);
@@ -127,35 +164,6 @@ AddSource(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool
 inline AddEntityResult
 AddConnection(IVec2 tilePos, SpriteID spriteID);
 
-inline void DeleteEntity(Entity * entity);
-
-inline void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir);
-
-inline void SetActionState(Entity * entity, ActionState state);
-
-inline void SetGlassBeBroken(Entity * glass);
-
-inline void UpdateSlimes();
-
-inline bool AttachSlime(Entity * slime, IVec2 dir);
-
-inline void SlimeMoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir);
-
-inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime);
-
-inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir);
-
-inline Entity * FindEntityByLocationAndLayer(IVec2 pos, EntityLayer layer);
-
-inline bool IsSlime(Entity * entity);
-
-inline void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos);
-
-void ShiftEntities(IVec2 startPos, IVec2 bounceDir);
-
-inline bool CheckBounce(IVec2 tilePos, IVec2 pushDir);
-
-void BounceEntity(Entity * entity, IVec2 dir);
 
 #define ENTITY_H
 #endif
