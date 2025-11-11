@@ -554,8 +554,7 @@ bool MoveAction(IVec2 actionDir)
 
     }
 
-    SM_ASSERT(false, "Unreachable code");
-    return false;
+    return true;
 }
 
 bool SplitAction(Entity * player, IVec2 bounceDir)
@@ -1046,6 +1045,7 @@ void GameplayUpdateAndRender()
 
 void InitializeGame()
 {
+    SM_TRACE("Initializing Game");
     // NOTE: Initialization
     gameState->initialized = true;
 

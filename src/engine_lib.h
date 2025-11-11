@@ -94,13 +94,6 @@ void _log(char * prefix, char * msg, TextColor textColor, Args... args)
 
 #if GAME_INTERNAL
 
-#define SM_TRACE(msg, ...)
-#define SM_WARN(msg, ...)
-#define SM_ERROR(msg, ...)
-#define SM_ASSERT(x, msg, ...)
-
-#else
-
 #define SM_TRACE(msg, ...) _log("Trace:   ", msg, TEXT_COLOR_GREEN, ##__VA_ARGS__);
 #define SM_WARN(msg, ...)  _log("Warning: ", msg, TEXT_COLOR_YELLOW, ##__VA_ARGS__);
 #define SM_ERROR(msg, ...) _log("Error:   ", msg, TEXT_COLOR_RED, ##__VA_ARGS__);
@@ -112,6 +105,13 @@ void _log(char * prefix, char * msg, TextColor textColor, Args... args)
         DEBUG_BREAK();                            \
     }                                             \
 }
+
+#else
+
+#define SM_TRACE(msg, ...)
+#define SM_WARN(msg, ...)
+#define SM_ERROR(msg, ...)
+#define SM_ASSERT(x, msg, ...)
 
 #endif
 
