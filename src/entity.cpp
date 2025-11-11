@@ -274,7 +274,10 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
         params.startVec2 = mergedSlime->pivot;
         params.endVec2 = mergeSlime->pivot;
         params.realVec2 = &mergedSlime->pivot;
-        AddTween(mergedSlime->tweenController, CreateTween(params));
+        
+        float dist = Vector2Distance(params.startVec2, params.endVec2);
+        float iDist = dist / MAP_TILE_SIZE;
+        AddTween(mergedSlime->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, iDist));
 
         EndTweeningEvent & endEvent = mergedSlime->tweenController.endEvent;
         endEvent.controller = &mergeSlime->tweenController;
@@ -796,16 +799,17 @@ void BounceEntity(Entity * entity, IVec2 dir)
                             return;
                         }
 
-                        if (target->type == ENTITY_TYPE_PLAYER)
-                        {
+                        // if (target->type == ENTITY_TYPE_PLAYER)
+                        // {
 
-                            entity = MergeSlimes( entity, target);
-                        }
-                        else
-                        {
+                        //     entity = MergeSlimes(entity, target);
+                        // }
+                        // else
+                        // {
+                        //     entity = MergeSlimes( target, entity);
 
-                            entity = MergeSlimes( target, entity);
-                        }
+                        // }
+                        entity = MergeSlimes(target, entity);
                                                 
                         break;
                     }
