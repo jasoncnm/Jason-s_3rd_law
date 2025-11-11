@@ -43,7 +43,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
     // IMPORTANT: the order of the layers are important, for example, we don't want to check blocks before checking doors in the same tile
     int checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_PIT };
     
-    MoveActionResult result = { false, false, nullptr };
+    MoveActionResult result = { false, false, false, nullptr };
     for (int layerIndex = 0; layerIndex < ArrayCount(checkLayers); layerIndex++)
     {
         int layer = checkLayers[layerIndex];
@@ -91,11 +91,11 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                         {
                             if (pushDir == -pushEntity->attachDir)
                             {
-
                                 result.pushed = false;
                                 return result;
                             }
-                            MergeSlimes( target, pushEntity);
+                            result.merged = true;
+                            MergeSlimes(target, pushEntity);
                             return result;
                         }
 
@@ -417,6 +417,11 @@ bool MoveAction(IVec2 actionDir)
         
     //MoveActionResult moveResult = MoveActionCheck(mother, mother, actionTilePos, actionDir, 0);
     MoveActionResult moveResult = MoveActionCheck(mother, mother, actionTilePos, actionDir, 0);
+
+    if (moveResult.merged)
+    {
+        return true;
+    }
         
     if (moveResult.blocked)
     {

@@ -120,8 +120,6 @@ inline void SetGlassBeBroken(Entity * glass);
 
 inline void UpdateSlimes();
 
-inline void SlimeMoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir);
-
 inline void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos);
 
 inline Entity * GetEntity(int i);

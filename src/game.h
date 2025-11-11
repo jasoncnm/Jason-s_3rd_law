@@ -159,6 +159,7 @@ struct MoveActionResult
 {
     bool blocked;
     bool pushed;
+    bool merged;
     Entity * blockedEntity;
 };
 

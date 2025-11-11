@@ -217,9 +217,14 @@ inline void SetGlassBeBroken(Entity * glass)
     glass->sprite = GetSprite(SPRITE_GLASS_BROKEN);
 }
 
+inline float GetSlimeSize(int mass)
+{
+    return mass == 1 ? 0.5f * MAP_TILE_SIZE : 0.8f * MAP_TILE_SIZE;
+}
+
 inline float GetSlimeSize(Entity * slime)
 {
-    return slime->mass == 1 ? 0.5f * MAP_TILE_SIZE : 0.8f * MAP_TILE_SIZE;
+    return GetSlimeSize(slime->mass);
 }
 
 inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
@@ -234,24 +239,53 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
         mergeSlime->color = WHITE;
     }
 
-    float startSize = GetSlimeSize(mergeSlime);
+    // mergeSlime->tileSize = endSize;
+    // mergeSlime->pivot = GetTilePivot(mergeSlime);
+    {
+        // Merge Slime Tween
 
-    mergeSlime->mass += mergedSlime->mass;
-    DeleteEntity(mergedSlime);
+        float startSize = GetSlimeSize(mergeSlime);
+        Vector2 startPivot = GetTilePivot(mergeSlime);
+        mergeSlime->mass++;
+        float endSize = GetSlimeSize(mergeSlime);
+        Vector2 endPivot = GetTilePivot(mergeSlime->tilePos, endSize, mergeSlime->attachDir);
 
-    float endSize = GetSlimeSize(mergeSlime);
-    
-    mergeSlime->tileSize = endSize;
-    mergeSlime->pivot = GetTilePivot(mergeSlime);
+        TweenParams params2 = {};
+        params2.paramType = PARAM_TYPE_VECTOR2;
+        params2.startVec2 = startPivot;
+        params2.endVec2 = endPivot;
+        params2.realVec2 = &mergeSlime->pivot;
+        AddTween(mergeSlime->tweenController, CreateTween(params2), 1);
+        
+        TweenParams params1 = {};
+        params1.paramType = PARAM_TYPE_FLOAT;
+        params1.startF = startSize;
+        params1.endF = endSize;
+        params1.realF = &mergeSlime->tileSize;
+        AddTween(mergeSlime->tweenController, CreateTween(params1), 0);
+    }
 
-    TweenParams params = {};
-    params.paramType = PARAM_TYPE_FLOAT;
-    params.startF = startSize;
-    params.endF = endSize;
-    params.realF = &mergeSlime->tileSize;
-    
-    AddTween(mergeSlime->tweenController, CreateTween(params));
-    OnPlayEvent(&mergeSlime->tweenController);
+    {
+        // Merged Slime Tween
+        
+        mergedSlime->tweenController.Reset();
+        TweenParams params = {};
+        params.paramType = PARAM_TYPE_VECTOR2;
+        params.startVec2 = mergedSlime->pivot;
+        params.endVec2 = mergeSlime->pivot;
+        params.realVec2 = &mergedSlime->pivot;
+        AddTween(mergedSlime->tweenController, CreateTween(params));
+
+        EndTweeningEvent & endEvent = mergedSlime->tweenController.endEvent;
+        endEvent.controller = &mergeSlime->tweenController;
+        endEvent.OnPlayFunc = OnPlayEvent;
+        endEvent.deleteEntity = mergedSlime;
+        endEvent.OnDeleteFunc = OnDeleteEvent;
+
+        OnPlayEvent(&mergedSlime->tweenController);
+        
+    }
+    // DeleteEntity(mergedSlime);
 
     return mergeSlime;
     
@@ -375,73 +409,6 @@ inline Entity * FindEntityByLocationAndLayers(IVec2 pos, EntityLayer * layers, i
     return nullptr;
 }
 
-inline void UpdateSlimes()
-{
-    auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
-    for (int i = 0; i < slimeEntityIndices.count; i++)
-    {
-        Entity * slime = GetEntity(slimeEntityIndices[i]);
-        if (slime && slime->attach)
-        {
-            Entity * attach = GetEntity(slime->attachedEntityIndex);
-
-            // NOTE: Depends on the levels, there might be the case when the attached entity get destroyed along with the slime
-            //       Need to handle that case in here if necessary
-            if (attach && attach->type != ENTITY_TYPE_ELECTRIC_DOOR)
-            {
-                IVec2 oldPos = slime->tilePos;
-                IVec2 newPos = attach->tilePos - slime->attachDir;
-                if (oldPos != newPos)
-                {
-                    IVec2 dir = newPos - oldPos;
-                    dir.x = dir.x == 0 ? 0 : Sign(dir.x);
-                    dir.y = dir.y == 0 ? 0 : Sign(dir.y);
-                
-                    SM_ASSERT(dir.SqrMagnitude() == 1, "Invalid bounce direction");
-
-                    Vector2 moveStart = GetTilePivot(slime);
-                    SlimeMoveTowardsUntilBlocked(slime, newPos, dir);
-                    Vector2 moveEnd = GetTilePivot(slime);
-
-                    float dist = Vector2Distance(moveStart, moveEnd);
-                    float iDist = dist / MAP_TILE_SIZE;
-
-                    // TODO: Play Instanly for now, need to blend the current animation with this animation
-                    //       How do I blend two motions
-#if 1
-                    slime->tweenController.Reset();
-#endif
-                    TweenParams params = {};
-                    params.paramType = PARAM_TYPE_VECTOR2;
-                    params.startVec2 = moveStart;
-                    params.endVec2 = moveEnd;
-                    params.realVec2  = &slime->pivot;
-                        
-                    AddTween(slime->tweenController, CreateTween(params, nullptr,  BOUNCE_SPEED, iDist));
-                    OnPlayEvent(&slime->tweenController);
-                    
-                }
-            }
-        }
-    }
-
-    Entity * player = GetEntity(gameState->playerEntityIndex);
-    for (int i = 0; i < slimeEntityIndices.count; i++)
-    {
-        Entity * slime = GetEntity(slimeEntityIndices[i]);
-        if (slime && slime != player && slime->mass > player->mass)
-        {
-            slime->type = ENTITY_TYPE_PLAYER;
-            slime->color = WHITE;
-
-            player->type = ENTITY_TYPE_CLONE;
-            player->color = GRAY;
-
-            gameState->playerEntityIndex = slime->entityIndex;
-        }
-    }
-}
-
 inline void SlimeMoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir)
 {
 
@@ -537,6 +504,74 @@ inline void SlimeMoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir)
     }
     SetEntityPosition(entity, attach, dest);
 
+}
+
+inline void UpdateSlimes()
+{
+    auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
+    for (int i = 0; i < slimeEntityIndices.count; i++)
+    {
+        Entity * slime = GetEntity(slimeEntityIndices[i]);
+        if (slime && slime->attach)
+        {
+            Entity * attach = GetEntity(slime->attachedEntityIndex);
+
+            // NOTE: Depends on the levels, there might be the case when the attached entity get destroyed along with the slime
+            //       Need to handle that case in here if necessary
+            if (attach && attach->type != ENTITY_TYPE_ELECTRIC_DOOR)
+            {
+                IVec2 oldPos = slime->tilePos;
+                IVec2 newPos = attach->tilePos - slime->attachDir;
+                if (oldPos != newPos)
+                {
+                    IVec2 dir = newPos - oldPos;
+                    dir.x = dir.x == 0 ? 0 : Sign(dir.x);
+                    dir.y = dir.y == 0 ? 0 : Sign(dir.y);
+                
+                    SM_ASSERT(dir.SqrMagnitude() == 1, "Invalid bounce direction");
+
+                    Vector2 moveStart = GetTilePivot(slime);
+                    SlimeMoveTowardsUntilBlocked(slime, newPos, dir);
+                    Vector2 moveEnd = GetTilePivot(slime);
+
+                    float dist = Vector2Distance(moveStart, moveEnd);
+                    float iDist = dist / MAP_TILE_SIZE;
+
+                    // TODO: Play Instanly for now, need to blend the current animation with this animation
+                    //       How do I blend two motions
+#if 1
+                    slime->tweenController.Reset();
+#endif
+                    TweenParams params = {};
+                    params.paramType = PARAM_TYPE_VECTOR2;
+                    params.startVec2 = moveStart;
+                    params.endVec2 = moveEnd;
+                    params.realVec2  = &slime->pivot;
+                        
+                    AddTween(slime->tweenController, CreateTween(params, nullptr,  BOUNCE_SPEED, iDist));
+                    OnPlayEvent(&slime->tweenController);
+                    
+                }
+            }
+        }
+    }
+
+    Entity * player = GetEntity(gameState->playerEntityIndex);
+    for (int i = 0; i < slimeEntityIndices.count; i++)
+    {
+        Entity * slime = GetEntity(slimeEntityIndices[i]);
+        if (slime && slime != player && slime->mass > player->mass)
+        {
+            slime->type = ENTITY_TYPE_PLAYER;
+            slime->color = WHITE;
+
+            player->type = ENTITY_TYPE_CLONE;
+            player->color = GRAY;
+
+            gameState->playerEntityIndex = slime->entityIndex;
+        }
+    }
+    
 }
 
 inline Entity * CreateSlimeClone(IVec2 tilePos)
