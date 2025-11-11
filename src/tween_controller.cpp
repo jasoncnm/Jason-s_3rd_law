@@ -9,7 +9,6 @@
 #include "tween_controller.h"
 
 
-
 void TweenController::Reset()
 {
     for (int i = 0; i < MAX_CHANNEL; i++)
@@ -47,6 +46,7 @@ void TweenController::Update()
         }
     }
 }
+
 
 // NOTE: Handle event end of animation
 void TweenController::HandleEndOfTween()

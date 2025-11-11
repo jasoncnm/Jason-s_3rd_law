@@ -106,6 +106,25 @@ struct FindAttachableResult
     bool has;
 };
 
+
+struct BounceEntityResult
+{
+    enum BounceState
+    {
+        STOP_AT_CONTACT_POS,
+        PASS_THROUGHT_CONTACT_POS,
+        PASS_THROUGHT_CONTACT_POS_AND_BROKE_GLASSES,
+    };
+    BounceState bounceState;
+    
+    IVec2 contactPos;
+    IVec2 finalPos;
+
+    Entity * contactEntity;
+
+    Array<Entity *, 20> brokenGlasses;
+};
+
 void BounceEntity(Entity * entity, IVec2 dir);
 
 void ShiftEntities(IVec2 startPos, IVec2 bounceDir);

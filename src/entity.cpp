@@ -172,7 +172,10 @@ inline void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 ti
     {
         IVec2 dir = (touchingEntity->tilePos - entity->tilePos);
 
-        SM_ASSERT(dir.SqrMagnitude() == 1, "Two entity are not near by");
+        dir.x = dir.x == 0 ? 0 : Sign(dir.x);
+        dir.y = dir.y == 0 ? 0 : Sign(dir.y);
+                
+        SM_ASSERT(dir.SqrMagnitude() == 1, "Invalid bounce direction");
 
         SetAttach(entity, touchingEntity, dir);
     }
@@ -678,6 +681,7 @@ inline bool CheckBounce(IVec2 tilePos, IVec2 pushDir)
     return true;
 }
 
+
 void BounceEntity(Entity * entity, IVec2 dir)
 {
     SM_ASSERT(entity->active, "entity does not exists");
@@ -705,13 +709,6 @@ void BounceEntity(Entity * entity, IVec2 dir)
 
                             SetEntityPosition(entity, target, pos - dir);
                             return;    
-                        }
-                        else if (isSlime && target->cableType == CABLE_TYPE_CONNECTION_POINT && target->conductive)
-                        {
-
-                            SetActionState(entity, FREEZE_STATE);
-                            SetEntityPosition(entity, nullptr, pos - dir);
-                            return;
                         }
                         break;
                     }

@@ -598,20 +598,28 @@ inline void UpdateElectricDoor()
     {
         Entity * source = GetSource(i);
         SM_ASSERT(source, "Entity is not active");
-        if (source->conductive) continue;
+        if (source->sourceLit) continue;
+
+        bool has = false;
+        int sourceCableIndex = Source_Indices[i];
+        
         auto & table = gameState->entityTable[LAYER_BLOCK];
         for (int blockIndex = 0; blockIndex < table.count; blockIndex++)
         {
             Entity * block = GetEntity(table[blockIndex]);
             if (block && block->tweenController.NoTweens() && source->tilePos == block->tilePos)
             {
-                
-                int sourceCableIndex = Source_Indices[i];
+                has = true;                
                 if (OnSourcePowerOn(sourceCableIndex))
                 {
                     source->sourceLit = true;
                 }
             }
+        }
+
+        if (!has)
+        {
+            ShutDownPower(sourceCableIndex);
         }
         
     }

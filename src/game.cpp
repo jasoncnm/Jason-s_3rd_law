@@ -25,7 +25,7 @@ TODO: Things that I can do beside arts and design I guess
   - Viewport scaling IMPORTANT: DO we really need this ?
   - Assets Managment
 
-NOTE: done
+  NOTE: done
   - Gamepad supports
   - (MoveActionCheck) When Door and block are in the same tile, we should check if the door is blocked first, then check if we can push the block
   - Change animation controller into a tweening controller that is able to tween arbitarty types of values using easing functions
@@ -487,7 +487,13 @@ bool MoveAction(IVec2 actionDir)
 
     if (mother->attachDir == -actionDir)
     {
-        return moveResult.pushed;
+        if (moveResult.pushed)
+        {
+            MoveActionResult result = MoveActionCheck(mother, mother, mother->tilePos + mother->attachDir, mother->attachDir, 0);
+
+            return result.pushed;
+        }
+        return false;
     }
         
     if (!mother->active) return false;
@@ -621,7 +627,7 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
         params.endVec2 = playerEnd;
         params.realVec2  = &player->pivot;
 
-        AddTween(player->tweenController, CreateTween(params, EaseInOutSine, BOUNCE_SPEED, tileDist));
+        AddTween(player->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, tileDist));
         OnPlayEvent(&player->tweenController);
     }
 
@@ -636,7 +642,7 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
         params.endVec2 = cloneEnd;
         params.realVec2  = &clone->pivot;
 
-        AddTween(clone->tweenController, CreateTween(params, EaseInOutSine, BOUNCE_SPEED, tileDist));
+        AddTween(clone->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, tileDist));
         OnPlayEvent(&clone->tweenController);
 
     }
@@ -965,7 +971,8 @@ void GameplayUpdateAndRender()
                 }
             } 
         }
-    }
+        
+    } 
     
     
     // NOTE: Arrow Setup

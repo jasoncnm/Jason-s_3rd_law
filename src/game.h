@@ -27,6 +27,8 @@
 
 #define MAX_ENTITIES 5000
 
+#define FIX_TIME_STEP_MS 20.0f
+
 constexpr float zoom_per_tile = 19.0f / 600.0f;
 constexpr float press_freq = 0.2f;
 

@@ -92,7 +92,7 @@ int main(int argumentCount, char *argumentArray[])
 
         SetWindowState(FLAG_WINDOW_TOPMOST);
         
-        // SetTargetFPS(GetMonitorRefreshRate(0));
+        // SetTargetFPS(30);
 #endif
         
         SetWindowState(FLAG_WINDOW_RESIZABLE);
