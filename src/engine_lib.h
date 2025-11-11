@@ -35,6 +35,7 @@
 #define MB(x) (1024LL * KB(x))
 #define GB(x) (1024LL * MB(x))
 
+#define ArrayCount(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 //  ========================================================================
 // NOTE: Logging

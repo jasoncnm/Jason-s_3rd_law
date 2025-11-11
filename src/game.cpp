@@ -11,6 +11,11 @@
 #include "tween_controller.cpp"
 
 /*
+  
+TODO BUGS:
+  -  (UpdateElectricDoor) Connection point Logic needs to be refine. Check to TODO comments in the function 
+
+
 TODO: Things that I can do beside arts and design I guess
   - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
   - smooth pixelperfect transition
@@ -19,8 +24,6 @@ TODO: Things that I can do beside arts and design I guess
   - Dropdown console commands 
   - Texture filtering when zooming out (is mipmapping come handy here?)
   - Viewport scaling IMPORTANT: DO we really need this ?
-  - BUGS:
-  -  (UpdateElectricDoor) Connection point Logic needs to be refine. Check to TODO comments in the function 
 
 NOTE: done
   - Gamepad supports
@@ -36,10 +39,15 @@ NOTE: done
 MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int accumulatedMass)
 {
     SM_ASSERT(startEntity->movable, "Static entity cannot be pushing blocks!");
+
+    // IMPORTANT: the order of the layers are important, for example, we don't want to check blocks before checking doors in the same tile
+    int checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_PIT };
     
     MoveActionResult result = { false, false, nullptr };
-    for (int layer = 0; layer < LAYER_COUNT; layer++)
+    for (int layerIndex = 0; layerIndex < ArrayCount(checkLayers); layerIndex++)
     {
+        int layer = checkLayers[layerIndex];
+        
         auto & entityTable = gameState->entityTable[layer];
         for (int i = 0; i < entityTable.count; i++)
         {
