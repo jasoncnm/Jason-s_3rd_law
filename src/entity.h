@@ -61,28 +61,26 @@ struct Entity
     
     Sprite sprite;
     SpriteID spriteID;
-    IVec2 tilePos;
-    IVec2 attachDir = {0,0};
     Color color;
 
+    IVec2 tilePos;
+    IVec2 attachDir = {0,0};
+
     Vector2 pivot;
+
+    float tileSize = 32.0f;
     
     int entityIndex;
     int attachedEntityIndex;
 
     int sourceIndex = -1;
     int rightIndex = -1, leftIndex = -1, upIndex = -1, downIndex = -1;
-    
-    float tileSize = 32.0f;
 
     int mass = 1;
     int maxMass = 2;
     
     bool movable = false;
-    
-    bool show = true;
 
-    bool split = false;
     bool attach = false;
 
     bool broken = false;
@@ -92,11 +90,8 @@ struct Entity
     bool left = false, right = false, up = false, down = false;
     bool sourceLit = false;
     bool hasPower = false;
-
-    bool hover = false;
     
     bool active = false;
-    
 };
 
 struct AddEntityResult

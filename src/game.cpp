@@ -12,7 +12,7 @@
 
 /*
   
-TODO BUGS:
+TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 
 
 TODO: Things that I can do beside arts and design I guess
@@ -30,7 +30,7 @@ NOTE: done
   - (MoveActionCheck) When Door and block are in the same tile, we should check if the door is blocked first, then check if we can push the block
   - Change animation controller into a tweening controller that is able to tween arbitarty types of values using easing functions
   - Basic Scene Manager
-  -  (UpdateElectricDoor) Connection point Logic needs to be refine. Check comments in the function 
+  - (UpdateElectricDoor) Connection point Logic needs to be refine. Check comments in the function 
 */
 
 //  ========================================================================
