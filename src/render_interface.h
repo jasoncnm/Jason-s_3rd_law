@@ -9,6 +9,7 @@
 
 #include "assets.h"
 #include "engine_lib.h"
+#include "entity.h"
 
 #define TEXTURE_PATH "Assets/Texture/SpriteAtlas.png"
 #define MAX_TRANSFORM 1000
@@ -34,6 +35,20 @@ Rectangle GetCameraRect(Camera2D camera)
     Rectangle result = { topleft.x, topleft.y, offset.x * 2, offset.y * 2 };
 
     return result;
+}
+
+void DebugDrawPlayerActionState(ActionState state, int x, int y, int fontSize, Color color)
+{
+    char * stateTable[] = { 
+        "NULL_STATE",
+        "MOVE_STATE",
+        "SPLIT_STATE",
+        "ANIMATE_STATE",
+        "FREEZE_STATE"
+    };
+
+    DrawText(TextFormat("Player Action State: %s", stateTable[state]), x, y, fontSize, color);
+    
 }
 
 void DrawTileMap(Camera2D camera, IVec2 startPos, IVec2 dim, Color tileColor, Color gridColor)

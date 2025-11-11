@@ -12,7 +12,8 @@
 #define MAX_CHANNEL 5
 
 struct TweenController;
-struct EndTweeningEvent
+
+struct TweenEvent
 {
     TweenController * controller = nullptr;
     void (*OnPlayFunc)(TweenController * controller) = nullptr;
@@ -40,16 +41,14 @@ struct TweenController
     int currentQueueIndex = 0;
     
     TweeningQueue channels[MAX_CHANNEL];
-    
-    EndTweeningEvent endEvent;
+
+    TweenEvent startEvent;
+    TweenEvent endEvent;
 
     void Reset();
     
     // NOTE: Update Every frame
     void Update();
-
-    // NOTE: Handle event end
-    void HandleEndOfTween();
 
     bool NoTweens()
     {
@@ -68,6 +67,9 @@ struct TweenController
     }
     
 };
+
+// NOTE: Handle event
+void HandleEvent(TweenEvent & event);
     
 void AddTween(TweenController & controller, Tween tween, int channel = 0);
 

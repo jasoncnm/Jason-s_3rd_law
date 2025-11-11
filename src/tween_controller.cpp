@@ -9,6 +9,21 @@
 #include "tween_controller.h"
 
 
+void HandleTweenEvent(TweenEvent & event)
+{
+    if (event.controller && event.OnPlayFunc)
+    {
+        event.OnPlayFunc(event.controller);
+    }
+
+    if (event.deleteEntity && event.OnDeleteFunc)
+    {
+        event.OnDeleteFunc(event.deleteEntity);
+    }
+
+    event.Reset();
+}
+
 void TweenController::Reset()
 {
     for (int i = 0; i < MAX_CHANNEL; i++)
@@ -41,29 +56,14 @@ void TweenController::Update()
             if (NoTweens())
             {
                 playing = false;
-                HandleEndOfTween();                
+                HandleTweenEvent(endEvent);
+                Reset();
+
             }
         }
     }
 }
 
-
-// NOTE: Handle event end of animation
-void TweenController::HandleEndOfTween()
-{
-    if (endEvent.controller && endEvent.OnPlayFunc)
-    {
-        endEvent.OnPlayFunc(endEvent.controller);
-    }
-
-    if (endEvent.deleteEntity && endEvent.OnDeleteFunc)
-    {
-        endEvent.OnDeleteFunc(endEvent.deleteEntity);
-    }
-
-    endEvent.Reset();
-    Reset();
-}
 
 void AddTween(TweenController & controller, Tween tween, int channel)
 {
@@ -74,6 +74,7 @@ void OnPlayEvent(TweenController * controller)
 {
     SM_ASSERT(controller, "controller is null");
     controller->playing = true;
+    HandleTweenEvent(controller->startEvent);
 }
 
 

@@ -357,7 +357,7 @@ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
         gameState->entities[i] = e;
         gameState->entities[i].tweenController.Reset();
 
-        if (IsSlime(&e))
+        if (IsSlime(&e) && e.actionState == ANIMATE_STATE)
         {
             gameState->entities[i].actionState = MOVE_STATE;
         }
@@ -903,6 +903,7 @@ void GameplayUpdateAndRender()
                 }
                 break;
             }
+         
         }
              
         if (gameState->electricDoorSystem)
@@ -954,7 +955,10 @@ void GameplayUpdateAndRender()
             {
                 if (!entity->tweenController.NoTweens())
                 {
-                    if (entity->actionState == MOVE_STATE) SetActionState(entity, ANIMATE_STATE);
+                    if (IsSlime(entity))
+                    {
+                        if (entity->actionState == MOVE_STATE) SetActionState(entity, ANIMATE_STATE);
+                    }
                     entity->tweenController.Update();
                     // entity->pivot = entity->tweenController.currentPosition;
                 }
@@ -1056,6 +1060,10 @@ void GameplayUpdateAndRender()
         DrawText("Arrow Direction to Shoot, R KEY to Restart, Z KEY to undo", 10, 10, 20, RAYWHITE);
         
         DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
+
+        int posX = GetScreenWidth() - MeasureText("Entity Action State: FFFFFFFFFFFFFFFFFFFF", 20);
+        DebugDrawPlayerActionState(player->actionState, posX, 50, 20, IntToRGBA(0x923eed));
+        
 #endif
         
         EndDrawing();

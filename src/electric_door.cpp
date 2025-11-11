@@ -251,6 +251,8 @@ inline bool PowerOnCable(Entity * cable, bool & end)
 
             cable->tilePos = cable->tilePos + offset;
         }
+        
+        GetSource(cable->sourceIndex)->sourceLit = true;
         end = true;
     }
     else if (cable->cableType == CABLE_TYPE_CONNECTION_POINT)
@@ -327,6 +329,12 @@ void ShutDownPower(int currentCableIndex)
     if (cable->cableType == CABLE_TYPE_CONNECTION_POINT)
     {
         cable->hasPower = false;
+        EntityLayer layers[] = { LAYER_SLIME };
+        Entity * slime = FindEntityByLocationAndLayers(cable->tilePos, layers, ArrayCount(layers));
+        if (slime)
+        {
+            SetActionState(slime, MOVE_STATE);
+        }
     }
     else
     {
@@ -602,22 +610,15 @@ inline void UpdateElectricDoor()
 
         bool has = false;
         int sourceCableIndex = Source_Indices[i];
-        
-        auto & table = gameState->entityTable[LAYER_BLOCK];
-        for (int blockIndex = 0; blockIndex < table.count; blockIndex++)
-        {
-            Entity * block = GetEntity(table[blockIndex]);
-            if (block && block->tweenController.NoTweens() && source->tilePos == block->tilePos)
-            {
-                has = true;                
-                if (OnSourcePowerOn(sourceCableIndex))
-                {
-                    source->sourceLit = true;
-                }
-            }
-        }
 
-        if (!has)
+        EntityLayer layers[] = { LAYER_BLOCK };
+        Entity * block = FindEntityByLocationAndLayers(source->tilePos, layers, ArrayCount(layers));
+        if (block && block->tweenController.NoTweens())
+        {
+            if (!source->conductive)
+                OnSourcePowerOn(sourceCableIndex);
+        }
+        else
         {
             ShutDownPower(sourceCableIndex);
         }

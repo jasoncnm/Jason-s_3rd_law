@@ -282,7 +282,7 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
         float iDist = dist / MAP_TILE_SIZE;
         AddTween(mergedSlime->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, iDist));
 
-        EndTweeningEvent & endEvent = mergedSlime->tweenController.endEvent;
+        TweenEvent & endEvent = mergedSlime->tweenController.endEvent;
         endEvent.controller = &mergeSlime->tweenController;
         endEvent.OnPlayFunc = OnPlayEvent;
         endEvent.deleteEntity = mergedSlime;
@@ -555,8 +555,17 @@ inline void UpdateSlimes()
                     params.realVec2  = &slime->pivot;
                         
                     AddTween(slime->tweenController, CreateTween(params, nullptr,  BOUNCE_SPEED, iDist));
-                    OnPlayEvent(&slime->tweenController);
-                    
+
+                    if (!attach->tweenController.NoTweens())
+                    {
+                        TweenEvent & startEvent = attach->tweenController.startEvent;
+                        startEvent.controller = &slime->tweenController;
+                        startEvent.OnPlayFunc = OnPlayEvent;
+                    }
+                    else
+                    {
+                        OnPlayEvent(&slime->tweenController);
+                    } 
                 }
             }
         }
