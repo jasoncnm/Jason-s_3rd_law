@@ -357,7 +357,7 @@ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
         gameState->entities[i] = e;
         gameState->entities[i].tweenController.Reset();
 
-        if (IsSlime(&e) && e.actionState == ANIMATE_STATE)
+        if (IsSlime(&e) && (e.actionState == ANIMATE_STATE || e.actionState == SPLIT_STATE))
         {
             gameState->entities[i].actionState = MOVE_STATE;
         }
