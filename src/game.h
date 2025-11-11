@@ -124,8 +124,6 @@ struct Map
 struct GameState
 {
     
-    GameScreen currentScreen;
-    
     IVec2 tileMin, tileMax;
 
     TweenController cameraTweenController;
@@ -150,6 +148,8 @@ struct GameState
     Arrow upArrow, downArrow, leftArrow, rightArrow;
     
     int currentMapIndex = -1;
+    int screenWidth = SCREEN_WIDTH;
+    int screenHeight = SCREEN_HEIGHT;
     
     bool initialized;
 };

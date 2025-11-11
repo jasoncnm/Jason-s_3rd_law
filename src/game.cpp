@@ -20,6 +20,7 @@ TODO: Things that I can do beside arts and design I guess
   - Texture filtering when zooming out (is mipmapping come handy here?)
   - Viewport scaling IMPORTANT: DO we really need this ?
   - BUGS:
+  -  (UpdateElectricDoor) Connection point Logic needs to be refine. Check to TODO comments in the function 
 
 NOTE: done
   - Gamepad supports
@@ -284,8 +285,10 @@ inline bool UpdateCamera()
 
                 if (gameState->currentMapIndex == -1)
                 {
+                    gameState->camera.rotation = 0.0f;
                     gameState->camera.target = pos;
                     gameState->camera.zoom = GetCameraZoom(map);
+                    gameState->camera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
                 }
                 
                 if (gameState->currentMapIndex != i)
@@ -322,10 +325,12 @@ inline bool UpdateCamera()
         }
     }
     
-    if (IsWindowResized())
+    if (GetScreenWidth() != gameState->screenWidth || GetScreenHeight() != gameState->screenHeight)
     {
         gameState->camera.zoom = GetCameraZoom(gameState->tileMaps[gameState->currentMapIndex]);
         gameState->camera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+        gameState->screenWidth = GetScreenWidth();
+        gameState->screenHeight = GetScreenHeight();
     }
     
     if (!gameState->cameraTweenController.NoTweens())
@@ -902,19 +907,19 @@ void GameplayUpdateAndRender()
                 break;
             }
         }
-
-        UpdateSlimes();                        
+             
         if (gameState->electricDoorSystem)
         {
             UpdateElectricDoor();
         }
-        
+
+        UpdateSlimes();
+            
         if (stateChanged)
         {
-            
             undoStack.push_back(prevState);
         }
-
+            
         // NOTE: Undo and Restart
         {
             static bool repeat = false;
@@ -938,7 +943,34 @@ void GameplayUpdateAndRender()
                 Restart();
             }
         }
+
+
     }
+
+    // NOTE: Simulate
+    {
+        // NOTE: Update: Entity
+        for (int i = 0; i < gameState->entities.count; i++)
+        {
+            Entity * entity = GetEntity(i);
+            if (entity)
+            {
+                if (!entity->tweenController.NoTweens())
+                {
+                    SetActionState(entity, ANIMATE_STATE);
+                    entity->tweenController.Update();
+                    // entity->pivot = entity->tweenController.currentPosition;
+                }
+                else
+                {
+                    if (entity->actionState == ANIMATE_STATE) SetActionState(entity, MOVE_STATE);
+                    entity->pivot = GetTilePivot(entity);
+                    // entity->tweenController.HandleAnimationNotPlaying();
+                }
+            } 
+        }
+    }
+    
     
     // NOTE: Arrow Setup
     {
@@ -957,28 +989,7 @@ void GameplayUpdateAndRender()
             arrow->topLeftPos = GetTilePivot(dir[i], (float)arrow->tileSize);
         }
     }
-
-    // NOTE: Update: Entity
-    for (int i = 0; i < gameState->entities.count; i++)
-    {
-        Entity * entity = GetEntity(i);
-        if (entity)
-        {
-            if (!entity->tweenController.NoTweens())
-            {
-                SetActionState(entity, ANIMATE_STATE);
-                entity->tweenController.Update();
-                // entity->pivot = entity->tweenController.currentPosition;
-            }
-            else
-            {
-                if (entity->actionState == ANIMATE_STATE) SetActionState(entity, MOVE_STATE);
-                entity->pivot = GetTilePivot(entity);
-                // entity->tweenController.HandleAnimationNotPlaying();
-            }
-        } 
-    }
-            
+       
     // NOTE: Render
     {
     
@@ -992,7 +1003,6 @@ void GameplayUpdateAndRender()
         for (int i = 0; i < gameState->tileMapCount; i++)
         {
             Map & map = gameState->tileMaps[i];
-        
             DrawTileMap(gameState->camera, map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
         }
         
@@ -1057,13 +1067,58 @@ void GameplayUpdateAndRender()
                             gameState->camera.target.x, gameState->camera.target.y,
                             gameState->camera.offset.x, gameState->camera.offset.y, gameState->camera.zoom), 10, 50, 20, RAYWHITE);
         DrawText("Arrow Direction to Shoot, R KEY to Restart, Z KEY to undo", 10, 10, 20, RAYWHITE);
-
         
         DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
 #endif
         
         EndDrawing();
     }    
+}
+
+void InitializeGame()
+{
+    // NOTE: Initialization
+    gameState->initialized = true;
+
+    InitKeyMapping();
+
+    gameState->tileMaps = (Map *)BumpAllocArray(gameMemory->persistentStorage, 100, sizeof(Map));
+        
+    LoadLevelToGameState(*gameState);
+        
+    // NOTE: Arrow Buttons
+    // UP
+    gameState->upArrow.sprite = GetSprite(SPRITE_ARROW_UP);
+    gameState->upArrow.id = SPRITE_ARROW_UP;
+    gameState->upArrow.tileSize = 16;
+        
+    // DOWN
+    gameState->downArrow.sprite = GetSprite(SPRITE_ARROW_DOWN);
+    gameState->downArrow.id = SPRITE_ARROW_DOWN;
+    gameState->downArrow.tileSize = 16;
+        
+    // LEFT
+    gameState->leftArrow.sprite = GetSprite(SPRITE_ARROW_LEFT);
+    gameState->leftArrow.id = SPRITE_ARROW_LEFT;
+    gameState->leftArrow.tileSize = 16;
+        
+    // RIGHT
+    gameState->rightArrow.sprite = GetSprite(SPRITE_ARROW_RIGHT);
+    gameState->rightArrow.id = SPRITE_ARROW_RIGHT;
+    gameState->rightArrow.tileSize = 16;
+
+    auto & entityIndexArray = gameState->entityTable[LAYER_SLIME];
+
+    for (int i = 0; i < entityIndexArray.count; i++)
+    {
+        Entity * slime = GetEntity(entityIndexArray[i]);
+        slime->pivot = GetTilePivot(slime);
+    }
+        
+    // NOTE: Initalize undoStack record
+    undoStack = std::vector<UndoState>();
+    undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });
+    
 }
 
 //  ========================================================================
@@ -1076,61 +1131,17 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
     
     if (gameState != gameStateIn) gameState = gameStateIn;
     if (gameMemory != gameMemoryIn) gameMemory = gameMemoryIn;
-    
-    if (!gameState->initialized)
-    {
-        // NOTE: Initialization
-        gameState->initialized = true;
 
-        InitKeyMapping();
+    static int currentScreen = TITLE_SCREEN;
 
-        gameState->tileMaps = (Map *)BumpAllocArray(gameMemory->persistentStorage, 100, sizeof(Map));
-        
-        LoadLevelToGameState(*gameState);
-        gameState->currentScreen = TITLE_SCREEN;
-        
-        // NOTE: Arrow Buttons
-        // UP
-        gameState->upArrow.sprite = GetSprite(SPRITE_ARROW_UP);
-        gameState->upArrow.id = SPRITE_ARROW_UP;
-        gameState->upArrow.tileSize = 16;
-        
-        // DOWN
-        gameState->downArrow.sprite = GetSprite(SPRITE_ARROW_DOWN);
-        gameState->downArrow.id = SPRITE_ARROW_DOWN;
-        gameState->downArrow.tileSize = 16;
-        
-        // LEFT
-        gameState->leftArrow.sprite = GetSprite(SPRITE_ARROW_LEFT);
-        gameState->leftArrow.id = SPRITE_ARROW_LEFT;
-        gameState->leftArrow.tileSize = 16;
-        
-        // RIGHT
-        gameState->rightArrow.sprite = GetSprite(SPRITE_ARROW_RIGHT);
-        gameState->rightArrow.id = SPRITE_ARROW_RIGHT;
-        gameState->rightArrow.tileSize = 16;
-
-        auto & entityIndexArray = gameState->entityTable[LAYER_SLIME];
-
-        for (int i = 0; i < entityIndexArray.count; i++)
-        {
-            Entity * slime = GetEntity(entityIndexArray[i]);
-            slime->pivot = GetTilePivot(slime);
-        }
-        
-        // NOTE: Initalize undoStack record
-        undoStack = std::vector<UndoState>();
-        undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });
-    }
-
-    switch(gameState->currentScreen)
+    switch(currentScreen)
     {
         case TITLE_SCREEN:
         {
 
             if (JustPressed(ANY_KEY))
             {
-                gameState->currentScreen = GAMEPLAY_SCREEN;
+                currentScreen = GAMEPLAY_SCREEN;
             }
             
             BeginDrawing();
@@ -1143,8 +1154,9 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             DrawText(Title, TitleTextX, TitleTextY, 40, DARKGREEN);
 
             const char * Instructions = "PRESS Any Key to JUMP to GAMEPLAY SCREEN";
-            int InstructionsTextSize = MeasureText(Instructions, 20);
-            DrawText(Instructions, (GetScreenWidth() - InstructionsTextSize) / 2, (GetScreenHeight()) / 2, 20, DARKGREEN);
+            int instX = (GetScreenWidth() - MeasureText(Instructions, 20)) / 2;
+            int instY = (GetScreenHeight()) / 2;
+            DrawText(Instructions, instX, instY, 20, DARKGREEN);
             EndDrawing();
 
             break;
@@ -1153,8 +1165,14 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
         {
             if (IsKeyPressed(KEY_ESCAPE))
             {
-                gameState->currentScreen = ENDING_SCREEN;
+                currentScreen = ENDING_SCREEN;
             }
+                                
+            if (!gameState->initialized)
+            {
+                InitializeGame();                    
+            }
+
             GameplayUpdateAndRender();
             break;
         }
@@ -1163,7 +1181,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
 
             if (JustPressed(ANY_KEY))
             {
-                gameState->currentScreen = TITLE_SCREEN;
+                currentScreen = TITLE_SCREEN;
             }
             
             BeginDrawing();
@@ -1178,7 +1196,6 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             const char * endInstructions = "PRESS Any Key to RETURN to TITLE SCREEN";
             int endInstX = (GetScreenWidth() - MeasureText(endInstructions, 20)) / 2;
             int endInstY = (GetScreenHeight()) / 2;
-            
             DrawText(endInstructions, endInstX, endInstY, 20, DARKBLUE);
 
             EndDrawing();

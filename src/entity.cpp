@@ -428,7 +428,6 @@ inline void UpdateSlimes()
             gameState->playerEntityIndex = slime->entityIndex;
         }
     }
-    
 }
 
 inline void SlimeMoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir)

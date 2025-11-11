@@ -9,7 +9,7 @@
 #include "electric_door.h"
 #include "tween_controller.h"
 
-inline bool CanFreezeSlime(Entity * connection)
+inline bool HasPower(Entity * connection)
 {
     bool result = false;
 
@@ -442,7 +442,6 @@ inline void SetUpElectricDoor()
 
 inline void UpdateElectricDoor()
 {
-
     for (int i = 0; i < CP_Indices.count; i++)
     {
         Entity * connection = GetEntity(Cable_Indices[CP_Indices[i]]);
@@ -450,32 +449,60 @@ inline void UpdateElectricDoor()
         
         if (!connection->conductive)
         {
-            Entity * entity = FindEntityByLocationAndLayer(connection->tilePos, LAYER_SLIME);
             bool has = false;
-            if (entity && entity->tweenController.NoTweens())
+            auto & slimeIndexTable = gameState->entityTable[LAYER_SLIME];
+            for (int slimeIndex = 0; slimeIndex < slimeIndexTable.count; slimeIndex++)
             {
-                has = true;    
+                Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
+                if (slime)
+                {
+                    Rectangle slimeRect = { slime->pivot.x, slime->pivot.y, slime->tileSize, slime->tileSize };
+                    Rectangle connectionRect = { connection->pivot.x, connection->pivot.y, connection->tileSize, connection->tileSize };
+
+                    if (CheckCollisionRecs(slimeRect, connectionRect))
+                    {
+                        if (HasPower(connection))
+                        {
+                            // TODO Need to properly freeze the slime
+                            //      1.force slime stay at the connection point location
+                            //      2. find if the slime can attach to any objects at that location
+                            //         - If yes, attach slime to that object and set actionState FREEZE_STATE
+                            //         - If no,  move slime to the center of the grid and set actionState to FREEZE_STATE
+                            slime->actionState = FREEZE_STATE;
+                            has = true;
+                        }
+                        break;
+                    }
+                }
             }
-            else
+            
+            if (!has)
             {
-                entity = FindEntityByLocationAndLayer(connection->tilePos, LAYER_BLOCK);
+                Entity * entity = FindEntityByLocationAndLayer(connection->tilePos, LAYER_BLOCK);
                 if (entity && entity->tweenController.NoTweens())
                 {
-                    has = true;                    
+                    if (HasPower(connection))
+                    {
+                        has = true;
+                    }
                 }
             }
+
             if (has)
             {
-                if (CanFreezeSlime(connection))
-                {
-                    if (IsSlime(entity)) entity->actionState = FREEZE_STATE;
-                    connection->conductive = true;
-                    Array<bool, MAX_CABLE> visited;
-                    for (int i = 0; i < Cable_Indices.count; i++) visited.Add(false);
-                    OnSourcePowerOn(visited, connection->sourceIndex);
-                }
+                connection->conductive = true;
+                Array<bool, MAX_CABLE> visited;
+                for (int i = 0; i < Cable_Indices.count; i++) visited.Add(false);
+                OnSourcePowerOn(visited, connection->sourceIndex);
             }
         }
+        else
+        {
+            // TODO Check if the circuit of the connection point are lit (i.e. power source connected to the door)
+            //      If not, set conductive to false if no block or slime on top
+            
+        }
+
     }
     
     for (int i = 0; i < Source_Indices.count; i++)
