@@ -68,12 +68,14 @@ enum GameInputType
     GAME_INPUT_COUNT,
 };
 
+
 enum GameScreen
 {
     TITLE_SCREEN,
     GAMEPLAY_SCREEN,
     ENDING_SCREEN,
 };
+
 
 struct KeyMapping
 {
@@ -82,11 +84,13 @@ struct KeyMapping
     int gamepadAxis;
 };
 
+
 struct Memory
 {
     BumpAllocator * transientStorage;
     BumpAllocator * persistentStorage;
 };
+
 
 struct Arrow
 {
@@ -99,13 +103,14 @@ struct Arrow
     bool show = true;
 };
 
+
 struct UndoState
 {
     int playerIndex;
     std::vector<Entity> undoEntities;    
 };
 
-// NOTE: Map data type
+
 struct Map
 {
     UndoState initUndoState;
@@ -123,30 +128,27 @@ struct Map
 // NOTE: GameState
 struct GameState
 {
-    
-    IVec2 tileMin, tileMax;
-
-    TweenController cameraTweenController;
     Camera2D camera;
+    TweenController cameraTweenController;
 
     Texture2D texture;
 
     ElectricDoorSystem * electricDoorSystem;
 
     Array<int, MAX_ENTITIES> entityTable[LAYER_COUNT];
-
-    int playerEntityIndex;
-        
-    KeyMapping keyMappings[GAME_INPUT_COUNT];
-
-    int tileMapCount;
-    Map * tileMaps;
-    Map * lv2Map;
-
     Array<Entity, MAX_ENTITIES> entities;
     
     Arrow upArrow, downArrow, leftArrow, rightArrow;
+
+    Map * tileMaps;
+    Map * lv2Map;
+
+    KeyMapping keyMappings[GAME_INPUT_COUNT];
+
+    IVec2 tileMin, tileMax;
     
+    int tileMapCount;
+    int playerEntityIndex;
     int currentMapIndex = -1;
     int screenWidth = SCREEN_WIDTH;
     int screenHeight = SCREEN_HEIGHT;
@@ -187,8 +189,6 @@ bool MoveAction(IVec2 actionDir);
 bool SplitAction(IVec2 bounceDir);
 
 inline void DrawSpriteLayer(EntityLayer layer);
-
-inline bool InstancePush(Vector2 pushStart, Vector2 pushedStart);
 
 #define GAME_H
 #endif

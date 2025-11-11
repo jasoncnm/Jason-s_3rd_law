@@ -235,13 +235,6 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
     return result;
 }
 
-inline bool InstancePush(Vector2 pushStart, Vector2 pushedStart)
-{
-    float dist = Vector2Distance(pushStart, pushedStart);
-    if (dist > MAP_TILE_SIZE) return true;
-    return false;
-}
-
 inline float GetCameraZoom(Map & currentMap)
 {
     
@@ -336,11 +329,6 @@ inline bool UpdateCamera()
     if (!gameState->cameraTweenController.NoTweens())
     {
         gameState->cameraTweenController.Update();
-        //gameState->camera.target = gameState->cameraTweenController.currentPosition;        
-    }
-    else
-    {
-        
     }
     
     return updated;
@@ -393,199 +381,180 @@ bool MoveAction(IVec2 actionDir)
     Entity * mother = GetEntity(gameState->playerEntityIndex);
     SM_ASSERT(mother, "player is not active");
 
+    if (!mother->attach) return false;
+
     float moveSpeed = 4.0f;
 
-    if (mother->attach)
+    IVec2 currentPos = mother->tilePos;
+    IVec2 actionTilePos = currentPos + actionDir;
+    if (mother->attachDir == actionDir)
     {
+        return false;
+    }
 
-        IVec2 currentPos = mother->tilePos;
-        IVec2 actionTilePos = currentPos + actionDir;
-        if (mother->attachDir == actionDir)
+    Entity * door = FindEntityByLocationAndLayer(currentPos, LAYER_DOOR);
+    if (door && DoorBlocked(door, -actionDir))
+    {
+        return false;
+    }
+        
+    //MoveActionResult moveResult = MoveActionCheck(mother, mother, actionTilePos, actionDir, 0);
+    MoveActionResult moveResult = MoveActionCheck(mother, mother, actionTilePos, actionDir, 0);
+        
+    if (moveResult.blocked)
+    {
+        if (moveResult.blockedEntity->type == ENTITY_TYPE_PIT ||
+            (moveResult.blockedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+             moveResult.blockedEntity->cableType == CABLE_TYPE_DOOR &&
+             !SameSide(moveResult.blockedEntity, actionTilePos, actionDir)))
         {
             return false;
         }
+            
+        if (mother->attachDir == -actionDir)
+        {
+            // NOTE: Bounce with the block
+            MoveActionResult result = MoveActionCheck(mother, mother, mother->tilePos + mother->attachDir, mother->attachDir, 0);
+            if (result.blocked)
+            {
+                // IMPORTANT: mother entity changed
+                Vector2 startPos = GetTilePivot(mother);
+                SetAttach(mother, moveResult.blockedEntity, actionDir);
+                Vector2 endPos = GetTilePivot(mother);
+                    
+                TweenParams params = {};
+                params.paramType = PARAM_TYPE_VECTOR2;
+                params.startVec2 = startPos;
+                params.endVec2 = endPos;
+                params.realVec2  = &mother->pivot;
 
-#if 1
-        Entity * door = FindEntityByLocationAndLayer(currentPos, LAYER_DOOR);
-        if (door && DoorBlocked(door, -actionDir))
+                AddTween(mother->tweenController, CreateTween(params, EaseOutCubic, moveSpeed));
+                OnPlayEvent(&mother->tweenController);
+                    
+                return true;
+            }
+            return true;
+        }
+
+        // IMPORTANT: mother entity changed
+        Vector2 moveStart = GetTilePivot(mother);
+        Vector2 moveMiddle =
+            Vector2Add(moveStart, Vector2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f *(MAP_TILE_SIZE - mother->tileSize)));
+        SetAttach(mother, moveResult.blockedEntity, actionDir);
+        Vector2 moveEnd = GetTilePivot(mother);
+                    
+        TweenParams params1 = {};
+        params1.paramType = PARAM_TYPE_VECTOR2;
+        params1.startVec2 = moveStart;
+        params1.endVec2 = moveMiddle;
+        params1.realVec2  = &mother->pivot;
+            
+                    
+        TweenParams params2 = {};
+        params2.paramType = PARAM_TYPE_VECTOR2;
+        params2.startVec2 = moveMiddle;
+        params2.endVec2 = moveEnd;
+        params2.realVec2  = &mother->pivot;
+
+        AddTween(mother->tweenController, CreateTween(params1, EaseOutCubic, moveSpeed * 2));
+        AddTween(mother->tweenController, CreateTween(params2, EaseOutCubic, moveSpeed * 2));
+        OnPlayEvent(&mother->tweenController);
+            
+        return true;
+    }
+
+    if (mother->attachDir == -actionDir)
+    {
+        return moveResult.pushed;
+    }
+        
+    if (!mother->active) return false;
+
+    
+    // NOTE: no obsticale, move player
+    IVec2 standingPlatformPos = actionTilePos + mother->attachDir;
+    FindAttachableResult findResult = FindAttachable(standingPlatformPos, mother->attachDir);
+    if (findResult.has)
+    {
+        Entity * resultEntity = findResult.entity;
+        if (resultEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+            resultEntity->cableType == CABLE_TYPE_DOOR &&
+            !SameSide(resultEntity, standingPlatformPos, mother->attachDir))
         {
             return false;
         }
-#endif
-        
-        //MoveActionResult moveResult = MoveActionCheck(mother, mother, actionTilePos, actionDir, 0);
-        MoveActionResult moveResult = MoveActionCheck(mother, mother, actionTilePos, actionDir, 0);
-        
-        if (moveResult.blocked)
+                
+        // IMPORTANT: mother entity changed
+        Vector2 moveStart = GetTilePivot(mother);
+        SetEntityPosition(mother, findResult.entity, actionTilePos);
+        Vector2 moveEnd = GetTilePivot(mother);
+
+        TweenParams params = {};
+        params.paramType = PARAM_TYPE_VECTOR2;
+        params.startVec2 = moveStart;
+        params.endVec2 = moveEnd;
+        params.realVec2  = &mother->pivot;
+                
+        AddTween(mother->tweenController, CreateTween(params, EaseOutCubic, moveSpeed));
+        OnPlayEvent(&mother->tweenController);
+                
+    }
+    else
+    {
+        Entity * slime = FindEntityByLocationAndLayer(standingPlatformPos, LAYER_SLIME);
+        if (slime)
         {
-            if (moveResult.blockedEntity->type == ENTITY_TYPE_PIT ||
-                (moveResult.blockedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
-                 moveResult.blockedEntity->cableType == CABLE_TYPE_DOOR &&
-                 !SameSide(moveResult.blockedEntity, actionTilePos, actionDir)))
+            mother = MergeSlimes(slime, mother);
+        }
+        else if ((!findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
+                 Abs(mother->attachDir) != Abs(actionDir))
+        {
+            IVec2 newTile = standingPlatformPos;
+            IVec2 newAttach = - actionDir;
+
+            Entity * attachedEntity = GetEntity(mother->attachedEntityIndex);
+
+            if (attachedEntity && attachedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+                attachedEntity->cableType == CABLE_TYPE_DOOR &&
+                !SameSide(attachedEntity, newTile, newAttach))
             {
                 return false;
             }
-            
-            if (mother->attachDir == -actionDir)
-            {
-                // NOTE: Bounce with the block
-                MoveActionResult result = MoveActionCheck(mother, mother, mother->tilePos + mother->attachDir, mother->attachDir, 0);
-                if (result.blocked)
-                {
-                    // IMPORTANT: mother entity changed
-                    Vector2 startPos = GetTilePivot(mother);
-                    SetAttach(mother, moveResult.blockedEntity, actionDir);
-                    Vector2 endPos = GetTilePivot(mother);
-                    
-                    TweenParams params = {};
-                    params.paramType = PARAM_TYPE_VECTOR2;
-                    params.startVec2 = startPos;
-                    params.endVec2 = endPos;
-                    params.realVec2  = &mother->pivot;
-
-                    AddTween(mother->tweenController, CreateTween(params, EaseOutCubic, moveSpeed));
-                    OnPlayEvent(&mother->tweenController);
-                    
-                    return true;
-                }
-                return true;
-            }
-
+                
             // IMPORTANT: mother entity changed
             Vector2 moveStart = GetTilePivot(mother);
-            Vector2 moveMiddle =
-                Vector2Add(moveStart, Vector2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f *(MAP_TILE_SIZE - mother->tileSize)));
-            SetAttach(mother, moveResult.blockedEntity, actionDir);
+            Vector2 movemiddle =
+                Vector2Add(moveStart, Vector2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f * (MAP_TILE_SIZE + mother->tileSize)));
+                
+            SetEntityPosition(mother, attachedEntity, newTile);
             Vector2 moveEnd = GetTilePivot(mother);
-                    
+
             TweenParams params1 = {};
             params1.paramType = PARAM_TYPE_VECTOR2;
             params1.startVec2 = moveStart;
-            params1.endVec2 = moveMiddle;
+            params1.endVec2 = movemiddle;
             params1.realVec2  = &mother->pivot;
-            
-                    
+
             TweenParams params2 = {};
             params2.paramType = PARAM_TYPE_VECTOR2;
-            params2.startVec2 = moveMiddle;
+            params2.startVec2 = movemiddle;
             params2.endVec2 = moveEnd;
             params2.realVec2  = &mother->pivot;
 
-            AddTween(mother->tweenController, CreateTween(params1, EaseOutCubic, moveSpeed * 2));
-            AddTween(mother->tweenController, CreateTween(params2, EaseOutCubic, moveSpeed * 2));
-            OnPlayEvent(&mother->tweenController);
-            
-            return true;
-        }
+            AddTween(mother->tweenController, CreateTween(params1, EaseOutCubic, moveSpeed * 1.5f));
+            AddTween(mother->tweenController, CreateTween(params2, EaseOutCubic, moveSpeed * 1.5f));
 
-        if (mother->attachDir == -actionDir)
+            OnPlayEvent(&mother->tweenController);                
+
+        }
+        else 
         {
-            if (moveResult.pushed)
-            {
-                // NOTE: Bounce with the block
-                MoveActionResult result = MoveActionCheck(mother, mother, mother->tilePos + mother->attachDir, mother->attachDir, 0);
-                if (!result.blocked)
-                {
-                    // BounceEntity(mother, mother->attachDir);
-                }
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return false;
         }
-        
-        if (!mother->active) return false;
-        
-        // NOTE: no obsticale, move player
-        {
-            IVec2 standingPlatformPos = actionTilePos + mother->attachDir;
-            FindAttachableResult findResult = FindAttachable(standingPlatformPos, mother->attachDir);
-            if (findResult.has)
-            {
-                Entity * resultEntity = findResult.entity;
-                if (resultEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
-                    resultEntity->cableType == CABLE_TYPE_DOOR &&
-                    !SameSide(resultEntity, standingPlatformPos, mother->attachDir))
-                {
-                    return false;
-                }
-                
-                // IMPORTANT: mother entity changed
-                Vector2 moveStart = GetTilePivot(mother);
-                SetEntityPosition(mother, findResult.entity, actionTilePos);
-                Vector2 moveEnd = GetTilePivot(mother);
 
-                TweenParams params = {};
-                params.paramType = PARAM_TYPE_VECTOR2;
-                params.startVec2 = moveStart;
-                params.endVec2 = moveEnd;
-                params.realVec2  = &mother->pivot;
-                
-                AddTween(mother->tweenController, CreateTween(params, EaseOutCubic, moveSpeed));
-                OnPlayEvent(&mother->tweenController);
-                
-            }
-            else
-            {
-                Entity * slime = FindEntityByLocationAndLayer(standingPlatformPos, LAYER_SLIME);
-                if (slime)
-                {
-                    mother = MergeSlimes(slime, mother);
-                }
-                else if ((!findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
-                         Abs(mother->attachDir) != Abs(actionDir))
-                {
-                    IVec2 newTile = standingPlatformPos;
-                    IVec2 newAttach = - actionDir;
-
-                    Entity * attachedEntity = GetEntity(mother->attachedEntityIndex);
-
-                    if (attachedEntity && attachedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
-                        attachedEntity->cableType == CABLE_TYPE_DOOR &&
-                        !SameSide(attachedEntity, newTile, newAttach))
-                    {
-                        return false;
-                    }
-                
-                    // IMPORTANT: mother entity changed
-                    Vector2 moveStart = GetTilePivot(mother);
-                    Vector2 movemiddle =
-                        Vector2Add(moveStart, Vector2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f * (MAP_TILE_SIZE + mother->tileSize)));
-                
-                    SetEntityPosition(mother, attachedEntity, newTile);
-                    Vector2 moveEnd = GetTilePivot(mother);
-
-                    TweenParams params1 = {};
-                    params1.paramType = PARAM_TYPE_VECTOR2;
-                    params1.startVec2 = moveStart;
-                    params1.endVec2 = movemiddle;
-                    params1.realVec2  = &mother->pivot;
-
-                    TweenParams params2 = {};
-                    params2.paramType = PARAM_TYPE_VECTOR2;
-                    params2.startVec2 = movemiddle;
-                    params2.endVec2 = moveEnd;
-                    params2.realVec2  = &mother->pivot;
-
-                    AddTween(mother->tweenController, CreateTween(params1, EaseOutCubic, moveSpeed * 1.5f));
-                    AddTween(mother->tweenController, CreateTween(params2, EaseOutCubic, moveSpeed * 1.5f));
-
-                    OnPlayEvent(&mother->tweenController);                
-
-                }
-                else 
-                {
-                    return false;
-                }
-
-            }
-            
-            return true;
-        }
-        
     }
+
+    SM_ASSERT(false, "Unreachable code");
     return false;
 }
 
