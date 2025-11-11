@@ -307,6 +307,62 @@
             "width": 224,
             "x": 2112,
             "y": 64
+        },
+        {
+            "fileName": "TileMap/TestRoom_4.tmj",
+            "height": 480,
+            "width": 480,
+            "x": 3648,
+            "y": -1472
+        },
+        {
+            "fileName": "TileMap/TestRoom_2.tmj",
+            "height": 160,
+            "width": 160,
+            "x": 3488,
+            "y": -1312
+        },
+        {
+            "fileName": "TileMap/TestRoom_3.tmj",
+            "height": 320,
+            "width": 320,
+            "x": 3168,
+            "y": -1376
+        },
+        {
+            "fileName": "TileMap/TestRoom_5.tmj",
+            "height": 224,
+            "width": 224,
+            "x": 3648,
+            "y": -1696
+        },
+        {
+            "fileName": "TileMap/TestRoom_6.tmj",
+            "height": 224,
+            "width": 256,
+            "x": 3872,
+            "y": -1696
+        },
+        {
+            "fileName": "TileMap/TestRoom_7.tmj",
+            "height": 384,
+            "width": 160,
+            "x": 3488,
+            "y": -1696
+        },
+        {
+            "fileName": "TileMap/TestRoom_8.tmj",
+            "height": 192,
+            "width": 320,
+            "x": 3168,
+            "y": -1696
+        },
+        {
+            "fileName": "TileMap/TestRoom_9.tmj",
+            "height": 128,
+            "width": 320,
+            "x": 3168,
+            "y": -1504
         }
     ],
     "onlyShowAdjacentMaps": false,
