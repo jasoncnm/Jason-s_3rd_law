@@ -89,6 +89,9 @@ int main(int argumentCount, char *argumentArray[])
 #if GAME_INTERNAL
         if (IsWindowState(FLAG_VSYNC_HINT)) ClearWindowState(FLAG_VSYNC_HINT);
         else SetWindowState(FLAG_VSYNC_HINT);
+
+        SetWindowState(FLAG_WINDOW_TOPMOST);
+        
         // SetTargetFPS(GetMonitorRefreshRate(0));
 #endif
         
