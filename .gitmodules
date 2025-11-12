@@ -1,3 +1,6 @@
 [submodule "src/vendor/raylib"]
 	path = src/vendor/raylib
 	url = https://github.com/jasoncnm/raylib.git
+[submodule "src/vendor/raygui"]
+	path = src/vendor/raygui
+	url = https://github.com/jasoncnm/raygui.git

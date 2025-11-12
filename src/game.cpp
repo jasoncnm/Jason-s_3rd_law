@@ -252,7 +252,7 @@ inline float GetCameraZoom(Map & currentMap)
     int mapMax = (currentMap.width > currentMap.height) ? currentMap.width : currentMap.height;
         
     float zoom = (zoom_per_tile / mapMax);
-    (newWidth < newHeight) ? zoom *= newWidth : zoom *= newHeight;         
+    (newWidth < newHeight) ? zoom *= newWidth : zoom *= newHeight;
 
     return zoom;
 }
@@ -1115,6 +1115,8 @@ void InitializeGame()
     // NOTE: Initalize undoStack record
     undoStack = std::vector<UndoState>();
     undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });
+
+    // SetTextureFilter(gameState->texture, TEXTURE_FILTER_BILINEAR); 
     
 }
 
@@ -1154,6 +1156,19 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             int instX = (GetScreenWidth() - MeasureText(Instructions, 20)) / 2;
             int instY = (GetScreenHeight()) / 2;
             DrawText(Instructions, instX, instY, 20, DARKGREEN);
+
+
+            static bool showMessageBox = false;
+            if (GuiButton({ 24, 24, 120, 30 }, "#191#Show Message")) showMessageBox = true;
+
+            if (showMessageBox)
+            {
+                int result = GuiMessageBox({ 85, 70, 250, 100 },
+                                           "#191#Message Box", "Hi! This is a message!", "Nice;Cool");
+
+                if (result >= 0) showMessageBox = false;
+            }
+            
             EndDrawing();
 
             break;

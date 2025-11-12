@@ -14,8 +14,8 @@
    1 - Build for pubilc release
 */
 
-#define SCREEN_WIDTH 1000
-#define SCREEN_HEIGHT 1000
+#define SCREEN_WIDTH  1600
+#define SCREEN_HEIGHT 1600
 
 #define MAP_TILE_SIZE 32       // Tiles size
 #define MAX_ANIMATION 50
@@ -33,8 +33,11 @@ constexpr float zoom_per_tile = 19.0f / 600.0f;
 constexpr float press_freq = 0.2f;
 
 
-#include "vendor/raylib/raylib.h"
-#include "vendor/raylib/raymath.h"
+#include "raylib.h"
+#include "raymath.h"
+
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
 
 #include "engine_lib.h"
 #include "assets.h"
