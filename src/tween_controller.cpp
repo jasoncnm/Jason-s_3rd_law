@@ -26,6 +26,7 @@ void HandleTweenEvent(TweenEvent & event)
 
 void TweenController::Reset()
 {
+    start = playing = false;
     for (int i = 0; i < MAX_CHANNEL; i++)
     {
         channels[i].Clear();
@@ -38,8 +39,16 @@ void TweenController::Update()
 {
     if (!NoTweens())
     {
+        if (start)
+        {
+            start = false;
+            playing = true;
+            HandleTweenEvent(startEvent);
+        }
+        
         if (playing)
         {
+            
             for (int channel = 0; channel < MAX_CHANNEL; channel++)
             {
                 TweeningQueue & queue = channels[channel];
@@ -74,7 +83,7 @@ void OnPlayEvent(TweenController * controller)
 {
     SM_ASSERT(controller, "controller is null");
     controller->playing = true;
-    HandleTweenEvent(controller->startEvent);
+    controller->start   = true;
 }
 
 

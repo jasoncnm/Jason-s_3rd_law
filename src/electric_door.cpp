@@ -536,7 +536,7 @@ inline void UpdateElectricDoor()
                                 params.realVec2  = &slime->pivot;
 
                                 AddTween(slime->tweenController, CreateTween(params));
-
+                                OnPlayEvent(&slime->tweenController);
                             }
                             else
                             {

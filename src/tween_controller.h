@@ -36,9 +36,9 @@ struct TweenEvent
 struct TweenController
 {
     using TweeningQueue = Array<Tween, 10>;
-    
+
+    bool start   = false;
     bool playing = false;
-    int currentQueueIndex = 0;
     
     TweeningQueue channels[MAX_CHANNEL];
 

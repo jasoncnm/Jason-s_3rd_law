@@ -106,6 +106,10 @@ struct FindAttachableResult
     bool has;
 };
 
+struct MoveSlimeUntilBlockResult
+{
+    bool merged = false;
+};
 
 struct BounceEntityResult
 {

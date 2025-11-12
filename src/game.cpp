@@ -16,6 +16,7 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 
 
 TODO: Things that I can do beside arts and design I guess
+  - Implement save points for testing
   - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
   - smooth pixelperfect transition
   - top down lights / spotlight rendering

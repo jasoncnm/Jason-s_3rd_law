@@ -415,9 +415,10 @@ inline Entity * FindEntityByLocationAndLayers(IVec2 pos, EntityLayer * layers, i
     return nullptr;
 }
 
-inline void SlimeMoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir)
+inline MoveSlimeUntilBlockResult SlimeMoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir)
 {
-
+    MoveSlimeUntilBlockResult result = { false };
+    
     IVec2 start = entity->tilePos + dir;
     bool isSlime = (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE);
 
@@ -435,39 +436,31 @@ inline void SlimeMoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir)
                     case ENTITY_TYPE_PIT:
                     {
                         SetEntityPosition(entity, nullptr, pos - dir);
-                        return;
+                        return result;
                     }
                     case ENTITY_TYPE_BLOCK:
                     case ENTITY_TYPE_WALL:
                     {
                         SetEntityPosition(entity, target, pos - dir);
-                        return;
+                        return result;
                     }
                     case ENTITY_TYPE_GLASS:
                     {
                         if (!target->broken)
                         {
                             SetEntityPosition(entity, target, pos - dir);
-                            return;
+                            return result;
                         }
                         break;
                     }
                     case ENTITY_TYPE_PLAYER:
-                    {
-                        if (isSlime)
-                        {
-                            entity = MergeSlimes(target, entity);
-                            goto EndSearch;
-                        }
-                        
-                        break;
-                    }
                     case ENTITY_TYPE_CLONE:
                     {
                         if (isSlime)
                         {
-                            entity = MergeSlimes(entity, target);
-                            goto EndSearch;
+                            entity = MergeSlimes(target, entity);
+                            result.merged = true;
+                            return result;
                         }
 
                         break;
@@ -481,16 +474,7 @@ inline void SlimeMoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir)
                                 if (SameSide(target, pos, dir))
                                 {
                                     SetEntityPosition(entity, target, pos - dir);
-                                    return;
-                                }
-                                break;
-                            }
-                            case CABLE_TYPE_CONNECTION_POINT:
-                            {
-                                if (isSlime && target->conductive)
-                                {
-                                    SetEntityPosition(entity, nullptr, pos);
-                                    SetActionState(entity, FREEZE_STATE);
+                                    return result;
                                 }
                                 break;
                             }
@@ -500,9 +484,9 @@ inline void SlimeMoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir)
                     }
                 }
             }
-        } EndSearch:;
+        }
     }
-
+    
     Entity * attach = nullptr;
     if (entity->attach)
     {
@@ -510,6 +494,8 @@ inline void SlimeMoveTowardsUntilBlocked(Entity * entity, IVec2 dest, IVec2 dir)
     }
     SetEntityPosition(entity, attach, dest);
 
+    return result;
+    
 }
 
 inline void UpdateSlimes()
@@ -518,7 +504,7 @@ inline void UpdateSlimes()
     for (int i = 0; i < slimeEntityIndices.count; i++)
     {
         Entity * slime = GetEntity(slimeEntityIndices[i]);
-        if (slime && slime->attach)
+        if (slime && slime->tweenController.NoTweens() && slime->attach)
         {
             Entity * attach = GetEntity(slime->attachedEntityIndex);
 
@@ -537,25 +523,60 @@ inline void UpdateSlimes()
                     SM_ASSERT(dir.SqrMagnitude() == 1, "Invalid bounce direction");
 
                     Vector2 moveStart = GetTilePivot(slime);
-                    SlimeMoveTowardsUntilBlocked(slime, newPos, dir);
+                    IVec2 attachDirStart = slime->attachDir;
+                    MoveSlimeUntilBlockResult moveResult = SlimeMoveTowardsUntilBlocked(slime, newPos, dir);
+      
+                    if (moveResult.merged)
+                    {
+                        return;                        
+                    }
+                    
                     Vector2 moveEnd = GetTilePivot(slime);
-
-                    float dist = Vector2Distance(moveStart, moveEnd);
-                    float iDist = dist / MAP_TILE_SIZE;
+                    IVec2 attachDirEnd = slime->attachDir;
 
                     // TODO: Play Instanly for now, need to blend the current animation with this animation
                     //       How do I blend two motions
 #if 1
                     slime->tweenController.Reset();
 #endif
-                    TweenParams params = {};
-                    params.paramType = PARAM_TYPE_VECTOR2;
-                    params.startVec2 = moveStart;
-                    params.endVec2 = moveEnd;
-                    params.realVec2  = &slime->pivot;
-                        
-                    AddTween(slime->tweenController, CreateTween(params, nullptr,  BOUNCE_SPEED, iDist));
+                    if (attachDirStart != attachDirEnd)
+                    {
+                        Vector2 moveMiddle = GetTilePivot(slime->tilePos, slime->tileSize, attachDirStart);
+                        moveMiddle =
+                            Vector2Add(moveMiddle,
+                                       Vector2Scale({ (float)dir.x, (float)dir.y }, 0.5f *(MAP_TILE_SIZE - slime->tileSize)));
 
+                        float dist = Vector2Distance(moveStart, moveMiddle);
+                        float iDist = dist / MAP_TILE_SIZE;
+                    
+                        TweenParams params1 = {};
+                        params1.paramType = PARAM_TYPE_VECTOR2;
+                        params1.startVec2 = moveStart;
+                        params1.endVec2 = moveMiddle;
+                        params1.realVec2  = &slime->pivot;
+                        AddTween(slime->tweenController, CreateTween(params1, nullptr,  BOUNCE_SPEED, iDist));
+                    
+                        TweenParams params2 = {};
+                        params2.paramType = PARAM_TYPE_VECTOR2;
+                        params2.startVec2 = moveMiddle;
+                        params2.endVec2 = moveEnd;
+                        params2.realVec2  = &slime->pivot;
+                        AddTween(slime->tweenController, CreateTween(params2, nullptr,  BOUNCE_SPEED * 2.0f, iDist));
+                        
+                    }
+                    else
+                    {
+                        float dist = Vector2Distance(moveStart, moveEnd);
+                        float iDist = dist / MAP_TILE_SIZE;
+                    
+                        TweenParams params = {};
+                        params.paramType = PARAM_TYPE_VECTOR2;
+                        params.startVec2 = moveStart;
+                        params.endVec2 = moveEnd;
+                        params.realVec2  = &slime->pivot;
+                        AddTween(slime->tweenController, CreateTween(params, nullptr,  BOUNCE_SPEED, iDist));
+                    }
+                    
                     if (!attach->tweenController.NoTweens())
                     {
                         TweenEvent & startEvent = attach->tweenController.startEvent;
