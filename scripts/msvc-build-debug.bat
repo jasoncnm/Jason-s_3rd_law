@@ -7,15 +7,16 @@ set EXPORTED_FUNCTIONS=/EXPORT:UpdateAndRender
 set COMMON_FLAGS=/DGAME_INTERNAL=1 /Zi /nologo -GR- -Od -Oi -WX -W4 -wd4530 -wd4456 -wd4505 -wd4201 -wd4100 -wd4189 -wd4996 -FC
 set EXE_NAME=game.exe
 set DLL_NAME=game_code.dll
+set INCLUDES=-I..\src\vendor\raylib\ -I..\src\vendor\raygui\src\
 
 REM call msvc_upgrade_cmd_64.bat
 
 cd bin
 
 echo LOCKFILE IN AID OF HOTLOADING > lock.file
-cl ..\src\game.cpp /LD /Fe:%DLL_NAME% %COMMON_FLAGS% %LINKER_FLAGS% %EXPORTED_FUNCTIONS% %WARNINGS% 
+cl %INCLUDES% ..\src\game.cpp /LD /Fe:%DLL_NAME% %COMMON_FLAGS% %LINKER_FLAGS% %EXPORTED_FUNCTIONS% %WARNINGS% 
 del lock.file
-cl  ..\src\main.cpp /D_AMD64_ /Fe:%EXE_NAME% %COMMON_FLAGS% %LINKER_FLAGS% %WARNINGS% %DEFINES%
+cl %INCLUDES% ..\src\main.cpp /D_AMD64_ /Fe:%EXE_NAME% %COMMON_FLAGS% %LINKER_FLAGS% %WARNINGS% %DEFINES%
 
 cd ..
 

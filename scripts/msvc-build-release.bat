@@ -3,10 +3,11 @@
 set LINKER_FLAGS=/link -incremental:no -opt:ref raylib.lib kernel32.lib user32.lib shell32.lib winmm.lib gdi32.lib opengl32.lib
 set COMMON_FLAGS=/DGAME_INTERNAL=0 -Ox -O2 -Os -Ot -GL -Oi -FC
 set EXE_NAME=game.exe
+set INCLUDES=-I..\src\vendor\raylib\ -I..\src\vendor\raygui\src\
 
 cd bin
 
-cl  ..\src\main.cpp /Fe:%EXE_NAME% %COMMON_FLAGS% %LINKER_FLAGS% %WARNINGS% %DEFINES%
+cl %INCLUDES% ..\src\main.cpp /Fe:%EXE_NAME% %COMMON_FLAGS% %LINKER_FLAGS% %WARNINGS% %DEFINES%
 
 cd ..
 
