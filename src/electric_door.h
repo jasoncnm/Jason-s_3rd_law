@@ -8,10 +8,10 @@
    ======================================================================== */
 
 #define MAX_CABLE 1000
-#define Cable_Indices gameState->electricDoorSystem->entityIndices
-#define Source_Indices gameState->electricDoorSystem->sourceIndices
-#define CP_Indices gameState->electricDoorSystem->connectionPointIndices
-#define Door_Indices gameState->electricDoorSystem->doorIndices
+#define Cable_Indices gameState->electricDoorSystem.entityIndices
+#define Source_Indices gameState->electricDoorSystem.sourceIndices
+#define CP_Indices gameState->electricDoorSystem.connectionPointIndices
+#define Door_Indices gameState->electricDoorSystem.doorIndices
 
 struct Entity;
 
@@ -34,6 +34,15 @@ struct ElectricDoorSystem
     Array<int, 400> doorIndices;
     Array<int, 400> connectionPointIndices;
     Array<int, MAX_CABLE> entityIndices;
+
+    void CleanUp()
+    {
+        sourceIndices.Clear();
+        doorIndices.Clear();
+        connectionPointIndices.Clear();
+        entityIndices.Clear();
+    }
+    
 };
 
 inline void UpdateElectricDoor();

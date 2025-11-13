@@ -119,6 +119,9 @@ int main(int argumentCount, char *argumentArray[])
             SM_ERROR("Unable to load file (%s) to texture", TEXTURE_PATH);
             return -1;
         }
+
+
+        
         UnloadImage(icon);
 
     }

@@ -43,7 +43,6 @@ inline void UnfreezeSlimes(Entity * door)
 {
     SM_ASSERT(door, "door is inactive");
     SM_ASSERT(door->cableType == CABLE_TYPE_DOOR, "entity is not a door");
-    SM_ASSERT(gameState->electricDoorSystem, "electric door does not exist");
 
 #if 0
     for (int i = 0; i < CP_Indices.count; i++)

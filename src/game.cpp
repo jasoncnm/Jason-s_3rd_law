@@ -4,6 +4,11 @@
 #include "render_interface.h"
 #include "action_input.h"
 
+
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
+
+
 #include "entity.cpp"
 #include "electric_door.cpp"
 #include "level_loader.cpp"
@@ -16,14 +21,16 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 
 
 TODO: Things that I can do beside arts and design I guess
-  - Implement save points for testing
+  - Drag and drop save file could be fun
+  - Implement save points (Since the state of our game is entirely based on each state of the entity,
+                           we can just read/write raw bytes of entities to a file)
   - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
   - smooth pixelperfect transition
   - top down lights / spotlight rendering
   - add particles
   - Dropdown console commands 
   - Texture filtering when zooming out (is mipmapping come handy here?)
-  - Viewport scaling IMPORTANT: DO we really need this ?
+  - Viewport scaling IMPORTANT: DO we really need this ? TODO: YES!!
   - Assets Managment
 
   NOTE: done
@@ -293,6 +300,10 @@ inline bool UpdateCamera()
 
                 if (gameState->currentMapIndex == -1)
                 {
+                    gameState->screenWidth = GetScreenWidth();
+                    gameState->screenHeight = GetScreenHeight();
+
+                    gameState->currentMapIndex = i;
                     gameState->camera.rotation = 0.0f;
                     gameState->camera.target = pos;
                     gameState->camera.zoom = GetCameraZoom(map);
@@ -907,11 +918,8 @@ void GameplayUpdateAndRender()
          
         }
              
-        if (gameState->electricDoorSystem)
-        {
-            UpdateElectricDoor();
-        }
-
+        UpdateElectricDoor();
+        
         UpdateSlimes();
             
         if (stateChanged)
@@ -1073,13 +1081,8 @@ void GameplayUpdateAndRender()
 
 void InitializeGame()
 {
-    SM_TRACE("Initializing Game");
     // NOTE: Initialization
     gameState->initialized = true;
-
-    InitKeyMapping();
-
-    gameState->tileMaps = (Map *)BumpAllocArray(gameMemory->persistentStorage, 100, sizeof(Map));
         
     LoadLevelToGameState(*gameState);
         
@@ -1116,7 +1119,24 @@ void InitializeGame()
     undoStack = std::vector<UndoState>();
     undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });
 
+    gameState->currentMapIndex = -1;
     // SetTextureFilter(gameState->texture, TEXTURE_FILTER_BILINEAR); 
+    
+}
+
+void CleanUpGame()
+{
+    undoStack = std::vector<UndoState>();
+    tileMapSources.Clear();
+
+    gameState->initialized = false;    
+    gameState->cameraTweenController.Reset();
+    for (int i = 0; i < LAYER_COUNT; i++)
+    {
+        gameState->entityTable[i].Clear();
+    }
+    gameState->electricDoorSystem.CleanUp();
+    gameState->entities.Clear();
     
 }
 
@@ -1131,8 +1151,16 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
     if (gameState != gameStateIn) gameState = gameStateIn;
     if (gameMemory != gameMemoryIn) gameMemory = gameMemoryIn;
 
-    static int currentScreen = TITLE_SCREEN;
+    static int currentScreen = MENU_SCREEN;
+    static bool init = false;
+    if (!init)
+    {
+        init = true;
+        GuiLoadStyle(RAYLIB_GUI_STYLE_PATH);
+        InitKeyMapping();
 
+    }
+    
     switch(currentScreen)
     {
         case TITLE_SCREEN:
@@ -1140,7 +1168,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
 
             if (JustPressed(ANY_KEY))
             {
-                currentScreen = GAMEPLAY_SCREEN;
+                currentScreen = MENU_SCREEN;
             }
             
             BeginDrawing();
@@ -1156,29 +1184,52 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             int instX = (GetScreenWidth() - MeasureText(Instructions, 20)) / 2;
             int instY = (GetScreenHeight()) / 2;
             DrawText(Instructions, instX, instY, 20, DARKGREEN);
-
-
-            static bool showMessageBox = false;
-            if (GuiButton({ 24, 24, 120, 30 }, "#191#Show Message")) showMessageBox = true;
-
-            if (showMessageBox)
-            {
-                int result = GuiMessageBox({ 85, 70, 250, 100 },
-                                           "#191#Message Box", "Hi! This is a message!", "Nice;Cool");
-
-                if (result >= 0) showMessageBox = false;
-            }
             
             EndDrawing();
 
             break;
         }
+        case MENU_SCREEN:
+        {
+            BeginDrawing();
+            ClearBackground(BLACK);
+
+            float width = 1000.0f;
+            float height = 100.0f;
+            
+            const char * NewGameText = "new game";
+            Rectangle bounds =
+            {
+                (GetScreenWidth() - width) * 0.5f,
+                (GetScreenHeight() - 40) * 0.5f - 250,
+                width,
+                height
+            };
+            
+            if (GuiButton(bounds, NewGameText))
+            {
+                currentScreen = GAMEPLAY_SCREEN;
+            }
+
+            const char * LoadGameText = "load game";
+            bounds.y += 200;
+            if (GuiButton(bounds, LoadGameText))
+            {
+                
+            };
+
+            const char * SaveGameText = "save game";
+            bounds.y += 200;
+            if (GuiButton(bounds, SaveGameText))
+            {
+            };
+            
+            EndDrawing();
+            
+            break;            
+        }
         case GAMEPLAY_SCREEN:
         {
-            if (IsKeyPressed(KEY_ESCAPE))
-            {
-                currentScreen = ENDING_SCREEN;
-            }
                                 
             if (!gameState->initialized)
             {
@@ -1186,6 +1237,17 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             }
 
             GameplayUpdateAndRender();
+            if (IsKeyPressed(KEY_ESCAPE))
+            {
+                CleanUpGame();
+                currentScreen = ENDING_SCREEN;
+        
+                for (;GetKeyPressed() > 0; )
+                {
+                }
+        
+            }
+
             break;
         }
         case ENDING_SCREEN:
@@ -1194,6 +1256,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             if (JustPressed(ANY_KEY))
             {
                 currentScreen = TITLE_SCREEN;
+
             }
             
             BeginDrawing();
@@ -1215,5 +1278,5 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             break;
         }
     }
-    
+
 }

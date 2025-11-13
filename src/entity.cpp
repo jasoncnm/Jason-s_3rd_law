@@ -69,11 +69,6 @@ AddCable(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool 
     entityResult.entity->up = up;
     entityResult.entity->down = down;
 
-    if (!gameState->electricDoorSystem)
-    {
-        gameState->electricDoorSystem = (ElectricDoorSystem *)BumpAlloc(gameMemory->persistentStorage, sizeof (ElectricDoorSystem));
-    }
-
     Cable_Indices.Add(entityResult.entityIndex);
 
     return entityResult;
@@ -97,11 +92,6 @@ AddDoor(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool d
     entityResult.entity->up = up;
     entityResult.entity->down = down;
 
-    if (!gameState->electricDoorSystem)
-    {
-        gameState->electricDoorSystem = (ElectricDoorSystem *)BumpAlloc(gameMemory->persistentStorage, sizeof (ElectricDoorSystem));
-    }
-
     Door_Indices.Add(Cable_Indices.Add(entityResult.entityIndex));
 
     return entityResult;
@@ -119,11 +109,6 @@ AddSource(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool
     entityResult.entity->up = up;
     entityResult.entity->down = down;
 
-    if (!gameState->electricDoorSystem)
-    {
-        gameState->electricDoorSystem = (ElectricDoorSystem *)BumpAlloc(gameMemory->persistentStorage, sizeof (ElectricDoorSystem));
-    }
-
     Source_Indices.Add(Cable_Indices.Add(entityResult.entityIndex));
     
     return entityResult;
@@ -140,11 +125,6 @@ AddConnection(IVec2 tilePos, SpriteID spriteID)
     entityResult.entity->right = true;
     entityResult.entity->up = true;
     entityResult.entity->down = true;
-
-    if (!gameState->electricDoorSystem)
-    {
-        gameState->electricDoorSystem = (ElectricDoorSystem *)BumpAlloc(gameMemory->persistentStorage, sizeof (ElectricDoorSystem));
-    }
 
     CP_Indices.Add(Cable_Indices.Add(entityResult.entityIndex));
 

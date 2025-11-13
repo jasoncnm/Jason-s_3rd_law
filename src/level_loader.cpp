@@ -342,11 +342,15 @@ void LoadLevelToGameState(GameState & state)
         std::ifstream f(WORLD_PATH);
         json worldData = json::parse(f);
 
-        json tileMaps = worldData["maps"];
+        auto tileMaps = worldData["maps"];
 
-        for (json::iterator it = tileMaps.begin(); it != tileMaps.end(); ++it)
+        state.tileMapCount = (int)tileMaps.size();
+#if 0
+        gameState->tileMaps = (Map *)BumpAllocArray(gameMemory->persistentStorage, state.tileMapCount, sizeof(Map));
+#endif
+        for (int index = 0; index < state.tileMapCount; index++)
         {
-            json map = *it;
+            json map = tileMaps[index];
             std::string fileName =  map["fileName"];
             
             int mapWidth = (int)map["width"] / MAP_TILE_SIZE;
@@ -358,13 +362,12 @@ void LoadLevelToGameState(GameState & state)
             tileMap.tilePos = { startPosX, startPosY };
             tileMap.width = mapWidth, tileMap.height =  mapHeight;
 
-
             int id = state.tileMapCount;
-            state.tileMaps[state.tileMapCount++] = tileMap;
+            state.tileMaps[index] = tileMap;
             
             if (fileName == LEVEL_2_ROOM_NAME)
             {
-                gameState->lv2Map = state.tileMaps + state.tileMapCount - 1;
+                gameState->lv2Map = &state.tileMaps[index];
             }
             
             std::string path = LEVELS_PATH + fileName;
@@ -418,7 +421,7 @@ void LoadLevelToGameState(GameState & state)
     }
     
     // NOTE: SetUp Electric Door
-    if (gameState->electricDoorSystem) SetUpElectricDoor();
+    SetUpElectricDoor();
 
 }
  

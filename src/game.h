@@ -36,9 +36,6 @@ constexpr float press_freq = 0.2f;
 #include "raylib.h"
 #include "raymath.h"
 
-#define RAYGUI_IMPLEMENTATION
-#include "raygui.h"
-
 #include "engine_lib.h"
 #include "assets.h"
 #include "render_interface.h"
@@ -46,6 +43,7 @@ constexpr float press_freq = 0.2f;
 #include "electric_door.h"
 #include "entity.h"
 #include "tween_controller.h"
+#include "game_ui.h"
 
 // ----------------------------------------------------
 // NOTE: Game Structs
@@ -75,6 +73,7 @@ enum GameInputType
 enum GameScreen
 {
     TITLE_SCREEN,
+    MENU_SCREEN,
     GAMEPLAY_SCREEN,
     ENDING_SCREEN,
 };
@@ -94,17 +93,6 @@ struct Memory
     BumpAllocator * persistentStorage;
 };
 
-
-struct Arrow
-{
-    Sprite sprite;
-    SpriteID id;
-
-    int tileSize;
-    
-    Vector2 topLeftPos;
-    bool show = true;
-};
 
 
 struct UndoState
@@ -136,23 +124,23 @@ struct GameState
 
     Texture2D texture;
 
-    ElectricDoorSystem * electricDoorSystem;
+    ElectricDoorSystem electricDoorSystem;
 
     Array<int, MAX_ENTITIES> entityTable[LAYER_COUNT];
     Array<Entity, MAX_ENTITIES> entities;
     
     Arrow upArrow, downArrow, leftArrow, rightArrow;
 
-    Map * tileMaps;
+    int tileMapCount;
+    Map tileMaps[500];
     Map * lv2Map;
 
     KeyMapping keyMappings[GAME_INPUT_COUNT];
 
     IVec2 tileMin, tileMax;
     
-    int tileMapCount;
     int playerEntityIndex;
-    int currentMapIndex = -1;
+    int currentMapIndex;
     int screenWidth = SCREEN_WIDTH;
     int screenHeight = SCREEN_HEIGHT;
     
