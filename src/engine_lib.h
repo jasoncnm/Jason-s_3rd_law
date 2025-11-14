@@ -248,6 +248,33 @@ char * BumpAlloc(BumpAllocator * ba, size_t size)
 //  ========================================================================
 // NOTE: File I/O
 //  ========================================================================
+
+int StringLength(char *String)
+{
+    int Count = 0;
+    while(*String++)
+    {
+        Count++;
+    }
+    return Count;
+}
+
+void CatStrings(char *SourceA, size_t SourceACount,
+                char *SourceB, size_t SourceBCount,
+                char *Dest)
+{
+    for (int Index = 0; Index < SourceACount; Index++)
+    {
+        *Dest++ = *SourceA++;
+    }
+    for (int Index = 0; Index < SourceBCount; Index++)
+    {
+        *Dest++ = *SourceB++;
+    }
+    *Dest++ = 0; 
+}
+
+
 long long GetTimestamp(char * file)
 {
     struct stat fileStat = {};

@@ -27,7 +27,10 @@
 
 #define MAX_ENTITIES 5000
 
-#define FIX_TIME_STEP_MS 20.0f
+#define GAME_SAVE_PATH "data/save_data/"
+
+#define _internal static
+
 
 constexpr float zoom_per_tile = 19.0f / 600.0f;
 constexpr float press_freq = 0.2f;
@@ -75,6 +78,7 @@ enum GameScreen
     TITLE_SCREEN,
     MENU_SCREEN,
     GAMEPLAY_SCREEN,
+    PAUSE_MENU_SCREEN,
     ENDING_SCREEN,
 };
 
@@ -145,6 +149,7 @@ struct GameState
     int screenHeight = SCREEN_HEIGHT;
     
     bool initialized;
+    
 };
 
 
@@ -168,19 +173,15 @@ static Memory * gameMemory;
 //  ========================================================================
 //              NOTE: Game Functions 
 //  ========================================================================
-inline bool UpdateCamera();
-
-inline void Undo();
-
-inline void Restart();
-
 MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int accumulatedMass);
 
-bool MoveAction(IVec2 actionDir);
 
-bool SplitAction(IVec2 bounceDir);
 
-inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount);
+//  ========================================================================
+//              NOTE: Game Functions (exposed)
+//  ========================================================================
+#define UPDATE_AND_RENDER(name) void name(GameState * gameStateIn, Memory * gameMemoryIn, bool * running)
+typedef UPDATE_AND_RENDER(update_and_render);
 
 #define GAME_H
 #endif

@@ -21,9 +21,9 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 
 
 TODO: Things that I can do beside arts and design I guess
+  - Need to refactor level_loader, we should have separate function to load entities, load tilemaps, and setup entity table.
+  - We should setup the cable indices in SetUpElectricDoor function 
   - Drag and drop save file could be fun
-  - Implement save points (Since the state of our game is entirely based on each state of the entity,
-                           we can just read/write raw bytes of entities to a file)
   - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
   - smooth pixelperfect transition
   - top down lights / spotlight rendering
@@ -34,6 +34,8 @@ TODO: Things that I can do beside arts and design I guess
   - Assets Managment
 
   NOTE: done
+  - Implement save points (Since the state of our game is entirely based on each state of the entity,
+                           we can just read/write raw bytes of entities to a file)
   - Gamepad supports
   - (MoveActionCheck) When Door and block are in the same tile, we should check if the door is blocked first, then check if we can push the block
   - Change animation controller into a tweening controller that is able to tween arbitarty types of values using easing functions
@@ -251,7 +253,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
     return result;
 }
 
-inline float GetCameraZoom(Map & currentMap)
+ inline float GetCameraZoom(Map & currentMap)
 {
     
     int newWidth = GetScreenWidth();
@@ -264,7 +266,7 @@ inline float GetCameraZoom(Map & currentMap)
     return zoom;
 }
 
-inline bool UpdateCamera()
+ inline bool UpdateCamera()
 {
     bool updated = false;
     Entity * player = GetPlayer();
@@ -361,7 +363,7 @@ inline bool UpdateCamera()
 }
 
 
-inline void SetUndoEntities(std::vector<Entity> & undoEntities)
+ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
 {
     for (int i = 0; i < undoEntities.size(); i++)
     {
@@ -377,7 +379,7 @@ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
     }
 }
 
-inline void Undo()
+ inline void Undo()
 {
     UndoState & undoState = undoStack.back();
     gameState->playerEntityIndex = undoState.playerIndex;
@@ -388,7 +390,7 @@ inline void Undo()
 }
 
 
-inline void Restart()
+ inline void Restart()
 {
     undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });    
     
@@ -402,7 +404,7 @@ inline void Restart()
     
 }
 
-bool MoveAction(IVec2 actionDir)
+ bool MoveAction(IVec2 actionDir)
 {
     Entity * player = GetEntity(gameState->playerEntityIndex);
     SM_ASSERT(player, "player is not active");
@@ -593,7 +595,7 @@ bool MoveAction(IVec2 actionDir)
     return true;
 }
 
-bool SplitAction(Entity * player, IVec2 bounceDir)
+ bool SplitAction(Entity * player, IVec2 bounceDir)
 {
 
     if (player->mass < 2) return false;
@@ -657,7 +659,7 @@ bool SplitAction(Entity * player, IVec2 bounceDir)
 }
 
 
-inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount)
+ inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount)
 {
     for (int layerIndex = 0; layerIndex < arrayCount; layerIndex++)
     {
@@ -676,7 +678,7 @@ inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount)
     } 
 }
 
-inline bool SlimeSelection(Entity * player)
+ inline bool SlimeSelection(Entity * player)
 {
     auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
 
@@ -714,7 +716,7 @@ inline bool SlimeSelection(Entity * player)
 }
 
 // TODO: Use Tile Bitmasking
-void UpdateSprite(EntityLayer layer)
+ void UpdateSprite(EntityLayer layer)
 {
     auto & entityIndexArray = gameState->entityTable[layer];
     IVec2 dir[4] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
@@ -735,7 +737,7 @@ void UpdateSprite(EntityLayer layer)
     }
 }
 
-void GameplayUpdateAndRender()
+ void GameplayUpdateAndRender()
 {
 
     // NOTE: Debug Switch Monitor
@@ -1050,7 +1052,7 @@ void GameplayUpdateAndRender()
     
         EndMode2D();
 
-#if GAME_INTERNAL
+#if GAME
         // NOTE: UI Draw Game Informations
 
         Entity * player = GetEntity(gameState->playerEntityIndex);
@@ -1084,8 +1086,6 @@ void InitializeGame()
     // NOTE: Initialization
     gameState->initialized = true;
         
-    LoadLevelToGameState(*gameState);
-        
     // NOTE: Arrow Buttons
     // UP
     gameState->upArrow.sprite = GetSprite(SPRITE_ARROW_UP);
@@ -1115,6 +1115,9 @@ void InitializeGame()
         slime->pivot = GetTilePivot(slime);
     }
         
+    // NOTE: SetUp Electric Door
+    SetUpElectricDoor();
+
     // NOTE: Initalize undoStack record
     undoStack = std::vector<UndoState>();
     undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });
@@ -1124,7 +1127,7 @@ void InitializeGame()
     
 }
 
-void CleanUpGame()
+ void CleanUpGame()
 {
     undoStack = std::vector<UndoState>();
     tileMapSources.Clear();
@@ -1145,7 +1148,7 @@ void CleanUpGame()
 //  ========================================================================
 
 // Called on every frame
-void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
+UPDATE_AND_RENDER(UpdateAndRender)
 {
     
     if (gameState != gameStateIn) gameState = gameStateIn;
@@ -1208,6 +1211,7 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             
             if (GuiButton(bounds, NewGameText))
             {
+                LoadLevelToGameState(*gameState);
                 currentScreen = GAMEPLAY_SCREEN;
             }
 
@@ -1216,17 +1220,76 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             if (GuiButton(bounds, LoadGameText))
             {
                 
-            };
+                char fileName[100];
+                CatStrings(GAME_SAVE_PATH, StringLength(GAME_SAVE_PATH),
+                           "Save_0", StringLength("Save_0"), fileName);
+                if (FileExists(fileName))
+                {
+                    LoadLevelToGameState(*gameState);
 
-            const char * SaveGameText = "save game";
-            bounds.y += 200;
-            if (GuiButton(bounds, SaveGameText))
-            {
+                    int dataSize;
+                    void * data = (void *)LoadFileData(fileName, &dataSize);
+                    gameState->entities.count = dataSize / sizeof(gameState->entities[0]);
+                    memcpy(gameState->entities.elements, data, dataSize);
+                    // IMPORTANT: Assumming game has only one level, not reloading maps
+                    currentScreen = GAMEPLAY_SCREEN;
+                }
             };
             
             EndDrawing();
             
             break;            
+        }
+        case PAUSE_MENU_SCREEN:
+        {
+            BeginDrawing();
+            ClearBackground(DARKGRAY);
+
+            float width = 1000.0f;
+            float height = 100.0f;
+            
+            const char * ContinueGameText = "continue";
+            Rectangle bounds =
+                {
+                    (GetScreenWidth() - width) * 0.5f,
+                    (GetScreenHeight() - 40) * 0.5f - 250,
+                    width,
+                    height
+                };
+            
+            if (GuiButton(bounds, ContinueGameText))
+            {
+                currentScreen = GAMEPLAY_SCREEN;
+            }
+
+            const char * SaveGameText = "save game";
+            bounds.y += 200;
+            if (GuiButton(bounds, SaveGameText))
+            {
+                int count = gameStateIn->entities.count;
+                void * data = (void *)(gameState->entities.elements);
+
+                char fileName[100];
+                CatStrings(GAME_SAVE_PATH, StringLength(GAME_SAVE_PATH),
+                           "Save_0", StringLength("Save_0"), fileName);
+
+                // Save data to file from byte array (write), returns true on success
+                if (!SaveFileData(fileName, data, sizeof(gameState->entities[0]) * count))
+                {
+                    SM_ASSERT(false, "fail to save game state");
+                }
+            };
+
+            const char * QuitGameText = "quit game";
+            bounds.y += 200;
+            if (GuiButton(bounds, QuitGameText))
+            {
+                *running = false;
+            };
+            
+            EndDrawing();
+
+            break;
         }
         case GAMEPLAY_SCREEN:
         {
@@ -1239,13 +1302,8 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             GameplayUpdateAndRender();
             if (IsKeyPressed(KEY_ESCAPE))
             {
-                CleanUpGame();
-                currentScreen = ENDING_SCREEN;
-        
-                for (;GetKeyPressed() > 0; )
-                {
-                }
-        
+                currentScreen = PAUSE_MENU_SCREEN;
+                for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
             }
 
             break;
@@ -1256,7 +1314,6 @@ void UpdateAndRender(GameState * gameStateIn, Memory * gameMemoryIn)
             if (JustPressed(ANY_KEY))
             {
                 currentScreen = TITLE_SCREEN;
-
             }
             
             BeginDrawing();

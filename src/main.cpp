@@ -126,12 +126,14 @@ int main(int argumentCount, char *argumentArray[])
 
     }
 
+    bool running = true;
 
     //--------------------------------------------------------------------------------------
     // NOTE: Update Loop
     //--------------------------------------------------------------------------------------
-    while(!WindowShouldClose())
+    while(running)
     {
+        running = !WindowShouldClose();
 
 #if GAME_INTERNAL
         // NOTE: Check if the code got recompiled
@@ -141,9 +143,9 @@ int main(int argumentCount, char *argumentArray[])
             GameCodeUnload(&gameCode);
             gameCode = GameCodeLoad(mainDllPath, tempDllPath, lockFilePath);
         }
-        gameCode.updateAndRender(gameState, &memory);
+        gameCode.updateAndRender(gameState, &memory, &running);
 #else
-        UpdateAndRender(gameState, &memory);
+        UpdateAndRender(gameState, &memory, &running);
 
 #endif
     }

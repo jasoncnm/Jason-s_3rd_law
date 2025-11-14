@@ -30,13 +30,8 @@ GameCodeLoad(char *mainDllPath, char *tempDllPath, char *lockFilePath)
     // NOTE: Load the functions from the game dll
     if (result.library)
     {
-#if 0
-        result.hotReload = (HotReload *)GetProcAddress(result.library, "HotReload");
-        result.hotUnload = (HotUnload *)GetProcAddress(result.library, "HotUnload");
-        result.initialize = (Initialize *)GetProcAddress(result.library, "Initialize");
-#endif
         
-        result.updateAndRender = (UpdateAndRender *)GetProcAddress((HMODULE)result.library, "UpdateAndRender");
+        result.updateAndRender = (update_and_render *)GetProcAddress((HMODULE)result.library, "UpdateAndRender");
 
         result.isValid = (result.updateAndRender != 0);
     }
@@ -44,12 +39,6 @@ GameCodeLoad(char *mainDllPath, char *tempDllPath, char *lockFilePath)
     // NOTE: if functions failed to load, load the empty functions
     if (result.isValid == 0)
     {
-
-#if 0
-        result.hotReload = HotReloadStub;
-        result.hotUnload = HotUnloadStub;
-        result.initialize = InitializeStub;
-#endif
         
         result.updateAndRender = UpdateAndRenderStub;
         
@@ -66,11 +55,6 @@ GameCodeUnload(GameCode *GameCode)
 {
     if (GameCode->library)
     {
-#if 0
-        GameCode->hotReload = HotReloadStub;
-        GameCode->hotUnload = HotUnloadStub;
-        GameCode->initialize = InitializeStub;
-#endif
         FreeLibrary((HMODULE)GameCode->library);
         GameCode->library = 0;
         GameCode->updateAndRender = UpdateAndRenderStub;

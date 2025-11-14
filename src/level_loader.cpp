@@ -12,14 +12,14 @@
 //              NOTE: Level Functions
 //  ========================================================================
 
-inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
+inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
 {
     AddEntityResult entityResult = { 0 };
     if (id == PIT)
     {
         entityResult = AddEntity(ENTITY_TYPE_PIT, tilePos, SPRITE_PIT);
 
-        gameState->entityTable[LAYER_PIT].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_PIT].Add(entityResult.entityIndex);
 
         SM_TRACE("Pit generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -27,7 +27,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddEntity(ENTITY_TYPE_WALL, tilePos, SPRITE_WALL);
 
-        gameState->entityTable[LAYER_WALL].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_WALL].Add(entityResult.entityIndex);
         
         SM_TRACE("Wall generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -37,7 +37,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
         entityResult.entity->mass = 2;
         entityResult.entity->movable = true;
 
-        gameState->entityTable[LAYER_BLOCK].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_BLOCK].Add(entityResult.entityIndex);
 
         SM_TRACE("BLOCK 2 generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
         
@@ -48,7 +48,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
         entityResult.entity->mass = 1;
         entityResult.entity->movable = true;
 
-        gameState->entityTable[LAYER_BLOCK].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_BLOCK].Add(entityResult.entityIndex);
 
         SM_TRACE("BLOCK 1 generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -56,7 +56,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddEntity(ENTITY_TYPE_GLASS, tilePos, SPRITE_GLASS);
 
-        gameState->entityTable[LAYER_GLASS].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_GLASS].Add(entityResult.entityIndex);
 
         SM_TRACE("GLASS generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -68,7 +68,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
         entityResult.entity->color = GRAY;
 
         entityResult.entity->movable = true;
-        gameState->entityTable[LAYER_SLIME].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_SLIME].Add(entityResult.entityIndex);
                                 
         SM_TRACE("CLONE 1 generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -87,7 +87,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
             SM_ASSERT(false, "Possible Door id miss match (id %d)", id);
         }
 
-        gameState->entityTable[LAYER_DOOR].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_DOOR].Add(entityResult.entityIndex);
         
         SM_TRACE("DOOR generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -106,7 +106,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
             SM_ASSERT(false, "Possible Door id miss match (id %d)", id);
         }
 
-        gameState->entityTable[LAYER_DOOR].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_DOOR].Add(entityResult.entityIndex);
         
         SM_TRACE("DOOR generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
         
@@ -115,7 +115,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddCable(tilePos, SPRITE_CABLE_DOWN_RIGHT_OFF, false, true, false, true);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -123,7 +123,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddCable(tilePos, SPRITE_CABLE_H_OFF, true, true, false, false);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -131,7 +131,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddCable(tilePos, SPRITE_CABLE_DOWN_LEFT_OFF, true, false, false, true);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -139,7 +139,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddCable(tilePos, SPRITE_CABLE_V_OFF, false, false, true, true);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -147,7 +147,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddCable(tilePos, SPRITE_CABLE_UP_RIGHT_OFF, false, true, true, false);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -155,7 +155,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddCable(tilePos, SPRITE_CABLE_UP_LEFT_OFF, true, false, true, false);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -163,7 +163,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_RIGHT_OFF, false, true, false, false);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -171,7 +171,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_LEFT_OFF, true, false, false, false);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -179,7 +179,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_DOWN_OFF, false, false, false, true);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -187,7 +187,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_UP_OFF, false, false, true, false);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -195,7 +195,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_H_OFF, true, true, false, false);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -203,7 +203,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_V_OFF, false, false, true, true);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -211,7 +211,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_UP_RIGHT_OFF, false, true, true, false);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -219,7 +219,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_UP_LEFT_OFF, true, false, true, false);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -227,7 +227,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_DOWN_RIGHT_OFF, false, true, false, true);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -235,7 +235,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_DOWN_LEFT_OFF, true, false, false, true);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -243,7 +243,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     {
         entityResult = AddConnection(tilePos, SPRITE_CABLE_CONNECTION);
 
-        gameState->entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
+        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -254,7 +254,7 @@ inline AddEntityResult LoadGameObject(int id, IVec2 tilePos)
     return entityResult;
 }
 
-inline void GenerateTileMap(std::string fileName, IVec2 startPos, int width, int height)
+inline void GenerateTileMap(GameState & state, std::string fileName, IVec2 startPos, int width, int height)
 {
     TileMapSrc & currentSrc = tileMapSources.last();
     
@@ -302,9 +302,9 @@ inline void GenerateTileMap(std::string fileName, IVec2 startPos, int width, int
                             result.entity->tileSize = GetSlimeSize(result.entity); 
                             result.entity->movable = true;
 
-                            gameState->playerEntityIndex = result.entityIndex;
+                            state.playerEntityIndex = result.entityIndex;
 
-                            gameState->entityTable[LAYER_SLIME].Add(result.entityIndex);
+                            state.entityTable[LAYER_SLIME].Add(result.entityIndex);
 
                             currentSrc.mapEntitiesIndex.Add(result.entityIndex);
                                 
@@ -312,7 +312,7 @@ inline void GenerateTileMap(std::string fileName, IVec2 startPos, int width, int
                         }
                         else
                         {
-                            result = LoadGameObject(tileId, tilePos);
+                            result = LoadGameObject(state, tileId, tilePos);
                             currentSrc.mapEntitiesIndex.Add(result.entityIndex);
                         }
                     }
@@ -346,7 +346,7 @@ void LoadLevelToGameState(GameState & state)
 
         state.tileMapCount = (int)tileMaps.size();
 #if 0
-        gameState->tileMaps = (Map *)BumpAllocArray(gameMemory->persistentStorage, state.tileMapCount, sizeof(Map));
+        state.tileMaps = (Map *)BumpAllocArray(gameMemory->persistentStorage, state.tileMapCount, sizeof(Map));
 #endif
         for (int index = 0; index < state.tileMapCount; index++)
         {
@@ -367,7 +367,7 @@ void LoadLevelToGameState(GameState & state)
             
             if (fileName == LEVEL_2_ROOM_NAME)
             {
-                gameState->lv2Map = &state.tileMaps[index];
+                state.lv2Map = &state.tileMaps[index];
             }
             
             std::string path = LEVELS_PATH + fileName;
@@ -376,7 +376,7 @@ void LoadLevelToGameState(GameState & state)
 
             IVec2 startPos = { startPosX + 1, startPosY + 1 };
 
-            GenerateTileMap(path, startPos, mapWidth, mapHeight);
+            GenerateTileMap(state, path, startPos, mapWidth, mapHeight);
 
             if (min.x > startPos.x) min.x = startPos.x;
             if (min.y > startPos.y) min.y = startPos.y;
@@ -402,7 +402,7 @@ void LoadLevelToGameState(GameState & state)
 
     // NOTE: Attatch slimes
     {
-        auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
+        auto & slimeEntityIndices = state.entityTable[LAYER_SLIME];
         
         for (int i = 0; i < slimeEntityIndices.count; i++)
         {
@@ -420,8 +420,5 @@ void LoadLevelToGameState(GameState & state)
         
     }
     
-    // NOTE: SetUp Electric Door
-    SetUpElectricDoor();
-
 }
  
