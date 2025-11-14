@@ -21,6 +21,6 @@ REM call scripts\msvc-build-raylib.bat
 ```
 to
 ```
-call scripts\msvc-build-raylib.bat
+call scripts\msvc-build-debug.bat
 ```
 Then you can delete the above line.
