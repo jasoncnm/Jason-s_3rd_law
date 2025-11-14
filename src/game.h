@@ -147,7 +147,7 @@ struct GameState
     int currentMapIndex;
     int screenWidth = SCREEN_WIDTH;
     int screenHeight = SCREEN_HEIGHT;
-    
+    int currentScreen = MENU_SCREEN;    
     bool initialized;
     
 };

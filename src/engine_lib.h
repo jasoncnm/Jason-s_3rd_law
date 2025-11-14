@@ -261,8 +261,9 @@ int StringLength(char *String)
 
 void CatStrings(char *SourceA, size_t SourceACount,
                 char *SourceB, size_t SourceBCount,
-                char *Dest)
+                char *Dest,    size_t DestCount)
 {
+    SM_ASSERT(DestCount > (SourceACount + SourceBCount), "Insufficient Dest string length"); 
     for (int Index = 0; Index < SourceACount; Index++)
     {
         *Dest++ = *SourceA++;

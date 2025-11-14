@@ -1052,7 +1052,8 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
     
         EndMode2D();
 
-#if GAME
+#if GAME_INTERNAL
+// #if 0
         // NOTE: UI Draw Game Informations
 
         Entity * player = GetEntity(gameState->playerEntityIndex);
@@ -1085,7 +1086,7 @@ void InitializeGame()
 {
     // NOTE: Initialization
     gameState->initialized = true;
-        
+    InitKeyMapping();
     // NOTE: Arrow Buttons
     // UP
     gameState->upArrow.sprite = GetSprite(SPRITE_ARROW_UP);
@@ -1154,24 +1155,21 @@ UPDATE_AND_RENDER(UpdateAndRender)
     if (gameState != gameStateIn) gameState = gameStateIn;
     if (gameMemory != gameMemoryIn) gameMemory = gameMemoryIn;
 
-    static int currentScreen = MENU_SCREEN;
     static bool init = false;
     if (!init)
     {
         init = true;
         GuiLoadStyle(RAYLIB_GUI_STYLE_PATH);
-        InitKeyMapping();
-
     }
     
-    switch(currentScreen)
+    switch(gameState->currentScreen)
     {
         case TITLE_SCREEN:
         {
 
             if (JustPressed(ANY_KEY))
             {
-                currentScreen = MENU_SCREEN;
+                gameState->currentScreen = MENU_SCREEN;
             }
             
             BeginDrawing();
@@ -1212,7 +1210,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             if (GuiButton(bounds, NewGameText))
             {
                 LoadLevelToGameState(*gameState);
-                currentScreen = GAMEPLAY_SCREEN;
+                gameState->currentScreen = GAMEPLAY_SCREEN;
             }
 
             const char * LoadGameText = "load game";
@@ -1222,17 +1220,23 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 
                 char fileName[100];
                 CatStrings(GAME_SAVE_PATH, StringLength(GAME_SAVE_PATH),
-                           "Save_0", StringLength("Save_0"), fileName);
+                           "Save_0", StringLength("Save_0"),
+                           fileName, 100);
                 if (FileExists(fileName))
                 {
                     LoadLevelToGameState(*gameState);
 
+                    // IMPORTANT: Assumming game has only one level, where entities are not add/delete from staring the new game and saving the game
+                    //            and the mapping array in gameState and electricDoorSystem are correct
                     int dataSize;
                     void * data = (void *)LoadFileData(fileName, &dataSize);
                     gameState->entities.count = dataSize / sizeof(gameState->entities[0]);
                     memcpy(gameState->entities.elements, data, dataSize);
-                    // IMPORTANT: Assumming game has only one level, not reloading maps
-                    currentScreen = GAMEPLAY_SCREEN;
+                    gameState->currentScreen = GAMEPLAY_SCREEN;
+                }
+                else
+                {
+                    SM_ERROR("faile to open file %s", fileName);                    
                 }
             };
             
@@ -1259,7 +1263,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
             if (GuiButton(bounds, ContinueGameText))
             {
-                currentScreen = GAMEPLAY_SCREEN;
+                gameState->currentScreen = GAMEPLAY_SCREEN;
             }
 
             const char * SaveGameText = "save game";
@@ -1271,7 +1275,8 @@ UPDATE_AND_RENDER(UpdateAndRender)
 
                 char fileName[100];
                 CatStrings(GAME_SAVE_PATH, StringLength(GAME_SAVE_PATH),
-                           "Save_0", StringLength("Save_0"), fileName);
+                           "Save_0", StringLength("Save_0"),
+                           fileName, 100);
 
                 // Save data to file from byte array (write), returns true on success
                 if (!SaveFileData(fileName, data, sizeof(gameState->entities[0]) * count))
@@ -1302,7 +1307,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             GameplayUpdateAndRender();
             if (IsKeyPressed(KEY_ESCAPE))
             {
-                currentScreen = PAUSE_MENU_SCREEN;
+                gameState->currentScreen = PAUSE_MENU_SCREEN;
                 for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
             }
 
@@ -1313,7 +1318,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
 
             if (JustPressed(ANY_KEY))
             {
-                currentScreen = TITLE_SCREEN;
+                gameState->currentScreen = TITLE_SCREEN;
             }
             
             BeginDrawing();

@@ -104,6 +104,7 @@ int main(int argumentCount, char *argumentArray[])
         {
             SetWindowIcon(icon); 
         } 
+        UnloadImage(icon);
         // MaximizeWindow();
 
         InitAudioDevice();      // Initialize audio device
@@ -120,10 +121,7 @@ int main(int argumentCount, char *argumentArray[])
             return -1;
         }
 
-
-        
-        UnloadImage(icon);
-
+        gameState->currentScreen = MENU_SCREEN;
     }
 
     bool running = true;
