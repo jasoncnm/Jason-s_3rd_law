@@ -254,7 +254,7 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
     return entityResult;
 }
 
-inline void GenerateTileMap(GameState & state, std::string fileName, IVec2 startPos, int width, int height)
+inline void GenerateTileMap(GameState & state, json & map, IVec2 startPos, int width, int height)
 {
     TileMapSrc & currentSrc = tileMapSources.last();
     
@@ -263,10 +263,7 @@ inline void GenerateTileMap(GameState & state, std::string fileName, IVec2 start
     
     // NOTE: Generate tile map    
     {
-        std::ifstream f(fileName);
-        json data = json::parse(f);
-
-        json array = data["layers"];
+        json array = map["layers"];
 
         for (json::iterator it = array.begin(); it != array.end(); ++it)
         {
@@ -325,6 +322,94 @@ inline void GenerateTileMap(GameState & state, std::string fileName, IVec2 start
     }
 }
 
+void LoadTestLevel(GameState & state)
+{
+
+    unsigned int tileCountX = 0, tileCountY = 0;
+    IVec2 offset = { 50 - 12, 50 - 6 };
+
+    IVec2 min = { INT_MAX, INT_MAX };
+    IVec2 max = { INT_MIN, INT_MIN };
+
+    // NOTE: Retrive TileMaps from world
+    {
+
+        state.currentMapIndex = -1;
+
+        state.tileMapCount = 1;
+
+        std::string fileName =  "Assets/Level_Editor/TileMap/Test.tmj";
+
+        std::ifstream f(fileName);
+        json map = json::parse(f);
+                    
+        int mapWidth = (int)map["width"];
+        int mapHeight = (int)map["height"];
+        int startPosX = 0;
+        int startPosY = 0;
+
+        Map tileMap = {};
+        tileMap.tilePos = { startPosX, startPosY };
+        tileMap.width = mapWidth, tileMap.height =  mapHeight;
+        state.tileMaps[0] = tileMap;
+
+        char * c_str = (char *)fileName.data();
+
+        tileMapSources.Add({0, mapWidth, mapHeight, c_str, GetTimestamp(c_str)});
+
+        IVec2 startPos = { startPosX + 1, startPosY + 1 };
+
+        auto & layers = map["layers"];
+        for (int index = 0; index < layers.size(); index++)
+        {
+            auto & layer = layers[index];
+            layer["visible"] = true;
+        }
+        
+        GenerateTileMap(state, map, startPos, mapWidth, mapHeight);
+
+        if (min.x > startPos.x) min.x = startPos.x;
+        if (min.y > startPos.y) min.y = startPos.y;
+
+        IVec2 dim = { mapWidth, mapHeight };
+
+        IVec2 endPos = startPos + dim;
+            
+        if (max.x < endPos.x) max.x = endPos.x;
+        if (max.y < endPos.y) max.y = endPos.y;
+
+    }
+
+    //animationPlaying = false;
+    //animateSlimeCount = 0;
+
+    {
+        state.tileMin = min;
+        state.tileMax = max;
+    } 
+
+    // NOTE: Attatch slimes
+    {
+        auto & slimeEntityIndices = state.entityTable[LAYER_SLIME];
+        
+        for (int i = 0; i < slimeEntityIndices.count; i++)
+        {
+            int index = slimeEntityIndices[i];
+            Entity * entity = GetEntity(index);
+            SM_ASSERT(entity, "Entity is just created but not activate");
+            
+            IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
+
+            for (int j = 0; j < 4; j++)
+            {
+                if (AttachSlime(entity, directions[j])) break;
+            }
+        }
+        
+    }
+     
+}
+
 void LoadLevelToGameState(GameState & state)
 {
 
@@ -345,13 +430,13 @@ void LoadLevelToGameState(GameState & state)
         auto tileMaps = worldData["maps"];
 
         state.tileMapCount = (int)tileMaps.size();
-#if 0
-        state.tileMaps = (Map *)BumpAllocArray(gameMemory->persistentStorage, state.tileMapCount, sizeof(Map));
-#endif
-        for (int index = 0; index < state.tileMapCount; index++)
+
+        int index = 0;
+        for (int i = 0; i < state.tileMapCount; i++)
         {
-            json map = tileMaps[index];
+            json map = tileMaps[i];
             std::string fileName =  map["fileName"];
+            if (fileName == TEST_LEVEL_ONE_NAME) continue;            
             
             int mapWidth = (int)map["width"] / MAP_TILE_SIZE;
             int mapHeight = (int)map["height"] / MAP_TILE_SIZE;
@@ -376,7 +461,10 @@ void LoadLevelToGameState(GameState & state)
 
             IVec2 startPos = { startPosX + 1, startPosY + 1 };
 
-            GenerateTileMap(state, path, startPos, mapWidth, mapHeight);
+            std::ifstream file(path);
+            json data = json::parse(file);
+
+            GenerateTileMap(state, data, startPos, mapWidth, mapHeight);
 
             if (min.x > startPos.x) min.x = startPos.x;
             if (min.y > startPos.y) min.y = startPos.y;
@@ -387,7 +475,8 @@ void LoadLevelToGameState(GameState & state)
             
             if (max.x < endPos.x) max.x = endPos.x;
             if (max.y < endPos.y) max.y = endPos.y;
-            
+
+            index++;
         }
 
     }

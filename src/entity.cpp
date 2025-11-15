@@ -484,8 +484,9 @@ inline void UpdateSlimes()
     for (int i = 0; i < slimeEntityIndices.count; i++)
     {
         Entity * slime = GetEntity(slimeEntityIndices[i]);
-        if (slime && slime->tweenController.NoTweens() && slime->attach)
+        if (slime && slime->attach)
         {
+            // slime->tweenController.NoTweens() && 
             Entity * attach = GetEntity(slime->attachedEntityIndex);
 
             // NOTE: Depends on the levels, there might be the case when the attached entity get destroyed along with the slime

@@ -15,9 +15,12 @@
 
 using json = nlohmann::json;
 
+// TODO: separate world into test levels and main levels
 #define WORLD_PATH "Assets/Level_Editor/maps.world"
 #define LEVELS_PATH "Assets/Level_Editor/"
 #define LEVEL_2_ROOM_NAME "TileMap/Room_24.tmj"
+#define TEST_LEVEL_ONE_NAME "TileMap/Test.tmj"
+
 
 //  ========================================================================
 //              NOTE: Level structs
@@ -62,6 +65,13 @@ enum TileID
     
     
     CABLE_CONNECTION = 72,
+};
+
+enum LoadOption
+{
+    LOAD_MAIN_LEVEL,
+    LOAD_TEST_LEVEL_1,
+    LOAD_TEST_LEVEL_2,
 };
 
 struct TileMapSrc

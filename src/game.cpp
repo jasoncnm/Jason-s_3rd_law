@@ -1239,6 +1239,15 @@ UPDATE_AND_RENDER(UpdateAndRender)
                     SM_ERROR("faile to open file %s", fileName);                    
                 }
             };
+
+            const char * TestLevel = "test level";
+            bounds.y += 200;
+            if (GuiButton(bounds, TestLevel))
+            {
+                LoadTestLevel(*gameState);
+                gameState->currentScreen = GAMEPLAY_SCREEN;
+                
+            }
             
             EndDrawing();
             
