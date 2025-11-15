@@ -132,7 +132,7 @@ int main(int argumentCount, char *argumentArray[])
     while(running)
     {
         running = !WindowShouldClose();
-
+        memory.transientStorage->used = 0;
 #if GAME_INTERNAL
         // NOTE: Check if the code got recompiled
         long dllFileWriteTime = GetFileModTime(mainDllPath);

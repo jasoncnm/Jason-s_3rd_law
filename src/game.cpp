@@ -1229,9 +1229,16 @@ UPDATE_AND_RENDER(UpdateAndRender)
                     // IMPORTANT: Assumming game has only one level, where entities are not add/delete from staring the new game and saving the game
                     //            and the mapping array in gameState and electricDoorSystem are correct
                     int dataSize;
-                    void * data = (void *)LoadFileData(fileName, &dataSize);
-                    gameState->entities.count = dataSize / sizeof(gameState->entities[0]);
-                    memcpy(gameState->entities.elements, data, dataSize);
+                    Entity * loadedEntities = (Entity *)LoadFileData(fileName, &dataSize);
+                    int loadedEntityCount = dataSize / sizeof(gameState->entities[0]);
+
+                    for (int i = 0; i < loadedEntityCount; i++)
+                    {
+                        Entity & loadedEntity = loadedEntities[i];
+                        gameState->entities[loadedEntity.entityIndex] = loadedEntity;
+                    }
+                    
+                    // memcpy(gameState->entities.elements, data, dataSize);
                     gameState->currentScreen = GAMEPLAY_SCREEN;
                 }
                 else
@@ -1279,8 +1286,25 @@ UPDATE_AND_RENDER(UpdateAndRender)
             bounds.y += 200;
             if (GuiButton(bounds, SaveGameText))
             {
-                int count = gameStateIn->entities.count;
-                void * data = (void *)(gameState->entities.elements);
+                EntityLayer saveLayers[] = { LAYER_DOOR, LAYER_CABLE, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK };
+                int saveEntityCount = 0;
+                for (int i = 0; i < ArrayCount(saveLayers); i++)
+                {
+                    saveEntityCount += gameState->entityTable[saveLayers[i]].count;
+                }
+
+                Entity * saveEntities = (Entity *)BumpAllocArray(gameMemory->transientStorage, saveEntityCount, sizeof(Entity));
+                int index = 0;
+                for (int layerIndex = 0; layerIndex < ArrayCount(saveLayers); layerIndex++)
+                {
+                    auto & layer = gameState->entityTable[saveLayers[layerIndex]];
+                    for (int i = 0; i < layer.count; i++)
+                    {
+                        SM_ASSERT(index < saveEntityCount, "Trying to write outside of allocated memory");
+                        Entity * entity = GetEntity(layer[i]);
+                        saveEntities[index++] = *entity;
+                    }
+                }
 
                 char fileName[100];
                 CatStrings(GAME_SAVE_PATH, StringLength(GAME_SAVE_PATH),
@@ -1288,11 +1312,11 @@ UPDATE_AND_RENDER(UpdateAndRender)
                            fileName, 100);
 
                 // Save data to file from byte array (write), returns true on success
-                if (!SaveFileData(fileName, data, sizeof(gameState->entities[0]) * count))
+                if (!SaveFileData(fileName, (void *) saveEntities, sizeof(Entity) * saveEntityCount))
                 {
                     SM_ASSERT(false, "fail to save game state");
                 }
-            };
+            }
 
             const char * QuitGameText = "quit game";
             bounds.y += 200;
