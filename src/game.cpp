@@ -253,7 +253,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
     return result;
 }
 
- inline float GetCameraZoom(Map & currentMap)
+inline float GetCameraZoom(Map & currentMap)
 {
     
     int newWidth = GetScreenWidth();
@@ -266,7 +266,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
     return zoom;
 }
 
- inline bool UpdateCamera()
+inline bool UpdateCamera()
 {
     bool updated = false;
     Entity * player = GetPlayer();
@@ -363,7 +363,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
 }
 
 
- inline void SetUndoEntities(std::vector<Entity> & undoEntities)
+inline void SetUndoEntities(std::vector<Entity> & undoEntities)
 {
     for (int i = 0; i < undoEntities.size(); i++)
     {
@@ -379,7 +379,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
     }
 }
 
- inline void Undo()
+inline void Undo()
 {
     UndoState & undoState = undoStack.back();
     gameState->playerEntityIndex = undoState.playerIndex;
@@ -390,7 +390,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
 }
 
 
- inline void Restart()
+inline void Restart()
 {
     undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });    
     
@@ -404,7 +404,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
     
 }
 
- bool MoveAction(IVec2 actionDir)
+bool MoveAction(IVec2 actionDir)
 {
     Entity * player = GetEntity(gameState->playerEntityIndex);
     SM_ASSERT(player, "player is not active");
@@ -595,7 +595,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
     return true;
 }
 
- bool SplitAction(Entity * player, IVec2 bounceDir)
+bool SplitAction(Entity * player, IVec2 bounceDir)
 {
 
     if (player->mass < 2) return false;
@@ -659,7 +659,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
 }
 
 
- inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount)
+inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount)
 {
     for (int layerIndex = 0; layerIndex < arrayCount; layerIndex++)
     {
@@ -678,7 +678,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
     } 
 }
 
- inline bool SlimeSelection(Entity * player)
+inline bool SlimeSelection(Entity * player)
 {
     auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
 
@@ -1113,7 +1113,7 @@ void InitializeGame()
     for (int i = 0; i < entityIndexArray.count; i++)
     {
         Entity * slime = GetEntity(entityIndexArray[i]);
-        slime->pivot = GetTilePivot(slime);
+        if (slime) slime->pivot = GetTilePivot(slime);
     }
         
     // NOTE: SetUp Electric Door
@@ -1235,6 +1235,10 @@ UPDATE_AND_RENDER(UpdateAndRender)
                     for (int i = 0; i < loadedEntityCount; i++)
                     {
                         Entity & loadedEntity = loadedEntities[i];
+
+                        if (loadedEntity.type == ENTITY_TYPE_PLAYER)
+                            gameState->playerEntityIndex = loadedEntity.entityIndex;
+                        
                         gameState->entities[loadedEntity.entityIndex] = loadedEntity;
                     }
                     
@@ -1301,8 +1305,8 @@ UPDATE_AND_RENDER(UpdateAndRender)
                     for (int i = 0; i < layer.count; i++)
                     {
                         SM_ASSERT(index < saveEntityCount, "Trying to write outside of allocated memory");
-                        Entity * entity = GetEntity(layer[i]);
-                        saveEntities[index++] = *entity;
+                        Entity entity = gameState->entities[layer[i]];
+                        saveEntities[index++] = entity;
                     }
                 }
 
