@@ -12,7 +12,6 @@
 
 enum EntityLayer
 {
-    
     LAYER_WALL,
     LAYER_DOOR,
     LAYER_CABLE,
@@ -79,19 +78,19 @@ struct Entity
     int mass = 1;
     int maxMass = 2;
     
-    bool movable = false;
+    bool8 movable = false;
 
-    bool attach = false;
+    bool8 attach = false;
 
-    bool broken = false;
+    bool8 broken = false;
 
-    bool open = false;
-    bool conductive = false;
-    bool left = false, right = false, up = false, down = false;
-    bool sourceLit = false;
-    bool hasPower = false;
+    bool8 open = false;
+    bool8 conductive = false;
+    bool8 left = false, right = false, up = false, down = false;
+    bool8 sourceLit = false;
+    bool8 hasPower = false;
     
-    bool active = false;
+    bool8 active = false;
 };
 
 struct AddEntityResult
@@ -103,12 +102,12 @@ struct AddEntityResult
 struct FindAttachableResult
 {
     Entity * entity;
-    bool has;
+    bool8 has;
 };
 
 struct MoveSlimeUntilBlockResult
 {
-    bool merged = false;
+    bool8 merged = false;
 };
 
 struct BounceEntityResult
@@ -157,11 +156,11 @@ inline Entity * CreateSlimeClone(IVec2 tilePos);
 
 inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir);
 
-inline bool AttachSlime(Entity * slime, IVec2 dir);
+inline bool8 AttachSlime(Entity * slime, IVec2 dir);
 
-inline bool IsSlime(Entity * entity);
+inline bool8 IsSlime(Entity * entity);
 
-inline bool CheckBounce(IVec2 tilePos, IVec2 pushDir);
+inline bool8 CheckBounce(IVec2 tilePos, IVec2 pushDir);
 
 inline Rectangle GetEntityRect(Entity * entity);
 
@@ -169,13 +168,13 @@ inline AddEntityResult
 AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color, int tileSize);
 
 inline AddEntityResult
-AddCable(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool down);
+AddCable(IVec2 tilePos, SpriteID spriteID, bool8 left, bool8 right, bool8 up, bool8 down);
 
 inline AddEntityResult
-AddDoor(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool down);
+AddDoor(IVec2 tilePos, SpriteID spriteID, bool8 left, bool8 right, bool8 up, bool8 down);
 
 inline AddEntityResult
-AddSource(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool down);
+AddSource(IVec2 tilePos, SpriteID spriteID, bool8 left, bool8 right, bool8 up, bool8 down);
 
 inline AddEntityResult
 AddConnection(IVec2 tilePos, SpriteID spriteID);

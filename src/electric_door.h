@@ -49,9 +49,9 @@ inline void UpdateElectricDoor();
     
 inline void SetUpElectricDoor();
 
-inline bool DoorBlocked(Entity * door, IVec2 reachDir);
+inline bool8 DoorBlocked(Entity * door, IVec2 reachDir);
 
-inline bool SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir);
+inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir);
 
 #define ELECTRIC_DOOR_H
 #endif

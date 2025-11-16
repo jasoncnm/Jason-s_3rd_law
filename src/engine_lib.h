@@ -35,6 +35,25 @@
 #define MB(x) (1024LL * KB(x))
 #define GB(x) (1024LL * MB(x))
 
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
+
+typedef int8 bool8;
+typedef int32 bool32;
+
+typedef uint8_t uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
+
+typedef size_t memory_index;
+
+typedef float real32;
+typedef double real64;
+
+
 #define ArrayCount(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 //  ========================================================================
@@ -123,10 +142,10 @@ template<typename T, int N>
 struct Array
 {
     static constexpr int maxElements = N;
-    int count = 0;
+    uint32 count = 0;
     T elements[N];
 
-    T & operator[](int idx)
+    T & operator[](uint32 idx)
     {
         SM_ASSERT(idx >= 0, "Idx negative!");
         SM_ASSERT(idx < count, "Idx out of bounds!");
@@ -139,7 +158,7 @@ struct Array
         return elements[count - 1];
     }
 
-    int Add(T element)
+    uint32 Add(T element)
     {
         SM_ASSERT(count < maxElements, "Array Full!");
         elements[count] = element;
@@ -150,7 +169,7 @@ struct Array
     {
         std::vector<T> result;
         result.reserve(count);
-        for (int i = 0; i < count; i++)
+        for (uint32 i = 0; i < count; i++)
         {
             result.push_back(elements[i]);
         }
@@ -158,7 +177,7 @@ struct Array
         return result;
     }
 
-    void RemoveIdxAndSwap(int idx)
+    void RemoveIdxAndSwap(uint32 idx)
     {
         SM_ASSERT(idx >= 0, "Idx negative!");
         SM_ASSERT(idx < count, "Idx out of bounds!");
@@ -169,7 +188,7 @@ struct Array
     {
         if (count > 1)
         {
-            for (int i = 0; i < count / 2; i++)
+            for (uint32 i = 0; i < count / 2; i++)
             {
                 T temp = elements[i];
                 elements[i] = elements[count - 1 - i];
@@ -183,12 +202,12 @@ struct Array
         count = 0;
     }
 
-    bool IsFull()
+    bool8 IsFull()
     {
         return count == N;
     }
 
-    bool IsEmpty()
+    bool8 IsEmpty()
     {
         return count == 0;
     }
@@ -283,7 +302,7 @@ long long GetTimestamp(char * file)
     return fileStat.st_mtime;
 }
 
-bool FileExists(char * filePath)
+bool8 FileExists(char * filePath)
 {
     SM_ASSERT(filePath, "No file path provided!");
 
@@ -378,7 +397,7 @@ void write_file(char * filePath, char * buffer, int size)
     fclose(file);
 }
 
-bool copy_file(char * fileName, char * outputName, char * buffer)
+bool8 copy_file(char * fileName, char * outputName, char * buffer)
 {
     int fileSize = 0;
     char * data = read_file(fileName, &fileSize, buffer);
@@ -403,7 +422,7 @@ bool copy_file(char * fileName, char * outputName, char * buffer)
 }
 
 
-bool copy_file(char * fileName, char * outputName, BumpAllocator * ba)
+bool8 copy_file(char * fileName, char * outputName, BumpAllocator * ba)
 {
 
     char * file = nullptr;
@@ -472,12 +491,12 @@ struct IVec2
         return { -x, -y };
     }
 
-    bool operator==(IVec2 other)
+    bool8 operator==(IVec2 other)
     {
         return (x == other.x) && (y == other.y); 
     }
 
-    bool operator!=(IVec2 other)
+    bool8 operator!=(IVec2 other)
     {
         return !(*this == other); 
     }
@@ -493,13 +512,13 @@ struct IVec2
         return x * x + y * y;
     }
     
-    bool IsBetween(IVec2 a, IVec2 b)
+    bool8 IsBetween(IVec2 a, IVec2 b)
     {
         float lenAB = Distance(IVec2ToVec2(a), IVec2ToVec2(b));
         float lenA = Distance(IVec2ToVec2(a), IVec2ToVec2(*this));
         float lenB = Distance(IVec2ToVec2(b), IVec2ToVec2(*this));
 
-        bool result = lenAB - (lenA + lenB) >= 0;
+        bool8 result = lenAB - (lenA + lenB) >= 0;
 
         return result;
         
@@ -648,7 +667,7 @@ float EaseInQuint(float x)
     return x * x * x * x * x;
 }
 
-bool SameSign(int x, int y)
+bool8 SameSign(int x, int y)
 {
     if (x == 0 || y == 0) return x == y;
 

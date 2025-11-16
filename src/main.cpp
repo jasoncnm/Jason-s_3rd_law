@@ -11,7 +11,7 @@
 #include "game.h"
 #include "platform.h"
 #if defined _WIN32
-#include "win32_hot_reload.c"
+#include "win32_hot_reload.cpp"
 #elif defined __linux__
 #error Linux build not supported
 #elif defined __APPLE__
@@ -124,7 +124,7 @@ int main(int argumentCount, char *argumentArray[])
         gameState->currentScreen = MENU_SCREEN;
     }
 
-    bool running = true;
+    bool8 running = true;
 
     //--------------------------------------------------------------------------------------
     // NOTE: Update Loop

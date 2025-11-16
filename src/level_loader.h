@@ -89,7 +89,6 @@ struct TileMapSrc
 //  ========================================================================
 //              NOTE: Level Globals
 //  ========================================================================
-static Array<TileMapSrc, 100> tileMapSources;
 
 
 //  ========================================================================
@@ -98,7 +97,7 @@ static Array<TileMapSrc, 100> tileMapSources;
 
 void ReloadTileMap(TileMapSrc & mapSrc);
 
-void LoadLevelToGameState(GameState & state);
+void LoadTileMapsAndEntities(GameState & state);
 
 
 #define LEVEL_LOADER_H

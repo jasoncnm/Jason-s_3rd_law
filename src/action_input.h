@@ -15,6 +15,14 @@ constexpr float leftTriggerDeadzone = -0.9f;
 constexpr float rightTriggerDeadzone = -0.9f;
 
 
+inline void CleanUpKeyMapping()
+{
+    for (int i = 0; i < GAME_INPUT_COUNT; i++)
+    {
+        gameState->keyMappings[i].keys.Clear();
+    }
+}
+
 inline void InitKeyMapping()
 {
     gameState->keyMappings[MOUSE_LEFT].keys.Add(MOUSE_BUTTON_LEFT);
@@ -51,7 +59,7 @@ inline void InitKeyMapping()
     
 }
 
-inline bool ProccessJoysticks(GameInputType type, int gamepad)
+inline bool8 ProccessJoysticks(GameInputType type, int gamepad)
 {
     float leftStickX =  GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X);
     float leftStickY =  GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_Y);
@@ -79,7 +87,7 @@ inline bool ProccessJoysticks(GameInputType type, int gamepad)
     return false;
 }
 
-inline bool JustPressed(GameInputType type)
+inline bool8 JustPressed(GameInputType type)
 {
 
     if (type == ANY_KEY)
@@ -92,7 +100,7 @@ inline bool JustPressed(GameInputType type)
     }
     
     KeyMapping & mapping = gameState->keyMappings[type];
-    for (int idx = 0; idx < mapping.keys.count; idx++)
+    for (uint32 idx = 0; idx < mapping.keys.count; idx++)
     {
         if (IsKeyPressed(mapping.keys[idx]) || IsMouseButtonPressed(mapping.keys[idx])) return true;
     }
@@ -106,13 +114,13 @@ inline bool JustPressed(GameInputType type)
     return false;
 }
 
-inline bool JustPressedMoveKey()
+inline bool8 JustPressedMoveKey()
 {
-    bool result = JustPressed(UP_KEY) || JustPressed(DOWN_KEY) || JustPressed(LEFT_KEY) || JustPressed(RIGHT_KEY);
+    bool8 result = JustPressed(UP_KEY) || JustPressed(DOWN_KEY) || JustPressed(LEFT_KEY) || JustPressed(RIGHT_KEY);
     return result;
 }
 
-inline bool IsAnyGamepadButtonDown(int button)
+inline bool8 IsAnyGamepadButtonDown(int button)
 {
     for (int gamepad = 0; gamepad < MAX_GAMEPAD; gamepad++)
     {
@@ -122,7 +130,7 @@ inline bool IsAnyGamepadButtonDown(int button)
     return false;
 }
 
-inline bool IsDown(GameInputType type)
+inline bool8 IsDown(GameInputType type)
 {
     
     if (type == ANY_KEY)
@@ -137,7 +145,7 @@ inline bool IsDown(GameInputType type)
     }
     
     KeyMapping mapping = gameState->keyMappings[type];
-    for (int idx = 0; idx < mapping.keys.count; idx++)
+    for (uint32 idx = 0; idx < mapping.keys.count; idx++)
     {
         if (IsKeyDown(mapping.keys[idx]) || IsMouseButtonDown(mapping.keys[idx])) return true;
     }

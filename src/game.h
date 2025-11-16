@@ -116,7 +116,7 @@ struct Map
     int   width;              // Number of tiles in X axis
     int   height;             // Number of tiles in Y axis
     
-    bool firstEnter = false;
+    bool8 firstEnter = false;
 };
 
 
@@ -148,16 +148,17 @@ struct GameState
     int screenWidth = SCREEN_WIDTH;
     int screenHeight = SCREEN_HEIGHT;
     int currentScreen = MENU_SCREEN;    
-    bool initialized;
+    bool8 initialized;
+    bool8 simulating = false;
     
 };
 
 
 struct MoveActionResult
 {
-    bool blocked;
-    bool pushed;
-    bool merged;
+    bool8 blocked;
+    bool8 pushed;
+    bool8 merged;
     Entity * blockedEntity;
 };
 
@@ -180,7 +181,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
 //  ========================================================================
 //              NOTE: Game Functions (exposed)
 //  ========================================================================
-#define UPDATE_AND_RENDER(name) void name(GameState * gameStateIn, Memory * gameMemoryIn, bool * running)
+#define UPDATE_AND_RENDER(name) void name(GameState * gameStateIn, Memory * gameMemoryIn, bool8 * running)
 typedef UPDATE_AND_RENDER(update_and_render);
 
 #define GAME_H

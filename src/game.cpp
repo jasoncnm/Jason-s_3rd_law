@@ -15,14 +15,15 @@
 #include "tween.cpp"
 #include "tween_controller.cpp"
 
+// #include "save_game.cpp"
+
 /*
   
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 
 
 TODO: Things that I can do beside arts and design I guess
-  - Need to refactor level_loader, we should have separate function to load entities, load tilemaps, and setup entity table.
-  - We should setup the cable indices in SetUpElectricDoor function 
+  - Create a load menu to choose save file
   - Drag and drop save file could be fun
   - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
   - smooth pixelperfect transition
@@ -41,6 +42,7 @@ TODO: Things that I can do beside arts and design I guess
   - Change animation controller into a tweening controller that is able to tween arbitarty types of values using easing functions
   - Basic Scene Manager
   - (UpdateElectricDoor) Connection point Logic needs to be refine. Check comments in the function 
+  - Need to refactor level_loader, we should have separate function to load entities, load tilemaps, and setup entity table.
 */
 
 //  ========================================================================
@@ -59,7 +61,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
         int layer = checkLayers[layerIndex];
         
         auto & entityTable = gameState->entityTable[layer];
-        for (int i = 0; i < entityTable.count; i++)
+        for (uint32 i = 0; i < entityTable.count; i++)
         {
             Entity * target = GetEntity(entityTable[i]);
             if (target && target->tilePos == blockNextPos)
@@ -266,9 +268,9 @@ inline float GetCameraZoom(Map & currentMap)
     return zoom;
 }
 
-inline bool UpdateCamera()
+inline bool8 UpdateCamera()
 {
-    bool updated = false;
+    bool8 updated = false;
     Entity * player = GetPlayer();
     SM_ASSERT(player, "Player is not active");
             
@@ -404,7 +406,7 @@ inline void Restart()
     
 }
 
-bool MoveAction(IVec2 actionDir)
+bool8 MoveAction(IVec2 actionDir)
 {
     Entity * player = GetEntity(gameState->playerEntityIndex);
     SM_ASSERT(player, "player is not active");
@@ -595,7 +597,7 @@ bool MoveAction(IVec2 actionDir)
     return true;
 }
 
-bool SplitAction(Entity * player, IVec2 bounceDir)
+bool8 SplitAction(Entity * player, IVec2 bounceDir)
 {
 
     if (player->mass < 2) return false;
@@ -667,7 +669,7 @@ inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount)
     
         auto & entityIndexArray = gameState->entityTable[layer];
 
-        for (int i = 0; i < entityIndexArray.count; i++)
+        for (uint32 i = 0; i < entityIndexArray.count; i++)
         {
             Entity * entity = GetEntity(entityIndexArray[i]);
             if (entity)
@@ -678,17 +680,17 @@ inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount)
     } 
 }
 
-inline bool SlimeSelection(Entity * player)
+inline bool8 SlimeSelection(Entity * player)
 {
     auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
 
-    bool stateChanged = false;
+    bool8 stateChanged = false;
 
     if (JustPressed(POSSES_KEY))// TODO: UnComment // && gameState->lv2Map && gameState->lv2Map->firstEnter)
     {
         
         Entity * nextPlayerEntity = nullptr;
-        for (int i = 0; i < slimeEntityIndices.count; i++)
+        for (uint32 i = 0; i < slimeEntityIndices.count; i++)
         {
             Entity * slime = GetEntity(slimeEntityIndices[i]);
             if (slime == player)
@@ -721,7 +723,7 @@ inline bool SlimeSelection(Entity * player)
     auto & entityIndexArray = gameState->entityTable[layer];
     IVec2 dir[4] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
 
-    for (int i = 0; i < entityIndexArray.count; i++)
+    for (uint32 i = 0; i < entityIndexArray.count; i++)
     {
         Entity * entity = GetEntity(entityIndexArray[i]);
         if (entity)
@@ -815,7 +817,7 @@ inline bool SlimeSelection(Entity * player)
     // NOTE: Actions
     {
         // NOTE: Recored if State Changes
-        bool stateChanged = false;
+        bool8 stateChanged = false;
 
         Entity * player = GetEntity(gameState->playerEntityIndex);
     
@@ -837,101 +839,104 @@ inline bool SlimeSelection(Entity * player)
         // NOTE SlimeSelection
         stateChanged = SlimeSelection(player);
 
-        switch(player->actionState)
+        if (!gameState->simulating)
         {
-            case MOVE_STATE:
+            switch(player->actionState)
             {
-                // NOTE: read input
-                gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = false;
-                
-                IVec2 actionDir = { 0 };
-                
-                bool isPressed = false;
-                    
-                if (IsDown(LEFT_KEY))
+                case MOVE_STATE:
                 {
-                    actionDir = {-1 , 0};                    
-                    isPressed = true;
-                }
-                    
-                if (IsDown(RIGHT_KEY))
-                {
-                    actionDir = {1, 0};
-                    isPressed = true;
-                }
-                    
-                if (IsDown(UP_KEY))
-                {
-                    actionDir = {0, -1};
-                    isPressed = true;
-                }
-                    
-                if (IsDown(DOWN_KEY))
-                {
-                    actionDir = {0, 1};
-                    isPressed = true;
-                }
-                    
-                if (isPressed)
-                {
-                    stateChanged = stateChanged || MoveAction(actionDir);
-                }
-                
-                break;
-            }
-            case SPLIT_STATE:
-            {
-                // NOTE: Split Arrow Buttons
-                gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = true;
-
-                bool split = false;
-                if (JustPressed(LEFT_KEY))
-                {
-                    //  shoot left and bounce right
-                    split = SplitAction(player, { -1, 0 });
-                }
-                    
-                if (JustPressed(RIGHT_KEY))
-                {
-                    //  shoot right and bounce left
-                    split = SplitAction(player, { 1, 0 });
-                }
-                    
-                if (JustPressed(UP_KEY))
-                {
-                    //  shoot up and bounce down
-                    split = SplitAction(player, { 0, -1 });
-                }
-                    
-                if (JustPressed(DOWN_KEY))
-                {
-                    //  shoot down and bounce up
-                    split = SplitAction(player, { 0, 1 });
-                }
-
-                if (split)
-                {
+                    // NOTE: read input
                     gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = false;
-                    stateChanged = stateChanged || split;
-                    player->actionState = MOVE_STATE;
+                
+                    IVec2 actionDir = { 0 };
+                
+                    bool8 isPressed = false;
+                    
+                    if (IsDown(LEFT_KEY))
+                    {
+                        actionDir = {-1 , 0};                    
+                        isPressed = true;
+                    }
+                    
+                    if (IsDown(RIGHT_KEY))
+                    {
+                        actionDir = {1, 0};
+                        isPressed = true;
+                    }
+                    
+                    if (IsDown(UP_KEY))
+                    {
+                        actionDir = {0, -1};
+                        isPressed = true;
+                    }
+                    
+                    if (IsDown(DOWN_KEY))
+                    {
+                        actionDir = {0, 1};
+                        isPressed = true;
+                    }
+                    
+                    if (isPressed)
+                    {
+                        stateChanged = stateChanged || MoveAction(actionDir);
+                    }
+                
+                    break;
                 }
-                break;
-            }
+                case SPLIT_STATE:
+                {
+                    // NOTE: Split Arrow Buttons
+                    gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = true;
+
+                    bool8 split = false;
+                    if (JustPressed(LEFT_KEY))
+                    {
+                        //  shoot left and bounce right
+                        split = SplitAction(player, { -1, 0 });
+                    }
+                    
+                    if (JustPressed(RIGHT_KEY))
+                    {
+                        //  shoot right and bounce left
+                        split = SplitAction(player, { 1, 0 });
+                    }
+                    
+                    if (JustPressed(UP_KEY))
+                    {
+                        //  shoot up and bounce down
+                        split = SplitAction(player, { 0, -1 });
+                    }
+                    
+                    if (JustPressed(DOWN_KEY))
+                    {
+                        //  shoot down and bounce up
+                        split = SplitAction(player, { 0, 1 });
+                    }
+
+                    if (split)
+                    {
+                        gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = false;
+                        stateChanged = stateChanged || split;
+                        player->actionState = MOVE_STATE;
+                    }
+                    break;
+                }
          
+            }
+            
+            if (stateChanged)
+            {
+                undoStack.push_back(prevState);
+            }
         }
-             
+                     
         UpdateElectricDoor();
         
         UpdateSlimes();
-            
-        if (stateChanged)
-        {
-            undoStack.push_back(prevState);
-        }
-            
+
         // NOTE: Undo and Restart
         {
-            static bool repeat = false;
+            static bool8 repeat = false;
             static float timeSinceLastPress = 0;
 
             timeSinceLastPress -= GetFrameTime();
@@ -958,14 +963,16 @@ inline bool SlimeSelection(Entity * player)
 
     // NOTE: Simulate
     {
+        gameState->simulating = false;
         // NOTE: Update: Entity
-        for (int i = 0; i < gameState->entities.count; i++)
+        for (uint32 i = 0; i < gameState->entities.count; i++)
         {
             Entity * entity = GetEntity(i);
             if (entity)
             {
                 if (!entity->tweenController.NoTweens())
                 {
+                    gameState->simulating = true;
                     if (IsSlime(entity))
                     {
                         if (entity->actionState == MOVE_STATE) SetActionState(entity, ANIMATE_STATE);
@@ -1086,8 +1093,8 @@ void InitializeGame()
 {
     // NOTE: Initialization
     gameState->initialized = true;
-    InitKeyMapping();
-    // NOTE: Arrow Buttons
+
+    // NOTE: Initilize Arrows
     // UP
     gameState->upArrow.sprite = GetSprite(SPRITE_ARROW_UP);
     gameState->upArrow.id = SPRITE_ARROW_UP;
@@ -1108,14 +1115,26 @@ void InitializeGame()
     gameState->rightArrow.id = SPRITE_ARROW_RIGHT;
     gameState->rightArrow.tileSize = 16;
 
-    auto & entityIndexArray = gameState->entityTable[LAYER_SLIME];
+    InitKeyMapping();
 
-    for (int i = 0; i < entityIndexArray.count; i++)
+    // NOTE: Initiaize slimes
     {
-        Entity * slime = GetEntity(entityIndexArray[i]);
-        if (slime) slime->pivot = GetTilePivot(slime);
+        auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
+        for (uint32 i = 0; i < slimeEntityIndices.count; i++)
+        {
+            int index = slimeEntityIndices[i];
+            Entity * entity = GetEntity(index);
+            SM_ASSERT(entity, "Entity is just created but not activate");
+            
+            IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
+
+            for (int j = 0; j < 4; j++)
+            {
+                if (AttachSlime(entity, directions[j])) break;
+            }
+        }
     }
-        
+    
     // NOTE: SetUp Electric Door
     SetUpElectricDoor();
 
@@ -1124,14 +1143,14 @@ void InitializeGame()
     undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });
 
     gameState->currentMapIndex = -1;
-    // SetTextureFilter(gameState->texture, TEXTURE_FILTER_BILINEAR); 
+    gameState->simulating = false;
     
 }
 
- void CleanUpGame()
+void CleanUpGame()
 {
     undoStack = std::vector<UndoState>();
-    tileMapSources.Clear();
+    CleanUpKeyMapping();
 
     gameState->initialized = false;    
     gameState->cameraTweenController.Reset();
@@ -1155,7 +1174,8 @@ UPDATE_AND_RENDER(UpdateAndRender)
     if (gameState != gameStateIn) gameState = gameStateIn;
     if (gameMemory != gameMemoryIn) gameMemory = gameMemoryIn;
 
-    static bool init = false;
+    // TODO: Temp code
+    static bool8 init = false;
     if (!init)
     {
         init = true;
@@ -1202,14 +1222,14 @@ UPDATE_AND_RENDER(UpdateAndRender)
             Rectangle bounds =
             {
                 (GetScreenWidth() - width) * 0.5f,
-                (GetScreenHeight() - 40) * 0.5f - 250,
+                (GetScreenHeight() - 40) * 0.5f - 400,
                 width,
                 height
             };
             
             if (GuiButton(bounds, NewGameText))
             {
-                LoadLevelToGameState(*gameState);
+                LoadTileMapsAndEntities(*gameState);
                 gameState->currentScreen = GAMEPLAY_SCREEN;
             }
 
@@ -1224,7 +1244,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                            fileName, 100);
                 if (FileExists(fileName))
                 {
-                    LoadLevelToGameState(*gameState);
+                    LoadTileMapsAndEntities(*gameState);
 
                     // IMPORTANT: Assumming game has only one level, where entities are not add/delete from staring the new game and saving the game
                     //            and the mapping array in gameState and electricDoorSystem are correct
@@ -1258,6 +1278,13 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 LoadTestLevel(*gameState);
                 gameState->currentScreen = GAMEPLAY_SCREEN;
                 
+            }
+
+            const char * QuitGame = "quit game";
+            bounds.y += 200;
+            if (GuiButton(bounds, QuitGame))
+            {
+                *running = false;   
             }
             
             EndDrawing();
@@ -1302,7 +1329,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 for (int layerIndex = 0; layerIndex < ArrayCount(saveLayers); layerIndex++)
                 {
                     auto & layer = gameState->entityTable[saveLayers[layerIndex]];
-                    for (int i = 0; i < layer.count; i++)
+                    for (uint32 i = 0; i < layer.count; i++)
                     {
                         SM_ASSERT(index < saveEntityCount, "Trying to write outside of allocated memory");
                         Entity entity = gameState->entities[layer[i]];
@@ -1310,23 +1337,35 @@ UPDATE_AND_RENDER(UpdateAndRender)
                     }
                 }
 
-                char fileName[100];
-                CatStrings(GAME_SAVE_PATH, StringLength(GAME_SAVE_PATH),
-                           "Save_0", StringLength("Save_0"),
-                           fileName, 100);
-
-                // Save data to file from byte array (write), returns true on success
-                if (!SaveFileData(fileName, (void *) saveEntities, sizeof(Entity) * saveEntityCount))
+                for (uint32 saveIndex = 0; ; saveIndex++)
                 {
-                    SM_ASSERT(false, "fail to save game state");
-                }
+                    
+                    char saveName[10];
+                    sprintf(saveName, "Save_%d", saveIndex);
+
+                    char fileName[100];                
+                    CatStrings(GAME_SAVE_PATH, StringLength(GAME_SAVE_PATH),
+                               saveName, StringLength(saveName),
+                               fileName, 100);
+
+                    if (!FileExists(fileName))
+                    {
+                        // Save data to file from byte array (write), returns true on success
+                        if (!SaveFileData(fileName, (void *) saveEntities, sizeof(Entity) * saveEntityCount))
+                        {
+                            SM_ASSERT(false, "fail to save game state");
+                        }
+                        break;
+                    }
+                } 
             }
 
-            const char * QuitGameText = "quit game";
+            const char * QuitMenuText = "quit to main menu";
             bounds.y += 200;
-            if (GuiButton(bounds, QuitGameText))
+            if (GuiButton(bounds, QuitMenuText))
             {
-                *running = false;
+                CleanUpGame();
+                gameState->currentScreen = MENU_SCREEN;
             };
             
             EndDrawing();

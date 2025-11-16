@@ -23,9 +23,9 @@ enum Direction
 //  ========================================================================
 //              NOTE: Game Util Functions
 //  ========================================================================
-inline bool CheckOutOfBound(int tileX, int tileY)
+inline bool8 CheckOutOfBound(int tileX, int tileY)
 {
-    bool result =
+    bool8 result =
     (tileX < gameState->tileMin.x)
         || (tileX > gameState->tileMax.x)
         || (tileY < gameState->tileMin.y)
@@ -34,7 +34,7 @@ inline bool CheckOutOfBound(int tileX, int tileY)
     return result;
 }
 
-inline bool CheckOutOfBound(IVec2 tilePos)
+inline bool8 CheckOutOfBound(IVec2 tilePos)
 {
     return CheckOutOfBound(tilePos.x, tilePos.y);
 }

@@ -9,7 +9,14 @@
 
 struct SaveData
 {
-    
+    IVec2 worldMin, worldMax;
+    Entity * saveEntities;
+    uint32 * saveEntityTable[LAYER_COUNT];
+    Map * saveTileMap;
+    uint32 * saveSourceIndices;
+    uint32 * saveDoorIndices;
+    uint32 * saveConnectionPointIndices;
+    uint32 * saveEntityIndices;
 };
 
 

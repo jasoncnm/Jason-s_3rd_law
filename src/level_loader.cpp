@@ -19,15 +19,12 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
     {
         entityResult = AddEntity(ENTITY_TYPE_PIT, tilePos, SPRITE_PIT);
 
-        state.entityTable[LAYER_PIT].Add(entityResult.entityIndex);
-
         SM_TRACE("Pit generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
     else if (id == WALL)
     {
         entityResult = AddEntity(ENTITY_TYPE_WALL, tilePos, SPRITE_WALL);
 
-        state.entityTable[LAYER_WALL].Add(entityResult.entityIndex);
         
         SM_TRACE("Wall generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -37,7 +34,6 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
         entityResult.entity->mass = 2;
         entityResult.entity->movable = true;
 
-        state.entityTable[LAYER_BLOCK].Add(entityResult.entityIndex);
 
         SM_TRACE("BLOCK 2 generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
         
@@ -48,7 +44,6 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
         entityResult.entity->mass = 1;
         entityResult.entity->movable = true;
 
-        state.entityTable[LAYER_BLOCK].Add(entityResult.entityIndex);
 
         SM_TRACE("BLOCK 1 generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -56,7 +51,6 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
     {
         entityResult = AddEntity(ENTITY_TYPE_GLASS, tilePos, SPRITE_GLASS);
 
-        state.entityTable[LAYER_GLASS].Add(entityResult.entityIndex);
 
         SM_TRACE("GLASS generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -68,7 +62,6 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
         entityResult.entity->color = GRAY;
 
         entityResult.entity->movable = true;
-        state.entityTable[LAYER_SLIME].Add(entityResult.entityIndex);
                                 
         SM_TRACE("CLONE 1 generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -86,8 +79,6 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
         {
             SM_ASSERT(false, "Possible Door id miss match (id %d)", id);
         }
-
-        state.entityTable[LAYER_DOOR].Add(entityResult.entityIndex);
         
         SM_TRACE("DOOR generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -105,8 +96,6 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
         {
             SM_ASSERT(false, "Possible Door id miss match (id %d)", id);
         }
-
-        state.entityTable[LAYER_DOOR].Add(entityResult.entityIndex);
         
         SM_TRACE("DOOR generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
         
@@ -115,7 +104,6 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
     {
         entityResult = AddCable(tilePos, SPRITE_CABLE_DOWN_RIGHT_OFF, false, true, false, true);
 
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -123,7 +111,6 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
     {
         entityResult = AddCable(tilePos, SPRITE_CABLE_H_OFF, true, true, false, false);
 
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -131,7 +118,6 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
     {
         entityResult = AddCable(tilePos, SPRITE_CABLE_DOWN_LEFT_OFF, true, false, false, true);
 
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -139,7 +125,6 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
     {
         entityResult = AddCable(tilePos, SPRITE_CABLE_V_OFF, false, false, true, true);
 
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -147,7 +132,6 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
     {
         entityResult = AddCable(tilePos, SPRITE_CABLE_UP_RIGHT_OFF, false, true, true, false);
 
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -155,7 +139,6 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
     {
         entityResult = AddCable(tilePos, SPRITE_CABLE_UP_LEFT_OFF, true, false, true, false);
 
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -163,7 +146,6 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_RIGHT_OFF, false, true, false, false);
 
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -171,7 +153,6 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_LEFT_OFF, true, false, false, false);
 
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -179,71 +160,54 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_DOWN_OFF, false, false, false, true);
 
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
     else if (id == SOURCE_UP || (id - 50) == SOURCE_UP)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_UP_OFF, false, false, true, false);
-
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
     else if (id == SOURCE_H || (id - 50) == SOURCE_H)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_H_OFF, true, true, false, false);
-
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
     else if (id == SOURCE_V || (id - 50) == SOURCE_V)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_V_OFF, false, false, true, true);
-
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
     else if (id == SOURCE_UP_RIGHT || (id - 50) == SOURCE_UP_RIGHT)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_UP_RIGHT_OFF, false, true, true, false);
-
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
     else if (id == SOURCE_UP_LEFT || (id - 50) == SOURCE_UP_LEFT)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_UP_LEFT_OFF, true, false, true, false);
-
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
     else if (id == SOURCE_DOWN_RIGHT || (id - 50) == SOURCE_DOWN_RIGHT)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_DOWN_RIGHT_OFF, false, true, false, true);
-
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
     else if (id == SOURCE_DOWN_LEFT || (id - 50) == SOURCE_DOWN_LEFT)
     {
         entityResult = AddSource(tilePos, SPRITE_SOURCE_DOWN_LEFT_OFF, true, false, false, true);
-
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
     else if (id == CABLE_CONNECTION)
     {
         entityResult = AddConnection(tilePos, SPRITE_CABLE_CONNECTION);
-
-        state.entityTable[LAYER_CABLE].Add(entityResult.entityIndex);
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
@@ -256,8 +220,7 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
 
 inline void GenerateTileMap(GameState & state, json & map, IVec2 startPos, int width, int height)
 {
-    TileMapSrc & currentSrc = tileMapSources.last();
-    
+        
     // NOTE: Offsets start position
     startPos = startPos;
     
@@ -301,16 +264,13 @@ inline void GenerateTileMap(GameState & state, json & map, IVec2 startPos, int w
 
                             state.playerEntityIndex = result.entityIndex;
 
-                            state.entityTable[LAYER_SLIME].Add(result.entityIndex);
-
-                            currentSrc.mapEntitiesIndex.Add(result.entityIndex);
-                                
+                                                            
                             SM_TRACE("Player generated (tile location: %i, %i)", result.entity->tilePos.x, result.entity->tilePos.y);
                         }
                         else
                         {
                             result = LoadGameObject(state, tileId, tilePos);
-                            currentSrc.mapEntitiesIndex.Add(result.entityIndex);
+                            
                         }
                     }
                 }
@@ -322,95 +282,57 @@ inline void GenerateTileMap(GameState & state, json & map, IVec2 startPos, int w
     }
 }
 
-void LoadTestLevel(GameState & state)
+void SetupEntityTable(GameState & state)
 {
-
-    unsigned int tileCountX = 0, tileCountY = 0;
-    IVec2 offset = { 50 - 12, 50 - 6 };
-
-    IVec2 min = { INT_MAX, INT_MAX };
-    IVec2 max = { INT_MIN, INT_MIN };
-
-    // NOTE: Retrive TileMaps from world
+    for (int layer = 0; layer < LAYER_COUNT; layer++)
     {
-
-        state.currentMapIndex = -1;
-
-        state.tileMapCount = 1;
-
-        std::string fileName =  "Assets/Level_Editor/TileMap/Test.tmj";
-
-        std::ifstream f(fileName);
-        json map = json::parse(f);
-                    
-        int mapWidth = (int)map["width"];
-        int mapHeight = (int)map["height"];
-        int startPosX = 0;
-        int startPosY = 0;
-
-        Map tileMap = {};
-        tileMap.tilePos = { startPosX, startPosY };
-        tileMap.width = mapWidth, tileMap.height =  mapHeight;
-        state.tileMaps[0] = tileMap;
-
-        char * c_str = (char *)fileName.data();
-
-        tileMapSources.Add({0, mapWidth, mapHeight, c_str, GetTimestamp(c_str)});
-
-        IVec2 startPos = { startPosX + 1, startPosY + 1 };
-
-        auto & layers = map["layers"];
-        for (int index = 0; index < layers.size(); index++)
-        {
-            auto & layer = layers[index];
-            layer["visible"] = true;
-        }
-        
-        GenerateTileMap(state, map, startPos, mapWidth, mapHeight);
-
-        if (min.x > startPos.x) min.x = startPos.x;
-        if (min.y > startPos.y) min.y = startPos.y;
-
-        IVec2 dim = { mapWidth, mapHeight };
-
-        IVec2 endPos = startPos + dim;
-            
-        if (max.x < endPos.x) max.x = endPos.x;
-        if (max.y < endPos.y) max.y = endPos.y;
-
+        state.entityTable[layer].Clear();
     }
-
-    //animationPlaying = false;
-    //animateSlimeCount = 0;
-
+    
+    for (uint32 i = 0; i < gameState->entities.count; i++)
     {
-        state.tileMin = min;
-        state.tileMax = max;
-    } 
-
-    // NOTE: Attatch slimes
-    {
-        auto & slimeEntityIndices = state.entityTable[LAYER_SLIME];
-        
-        for (int i = 0; i < slimeEntityIndices.count; i++)
+        Entity * entity = GetEntity(i);
+        if (entity)
         {
-            int index = slimeEntityIndices[i];
-            Entity * entity = GetEntity(index);
-            SM_ASSERT(entity, "Entity is just created but not activate");
-            
-            IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
-
-            for (int j = 0; j < 4; j++)
+            switch(entity->type)
             {
-                if (AttachSlime(entity, directions[j])) break;
+                case ENTITY_TYPE_PLAYER:
+                case ENTITY_TYPE_CLONE:
+                {
+                    state.entityTable[LAYER_SLIME].Add(entity->entityIndex);
+                    break;
+                }
+                case ENTITY_TYPE_WALL:
+                {
+                    state.entityTable[LAYER_WALL].Add(entity->entityIndex);
+                    break;
+                }
+                case ENTITY_TYPE_BLOCK:
+                {
+                    state.entityTable[LAYER_BLOCK].Add(entity->entityIndex);
+                    break;
+                }
+                case ENTITY_TYPE_GLASS:
+                {
+                    state.entityTable[LAYER_GLASS].Add(entity->entityIndex);
+                    break;
+                }
+                case ENTITY_TYPE_ELECTRIC_DOOR:
+                {
+                    state.entityTable[LAYER_DOOR].Add(entity->entityIndex);
+                    break;
+                }
+                case ENTITY_TYPE_PIT:
+                {
+                    state.entityTable[LAYER_PIT].Add(entity->entityIndex);
+                    break;
+                }
             }
         }
-        
     }
-     
 }
 
-void LoadLevelToGameState(GameState & state)
+void LoadTileMapsAndEntities(GameState & state)
 {
 
     unsigned int tileCountX = 0, tileCountY = 0;
@@ -447,7 +369,6 @@ void LoadLevelToGameState(GameState & state)
             tileMap.tilePos = { startPosX, startPosY };
             tileMap.width = mapWidth, tileMap.height =  mapHeight;
 
-            int id = state.tileMapCount;
             state.tileMaps[index] = tileMap;
             
             if (fileName == LEVEL_2_ROOM_NAME)
@@ -456,9 +377,7 @@ void LoadLevelToGameState(GameState & state)
             }
             
             std::string path = LEVELS_PATH + fileName;
-            char * c_str = (char *)path.data();
-            tileMapSources.Add({id, mapWidth, mapHeight, c_str, GetTimestamp(c_str)});
-
+            
             IVec2 startPos = { startPosX + 1, startPosY + 1 };
 
             std::ifstream file(path);
@@ -487,27 +406,72 @@ void LoadLevelToGameState(GameState & state)
     {
         state.tileMin = min;
         state.tileMax = max;
-    } 
-
-    // NOTE: Attatch slimes
-    {
-        auto & slimeEntityIndices = state.entityTable[LAYER_SLIME];
-        
-        for (int i = 0; i < slimeEntityIndices.count; i++)
-        {
-            int index = slimeEntityIndices[i];
-            Entity * entity = GetEntity(index);
-            SM_ASSERT(entity, "Entity is just created but not activate");
-            
-            IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
-
-            for (int j = 0; j < 4; j++)
-            {
-                if (AttachSlime(entity, directions[j])) break;
-            }
-        }
-        
     }
     
+    SetupEntityTable(state);
 }
  
+
+
+void LoadTestLevel(GameState & state)
+{
+
+    unsigned int tileCountX = 0, tileCountY = 0;
+    IVec2 offset = { 50 - 12, 50 - 6 };
+
+    IVec2 min = { INT_MAX, INT_MAX };
+    IVec2 max = { INT_MIN, INT_MIN };
+
+    // NOTE: Retrive TileMaps from world
+    {
+
+        state.currentMapIndex = -1;
+
+        state.tileMapCount = 1;
+
+        std::string fileName =  "Assets/Level_Editor/TileMap/Test.tmj";
+
+        std::ifstream f(fileName);
+        json map = json::parse(f);
+                    
+        int mapWidth = (int)map["width"];
+        int mapHeight = (int)map["height"];
+        int startPosX = 0;
+        int startPosY = 0;
+
+        Map tileMap = {};
+        tileMap.tilePos = { startPosX, startPosY };
+        tileMap.width = mapWidth, tileMap.height =  mapHeight;
+        state.tileMaps[0] = tileMap;
+        
+        IVec2 startPos = { startPosX + 1, startPosY + 1 };
+
+        auto & layers = map["layers"];
+        for (int index = 0; index < layers.size(); index++)
+        {
+            auto & layer = layers[index];
+            layer["visible"] = true;
+        }
+        
+        GenerateTileMap(state, map, startPos, mapWidth, mapHeight);
+
+        if (min.x > startPos.x) min.x = startPos.x;
+        if (min.y > startPos.y) min.y = startPos.y;
+
+        IVec2 dim = { mapWidth, mapHeight };
+
+        IVec2 endPos = startPos + dim;
+            
+        if (max.x < endPos.x) max.x = endPos.x;
+        if (max.y < endPos.y) max.y = endPos.y;
+
+    }
+
+    {
+        state.tileMin = min;
+        state.tileMax = max;
+    } 
+
+    SetupEntityTable(state);
+     
+}

@@ -45,9 +45,9 @@ struct Tween
     float target_t = 1;
     float dt;
 
-    bool Update()
+    bool8 Update()
     {
-        bool end = false;
+        bool8 end = false;
         float delta = GetFrameTime() * dt;
 
         if (t < target_t)
@@ -64,7 +64,7 @@ struct Tween
         return end;
     }
 
-    bool UpdateEntityVal();
+    bool8 UpdateEntityVal();
 
     float (*Easing)(float);
     

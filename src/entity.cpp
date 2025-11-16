@@ -26,7 +26,7 @@ inline Rectangle GetEntityRect(Entity * entity)
     return rect;
 }
 
-inline bool IsSlime(Entity * entity)
+inline bool8 IsSlime(Entity * entity)
 {
     return entity->type == ENTITY_TYPE_CLONE || entity->type == ENTITY_TYPE_PLAYER;
 }
@@ -58,7 +58,7 @@ AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE
 
 
 inline AddEntityResult
-AddCable(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool down)
+AddCable(IVec2 tilePos, SpriteID spriteID, bool8 left, bool8 right, bool8 up, bool8 down)
 {
     AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, spriteID);
     
@@ -76,7 +76,7 @@ AddCable(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool 
 
 
 inline AddEntityResult
-AddDoor(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool down)
+AddDoor(IVec2 tilePos, SpriteID spriteID, bool8 left, bool8 right, bool8 up, bool8 down)
 {
     AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, spriteID);
 
@@ -98,7 +98,7 @@ AddDoor(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool d
 }
 
 inline AddEntityResult
-AddSource(IVec2 tilePos, SpriteID spriteID, bool left, bool right, bool up, bool down)
+AddSource(IVec2 tilePos, SpriteID spriteID, bool8 left, bool8 right, bool8 up, bool8 down)
 {
     AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, spriteID);
     
@@ -278,17 +278,17 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
 }
 
 
-inline bool AttachSlime(Entity * slime, IVec2 dir)
+inline bool8 AttachSlime(Entity * slime, IVec2 dir)
 {
     SM_ASSERT((slime->type == ENTITY_TYPE_PLAYER || slime->type == ENTITY_TYPE_CLONE), "entity is not attachable");
 
     IVec2 pos = slime->tilePos + dir;
 
-    bool attach = false;
+    bool8 attach = false;
 
     Entity * attachEntity = nullptr;
 
-    for (int j = 0; j < gameState->entities.count; j++)
+    for (uint32 j = 0; j < gameState->entities.count; j++)
     {
         attachEntity = GetEntity(j);
 
@@ -329,10 +329,10 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
 {
     FindAttachableResult result = { nullptr, false };
     
-    bool has = false;
+    bool8 has = false;
     Entity * entity = nullptr;
 
-    for (int i = 0; i < gameState->entities.count; i++)
+    for (uint32 i = 0; i < gameState->entities.count; i++)
     {
         entity = GetEntity(i);
         if (entity && entity->tilePos == tilePos)
@@ -381,7 +381,7 @@ inline Entity * FindEntityByLocationAndLayers(IVec2 pos, EntityLayer * layers, i
     {
         int layer = layers[layerIndex];
         auto & entityIndeices = gameState->entityTable[layer];
-        for (int i = 0; i < entityIndeices.count; i++)
+        for (uint32 i = 0; i < entityIndeices.count; i++)
         {
             Entity * entity = GetEntity(entityIndeices[i]);
             if (entity && entity->tilePos == pos)
@@ -400,13 +400,13 @@ inline MoveSlimeUntilBlockResult SlimeMoveTowardsUntilBlocked(Entity * entity, I
     MoveSlimeUntilBlockResult result = { false };
     
     IVec2 start = entity->tilePos + dir;
-    bool isSlime = (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE);
+    bool8 isSlime = (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE);
 
     SM_ASSERT(isSlime, "For now entity can only be slime");
 
     for (IVec2 pos = start; pos.IsBetween(start, dest); pos += dir)
     {
-        for (int i = 0; i < gameState->entities.count; i++)
+        for (uint32 i = 0; i < gameState->entities.count; i++)
         {
             Entity * target = GetEntity(i);
             if (target && target->tilePos == pos)
@@ -481,7 +481,7 @@ inline MoveSlimeUntilBlockResult SlimeMoveTowardsUntilBlocked(Entity * entity, I
 inline void UpdateSlimes()
 {
     auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
-    for (int i = 0; i < slimeEntityIndices.count; i++)
+    for (uint32 i = 0; i < slimeEntityIndices.count; i++)
     {
         Entity * slime = GetEntity(slimeEntityIndices[i]);
         if (slime && slime->attach)
@@ -574,7 +574,7 @@ inline void UpdateSlimes()
     }
 
     Entity * player = GetEntity(gameState->playerEntityIndex);
-    for (int i = 0; i < slimeEntityIndices.count; i++)
+    for (uint32 i = 0; i < slimeEntityIndices.count; i++)
     {
         Entity * slime = GetEntity(slimeEntityIndices[i]);
         if (slime && slime != player && slime->mass > player->mass)
@@ -595,7 +595,7 @@ inline Entity * CreateSlimeClone(IVec2 tilePos)
 {
     auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
     Entity * freeEntity = nullptr;
-    for (int i = 0; i < slimeEntityIndices.count; i++)
+    for (uint32 i = 0; i < slimeEntityIndices.count; i++)
     {
         Entity * entity = &gameState->entities[slimeEntityIndices[i]];
         if (!entity->active)
@@ -625,8 +625,8 @@ void ShiftEntities(IVec2 startPos, IVec2 bounceDir)
     Entity * last = nullptr;
     for (IVec2 pos = startPos; ; pos = pos + bounceDir)
     {
-        bool empty = true;
-        for (int i = 0; i < gameState->entities.count; i++)
+        bool8 empty = true;
+        for (uint32 i = 0; i < gameState->entities.count; i++)
         {
             Entity * entity = GetEntity(i);
             if (entity && entity != last && entity->movable && entity->tilePos == pos)
@@ -645,17 +645,17 @@ void ShiftEntities(IVec2 startPos, IVec2 bounceDir)
     }
 }
 
-inline bool CheckBounce(IVec2 tilePos, IVec2 pushDir)
+inline bool8 CheckBounce(IVec2 tilePos, IVec2 pushDir)
 {
     IVec2 dirs[4] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 
-    bool bounce = true;
+    bool8 bounce = true;
     
     for (int i = 0; i < 4; i++)
     {
         if (dirs[i] == -pushDir) continue;
 
-        for (int entityIndex = 0; entityIndex < gameState->entities.count; entityIndex++)
+        for (uint32 entityIndex = 0; entityIndex < gameState->entities.count; entityIndex++)
         {
             Entity * target = GetEntity(entityIndex);
 
@@ -704,10 +704,10 @@ void BounceEntity(Entity * entity, IVec2 dir)
          ;
          pos = pos + dir)
     {
-        for (int i = 0; i < gameState->entities.count; i++)
+        for (uint32 i = 0; i < gameState->entities.count; i++)
         {
             Entity * target = GetEntity(i);
-            bool isSlime = (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE);
+            bool8 isSlime = (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE);
 
             if (target && target->tilePos == pos)
             {

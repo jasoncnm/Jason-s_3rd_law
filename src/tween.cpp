@@ -31,11 +31,11 @@ Tween CreateTween(TweenParams params, float (*Easing)(float), float animateSpeed
 }
 
 
-bool Tween::UpdateEntityVal()
+bool8 Tween::UpdateEntityVal()
 {
     SM_ASSERT(target_t, "Divide by zero");
 
-    bool end = Update();
+    bool8 end = Update();
     
     float current_t = t / target_t;
 

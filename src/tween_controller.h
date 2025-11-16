@@ -37,8 +37,8 @@ struct TweenController
 {
     using TweeningQueue = Array<Tween, 10>;
 
-    bool start   = false;
-    bool playing = false;
+    bool8 start   = false;
+    bool8 playing = false;
     
     TweeningQueue channels[MAX_CHANNEL];
 
@@ -50,9 +50,9 @@ struct TweenController
     // NOTE: Update Every frame
     void Update();
 
-    bool NoTweens()
+    bool8 NoTweens()
     {
-        bool result = true;
+        bool8 result = true;
 
         for (int channel = 0; channel < MAX_CHANNEL; channel++)
         {

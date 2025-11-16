@@ -17,7 +17,7 @@ typedef struct GameCode
     
     void * library;
     long lastDllWriteTime;
-    bool isValid;
+    bool8 isValid;
 
     // NOTE: pointers to functions from the dll
     update_and_render *updateAndRender;

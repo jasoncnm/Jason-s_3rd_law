@@ -17,12 +17,12 @@ inline Entity * GetSource(int sourceIndex)
     return source;
 }
 
-inline bool SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir)
+inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir)
 {
     SM_ASSERT(door->type == ENTITY_TYPE_ELECTRIC_DOOR && door->cableType == CABLE_TYPE_DOOR,
               "Entity is not a door");
     
-    bool result = false;
+    bool8 result = false;
 
     if (door->tilePos == tilePos)
     {
@@ -62,7 +62,7 @@ inline void UnfreezeSlimes(Entity * door)
     // TODO
     auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
     
-    for (int i = 0; i < slimeEntityIndices.count; i++)
+    for (uint32 i = 0; i < slimeEntityIndices.count; i++)
     {
         Entity * slime = GetEntity(slimeEntityIndices[i]);
         if (slime)
@@ -74,9 +74,9 @@ inline void UnfreezeSlimes(Entity * door)
 #endif
 }
 
-inline bool PowerOnCable(Entity * cable, bool & end)
+inline bool8 PowerOnCable(Entity * cable, bool8 & end)
 {
-    bool doorOpened = false;
+    bool8 doorOpened = false;
     if (cable->cableType == CABLE_TYPE_DOOR)
     {
         doorOpened = true;
@@ -260,7 +260,7 @@ inline bool PowerOnCable(Entity * cable, bool & end)
         if (!cable->conductive)
         {
             EntityLayer layers[] = { LAYER_SLIME, LAYER_BLOCK };
-            bool has = FindEntityByLocationAndLayers(cable->tilePos, layers, ArrayCount(layers)) != nullptr;
+            bool8 has = FindEntityByLocationAndLayers(cable->tilePos, layers, ArrayCount(layers)) != nullptr;
 
             if (has)
             {
@@ -288,12 +288,12 @@ inline bool PowerOnCable(Entity * cable, bool & end)
 }
 
 
-bool OnSourcePowerOn(int currentIndex)
+bool8 OnSourcePowerOn(int currentIndex)
 {
 
-    bool doorOpened = false;
+    bool8 doorOpened = false;
     
-    bool end = false;
+    bool8 end = false;
     
     Entity * cable = GetEntity(Cable_Indices[currentIndex]);
     SM_ASSERT(cable, "entity is not active");
@@ -359,11 +359,11 @@ void ShutDownPower(int currentCableIndex)
 }
 
 
-inline bool DoorBlocked(Entity * door, IVec2 reachDir)
+inline bool8 DoorBlocked(Entity * door, IVec2 reachDir)
 {
     SM_ASSERT(reachDir.SqrMagnitude() <= 1, "Directional Vector should be a unit vector");
     
-    bool result = false;
+    bool8 result = false;
 
     if (reachDir.x == 1)
     {
@@ -386,15 +386,14 @@ inline bool DoorBlocked(Entity * door, IVec2 reachDir)
     return result;
 }
 
-inline bool CheckDoor(IVec2 tilePos)
+inline bool8 CheckDoor(IVec2 tilePos)
 {
     
-    bool result = false;
-    for (int i = 0; i < Door_Indices.count; i++)
+    bool8 result = false;
+    for (uint32 i = 0; i < Door_Indices.count; i++)
     {
         Entity * door = GetEntity(Cable_Indices[Door_Indices[i]]);
-        SM_ASSERT(door, "entity is not active");
-        if (door->tilePos == tilePos)
+        if (door && door->tilePos == tilePos)
         {
             result = true;
             break;
@@ -403,7 +402,7 @@ inline bool CheckDoor(IVec2 tilePos)
     return result;
 }
 
-void Search(Array<bool, MAX_CABLE> & visited, int currentIndex, int sourceIndex)
+void Search(Array<bool8, MAX_CABLE> & visited, int currentIndex, int sourceIndex)
 {
     visited[currentIndex] = true;
 
@@ -413,7 +412,7 @@ void Search(Array<bool, MAX_CABLE> & visited, int currentIndex, int sourceIndex)
 
     if (current->cableType == CABLE_TYPE_DOOR) return;
 
-    for (int i = 0; i < Cable_Indices.count; i++)
+    for (uint32 i = 0; i < Cable_Indices.count; i++)
     {
         if (!visited[i])
         {
@@ -464,13 +463,13 @@ void Search(Array<bool, MAX_CABLE> & visited, int currentIndex, int sourceIndex)
 
 inline void SetUpElectricDoor()
 {
-    for (int sourceIndex = 0; sourceIndex < Source_Indices.count; sourceIndex++)
+    for (uint32 sourceIndex = 0; sourceIndex < Source_Indices.count; sourceIndex++)
     {
         int currentIndex = Source_Indices[sourceIndex];
 
-        Array<bool, MAX_CABLE> visited;
+        Array<bool8, MAX_CABLE> visited;
 
-        for (int i = 0; i < Cable_Indices.count; i++) visited.Add(false);
+        for (uint32 i = 0; i < Cable_Indices.count; i++) visited.Add(false);
 
         Search(visited, currentIndex, sourceIndex);
     }
@@ -478,7 +477,7 @@ inline void SetUpElectricDoor()
 
 inline void UpdateElectricDoor()
 {
-    for (int i = 0; i < CP_Indices.count; i++)
+    for (uint32 i = 0; i < CP_Indices.count; i++)
     {
         Entity * connection = GetEntity(Cable_Indices[CP_Indices[i]]);
         SM_ASSERT(connection, "Entity is not active");
@@ -486,7 +485,7 @@ inline void UpdateElectricDoor()
         if (!connection->conductive)
         {
             auto & slimeIndexTable = gameState->entityTable[LAYER_SLIME];
-            for (int slimeIndex = 0; slimeIndex < slimeIndexTable.count; slimeIndex++)
+            for (uint32 slimeIndex = 0; slimeIndex < slimeIndexTable.count; slimeIndex++)
             {
                 Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
                 if (slime)
@@ -498,7 +497,7 @@ inline void UpdateElectricDoor()
                             connection->conductive = true;
 
                             int sourceCableIndex = Source_Indices[connection->sourceIndex];
-                            bool doorOpened = OnSourcePowerOn(sourceCableIndex);
+                            bool8 doorOpened = OnSourcePowerOn(sourceCableIndex);
 
                             if (!doorOpened)
                             {                                
@@ -601,13 +600,13 @@ inline void UpdateElectricDoor()
 
     }
     
-    for (int i = 0; i < Source_Indices.count; i++)
+    for (uint32 i = 0; i < Source_Indices.count; i++)
     {
         Entity * source = GetSource(i);
         SM_ASSERT(source, "Entity is not active");
         if (source->sourceLit) continue;
 
-        bool has = false;
+        bool8 has = false;
         int sourceCableIndex = Source_Indices[i];
 
         EntityLayer layers[] = { LAYER_BLOCK };
