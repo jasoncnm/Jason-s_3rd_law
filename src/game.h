@@ -27,9 +27,9 @@
 
 #define MAX_ENTITIES 5000
 
-#define GAME_SAVE_PATH "data/save_data/"
+#define STAR_COUNT 420
 
-#define _internal static
+#define GAME_SAVE_PATH "data/save_data/"
 
 
 constexpr float zoom_per_tile = 19.0f / 600.0f;
@@ -119,6 +119,12 @@ struct Map
     bool8 firstEnter = false;
 };
 
+struct StarFields
+{
+    Vector3 stars[STAR_COUNT];
+    Vector2 starsScreenPos[STAR_COUNT];
+    float flySpeed = 0.1f;    
+};
 
 // NOTE: GameState
 struct GameState
@@ -129,6 +135,8 @@ struct GameState
     Texture2D texture;
 
     ElectricDoorSystem electricDoorSystem;
+
+    StarFields starFields;
 
     Array<int, MAX_ENTITIES> entityTable[LAYER_COUNT];
     Array<Entity, MAX_ENTITIES> entities;
@@ -141,13 +149,15 @@ struct GameState
 
     KeyMapping keyMappings[GAME_INPUT_COUNT];
 
+    Color bgColor;
+    
     IVec2 tileMin, tileMax;
     
     int playerEntityIndex;
     int currentMapIndex;
     int screenWidth = SCREEN_WIDTH;
     int screenHeight = SCREEN_HEIGHT;
-    int currentScreen = MENU_SCREEN;    
+    int currentScreen = TITLE_SCREEN;    
     bool8 initialized;
     bool8 simulating = false;
     

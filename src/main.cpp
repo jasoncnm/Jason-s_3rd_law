@@ -79,6 +79,7 @@ int main(int argumentCount, char *argumentArray[])
         SM_ERROR("Failed to allocate gameState");
         return -1;
     }
+    
     Memory memory = { &transientStorage,  &persistentStorage };
 
     //--------------------------------------------------------------------------------------
@@ -121,7 +122,9 @@ int main(int argumentCount, char *argumentArray[])
             return -1;
         }
 
-        gameState->currentScreen = MENU_SCREEN;
+        gameState->currentScreen = TITLE_SCREEN;
+        gameState->bgColor = ColorLerp(DARKBLUE, BLACK, 0.69f);
+
     }
 
     bool8 running = true;

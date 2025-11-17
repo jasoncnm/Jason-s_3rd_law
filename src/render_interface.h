@@ -66,6 +66,7 @@ void DrawTileMap(Camera2D camera, IVec2 startPos, IVec2 dim, Color tileColor, Co
 
             if (CheckCollisionRecs(source, GetCameraRect(camera)))
             {
+#if 0
                 // NOTE: Draw tiles from id (and tile borders)
                 DrawRectangle(
                     x * tileSize,
@@ -73,7 +74,8 @@ void DrawTileMap(Camera2D camera, IVec2 startPos, IVec2 dim, Color tileColor, Co
                     tileSize,
                     tileSize,
                     tileColor);
-
+#endif
+                
                 DrawRectangleLinesEx(source, .5f, gridColor);
                 // DrawRectangleLines(x * tileSize, y * tileSize, tileSize, tileSize, gridColor);
             }                     
@@ -113,6 +115,45 @@ void DrawSprite(Camera2D camera, Texture2D texture, Sprite & sprite, Vector2 top
 void DrawError()
 {
     DrawText("SOMETHING IS WRONG PLEASE UNDO(Z) OR RESET(R)", GetScreenWidth() / 2, GetScreenHeight() / 2, 20, RED);
+}
+
+void UpdateAndDrawStarFieldBG(Vector3 * stars, Vector2 * starsScreenPos, uint32 starCount, float flySpeed)
+{
+    int screenWidth = GetScreenWidth();
+    int screenHeight = GetScreenHeight();
+    
+    float dt = GetFrameTime();
+    for (uint32 i = 0; i < starCount; i++)
+    {
+        // Update star's timer
+        stars[i].z -= dt*flySpeed;
+
+        // Calculate the screen position
+        starsScreenPos[i] =
+            {
+                screenWidth *  0.5f + stars[i].x/stars[i].z,
+                screenHeight * 0.5f + stars[i].y/stars[i].z,
+            };
+
+        // If the star is too old, or offscreen, it dies and we make a new random one
+        if ((stars[i].z < 0.0f) || (starsScreenPos[i].x < 0) || (starsScreenPos[i].y < 0.0f) ||
+            (starsScreenPos[i].x > screenWidth) || (starsScreenPos[i].y > screenHeight))
+        {
+            stars[i].x = (float)GetRandomValue(-screenWidth / 2, screenWidth / 2);
+            stars[i].y = (float)GetRandomValue(-screenHeight / 2, screenHeight / 2);
+            stars[i].z = 1.0f;
+        }
+
+    }
+
+    for (uint32 i = 0; i < starCount; i++)
+    {
+        // Make the radius grow as the star ages
+        float radius = Lerp(stars[i].z, 1.0f, 5.0f);
+        // Draw the circle
+        DrawCircleV(starsScreenPos[i], radius, RAYWHITE);
+    } 
+
 }
 
 #define RENDER_INTERFACE_H

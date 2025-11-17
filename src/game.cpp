@@ -817,7 +817,7 @@ inline bool8 SlimeSelection(Entity * player)
     // NOTE: Actions
     {
         // NOTE: Recored if State Changes
-        bool8 stateChanged = false;
+        static bool8 stateChanged = false;
 
         Entity * player = GetEntity(gameState->playerEntityIndex);
     
@@ -839,7 +839,6 @@ inline bool8 SlimeSelection(Entity * player)
         // NOTE SlimeSelection
         stateChanged = SlimeSelection(player);
 
-        if (!gameState->simulating)
         {
             switch(player->actionState)
             {
@@ -924,8 +923,9 @@ inline bool8 SlimeSelection(Entity * player)
          
             }
             
-            if (stateChanged)
+            if (stateChanged && !gameState->simulating)
             {
+                stateChanged = false;
                 undoStack.push_back(prevState);
             }
         }
@@ -1016,8 +1016,10 @@ inline bool8 SlimeSelection(Entity * player)
         // NOTE: Draw
         BeginDrawing();
 
-        ClearBackground(GRAY);
+        ClearBackground(gameState->bgColor);
     
+        UpdateAndDrawStarFieldBG(gameState->starFields.stars, gameState->starFields.starsScreenPos, STAR_COUNT, gameState->starFields.flySpeed);
+
         BeginMode2D(gameState->camera);
     
         for (int i = 0; i < gameState->tileMapCount; i++)
@@ -1180,6 +1182,21 @@ UPDATE_AND_RENDER(UpdateAndRender)
     {
         init = true;
         GuiLoadStyle(RAYLIB_GUI_STYLE_PATH);
+
+        gameState->bgColor = IntToRGBA(0x083050);
+        
+        gameState->starFields = { };
+        
+        // Speed at which we fly forward
+        gameState->starFields.flySpeed = 0.2f;
+
+        // Setup the stars with a random position
+        for (int i = 0; i < STAR_COUNT; i++)
+        {
+            gameState->starFields.stars[i].x = (float)GetRandomValue(-GetScreenWidth() / 2, GetScreenWidth() / 2);
+            gameState->starFields.stars[i].y = (float)GetRandomValue(-GetScreenHeight() / 2, GetScreenHeight() / 2);
+            gameState->starFields.stars[i].z = 1.0f;
+        }
     }
     
     switch(gameState->currentScreen)
@@ -1190,11 +1207,13 @@ UPDATE_AND_RENDER(UpdateAndRender)
             if (JustPressed(ANY_KEY))
             {
                 gameState->currentScreen = MENU_SCREEN;
+                for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
             }
             
             BeginDrawing();
-            ClearBackground(RAYWHITE);
-            DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), GREEN);
+            ClearBackground(gameState->bgColor);
+
+            UpdateAndDrawStarFieldBG(gameState->starFields.stars, gameState->starFields.starsScreenPos, STAR_COUNT, gameState->starFields.flySpeed);
 
             const char * Title = "TITLE SCREEN";
             int TitleTextX = (GetScreenWidth() - MeasureText(Title, 40)) / 2;
@@ -1213,7 +1232,9 @@ UPDATE_AND_RENDER(UpdateAndRender)
         case MENU_SCREEN:
         {
             BeginDrawing();
-            ClearBackground(BLACK);
+            ClearBackground(gameState->bgColor);
+
+            UpdateAndDrawStarFieldBG(gameState->starFields.stars, gameState->starFields.starsScreenPos, STAR_COUNT, gameState->starFields.flySpeed);
 
             float width = 1000.0f;
             float height = 100.0f;
@@ -1294,7 +1315,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
         case PAUSE_MENU_SCREEN:
         {
             BeginDrawing();
-            ClearBackground(DARKGRAY);
+            ClearBackground(gameState->bgColor);
 
             float width = 1000.0f;
             float height = 100.0f;
@@ -1398,7 +1419,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             }
             
             BeginDrawing();
-            ClearBackground(RAYWHITE);
+            ClearBackground(gameState->bgColor);
             DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLUE);
 
             const char * endText = "ENDING SCREEN";
