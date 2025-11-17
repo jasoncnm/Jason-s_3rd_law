@@ -25,7 +25,6 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 TODO: Things that I can do beside arts and design I guess
   - Create a load menu to choose save file
   - Drag and drop save file could be fun
-  - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
   - smooth pixelperfect transition
   - top down lights / spotlight rendering
   - add particles
@@ -35,6 +34,7 @@ TODO: Things that I can do beside arts and design I guess
   - Assets Managment
 
   NOTE: done
+  - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
   - Implement save points (Since the state of our game is entirely based on each state of the entity,
                            we can just read/write raw bytes of entities to a file)
   - Gamepad supports
@@ -718,7 +718,7 @@ inline bool8 SlimeSelection(Entity * player)
 }
 
 // TODO: Use Tile Bitmasking
- void UpdateSprite(EntityLayer layer)
+void UpdateSprite(EntityLayer layer)
 {
     auto & entityIndexArray = gameState->entityTable[layer];
     IVec2 dir[4] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
@@ -739,7 +739,7 @@ inline bool8 SlimeSelection(Entity * player)
     }
 }
 
- void GameplayUpdateAndRender()
+void GameplayUpdateAndRender()
 {
 
     // NOTE: Debug Switch Monitor
@@ -1028,7 +1028,7 @@ inline bool8 SlimeSelection(Entity * player)
             DrawTileMap(gameState->camera, map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
         }
 
-        EntityLayer orderedDrawLayers[] = { LAYER_BLOCK, LAYER_WALL, LAYER_CABLE, LAYER_PIT, LAYER_GLASS, LAYER_DOOR, LAYER_SLIME };
+        EntityLayer orderedDrawLayers[] = { LAYER_BLOCK, LAYER_WALL, LAYER_CABLE, LAYER_PIT,  LAYER_DOOR, LAYER_SLIME, LAYER_GLASS };
 
         int count = ArrayCount(orderedDrawLayers);
         DrawSpriteLayers(orderedDrawLayers, count);
@@ -1126,7 +1126,7 @@ void InitializeGame()
         {
             int index = slimeEntityIndices[i];
             Entity * entity = GetEntity(index);
-            SM_ASSERT(entity, "Entity is just created but not activate");
+            if (!entity) continue;
             
             IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
 
