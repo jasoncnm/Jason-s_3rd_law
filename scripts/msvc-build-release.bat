@@ -1,7 +1,7 @@
 @echo off
 
 set LINKER_FLAGS=/link -incremental:no -opt:ref raylib.lib kernel32.lib user32.lib shell32.lib winmm.lib gdi32.lib opengl32.lib
-set COMMON_FLAGS=/DGAME_INTERNAL=0 -Ox -O2 -Os -Ot -GL -Oi -FC
+set COMMON_FLAGS=/std:c++17 /DGAME_INTERNAL=0 -Ox -O2 -Os -Ot -GL -Oi -FC
 set EXE_NAME=game.exe
 set INCLUDES=-I..\src\vendor\raylib\ -I..\src\vendor\raygui\src\
 

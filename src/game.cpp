@@ -1317,6 +1317,8 @@ UPDATE_AND_RENDER(UpdateAndRender)
             BeginDrawing();
             ClearBackground(gameState->bgColor);
 
+            UpdateAndDrawStarFieldBG(gameState->starFields.stars, gameState->starFields.starsScreenPos, STAR_COUNT, gameState->starFields.flySpeed);
+
             float width = 1000.0f;
             float height = 100.0f;
             
