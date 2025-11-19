@@ -44,34 +44,22 @@ inline void UnfreezeSlimes(Entity * door)
     SM_ASSERT(door, "door is inactive");
     SM_ASSERT(door->cableType == CABLE_TYPE_DOOR, "entity is not a door");
 
-#if 0
-    for (int i = 0; i < CP_Indices.count; i++)
+    for (uint32 i = 0; i < CP_Indices.count; i++)
     {
         Entity * connect = GetEntity(Cable_Indices[CP_Indices[i]]);
         if (connect && connect->sourceIndex == door->sourceIndex)
         {
-            Entity * slime = FindSlime(connect->tilePos);
-
-            if (slime)
+            auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
+            for (uint32 i = 0; i < slimeEntityIndices.count; i++)
             {
-                slime->actionState = MOVE_STATE;
+                Entity * slime = GetEntity(slimeEntityIndices[i]);
+                if (slime)
+                {
+                    SetActionState(slime, MOVE_STATE);
+                }
             }
         }
     }
-#else
-    // TODO
-    auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
-    
-    for (uint32 i = 0; i < slimeEntityIndices.count; i++)
-    {
-        Entity * slime = GetEntity(slimeEntityIndices[i]);
-        if (slime)
-        {
-            SetActionState(slime, MOVE_STATE);
-        }
-    }
-
-#endif
 }
 
 inline bool8 PowerOnCable(Entity * cable, bool8 & end)
