@@ -13,6 +13,8 @@
 #define CP_Indices gameState->electricDoorSystem.connectionPointIndices
 #define Door_Indices gameState->electricDoorSystem.doorIndices
 
+#define CABLE_MAX_CALL_STACK 50
+
 struct Entity;
 
 enum CableType
@@ -47,7 +49,7 @@ struct ElectricDoorSystem
 
 inline void UpdateElectricDoor();
     
-inline void SetUpElectricDoor();
+void SetUpElectricDoor();
 
 inline bool8 DoorBlocked(Entity * door, IVec2 reachDir);
 

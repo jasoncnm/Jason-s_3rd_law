@@ -158,6 +158,14 @@ struct Array
         return elements[count - 1];
     }
 
+    void RemoveLast()
+    {
+        if (!IsEmpty())
+        {
+            count--;
+        }
+    }
+
     uint32 Add(T element)
     {
         SM_ASSERT(count < maxElements, "Array Full!");

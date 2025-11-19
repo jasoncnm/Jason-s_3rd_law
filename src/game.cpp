@@ -503,7 +503,7 @@ bool8 MoveAction(IVec2 actionDir)
         {
             // NOTE: Bounce with the block
             MoveActionResult result = MoveActionCheck(player, player, player->tilePos + player->attachDir, player->attachDir, 0);
-            return result.pushed;
+            return true;
         }
         return false;
     }
