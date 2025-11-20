@@ -32,10 +32,11 @@ TODO: Things that I can do beside arts and design I guess
   - Texture filtering when zooming out (is mipmapping come handy here?)
   - Viewport scaling IMPORTANT: DO we really need this ? TODO: YES!!
   - Assets Managment
+  - Bit masking with tile rules
 
   NOTE: done
   - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
-  - Implement save points (Since the state of our game is entirely based on each state of the entity,
+  - Implement save points (Since the state of our game is entirely based oneach state of the entity,
                            we can just read/write raw bytes of entities to a file)
   - Gamepad supports
   - (MoveActionCheck) When Door and block are in the same tile, we should check if the door is blocked first, then check if we can push the block
@@ -255,6 +256,236 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
     return result;
 }
 
+#if 0
+MoveActionResult _MoveActionCheck(Entity * startEntity, Entity * initPushEntity, IVec2 initBlockNextPos, IVec2 pushDir, int initAccumulatedMass)
+{
+    SM_ASSERT(startEntity->movable, "Static entity cannot be pushing blocks!");
+
+    struct StackFrame { Entity * pushEntity; IVec2 blockNextPos; int accumulatedMass; };
+
+    StackFrame frame = { initPushEntity, initBlockNextPos, initAccumulatedMass };
+    Array<StackFrame, 50> callStack = {};
+    callStack.Add(frame);
+    
+    // IMPORTANT: the order of the layers are important, for example, we don't want to check blocks before checking doors in the same tile
+    int checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_PIT };
+    MoveActionResult result = { false, false, false, nullptr };
+
+    while (!callStack.IsEmpty())
+    {
+        for (int layerIndex = 0; layerIndex < ArrayCount(checkLayers); layerIndex++)
+        {
+            int layer = checkLayers[layerIndex];
+        
+            auto & entityTable = gameState->entityTable[layer];
+            for (uint32 i = 0; i < entityTable.count; i++)
+            {
+                Entity * target = GetEntity(entityTable[i]);
+
+                StackFrame frame = callStack.last();
+                callStack.RemoveLast();                
+
+                Entity * pushEntity = frame.pushEntity;
+                IVec2 blockNextPos  = frame.blockNextPos;
+                int accumulatedMass = frame.accumulatedMass;
+                
+                if (target && target->tilePos == blockNextPos)
+                {
+                    switch(target->type)
+                    {
+                        case ENTITY_TYPE_BLOCK:
+                        {
+                            EntityLayer layers[] = { LAYER_DOOR };
+                            Entity * door = FindEntityByLocationAndLayers(target->tilePos, layers, ArrayCount(layers));
+                            if (door && DoorBlocked(door, -pushDir))
+                            {
+                                result.pushed = false;
+                                result.blocked = true;
+                                result.blockedEntity = target;
+                                
+                                return result;
+                            }
+                            
+                            if (CheckBounce(target->tilePos, pushDir))
+                            {
+                                result.pushed = true;
+
+                                IVec2 startTile = target->tilePos;
+                                Vector2 moveStart = GetTilePivot(target);
+                        
+                                BounceEntity(target, pushDir);
+
+                                Vector2 moveEnd = GetTilePivot(target);
+                                float dist = Vector2Distance(moveStart, moveEnd);
+                                float tileDist = dist / MAP_TILE_SIZE;
+
+                                if (!Vector2Equals(moveStart, moveEnd))
+                                {
+                                    TweenParams params = {};
+                                    params.paramType = PARAM_TYPE_VECTOR2;
+                                    params.startVec2 = moveStart;
+                                    params.endVec2 = moveEnd;
+                                    params.realVec2  = &target->pivot;
+
+                                    AddTween(target->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, tileDist));
+                        
+                                    if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
+                                    {
+                                        pushEntity->tweenController.endEvent.controller = &target->tweenController;
+                                        pushEntity->tweenController.endEvent.OnPlayFunc = OnPlayEvent;
+                                    }
+                                    else
+                                    {
+                                        OnPlayEvent(&target->tweenController);
+                                    }
+                                                    
+                                    if (!target->active)
+                                    {
+                                        target->active = true;
+                                        target->tweenController.endEvent.deleteEntity = target;
+                                        target->tweenController.endEvent.OnDeleteFunc = DeleteEntity;
+                                    }
+
+                                }
+                                else
+                                {
+                                    result.pushed = false;
+                                    result.blocked = true;
+                                    result.blockedEntity = target;
+                                }
+                                return result;
+                            }
+                            else
+                            {
+                            
+                                int newAccumulatedMass = accumulatedMass + target->mass;
+                                if (newAccumulatedMass > startEntity->mass)
+                                {
+                                    result.blockedEntity = target;
+                                    result.blocked = true;
+                                    return result;
+                                }
+
+                                result = MoveActionCheck(startEntity, target, blockNextPos + pushDir, pushDir, newAccumulatedMass);
+                    
+                                if (!result.blocked)
+                                {
+                                    IVec2 startTile = target->tilePos;
+                                    result.pushed = true;
+
+                                    Vector2 moveStart = GetTilePivot(target);
+                                    SetEntityPosition(target, nullptr, blockNextPos + pushDir);
+
+                                    Vector2 moveEnd = GetTilePivot(target);
+                                    float dist = Vector2Distance(moveStart, moveEnd);
+                                    float iDist = dist / MAP_TILE_SIZE;
+
+                                    TweenParams params = {};
+                                    params.paramType = PARAM_TYPE_VECTOR2;
+                                    params.startVec2 = moveStart;
+                                    params.endVec2 = moveEnd;
+                                    params.realVec2  = &target->pivot;
+
+                                    AddTween(target->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, iDist));
+
+                                    if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
+                                    {
+                                        pushEntity->tweenController.endEvent.controller = &target->tweenController;
+                                        pushEntity->tweenController.endEvent.OnPlayFunc = OnPlayEvent;
+                                    }
+                                    else
+                                    {
+                                        OnPlayEvent(&target->tweenController);
+                                    }
+                                }
+                                else
+                                {
+                                    result.blockedEntity = target;
+                                }
+                        
+                                return result;
+                            }
+                    
+                            break;
+                        }                    
+                    }
+                }
+            }        
+        }
+    }
+        case ENTITY_TYPE_GLASS:
+        {
+            if (!target->broken)
+            {
+                result.blocked = true;
+                result.blockedEntity = target;
+                return result;
+            }
+            break;
+        }
+        case ENTITY_TYPE_ELECTRIC_DOOR:
+        {
+            if (target->cableType == CABLE_TYPE_DOOR && DoorBlocked(target, pushDir))
+            {
+                result.blocked = true;
+                result.blockedEntity = target;
+                return result;
+            }
+                    
+                        break;
+                    }
+                    case ENTITY_TYPE_PIT:
+                    case ENTITY_TYPE_WALL:
+                    {
+                        result.blocked = true;
+                        result.blockedEntity = target;
+                        return result;
+                    }
+                    case ENTITY_TYPE_PLAYER:
+                    case ENTITY_TYPE_CLONE:
+                    {
+                        if (pushEntity->type == ENTITY_TYPE_CLONE || pushEntity->type == ENTITY_TYPE_PLAYER)
+                        {
+                            if (pushDir == -pushEntity->attachDir)
+                            {
+                                result.pushed = false;
+                                return result;
+                            }
+                            result.merged = true;
+                            MergeSlimes(target, pushEntity);
+                            return result;
+                        }
+
+                        if (pushEntity->type == ENTITY_TYPE_BLOCK)
+                        {
+                            FindAttachableResult attachResult = FindAttachable(target->tilePos + pushDir, pushDir);
+                            if (attachResult.has)
+                            {
+                                SetAttach(target, attachResult.entity, pushDir);
+                            }
+                            else if (target->attach)
+                            {
+                                attachResult = FindAttachable(target->tilePos + target->attachDir, target->attachDir);
+                                if (attachResult.has)
+                                {
+                                    SetAttach(target, attachResult.entity, target->attachDir);
+                                }
+                            }
+                            // SetAttach(target, pushEntity, -pushDir);
+                        }
+                    
+                    }
+
+                }
+            }
+        }
+    }
+ 
+    return result;
+}
+
+#endif
+
 inline float GetCameraZoom(Map & currentMap)
 {
     
@@ -422,14 +653,24 @@ bool8 MoveAction(IVec2 actionDir)
         return false;
     }
 
-    EntityLayer layers[] = { LAYER_DOOR };
-    
-    Entity * door = FindEntityByLocationAndLayers(currentPos, layers, ArrayCount(layers));
-    if (door && DoorBlocked(door, -actionDir))
     {
-        return false;
+        EntityLayer layers[] = { LAYER_DOOR };
+        Entity * door = FindEntityByLocationAndLayers(currentPos, layers, ArrayCount(layers));
+        if (door && DoorBlocked(door, -actionDir))
+        {
+            return false;
+        }
     }
-        
+    
+    {
+        EntityLayer layers[] = { LAYER_PIT };
+        Entity * pit = FindEntityByLocationAndLayers(currentPos + player->attachDir, layers, ArrayCount(layers));
+        if (pit)
+        {
+            return false;
+        }
+    }
+    
     MoveActionResult moveResult = MoveActionCheck(player, player, actionTilePos, actionDir, 0);
 
     if (moveResult.merged)
@@ -1018,7 +1259,7 @@ void GameplayUpdateAndRender()
 
         ClearBackground(gameState->bgColor);
     
-        UpdateAndDrawStarFieldBG(gameState->starFields.stars, gameState->starFields.starsScreenPos, STAR_COUNT, gameState->starFields.flySpeed);
+        UpdateAndDrawStarFieldBG(&gameState->starFields);
 
         BeginMode2D(gameState->camera);
     
@@ -1182,21 +1423,6 @@ UPDATE_AND_RENDER(UpdateAndRender)
     {
         init = true;
         GuiLoadStyle(RAYLIB_GUI_STYLE_PATH);
-
-        // gameState->bgColor = IntToRGBA(0x083050);
-        gameState->bgColor = IntToRGBA(0x3322);
-        gameState->starFields = { };
-        
-        // Speed at which we fly forward
-        gameState->starFields.flySpeed = 0.2f;
-
-        // Setup the stars with a random position
-        for (int i = 0; i < STAR_COUNT; i++)
-        {
-            gameState->starFields.stars[i].x = (float)GetRandomValue(-GetScreenWidth() / 2, GetScreenWidth() / 2);
-            gameState->starFields.stars[i].y = (float)GetRandomValue(-GetScreenHeight() / 2, GetScreenHeight() / 2);
-            gameState->starFields.stars[i].z = 1.0f;
-        }
     }
 
     Color colorA = IntToRGBA(0x222f);
@@ -1218,7 +1444,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             BeginDrawing();
             ClearBackground(gameState->bgColor);
 
-            UpdateAndDrawStarFieldBG(gameState->starFields.stars, gameState->starFields.starsScreenPos, STAR_COUNT, gameState->starFields.flySpeed);
+            UpdateAndDrawStarFieldBG(&gameState->starFields);
 
             const char * Title = "TITLE SCREEN";
             int TitleTextX = (GetScreenWidth() - MeasureText(Title, 40)) / 2;
@@ -1239,7 +1465,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             BeginDrawing();
             ClearBackground(gameState->bgColor);
 
-            UpdateAndDrawStarFieldBG(gameState->starFields.stars, gameState->starFields.starsScreenPos, STAR_COUNT, gameState->starFields.flySpeed);
+            UpdateAndDrawStarFieldBG(&gameState->starFields);
 
             float width = GetScreenWidth() - 600.0f;
             float height = 100.0f;
@@ -1324,7 +1550,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             BeginDrawing();
             ClearBackground(gameState->bgColor);
 
-            UpdateAndDrawStarFieldBG(gameState->starFields.stars, gameState->starFields.starsScreenPos, STAR_COUNT, gameState->starFields.flySpeed);
+            UpdateAndDrawStarFieldBG(&gameState->starFields);
 
             float width = 1000.0f;
             float height = 100.0f;

@@ -119,13 +119,6 @@ struct Map
     bool8 firstEnter = false;
 };
 
-struct StarFields
-{
-    Vector3 stars[STAR_COUNT];
-    Vector2 starsScreenPos[STAR_COUNT];
-    float flySpeed = 0.1f;    
-};
-
 // NOTE: GameState
 struct GameState
 {

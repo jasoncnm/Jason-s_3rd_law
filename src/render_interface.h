@@ -12,11 +12,18 @@
 #include "entity.h"
 
 #define TEXTURE_PATH "Assets/Texture/SpriteAtlas.png"
-#define MAX_TRANSFORM 1000
 
 //  ========================================================================
 //              NOTE: Render Structs
 //  ========================================================================
+
+struct StarFields
+{
+    bool8 initialized = false;
+    Vector3 stars[STAR_COUNT];
+    Vector2 starsScreenPos[STAR_COUNT];
+    float flySpeed = 0.1f;    
+};
 
 
 //  ========================================================================
@@ -117,8 +124,29 @@ void DrawError()
     DrawText("SOMETHING IS WRONG PLEASE UNDO(Z) OR RESET(R)", GetScreenWidth() / 2, GetScreenHeight() / 2, 20, RED);
 }
 
-void UpdateAndDrawStarFieldBG(Vector3 * stars, Vector2 * starsScreenPos, uint32 starCount, float flySpeed)
+// TODO: parallelize the operation
+void UpdateAndDrawStarFieldBG(StarFields * starFields)
 {
+
+    if (!starFields->initialized)
+    {
+        starFields->initialized = true;
+        // Speed at which we fly forward
+        starFields->flySpeed = 0.1f;
+        // Setup the stars with a random position
+        for (int i = 0; i < STAR_COUNT; i++)
+        {
+            starFields->stars[i].x = (float)GetRandomValue(-GetScreenWidth() / 2, GetScreenWidth() / 2);
+            starFields->stars[i].y = (float)GetRandomValue(-GetScreenHeight() / 2, GetScreenHeight() / 2);
+            starFields->stars[i].z = (float)GetRandomValue(0, INT_MAX) / INT_MAX;
+        }
+    }
+    
+    Vector3 * stars = starFields->stars;
+    Vector2 * starsScreenPos = starFields->starsScreenPos;
+    uint32 starCount = STAR_COUNT;
+    float flySpeed = starFields->flySpeed;
+        
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
     static float time = 0;    
@@ -127,7 +155,7 @@ void UpdateAndDrawStarFieldBG(Vector3 * stars, Vector2 * starsScreenPos, uint32 
     for (uint32 i = 0; i < starCount; i++)
     {
         // Update star's timer
-        stars[i].z -= dt* 0.1f;
+        stars[i].z -= dt * flySpeed;
 #if 0
         int random = GetRandomValue(INT_MIN, INT_MAX);
 
