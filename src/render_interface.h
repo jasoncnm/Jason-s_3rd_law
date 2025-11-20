@@ -121,13 +121,36 @@ void UpdateAndDrawStarFieldBG(Vector3 * stars, Vector2 * starsScreenPos, uint32 
 {
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
-    
+    static float time = 0;    
     float dt = GetFrameTime();
+    time += dt;
     for (uint32 i = 0; i < starCount; i++)
     {
         // Update star's timer
-        stars[i].z -= dt*flySpeed;
+        stars[i].z -= dt* 0.1f;
+#if 0
+        int random = GetRandomValue(INT_MIN, INT_MAX);
 
+        if (random % 2 == 0)
+        {
+            stars[i].x += 0.5f * cosf(time);
+        }
+        else
+        {
+            stars[i].x += 0.5f * sinf(time);
+        }
+        
+        random = GetRandomValue(INT_MIN, INT_MAX);
+
+        if (random % 2 == 0)
+        {
+            stars[i].y += 0.5f * sinf(time);
+        }
+        else
+        {
+            stars[i].y += 0.5f * cosf(time);
+        }
+#endif
         // Calculate the screen position
         starsScreenPos[i] =
             {
@@ -150,8 +173,9 @@ void UpdateAndDrawStarFieldBG(Vector3 * stars, Vector2 * starsScreenPos, uint32 
     {
         // Make the radius grow as the star ages
         float radius = Lerp(stars[i].z, 1.0f, 5.0f);
+        Color color = ColorLerp(SKYBLUE, DARKPURPLE, stars[i].z);
         // Draw the circle
-        DrawCircleV(starsScreenPos[i], radius, RAYWHITE);
+        DrawCircleV(starsScreenPos[i], radius, color);
     } 
 
 }

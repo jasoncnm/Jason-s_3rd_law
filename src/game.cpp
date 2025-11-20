@@ -1183,8 +1183,8 @@ UPDATE_AND_RENDER(UpdateAndRender)
         init = true;
         GuiLoadStyle(RAYLIB_GUI_STYLE_PATH);
 
-        gameState->bgColor = IntToRGBA(0x083050);
-        
+        // gameState->bgColor = IntToRGBA(0x083050);
+        gameState->bgColor = IntToRGBA(0x3322);
         gameState->starFields = { };
         
         // Speed at which we fly forward
@@ -1198,6 +1198,11 @@ UPDATE_AND_RENDER(UpdateAndRender)
             gameState->starFields.stars[i].z = 1.0f;
         }
     }
+
+    Color colorA = IntToRGBA(0x222f);
+    Color colorB = IntToRGBA(0x3322);
+
+    gameState->bgColor = ColorLerp(colorA, colorB, sinf((float)GetTime() * 0.01f));
     
     switch(gameState->currentScreen)
     {
@@ -1236,8 +1241,10 @@ UPDATE_AND_RENDER(UpdateAndRender)
 
             UpdateAndDrawStarFieldBG(gameState->starFields.stars, gameState->starFields.starsScreenPos, STAR_COUNT, gameState->starFields.flySpeed);
 
-            float width = 1000.0f;
+            float width = GetScreenWidth() - 600.0f;
             float height = 100.0f;
+            width = Clamp(width, 16.0f, 1000.0f);
+            height = Clamp(height, 9.0f, 150.0f);
             
             const char * NewGameText = "new game";
             Rectangle bounds =
