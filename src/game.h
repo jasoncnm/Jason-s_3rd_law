@@ -82,6 +82,11 @@ enum GameScreen
     ENDING_SCREEN,
 };
 
+enum CheckState
+{
+    MOVE_CHECK,
+    BOUNCE_CHECK
+};
 
 struct KeyMapping
 {

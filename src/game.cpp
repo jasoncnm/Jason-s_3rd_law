@@ -257,233 +257,289 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
 }
 
 #if 0
-MoveActionResult _MoveActionCheck(Entity * startEntity, Entity * initPushEntity, IVec2 initBlockNextPos, IVec2 pushDir, int initAccumulatedMass)
+MoveActionResult CheckAndExecuteAction(Entity * startEntity,
+                                       Entity * initPushEntity,
+                                       IVec2 initBlockNextPos,
+                                       IVec2 pushDir,
+                                       int initAccumulatedMass,
+                                       CheckState initCheckState)
 {
     SM_ASSERT(startEntity->movable, "Static entity cannot be pushing blocks!");
 
-    struct StackFrame { Entity * pushEntity; IVec2 blockNextPos; int accumulatedMass; };
+    struct StackFrame
+    {
+        StackFrame * parent;
+        MoveActionResult result;
+        Entity * pushEntity;
+        IVec2 blockNextPos;
+        int accumulatedMass;
+        bool8 visited = false;
+    };
+    MoveActionResult result = { false, false, false, nullptr };
 
-    StackFrame frame = { initPushEntity, initBlockNextPos, initAccumulatedMass };
+    StackFrame frame = { &frame, result, initPushEntity, initBlockNextPos, initAccumulatedMass, false };
     Array<StackFrame, 50> callStack = {};
     callStack.Add(frame);
+
+    StackFrame * resultFrame = nullptr;
+
+    CheckState checkState = initCheckState;
     
     // IMPORTANT: the order of the layers are important, for example, we don't want to check blocks before checking doors in the same tile
     int checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_PIT };
-    MoveActionResult result = { false, false, false, nullptr };
-
     while (!callStack.IsEmpty())
     {
-        for (int layerIndex = 0; layerIndex < ArrayCount(checkLayers); layerIndex++)
+        StackFrame & currentFrame = callStack.last();
+        resultFrame = &currentFrame;
+
+        if (!currentFrame.visited)
         {
-            int layer = checkLayers[layerIndex];
-        
-            auto & entityTable = gameState->entityTable[layer];
-            for (uint32 i = 0; i < entityTable.count; i++)
+            currentFrame.visited = true;
+
+            switch (checkState)
             {
-                Entity * target = GetEntity(entityTable[i]);
-
-                StackFrame frame = callStack.last();
-                callStack.RemoveLast();                
-
-                Entity * pushEntity = frame.pushEntity;
-                IVec2 blockNextPos  = frame.blockNextPos;
-                int accumulatedMass = frame.accumulatedMass;
-                
-                if (target && target->tilePos == blockNextPos)
+                case BOUNCE_CHECK:
                 {
-                    switch(target->type)
+                    for (IVec2 pos = currentFrame.blockNextPos; ; pos = pos + pushDir)
                     {
-                        case ENTITY_TYPE_BLOCK:
+                        for (int layerIndex = 0; layerIndex < ArrayCount(checkLayers); layerIndex++)
                         {
-                            EntityLayer layers[] = { LAYER_DOOR };
-                            Entity * door = FindEntityByLocationAndLayers(target->tilePos, layers, ArrayCount(layers));
-                            if (door && DoorBlocked(door, -pushDir))
+                            int layer = checkLayers[layerIndex];
+        
+                            auto & entityTable = gameState->entityTable[layer];
+                            for (uint32 i = 0; i < entityTable.count; i++)
                             {
-                                result.pushed = false;
-                                result.blocked = true;
-                                result.blockedEntity = target;
+                                Entity * target = GetEntity(entityTable[i]);
+                                if (target && target->tilePos == pos)
+                                {
+                                    switch(target->type)
+                                    {
+                                        case ENTITY_TYPE_ELECTRIC_DOOR:
+                                        {
+                                            if (target->cableType == CABLE_TYPE_DOOR && SameSide(target, pos, pushDir))
+                                            {
+                                                SetEntityPosition(currentFrame.pushEntity, target, pos - pushDir);
+                                                callStack.RemoveLast();
+                                                goto NextStackFrame;
+                                            }
+                                            break;
+                                        }
+                                        case ENTITY_TYPE_PIT:
+                                        case ENTITY_TYPE_WALL:
+                                        {
+                                            if (IsSlime(currentFrame.pushEntity) && target->type == ENTITY_TYPE_WALL)
+                                            {
+                                                SetAttach(currentFrame.pushEntity, target, dir);
+                                            }
+                                            SetEntityPosition(currentFrame.pushEntity, target, pos - dir);
+                                            callStack.RemoveLast();
+                                            goto NextStackFrame;
+                                        }
+                                        case ENTITY_TYPE_GLASS:
+                                        {
+                                            if (!target->broken && isSlime)
+                                            {
+
+                                                SetAttach(currentFrame.pushEntity, target, dir);
+                                                SetEntityPosition(currentFrame.pushEntity, target, pos - dir);
+                                                callStack.RemoveLast();
+                                                goto NextStackFrame;
+                                            }
+                                            SetGlassBeBroken(target);
+                                            break;                        
+                                        }
+                                        case ENTITY_TYPE_BLOCK:
+                                        {
+
+                                            MoveActionResult result = 
+                                                MoveActionCheck(entity, entity, pos, dir, 0);
+
+                                            if (IsSlime(entity))
+                                            {
+                                                SetEntityPosition(entity, target, target->tilePos - dir);
+                                            }
+                                            else if (result.blocked)
+                                            {
+                                                SetEntityPosition(entity, result.blockedEntity, pos - dir);
+                                            }
+                                            else
+                                            {
+                                                SetEntityPosition(entity, nullptr, pos - dir);
+                                            }
+                        
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
+                case MOVE_CHECK:
+                {
+                    for (int layerIndex = 0; layerIndex < ArrayCount(checkLayers); layerIndex++)
+                    {
+                        int layer = checkLayers[layerIndex];
+        
+                        auto & entityTable = gameState->entityTable[layer];
+                        for (uint32 i = 0; i < entityTable.count; i++)
+                        {
+                            Entity * target = GetEntity(entityTable[i]);
+
+                            if (target && target->tilePos == currentFrame.blockNextPos)
+                            {
+                                switch(target->type)
+                                {
+                                    case ENTITY_TYPE_GLASS:
+                                    {
+                                        if (!target->broken)
+                                        {
+                                            currentFrame.parent->result.blocked = true;
+                                            currentFrame.parent->result.blockedEntity = target;
+                                            callStack.RemoveLast();
+                                            goto NextStackFrame;
+                                        }
+                                        break;
+                                    }
+                                    case ENTITY_TYPE_ELECTRIC_DOOR:
+                                    {
+                                        if (target->cableType == CABLE_TYPE_DOOR && DoorBlocked(target, pushDir))
+                                        {
+                                            currentFrame.parent->result.blocked = true;
+                                            currentFrame.parent->result.blockedEntity = target;
+                                            goto NextStackFrame;
+                                        }
+                                        break;
+                                    }
+                                    case ENTITY_TYPE_PIT:
+                                    case ENTITY_TYPE_WALL:
+                                    {
+                                        currentFrame.parent->result.blocked = true;
+                                        currentFrame.parent->result.blockedEntity = target;
+                                        goto NextStackFrame;
+                                    }
+                                    case ENTITY_TYPE_PLAYER:
+                                    case ENTITY_TYPE_CLONE:
+                                    {
+                                        if (currentFrame.pushEntity->type == ENTITY_TYPE_CLONE || currentFrame.pushEntity->type == ENTITY_TYPE_PLAYER)
+                                        {
+                                            if (pushDir == -currentFrame.pushEntity->attachDir)
+                                            {
+                                                currentFrame.parent->result.pushed = false;
+                                                goto NextStackFrame;
+                                            }
+                                            currentFrame.parent->result.merged = true;
+                                            MergeSlimes(target, currentFrame.pushEntity);
+                                            goto NextStackFrame;
+                                        }
+
+                                        if (pushEntity->type == ENTITY_TYPE_BLOCK)
+                                        {
+                                            FindAttachableResult attachResult = FindAttachable(target->tilePos + pushDir, pushDir);
+                                            if (attachResult.has)
+                                            {
+                                                SetAttach(target, attachResult.entity, pushDir);
+                                            }
+                                            else if (target->attach)
+                                            {
+                                                attachResult = FindAttachable(target->tilePos + target->attachDir, target->attachDir);
+                                                if (attachResult.has)
+                                                {
+                                                    SetAttach(target, attachResult.entity, target->attachDir);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    case ENTITY_TYPE_BLOCK:
+                                    {
+                                        EntityLayer layers[] = { LAYER_DOOR };
+                                        Entity * door = FindEntityByLocationAndLayers(target->tilePos, layers, ArrayCount(layers));
+                                        if (door && DoorBlocked(door, -pushDir))
+                                        {
+                                            currentFrame.parent->result.pushed = false;
+                                            currentFrame.parent->result.blocked = true;
+                                            currentFrame.parent->result.blockedEntity = target;
                                 
-                                return result;
-                            }
-                            
-                            if (CheckBounce(target->tilePos, pushDir))
-                            {
-                                result.pushed = true;
+                                            goto NextStackFrame;
+                                        }
 
-                                IVec2 startTile = target->tilePos;
-                                Vector2 moveStart = GetTilePivot(target);
-                        
-                                BounceEntity(target, pushDir);
+                                        if (CheckBounce(target->tilePos, pushDir))
+                                        {
+                                            // TODO
+                                            currentFrame.parent->result.pushed = true;
+                                            checkState = BOUNCE_CHECK;
 
-                                Vector2 moveEnd = GetTilePivot(target);
-                                float dist = Vector2Distance(moveStart, moveEnd);
-                                float tileDist = dist / MAP_TILE_SIZE;
+                                            StackFrame newFrame  = {};
+                                            newFrame.parent = &currentFrame;
+                                            newFrame.result = {};
+                                            newFrame.pushEntity = target;
+                                            newFrame.blockNextPos = currentFrame.blockNextPos + pushDir;
+                                            newFrame.accumulatedMass = newAccumulatedMass;
+                                            newFrame.visited = false;
+                                            callStack.Add(newFrame);
+                                            
+                                            goto NextStackFrame;
+                                        }
+                                        else
+                                        {
+                                            int newAccumulatedMass = currentFrame.accumulatedMass + target->mass;
+                                            if (newAccumulatedMass > startEntity->mass)
+                                            {
+                                                currentFrame.parent->result.blocked = true;
+                                                currentFrame.parent->result.blockedEntity = target;
+                                                goto NextStackFrame;
+                                            }
 
-                                if (!Vector2Equals(moveStart, moveEnd))
-                                {
-                                    TweenParams params = {};
-                                    params.paramType = PARAM_TYPE_VECTOR2;
-                                    params.startVec2 = moveStart;
-                                    params.endVec2 = moveEnd;
-                                    params.realVec2  = &target->pivot;
-
-                                    AddTween(target->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, tileDist));
-                        
-                                    if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
-                                    {
-                                        pushEntity->tweenController.endEvent.controller = &target->tweenController;
-                                        pushEntity->tweenController.endEvent.OnPlayFunc = OnPlayEvent;
-                                    }
-                                    else
-                                    {
-                                        OnPlayEvent(&target->tweenController);
-                                    }
-                                                    
-                                    if (!target->active)
-                                    {
-                                        target->active = true;
-                                        target->tweenController.endEvent.deleteEntity = target;
-                                        target->tweenController.endEvent.OnDeleteFunc = DeleteEntity;
-                                    }
-
-                                }
-                                else
-                                {
-                                    result.pushed = false;
-                                    result.blocked = true;
-                                    result.blockedEntity = target;
-                                }
-                                return result;
-                            }
-                            else
-                            {
-                            
-                                int newAccumulatedMass = accumulatedMass + target->mass;
-                                if (newAccumulatedMass > startEntity->mass)
-                                {
-                                    result.blockedEntity = target;
-                                    result.blocked = true;
-                                    return result;
-                                }
-
-                                result = MoveActionCheck(startEntity, target, blockNextPos + pushDir, pushDir, newAccumulatedMass);
-                    
-                                if (!result.blocked)
-                                {
-                                    IVec2 startTile = target->tilePos;
-                                    result.pushed = true;
-
-                                    Vector2 moveStart = GetTilePivot(target);
-                                    SetEntityPosition(target, nullptr, blockNextPos + pushDir);
-
-                                    Vector2 moveEnd = GetTilePivot(target);
-                                    float dist = Vector2Distance(moveStart, moveEnd);
-                                    float iDist = dist / MAP_TILE_SIZE;
-
-                                    TweenParams params = {};
-                                    params.paramType = PARAM_TYPE_VECTOR2;
-                                    params.startVec2 = moveStart;
-                                    params.endVec2 = moveEnd;
-                                    params.realVec2  = &target->pivot;
-
-                                    AddTween(target->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, iDist));
-
-                                    if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
-                                    {
-                                        pushEntity->tweenController.endEvent.controller = &target->tweenController;
-                                        pushEntity->tweenController.endEvent.OnPlayFunc = OnPlayEvent;
-                                    }
-                                    else
-                                    {
-                                        OnPlayEvent(&target->tweenController);
+                                            StackFrame newFrame  = {};
+                                            newFrame.parent = &currentFrame;
+                                            newFrame.result = {};
+                                            newFrame.pushEntity = target;
+                                            newFrame.blockNextPos = currentFrame.blockNextPos + pushDir;
+                                            newFrame.accumulatedMass = newAccumulatedMass;
+                                            newFrame.visited = false;
+                                            callStack.Add(newFrame);
+                                            goto NextStackFrame;
+                                    
+                                        }
+                                        break;
                                     }
                                 }
-                                else
-                                {
-                                    result.blockedEntity = target;
-                                }
-                        
-                                return result;
                             }
-                    
-                            break;
-                        }                    
-                    }
-                }
-            }        
-        }
-    }
-        case ENTITY_TYPE_GLASS:
-        {
-            if (!target->broken)
-            {
-                result.blocked = true;
-                result.blockedEntity = target;
-                return result;
-            }
-            break;
-        }
-        case ENTITY_TYPE_ELECTRIC_DOOR:
-        {
-            if (target->cableType == CABLE_TYPE_DOOR && DoorBlocked(target, pushDir))
-            {
-                result.blocked = true;
-                result.blockedEntity = target;
-                return result;
-            }
-                    
-                        break;
-                    }
-                    case ENTITY_TYPE_PIT:
-                    case ENTITY_TYPE_WALL:
-                    {
-                        result.blocked = true;
-                        result.blockedEntity = target;
-                        return result;
-                    }
-                    case ENTITY_TYPE_PLAYER:
-                    case ENTITY_TYPE_CLONE:
-                    {
-                        if (pushEntity->type == ENTITY_TYPE_CLONE || pushEntity->type == ENTITY_TYPE_PLAYER)
-                        {
-                            if (pushDir == -pushEntity->attachDir)
-                            {
-                                result.pushed = false;
-                                return result;
-                            }
-                            result.merged = true;
-                            MergeSlimes(target, pushEntity);
-                            return result;
-                        }
-
-                        if (pushEntity->type == ENTITY_TYPE_BLOCK)
-                        {
-                            FindAttachableResult attachResult = FindAttachable(target->tilePos + pushDir, pushDir);
-                            if (attachResult.has)
-                            {
-                                SetAttach(target, attachResult.entity, pushDir);
-                            }
-                            else if (target->attach)
-                            {
-                                attachResult = FindAttachable(target->tilePos + target->attachDir, target->attachDir);
-                                if (attachResult.has)
-                                {
-                                    SetAttach(target, attachResult.entity, target->attachDir);
-                                }
-                            }
-                            // SetAttach(target, pushEntity, -pushDir);
                         }
                     
                     }
 
+                    // NOTE: case when the block next position has not pushable or blockable entity
+                    {
+                        currentFrame.parent->result.pushed = false;
+                        currentFrame.parent->result.blocked = false;
+                        callStack.RemoveLast();
+                    }
+                    
+                    break;
                 }
             }
+             
         }
+        else
+        {
+            if (!currentFrame.result.blocked)
+            {
+                // TODO
+                
+            }
+            else
+            {
+                currentFrame.parent->result.blocked = true;
+                currentFrame.parent->result.blockedEntity = currentFrame.parent->pushEntity;
+            }
+            callStack.RemoveLast();
+        } NextStackFrame:;
     }
- 
-    return result;
+
+    return resultFrame->result;    
 }
-
 #endif
 
 inline float GetCameraZoom(Map & currentMap)
