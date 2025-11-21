@@ -319,7 +319,14 @@ void SetupEntityTable(GameState & state)
                 }
                 case ENTITY_TYPE_ELECTRIC_DOOR:
                 {
-                    state.entityTable[LAYER_DOOR].Add(entity->entityIndex);
+                    if (entity->cableType == CABLE_TYPE_DOOR)
+                    {
+                        state.entityTable[LAYER_DOOR].Add(entity->entityIndex);
+                    }
+                    else
+                    {
+                        state.entityTable[LAYER_CABLE].Add(entity->entityIndex);
+                    }
                     break;
                 }
                 case ENTITY_TYPE_PIT:
