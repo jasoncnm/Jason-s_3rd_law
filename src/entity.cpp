@@ -699,133 +699,125 @@ void BounceEntity(Entity * entity, IVec2 dir)
     SM_ASSERT(entity->movable, "entitiy is static");
     
     IVec2 start = entity->tilePos + dir;
+
+    // IMPORTANT: the order of the layers are important, for example, we don't want to check blocks before checking doors in the same tile
+    int checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_PIT };
     
     for (IVec2 pos = start;
          ;
          pos = pos + dir)
     {
-        for (uint32 i = 0; i < gameState->entities.count; i++)
+        for (int layerIndex = 0; layerIndex < ArrayCount(checkLayers); layerIndex++)
         {
-            Entity * target = GetEntity(i);
-            bool8 isSlime = (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE);
-
-            if (target && target->tilePos == pos)
+            int layer = checkLayers[layerIndex];
+        
+            auto & entityTable = gameState->entityTable[layer];
+            for (uint32 i = 0; i < entityTable.count; i++)
             {
-                switch(target->type)
+                Entity * target = GetEntity(entityTable[i]);
+
+                if (target && target->tilePos == pos)
                 {
-                    case ENTITY_TYPE_ELECTRIC_DOOR:
-                    {
-                        if (target->cableType == CABLE_TYPE_DOOR && SameSide(target, pos, dir))
-                        {
+                    if (layer == LAYER_DOOR && !DoorBlocked(target, dir)) continue;
 
-                            SetEntityPosition(entity, target, pos - dir);
-                            return;    
-                        }
-                        break;
-                    }
-                    case ENTITY_TYPE_PIT:
-                    case ENTITY_TYPE_WALL:
+                    switch(layer)
                     {
-
-                        if (isSlime && target->type == ENTITY_TYPE_WALL)
+                        case LAYER_DOOR:
+                        case LAYER_PIT:
+                        case LAYER_WALL:
                         {
-                            SetAttach(entity, target, dir);
-                        }
-                        SetEntityPosition(entity, target, pos - dir);
-                        return;
-                    }
-                    case ENTITY_TYPE_GLASS:
-                    {
-                        if (!target->broken && isSlime)
-                        {
-
-                            SetAttach(entity, target, dir);
                             SetEntityPosition(entity, target, pos - dir);
                             return;
                         }
-
-
-                        SetGlassBeBroken(target);
-                        break;                        
-                    }
-                    case ENTITY_TYPE_BLOCK:
-                    {
-
-                        MoveActionResult result = 
-                            MoveActionCheck(entity, entity, pos, dir, 0);
-
-                        if (IsSlime(entity))
+                        case LAYER_GLASS:
                         {
-                            SetEntityPosition(entity, target, target->tilePos - dir);
+                            if (!target->broken && IsSlime(entity))
+                            {
+                                SetEntityPosition(entity, target, pos - dir);
+                                return;
+                            }
+
+                            SetGlassBeBroken(target);
+                            break;                        
                         }
-                        else if (result.blocked)
-                        {
-                            SetEntityPosition(entity, result.blockedEntity, pos - dir);
-                        }
-                        else
-                        {
-                            SetEntityPosition(entity, nullptr, pos - dir);
-                        }
-                        
-                        return;
-                    }
-                    case ENTITY_TYPE_PLAYER:
-                    case ENTITY_TYPE_CLONE:
-                    {
-                        if (!isSlime)
+                        case LAYER_BLOCK:
                         {
 
-                            IVec2 attachDir = target->attachDir;
-                            MoveActionResult result =
+                            MoveActionResult result = 
                                 MoveActionCheck(entity, entity, pos, dir, 0);
 
-                            if (result.blocked)
+                            if (IsSlime(entity))
                             {
-                                if (result.blockedEntity != target)
-                                {
-                                    SetEntityPosition(target, result.blockedEntity, target->tilePos);
-                                }
+                                SetEntityPosition(entity, target, target->tilePos - dir);
+                            }
+                            else if (result.blocked)
+                            {
+                                SetEntityPosition(entity, result.blockedEntity, pos - dir);
                             }
                             else
                             {
-                                Entity * attachEntity = nullptr;
-                                FindAttachableResult result = FindAttachable(target->tilePos + attachDir, attachDir);
-                                if (result.has)
-                                {
-                                    attachEntity = result.entity;
-                                }
-                                
-                                if (attachEntity && attachEntity != target)
-                                {
-                                    SetEntityPosition(target, attachEntity, target->tilePos);
-                                }
-
+                                SetEntityPosition(entity, nullptr, pos - dir);
                             }
-                            
-                            SetEntityPosition(entity, nullptr, pos - dir);
-
+                        
                             return;
                         }
+                        case LAYER_SLIME:
+                        {
+                            if (!IsSlime(entity))
+                            {
 
-                        // if (target->type == ENTITY_TYPE_PLAYER)
-                        // {
+                                IVec2 attachDir = target->attachDir;
+                                MoveActionResult result =
+                                    MoveActionCheck(entity, entity, pos, dir, 0);
 
-                        //     entity = MergeSlimes(entity, target);
-                        // }
-                        // else
-                        // {
-                        //     entity = MergeSlimes( target, entity);
+                                if (result.blocked)
+                                {
+                                    if (result.blockedEntity != target)
+                                    {
+                                        SetEntityPosition(target, result.blockedEntity, target->tilePos);
+                                    }
+                                }
+                                else
+                                {
+                                    Entity * attachEntity = nullptr;
+                                    FindAttachableResult result = FindAttachable(target->tilePos + attachDir, attachDir);
+                                    if (result.has)
+                                    {
+                                        attachEntity = result.entity;
+                                    }
+                                
+                                    if (attachEntity && attachEntity != target)
+                                    {
+                                        SetEntityPosition(target, attachEntity, target->tilePos);
+                                    }
 
-                        // }
-                        entity = MergeSlimes(target, entity);
+                                }
+                            
+                                SetEntityPosition(entity, nullptr, pos - dir);
+
+                                return;
+                            }
+
+                            // if (target->type == ENTITY_TYPE_PLAYER)
+                            // {
+
+                            //     entity = MergeSlimes(entity, target);
+                            // }
+                            // else
+                            // {
+                            //     entity = MergeSlimes( target, entity);
+
+                            // }
+                            entity = MergeSlimes(target, entity);
                                                 
-                        break;
+                            break;
+                        }
                     }
+                    break;   
+                    // break;
                 }
-                        
-                // break;
-            }
             
+            }
         }
         
         if (CheckOutOfBound(pos))
