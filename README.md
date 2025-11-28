@@ -1,17 +1,22 @@
 # ![](Assets/ICON/ICON.png)  Jason's_law
 
-Application should be able to run on windows without build.
+The application should be able to run on Windows without build.
 
-Just clone the repo with command
+Just clone the repo with the command
 ```
 git clone --recurse-submodules <URL>
 ```
-and run command
+and run the command
 ```
 hotrun.bat
 ```
-If you want to build the project make sure your have msvc 2019 or 2022 installed in you system (I've only tested these two version), then simply run
+If you want to build the project, make sure you have MSVC 2019 or 2022 installed in your system (I've only tested these two versions), then in the project directory, simply run
 ```
-build.bat
+build clean
 ```
+For the first time, or you want a clean build
 
+Then, for subsequent builds, just run
+```
+build
+```
