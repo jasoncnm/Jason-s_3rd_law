@@ -14,8 +14,8 @@
    1 - Build for pubilc release
 */
 
-#define SCREEN_WIDTH  1600
-#define SCREEN_HEIGHT 1600
+#define SCREEN_WIDTH  1000
+#define SCREEN_HEIGHT 1000
 
 #define MAP_TILE_SIZE 32       // Tiles size
 #define MAX_ANIMATION 50
