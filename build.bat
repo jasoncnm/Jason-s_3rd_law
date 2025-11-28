@@ -1,5 +1,7 @@
 @echo off
 
+call scripts\msvc_upgrade_cmd_64.bat
+ 
 call scripts\msvc-build-raylib.bat
 
 REM call scripts\msvc-build-release.bat
