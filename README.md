@@ -12,11 +12,9 @@ hotrun.bat
 ```
 If you want to build the project, make sure you have MSVC 2019 or 2022 installed in your system (I've only tested these two versions), then in the project directory, simply run
 ```
-build clean
-```
-For the first time, or you want a clean build
-
-Then, for subsequent builds, just run
-```
 build
+```
+If you want a clean build run
+```
+build clean
 ```
