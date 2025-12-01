@@ -41,13 +41,13 @@ inline bool8 CheckOutOfBound(IVec2 tilePos)
 
 Vector2 TilePositionToPixelPosition(float tileX, float tileY)
 {
-
+    
     Vector2 result;
     result.x = (float)tileX * MAP_TILE_SIZE - (MAP_TILE_SIZE) / 2.0f;
     result.y = (float)tileY * MAP_TILE_SIZE - (MAP_TILE_SIZE) / 2.0f;
-
+    
     return result;
-
+    
 }
 
 Vector2 TilePositionToPixelPosition(Vector2 tilePos)
@@ -60,11 +60,11 @@ Vector2 GetTilePivot(IVec2 tilePos, float tileSize, IVec2 attachDir = { 0, 0 })
 {
     Vector2 playerPos = TilePositionToPixelPosition((float)tilePos.x, (float)tilePos.y);
     Vector2 topLeft = Vector2Subtract(playerPos, Vector2Scale(Vector2One(), tileSize * 0.5f));
-
+    
     float dist = (MAP_TILE_SIZE - tileSize) * 0.5f;
     Vector2 offset = Vector2Scale({ (float)attachDir.x, (float)attachDir.y }, dist);
     topLeft = Vector2Add(topLeft, offset);                
-
+    
     return topLeft;
 }
 
@@ -77,19 +77,19 @@ Vector2 GetTilePivot(Entity * entity)
     {
         topLeft = GetTilePivot(entity->tilePos, entity->tileSize, entity->attachDir);
     }
-
+    
     return topLeft;
 }
 
 Color IntToRGBA(unsigned int val)
 {
-
+    
     unsigned char red   = (val >> 16) & 0xFF;
     unsigned char green = (val >> 8) & 0xFF;
     unsigned char blue  = (val >> 0) & 0xFF;
-
+    
     Color color = { red, green, blue, 0xFF };
-
+    
     return color;
 }
 

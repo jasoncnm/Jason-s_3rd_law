@@ -61,13 +61,13 @@ enum GameInputType
     RIGHT_KEY,
     UP_KEY,
     DOWN_KEY,
-
+    
     POSSES_KEY,
     SPLIT_KEY,
-
+    
     UNDO_KEY,
     RESET_KEY,
-
+    
     ANY_KEY,
     GAME_INPUT_COUNT,
 };
@@ -114,7 +114,7 @@ struct UndoState
 struct Map
 {
     UndoState initUndoState;
-
+    
     Entity playerEnter;
     
     IVec2 tilePos;            // Top left tile position of the map
@@ -129,24 +129,24 @@ struct GameState
 {
     Camera2D camera;
     TweenController cameraTweenController;
-
+    
     Texture2D texture;
-
+    
     ElectricDoorSystem electricDoorSystem;
-
+    
     StarFields starFields;
-
+    
     Array<int, MAX_ENTITIES> entityTable[LAYER_COUNT];
     Array<Entity, MAX_ENTITIES> entities;
     
     Arrow upArrow, downArrow, leftArrow, rightArrow;
-
+    
     int tileMapCount;
     Map tileMaps[500];
     Map * lv2Map;
-
+    
     KeyMapping keyMappings[GAME_INPUT_COUNT];
-
+    
     Color bgColor;
     
     IVec2 tileMin, tileMax;

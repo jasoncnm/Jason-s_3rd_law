@@ -26,7 +26,7 @@ enum EntityLayer
 enum EntityType
 {
     ENTITY_TYPE_NULL,
-
+    
     ENTITY_TYPE_PLAYER,
     ENTITY_TYPE_CLONE,
     ENTITY_TYPE_WALL,
@@ -34,7 +34,7 @@ enum EntityType
     ENTITY_TYPE_GLASS,
     ENTITY_TYPE_ELECTRIC_DOOR,
     ENTITY_TYPE_PIT,
-
+    
     ENTITY_TYPE_COUNT,
 };
 
@@ -53,37 +53,37 @@ struct Entity
     
     EntityType type;
     CableType cableType;
-
+    
     ActionState actionState = MOVE_STATE;
-
+    
     TweenController tweenController;
     
     Sprite sprite;
     SpriteID spriteID;
     Color color;
-
+    
     IVec2 tilePos;
     IVec2 attachDir = {0,0};
-
+    
     Vector2 pivot;
-
+    
     float tileSize = 32.0f;
     
     int entityIndex;
     int attachedEntityIndex;
-
+    
     int sourceIndex = -1;
     int rightIndex = -1, leftIndex = -1, upIndex = -1, downIndex = -1;
-
+    
     int mass = 1;
     int maxMass = 2;
     
     bool8 movable = false;
-
+    
     bool8 attach = false;
-
+    
     bool8 broken = false;
-
+    
     bool8 open = false;
     bool8 conductive = false;
     bool8 left = false, right = false, up = false, down = false;
@@ -122,9 +122,9 @@ struct BounceEntityResult
     
     IVec2 contactPos;
     IVec2 finalPos;
-
+    
     Entity * contactEntity;
-
+    
     Array<Entity *, 20> brokenGlasses;
 };
 
