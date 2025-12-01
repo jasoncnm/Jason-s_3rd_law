@@ -1,4 +1,6 @@
-# ![](Assets/ICON/ICON.png)  Jason's_law
+# ![](Assets/ICON/ICON.png)  Jason's_law (working title)
+
+This is a 2D puzzle game made with raylib/C++.
 
 The application should be able to run on Windows without build.
 
