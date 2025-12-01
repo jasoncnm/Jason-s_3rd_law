@@ -44,10 +44,6 @@
 *.a
 *.o
 
-src/raylib/rmem.h    
-src/raylib/raylib.h  
-src/raylib/physac.h  
-src/raylib/raymath.h
 *.vsidx
 *.ipch
 *.db
