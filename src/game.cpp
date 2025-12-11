@@ -18,7 +18,9 @@
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 
   TODO: Things that I can do beside arts and design I guess
-     - Create a load menu to choose save file
+- Try use particle systems to render Startfield background to impore performence
+- Draw Tile Grid with texture to reduce draw call
+- Create a load menu to choose save file
   - Drag and drop save file could be fun
   - smooth pixelperfect transition
   - top down lights / spotlight rendering
@@ -30,7 +32,9 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
   - Bit masking with tile rules
 
   NOTE: done
-        - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
+        - Batch all sprite into a single draw call (raylib handled that internally, see https://www.raylib.com/examples/textures/loader.html?name=textures_bunnymark)
+
+     - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
   - Implement save points (Since the state of our game is entirely based oneach state of the entity,
                            we can just read/write raw bytes of entities to a file)
   - Gamepad supports
@@ -1034,7 +1038,7 @@ void GameplayUpdateAndRender()
         for (int i = 0; i < gameState->tileMapCount; i++)
         {
             Map & map = gameState->tileMaps[i];
-            DrawTileMap(gameState->camera, map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
+             DrawTileMap(gameState->camera, map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
         }
         
         EntityLayer orderedDrawLayers[] = { LAYER_BLOCK, LAYER_WALL, LAYER_CABLE, LAYER_PIT,  LAYER_DOOR, LAYER_SLIME, LAYER_GLASS };

@@ -33,7 +33,7 @@ inline bool8 IsSlime(Entity * entity)
 
 
 inline AddEntityResult
-AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE, int tileSize = 32)
+AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE, int tileSize = MAP_TILE_SIZE)
 {
     AddEntityResult result;
 

@@ -72,7 +72,7 @@ int main(int argumentCount, char *argumentArray[])
     // NOTE: Memory Allocation
     //--------------------------------------------------------------------------------------
     BumpAllocator transientStorage = MakeBumpAllocator(MB(64));
-    BumpAllocator persistentStorage = MakeBumpAllocator(MB(64));
+    BumpAllocator persistentStorage = MakeBumpAllocator(MB(256));
     gameState = (GameState *)BumpAlloc(&persistentStorage, sizeof(GameState));
     if (!gameState)
     {
@@ -88,10 +88,10 @@ int main(int argumentCount, char *argumentArray[])
     {
         InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jason's 3rd law");
 #if GAME_INTERNAL
-        if (IsWindowState(FLAG_VSYNC_HINT)) ClearWindowState(FLAG_VSYNC_HINT);
-        else SetWindowState(FLAG_VSYNC_HINT);
-
-        SetWindowState(FLAG_WINDOW_TOPMOST);
+        
+        // if (IsWindowState(FLAG_VSYNC_HINT)) ClearWindowState(FLAG_VSYNC_HINT);
+        // else SetWindowState(FLAG_VSYNC_HINT);
+SetWindowState(FLAG_WINDOW_TOPMOST);
         
         // SetTargetFPS(30);
 #endif
@@ -121,7 +121,9 @@ int main(int argumentCount, char *argumentArray[])
             SM_ERROR("Unable to load file (%s) to texture", TEXTURE_PATH);
             return -1;
         }
-
+        
+        GenTextureMipmaps(&gameState->texture);
+        SetTextureFilter(gameState->texture, TEXTURE_FILTER_POINT);
         gameState->currentScreen = TITLE_SCREEN;
         gameState->bgColor = ColorLerp(DARKBLUE, BLACK, 0.69f);
 

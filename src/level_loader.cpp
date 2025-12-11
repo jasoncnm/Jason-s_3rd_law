@@ -357,20 +357,25 @@ void LoadTileMapsAndEntities(GameState & state)
         json worldData = json::parse(f);
 
         auto tileMaps = worldData["maps"];
-
+        
         state.tileMapCount = (int)tileMaps.size();
 
         int index = 0;
         for (int i = 0; i < state.tileMapCount; i++)
         {
             json map = tileMaps[i];
-            std::string fileName =  map["fileName"];
+            std::string fileName = map["fileName"];
             if (fileName == TEST_LEVEL_ONE_NAME) continue;            
             
-            int mapWidth = (int)map["width"] / MAP_TILE_SIZE;
-            int mapHeight = (int)map["height"] / MAP_TILE_SIZE;
-            int startPosX = (int)map["x"] / MAP_TILE_SIZE + 1;
-            int startPosY = (int)map["y"] / MAP_TILE_SIZE + 1;
+            std::string path = LEVELS_PATH + fileName;
+            std::ifstream file(path);
+            json data = json::parse(file);
+            int tileWidth = (int)data["tilewidth"];
+            
+            int mapWidth =  (int)map["width"] / tileWidth;
+            int mapHeight = (int)map["height"] / tileWidth;
+            int startPosX = (int)map["x"] / tileWidth + 1;
+            int startPosY = (int)map["y"] / tileWidth + 1;
 
             Map tileMap = {};
             tileMap.tilePos = { startPosX, startPosY };
@@ -383,12 +388,8 @@ void LoadTileMapsAndEntities(GameState & state)
                 state.lv2Map = &state.tileMaps[index];
             }
             
-            std::string path = LEVELS_PATH + fileName;
             
             IVec2 startPos = { startPosX + 1, startPosY + 1 };
-
-            std::ifstream file(path);
-            json data = json::parse(file);
 
             GenerateTileMap(state, data, startPos, mapWidth, mapHeight);
 
