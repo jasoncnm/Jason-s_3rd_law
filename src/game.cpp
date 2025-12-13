@@ -18,6 +18,7 @@
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 
   TODO: Things that I can do beside arts and design I guess
+- Make The Save File Less buggy! (Serialize It, so that game won't break when level/code change)
 - Try use particle systems to render Startfield background to impore performence
 - Draw Tile Grid with texture to reduce draw call
 - Create a load menu to choose save file
@@ -1259,6 +1260,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 gameState->currentScreen = GAMEPLAY_SCREEN;
             }
             
+            // TODO: Experimental features, Very breakable!!!
             const char * LoadGameText = "load game";
             bounds.y += 200;
             if (GuiButton(bounds, LoadGameText))
@@ -1341,6 +1343,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 gameState->currentScreen = GAMEPLAY_SCREEN;
             }
             
+            // TODO: Experimental features, Very breakable!!!
             const char * SaveGameText = "save game";
             bounds.y += 200;
             if (GuiButton(bounds, SaveGameText))
