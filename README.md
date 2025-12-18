@@ -23,3 +23,6 @@ If you want a clean build run
 ```
 build clean
 ```
+
+# Video showcase
+[link](https://www.youtube.com/watch?v=DW0J4LAYtxA&t=110s)
