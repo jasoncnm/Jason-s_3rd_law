@@ -466,49 +466,14 @@ bool8 MoveAction(IVec2 actionDir)
             MoveActionResult result = MoveActionCheck(player, player, player->tilePos + player->attachDir, player->attachDir, 0);
             if (result.blocked)
             {
-                
-                Vector2 startPos = GetTilePivot(player);
-                SetAttach(player, moveResult.blockedEntity, actionDir);
-                Vector2 endPos = GetTilePivot(player);
-                
-                TweenParams params = {};
-                params.paramType = PARAM_TYPE_VECTOR2;
-                params.startVec2 = startPos;
-                params.endVec2 = endPos;
-                params.realVec2  = &player->pivot;
-                
-                AddTween(player->tweenController, CreateTween(params, EaseOutCubic, moveSpeed));
-                OnPlayEvent(&player->tweenController);
+                MoveEntity(player, moveResult.blockedEntity, player->tilePos, MOVE_FLAT);
                 
                 return true;
             }
             return true;
         }
         
-        
-        Vector2 moveStart = GetTilePivot(player);
-        Vector2 moveMiddle =
-            Vector2Add(moveStart, Vector2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f *(MAP_TILE_SIZE - player->tileSize)));
-        SetAttach(player, moveResult.blockedEntity, actionDir);
-        Vector2 moveEnd = GetTilePivot(player);
-        
-        TweenParams params1 = {};
-        params1.paramType = PARAM_TYPE_VECTOR2;
-        params1.startVec2 = moveStart;
-        params1.endVec2 = moveMiddle;
-        params1.realVec2  = &player->pivot;
-        
-        
-        TweenParams params2 = {};
-        params2.paramType = PARAM_TYPE_VECTOR2;
-        params2.startVec2 = moveMiddle;
-        params2.endVec2 = moveEnd;
-        params2.realVec2  = &player->pivot;
-        
-        AddTween(player->tweenController, CreateTween(params1, EaseOutCubic, moveSpeed * 2));
-        AddTween(player->tweenController, CreateTween(params2, EaseOutCubic, moveSpeed * 2));
-        OnPlayEvent(&player->tweenController);
-        
+        MoveEntity(player, moveResult.blockedEntity, player->tilePos, MOVE_INNER_CORNER);
         return true;
     }
     else if (player->attachDir == -actionDir)
@@ -536,22 +501,8 @@ bool8 MoveAction(IVec2 actionDir)
         {
             return false;
         }
-        
-        
-        Vector2 moveStart = GetTilePivot(player);
-        SetEntityPosition(player, findResult.entity, actionTilePos);
-        Vector2 moveEnd = GetTilePivot(player);
-        
-        TweenParams params = {};
-        params.paramType = PARAM_TYPE_VECTOR2;
-        params.startVec2 = moveStart;
-        params.endVec2 = moveEnd;
-        params.realVec2  = &player->pivot;
-        
-        AddTween(player->tweenController, CreateTween(params, EaseOutCubic, moveSpeed));
-        OnPlayEvent(&player->tweenController);
-        
-    }
+        MoveEntity(player, findResult.entity, actionTilePos, MOVE_FLAT);
+        }
     else
     {
         EntityLayer layers[] = { LAYER_SLIME };
@@ -576,29 +527,7 @@ bool8 MoveAction(IVec2 actionDir)
             }
             
             
-            Vector2 moveStart = GetTilePivot(player);
-            Vector2 movemiddle =
-                Vector2Add(moveStart, Vector2Scale({ (float)actionDir.x, (float)actionDir.y }, 0.5f * (MAP_TILE_SIZE + player->tileSize)));
-            
-            SetEntityPosition(player, attachedEntity, newTile);
-            Vector2 moveEnd = GetTilePivot(player);
-            
-            TweenParams params1 = {};
-            params1.paramType = PARAM_TYPE_VECTOR2;
-            params1.startVec2 = moveStart;
-            params1.endVec2 = movemiddle;
-            params1.realVec2  = &player->pivot;
-            
-            TweenParams params2 = {};
-            params2.paramType = PARAM_TYPE_VECTOR2;
-            params2.startVec2 = movemiddle;
-            params2.endVec2 = moveEnd;
-            params2.realVec2  = &player->pivot;
-            
-            AddTween(player->tweenController, CreateTween(params1, EaseOutCubic, moveSpeed * 1.5f));
-            AddTween(player->tweenController, CreateTween(params2, EaseOutCubic, moveSpeed * 1.5f));
-            
-            OnPlayEvent(&player->tweenController);                
+            MoveEntity(player, attachedEntity, newTile, MOVE_OUTER_CORNER);
             
         }
         else 

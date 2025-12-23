@@ -22,6 +22,7 @@
 #define DIST_ONE_TILE MAP_TILE_SIZE
 #define BLOCK_ANI_SPEED 20.0f
 #define BOUNCE_SPEED 10.0f
+#define SLIME_MOVE_SPEED 4.0f
 
 #define MAX_GAMEPAD 5
 

@@ -138,6 +138,118 @@ inline void DeleteEntity(Entity * entity)
     entity->tweenController.Reset();
 }
 
+inline void MoveEntity(Entity * entity, Entity * attachedEntity, IVec2 targetPos, MoveType moveType)
+{
+    SM_ASSERT(entity->active, "entity does not exist");
+    SM_ASSERT(entity->movable, "entity cannot be moved");
+    
+    Vector2 startPivot = GetTilePivot(entity);
+    entity->tilePos = targetPos;
+    if (attachedEntity)
+    {
+        IVec2 dir = (attachedEntity->tilePos - entity->tilePos);
+        
+        dir.x = dir.x == 0 ? 0 : Sign(dir.x);
+        dir.y = dir.y == 0 ? 0 : Sign(dir.y);
+        
+        SM_ASSERT(dir.SqrMagnitude() == 1, "Invalid bounce direction");
+        
+        if (IsSlime(entity))
+        {
+            entity->attach = true;
+            entity->attachedEntityIndex = attachedEntity->entityIndex;
+            entity->attachDir = dir;
+        }
+        
+        if (IsSlime(attachedEntity))
+        {
+            attachedEntity->attach = true;
+            attachedEntity->attachedEntityIndex = entity->entityIndex;
+            attachedEntity->attachDir = -dir;
+            
+        }
+    }
+    else
+    {
+        entity->attach = false;
+        entity->attachedEntityIndex = entity->entityIndex;
+    }
+    Vector2 endPivot = GetTilePivot(entity);
+    
+    switch(moveType)
+    {
+        case MOVE_FLAT:
+        {
+            float speed = IsSlime(entity) ? SLIME_MOVE_SPEED : BOUNCE_SPEED;
+            TweenParams params = {};
+            params.paramType = PARAM_TYPE_VECTOR2;
+            params.startVec2 = startPivot;
+            params.endVec2 = endPivot;
+            params.realVec2  = &entity->pivot;
+            
+            AddTween(entity->tweenController, CreateTween(params, EaseOutCubic, speed));
+            break;
+        }
+        case MOVE_OUTER_CORNER:
+        {
+            float speed = IsSlime(entity) ? SLIME_MOVE_SPEED : BOUNCE_SPEED;
+            
+            IVec2 dir = -entity->attachDir;
+            Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({ (float)dir.x, (float)dir.y },
+                                                                      0.5f * (MAP_TILE_SIZE + entity->tileSize)));
+            TweenParams params1 = {};
+            params1.paramType = PARAM_TYPE_VECTOR2;
+            params1.startVec2 = startPivot;
+            params1.endVec2 = middlePivot;
+            params1.realVec2  = &entity->pivot;
+            
+            TweenParams params2 = {};
+            params2.paramType = PARAM_TYPE_VECTOR2;
+            params2.startVec2 = middlePivot;
+            params2.endVec2 = endPivot;
+            params2.realVec2  = &entity->pivot;
+            
+            AddTween(entity->tweenController, CreateTween(params1, EaseOutCubic, speed * 1.5f));
+            AddTween(entity->tweenController, CreateTween(params2, EaseOutCubic, speed * 1.5f));
+            
+            break;
+        }
+        case MOVE_INNER_CORNER:
+        {
+            float speed = IsSlime(entity) ? SLIME_MOVE_SPEED : BOUNCE_SPEED;
+            
+            IVec2 dir = entity->attachDir;
+            Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({ (float)dir.x, (float)dir.y },
+                                                                                                       0.5f * (MAP_TILE_SIZE - entity->tileSize)));
+            TweenParams params1 = {};
+            params1.paramType = PARAM_TYPE_VECTOR2;
+            params1.startVec2 = startPivot;
+            params1.endVec2 = middlePivot;
+            params1.realVec2  = &entity->pivot;
+            
+            TweenParams params2 = {};
+            params2.paramType = PARAM_TYPE_VECTOR2;
+            params2.startVec2 = middlePivot;
+            params2.endVec2 = endPivot;
+            params2.realVec2  = &entity->pivot;
+            
+            AddTween(entity->tweenController, CreateTween(params1, EaseOutCubic, speed * 2));
+            AddTween(entity->tweenController, CreateTween(params2, EaseOutCubic, speed * 2));
+            
+            break;
+        }
+        case BOUNCE_FLAT:
+        {
+            
+            break;
+        }
+    }
+    
+    // TODO: Controll the play conditions
+    if (!entity->tweenController.NoTweens()) OnPlayEvent(&entity->tweenController);
+    
+}
+
 inline void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
 {
     SM_ASSERT(entity->active, "entity does not exist");

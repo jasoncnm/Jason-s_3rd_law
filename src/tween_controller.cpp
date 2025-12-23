@@ -37,18 +37,15 @@ void TweenController::Reset()
 // NOTE: Every frame
 void TweenController::Update()
 {
-    if (!NoTweens())
-    {
-        if (start)
+    
+    if (start)
         {
             start = false;
             playing = true;
-            HandleTweenEvent(startEvent);
-        }
+            }
         
         if (playing)
         {
-            
             for (int channel = 0; channel < MAX_CHANNEL; channel++)
             {
                 TweeningQueue & queue = channels[channel];
@@ -58,20 +55,18 @@ void TweenController::Update()
                     {
                         queue.RemoveIdxAndSwap(0);
                     }
-                    
-                }
+                    }
             }
-
-            if (NoTweens())
-            {
-                playing = false;
-                HandleTweenEvent(endEvent);
-                Reset();
-
-            }
+        
+        if (NoTweens())
+        {
+            HandleTweenEvent(endEvent);
+            Reset();
         }
+        
     }
-}
+    
+    }
 
 
 void AddTween(TweenController & controller, Tween tween, int channel)
@@ -82,8 +77,8 @@ void AddTween(TweenController & controller, Tween tween, int channel)
 void OnPlayEvent(TweenController * controller)
 {
     SM_ASSERT(controller, "controller is null");
-    controller->playing = true;
     controller->start   = true;
+    HandleTweenEvent(controller->startEvent);
 }
 
 
