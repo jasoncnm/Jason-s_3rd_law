@@ -23,3 +23,8 @@ If you want a clean build run
 ```
 build clean
 ```
+# Key development feature: Live Code Editing
+Any code outside of ```main.cpp```, ```platform.h```, and ```win32_hot_reload.cpp``` can be recompiled and see the changes during game runtime.
+
+# Video showcase
+[link](https://www.youtube.com/watch?v=DW0J4LAYtxA&t=110s)
