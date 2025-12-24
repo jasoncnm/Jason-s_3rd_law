@@ -8,6 +8,10 @@
 #include "entity.h"
 #include "game_util.h"
 
+inline bool8 DoorBlocked(Entity * door, IVec2 reachDir);
+inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir);
+
+
 inline Entity * GetEntity(int i)
 {
     Entity * entity = &gameState->entities[i];
@@ -53,8 +57,7 @@ AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE
     result.entity->entityIndex = result.entityIndex;
 
     return result;
-    
-}
+    }
 
 
 inline AddEntityResult
@@ -250,34 +253,6 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, IVec2 targetPos
     
 }
 
-inline void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
-{
-    SM_ASSERT(entity->active, "entity does not exist");
-    SM_ASSERT(entity->movable, "entity cannot be moved");
-
-    // entity->positionSetMarker = true;
-    
-    entity->tilePos = tilePos;
-    // entity->pivot = GetTilePivot(entity);
-
-    if (touchingEntity && touchingEntity && (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE))
-    {
-        IVec2 dir = (touchingEntity->tilePos - entity->tilePos);
-
-        dir.x = dir.x == 0 ? 0 : Sign(dir.x);
-        dir.y = dir.y == 0 ? 0 : Sign(dir.y);
-                
-        SM_ASSERT(dir.SqrMagnitude() == 1, "Invalid bounce direction");
-
-        SetAttach(entity, touchingEntity, dir);
-    }
-    else
-    {
-        entity->attach = false;
-    }
-
-}
-
 inline void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir)
 {
     SM_ASSERT((attacher->type == ENTITY_TYPE_PLAYER || attacher->type == ENTITY_TYPE_CLONE), "entity is not attachable");
@@ -296,6 +271,34 @@ inline void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir)
         attachee->attachedEntityIndex = attachee->entityIndex;
         attachee->attachDir = -dir;
     }
+}
+
+inline void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
+{
+    SM_ASSERT(entity->active, "entity does not exist");
+    SM_ASSERT(entity->movable, "entity cannot be moved");
+    
+    // entity->positionSetMarker = true;
+    
+    entity->tilePos = tilePos;
+    // entity->pivot = GetTilePivot(entity);
+    
+    if (touchingEntity && touchingEntity && (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE))
+    {
+        IVec2 dir = (touchingEntity->tilePos - entity->tilePos);
+        
+        dir.x = dir.x == 0 ? 0 : Sign(dir.x);
+        dir.y = dir.y == 0 ? 0 : Sign(dir.y);
+        
+        SM_ASSERT(dir.SqrMagnitude() == 1, "Invalid bounce direction");
+        
+        SetAttach(entity, touchingEntity, dir);
+    }
+    else
+    {
+        entity->attach = false;
+    }
+    
 }
 
 inline void SetActionState(Entity * entity, ActionState state)
@@ -487,6 +490,25 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
 }
 
 
+inline Array<Entity *, LAYER_COUNT> FindAllEntitiesFromLocationAndLayers(IVec2 pos, EntityLayer * layers, int layerCount)
+{
+    Array<Entity *, LAYER_COUNT> result;
+    for (int layerIndex = 0; layerIndex , layerCount; layerIndex++)
+    {
+        int layer = layers[layerIndex];
+        for (uint32 i = 0; i < gameState->entityTable[layer].count; i++)
+        {
+            Entity * ent = GetEntity(gameState->entityTable[layer][i]);
+            if (ent && ent->tilePos == pos)
+            {
+                result.Add(ent);
+                break;
+            }
+        }
+    }
+    return result;
+}
+
 inline Entity * FindEntityByLocationAndLayers(IVec2 pos, EntityLayer * layers, int arrayCount)
 {
     for (int layerIndex = 0; layerIndex < arrayCount; layerIndex++)
@@ -499,8 +521,7 @@ inline Entity * FindEntityByLocationAndLayers(IVec2 pos, EntityLayer * layers, i
             if (entity && entity->tilePos == pos)
             {
                 return entity;
-                break;
-            }
+                }
         }
     }
     
@@ -757,53 +778,57 @@ void ShiftEntities(IVec2 startPos, IVec2 bounceDir)
     }
 }
 
-inline bool8 CheckBounce(IVec2 tilePos, IVec2 pushDir)
+inline bool8 IsProjectable(IVec2 tilePos, IVec2 pushDir)
 {
+    EntityLayer checkLayers[] = { LAYER_WALL, LAYER_GLASS, LAYER_BLOCK, LAYER_PIT, LAYER_DOOR };
+      uint32 layerCount = ArrayCount(checkLayers);
     IVec2 dirs[4] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-
-    bool8 bounce = true;
     
-    for (int i = 0; i < 4; i++)
+    bool result = true;
+    for (uint32 i = 0; i < 4; i++)
     {
         if (dirs[i] == -pushDir) continue;
-
-        for (uint32 entityIndex = 0; entityIndex < gameState->entities.count; entityIndex++)
+        Entity * ent = FindEntityByLocationAndLayers(tilePos + dirs[i], checkLayers, layerCount);
+        if (ent)
         {
-            Entity * target = GetEntity(entityIndex);
-
-            if (target && target->tilePos == tilePos + dirs[i])
+            if ((ent->type == ENTITY_TYPE_ELECTRIC_DOOR) &&
+                (ent->cableType != CABLE_TYPE_DOOR || !SameSide(ent, ent->tilePos, dirs[i])))
             {
-                switch (target->type)
-                {
-                    case ENTITY_TYPE_BLOCK:
-                    case ENTITY_TYPE_WALL:
-                    {
-                        return false;
-                    }
-                    case ENTITY_TYPE_GLASS:
-                    {
-                        if (!target->broken)
-                        {
-                            return false;
-                        }
-                        break;
-                    }
-                    case ENTITY_TYPE_ELECTRIC_DOOR:
-                    {
-                        if (target->cableType == CABLE_TYPE_DOOR && SameSide(target, target->tilePos, dirs[i]))
-                        {
-                            return false; 
-                        }
-                        break;
-                    }
-                }
+                continue;
             }
-            
-        }
+            result = false;
+            break;
+            }
     }
-    return true;
+    return result;
 }
 
+  Entity * ProjectEntity(Entity * bouncedEnt, IVec2 dir)
+{
+    SM_ASSERT(bouncedEnt->active, "entity does not exists");
+    SM_ASSERT(bouncedEnt->movable, "entitiy is static");
+    
+    IVec2 start = bouncedEnt->tilePos + dir;
+    
+    // IMPORTANT: the order of the layers are important, for example, we don't want to check blocks before checking doors in the same tile
+     EntityLayer checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_PIT };
+    uint32 layerCount = ArrayCount(checkLayers);
+    for (IVec2 pos = start;
+         ;
+         pos = pos + dir)
+    {
+        auto entList = FindAllEntitiesFromLocationAndLayers(pos, checkLayers, layerCount); 
+        // TODO
+        
+        if (CheckOutOfBound(pos))
+        {
+            DeleteEntity(bouncedEnt);
+            break;
+    
+        }
+    }
+    return nullptr;
+}
 
 void BounceEntity(Entity * entity, IVec2 dir)
 {
@@ -811,7 +836,7 @@ void BounceEntity(Entity * entity, IVec2 dir)
     SM_ASSERT(entity->movable, "entitiy is static");
     
     IVec2 start = entity->tilePos + dir;
-
+    
     // IMPORTANT: the order of the layers are important, for example, we don't want to check blocks before checking doors in the same tile
     int checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_PIT };
     
@@ -819,6 +844,7 @@ void BounceEntity(Entity * entity, IVec2 dir)
          ;
          pos = pos + dir)
     {
+        
         for (int layerIndex = 0; layerIndex < ArrayCount(checkLayers); layerIndex++)
         {
             int layer = checkLayers[layerIndex];
@@ -910,16 +936,6 @@ void BounceEntity(Entity * entity, IVec2 dir)
                                 return;
                             }
 
-                            // if (target->type == ENTITY_TYPE_PLAYER)
-                            // {
-
-                            //     entity = MergeSlimes(entity, target);
-                            // }
-                            // else
-                            // {
-                            //     entity = MergeSlimes( target, entity);
-
-                            // }
                             entity = MergeSlimes(target, entity);
                                                 
                             break;

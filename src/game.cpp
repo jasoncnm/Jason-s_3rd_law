@@ -51,6 +51,114 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 //              NOTE: Game Functions (internal)
 //  ========================================================================
 
+PushCheckResult PushCheck(Entity * startEnt, IVec2 pushDir)
+{
+    SM_ASSERT(startEnt->movable, "Static entity cannot be pushing blocks!");
+    
+    // IMPORTANT: the order of the layers are important, for example, we don't want to check blocks before checking doors in the same tile
+    EntityLayer checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_PIT };
+    uint32 layerCount = ArrayCount(checkLayers);
+    
+    struct CheckThings
+    {
+        bool visited = false;
+        Entity * pushEnt;
+        PushCheckResult pushResult;
+    };
+    
+    Array<CheckThings, 100> checkList;
+    checkList.Add({ false, startEnt, { PUSH_STATE_EMPTY, nullptr } });
+    
+    PushCheckResult pushResult = {};
+    int32 accumulatedMass = 0;
+    while (!checkList.IsEmpty())
+    {
+        CheckThings & things = checkList.last();
+        
+        if (things.visited)
+        {
+            // TODO
+            checkList.RemoveLast();
+        }
+        else
+        {
+            things.visited = true;
+            
+            auto entList = FindAllEntitiesFromLocationAndLayers(things.pushEnt->tilePos + pushDir, 
+                                                              checkLayers, layerCount); 
+                                                              
+        for (uint32 idx = 0; idx < entList.count; idx++)
+        {
+            Entity * target = entList[idx];
+            switch(target->type)
+                {
+                    // TODO: Add entity types
+                    case ENTITY_TYPE_WALL:
+                    {
+                            things.pushResult.state = PUSH_STATE_BLOCKED;
+                            things.pushResult.blockedEntity = target;
+                        goto PushCheckFor;
+                    }
+                    case ENTITY_TYPE_BLOCK:
+                    {
+                        {
+                            EntityLayer layers[] = { LAYER_DOOR };
+                        Entity * door = FindEntityByLocationAndLayers(target->tilePos, layers, ArrayCount(layers));
+                        if (door && DoorBlocked(door, -pushDir))
+                        {
+                            things.pushResult.state = PUSH_STATE_BLOCKED;
+                            things.pushResult.blockedEntity = target;
+                                goto PushCheckFor;
+                            }
+                        } 
+                        
+                        if (IsProjectable(target->tilePos, pushDir))
+                        {
+                            things.pushResult.state = PUSH_STATE_PUSHED;
+                            Entity * pushedEntity = ProjectEntity(target, pushDir);
+                            if (pushedEntity)
+                            {
+                                CheckThings targetThings = {};
+                                targetThings.visited = true;
+                                targetThings.pushEnt = target;
+                                targetThings.pushResult.state = PUSH_STATE_PROJECTED;
+                                targetThings.pushResult.blockedEntity = nullptr;
+                                checkList.Add(targetThings);
+                                
+                                CheckThings newThings = {};
+                                newThings.visited = false;
+                                newThings.pushEnt = pushedEntity;
+                                newThings.pushResult = { PUSH_STATE_EMPTY, nullptr };
+                                checkList.Add(newThings);
+                            }
+                            goto PushCheckFor;
+                        }
+                        
+                        accumulatedMass += target->mass;
+                        if (accumulatedMass > startEnt->mass)
+                        {
+                            things.pushResult.state = PUSH_STATE_BLOCKED;
+                            things.pushResult.blockedEntity = target;
+                            goto PushCheckFor;
+                        }
+                        
+                        CheckThings newThings = {};
+                        newThings.visited = false;
+                        newThings.pushEnt = target;
+                        newThings.pushResult = { PUSH_STATE_EMPTY, nullptr };
+                        checkList.Add(newThings);
+                        
+                        goto PushCheckFor;
+                    }
+            }
+            }
+            PushCheckFor:;
+        }
+    }
+    return pushResult;
+    }
+
+// TODO: Do something about BounceEntity first
 MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int accumulatedMass)
 {
     SM_ASSERT(startEntity->movable, "Static entity cannot be pushing blocks!");
@@ -146,8 +254,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                             return result;
                         }
                         
-                        
-                        if (CheckBounce(target->tilePos, pushDir))
+                        if (IsProjectable(target->tilePos, pushDir))
                         {
                             result.pushed = true;
                             
