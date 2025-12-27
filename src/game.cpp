@@ -45,13 +45,197 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
   - (UpdateElectricDoor) Connection point Logic needs to be refine. Check comments in the function 
   - Need to refactor level_loader, we should have separate function to load entities, load tilemaps, and setup entity table.
 */
+//  ========================================================================
+//              NOTE: Game Structs (internal)
+//  ========================================================================
+enum PushState
+{
+    PUSH_STATE_NONE,
+    PUSH_STATE_MOVED,
+    PUSH_STATE_BLOCKED,
+    PUSH_STATE_PUSHED,
+    PUSH_STATE_MERGED,
+    PUSH_STATE_ATTACHED,
+};
+
+enum CheckState
+{
+    CHECK_MOVE,
+    CHECK_PROJECT,
+};
+
+struct PushCheckResult
+{
+    PushState state;
+    Entity * blockedEntity;
+};
+
+struct CheckThings
+{
+    bool visited;
+    CheckState checkState;
+    Entity * pushEnt;
+    PushCheckResult pushResult;
+};
 
 
 //  ========================================================================
 //              NOTE: Game Functions (internal)
 //  ========================================================================
+inline void ResolvePushAction(CheckThings * current, CheckThings * prev)
+{
+    SM_ASSERT(current, "curent things cannot be null");
+    
+    switch(pushResult.state)
+    {
+        case PUSH_STATE_BLOCKED:
+        {
+            
+            break;
+        }
+        }
+    }
 
-PushCheckResult PushCheck(Entity * startEnt, IVec2 pushDir)
+inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMass, 
+                      IVec2 pushDir, Entity * startEnt, EntityLayer * checkLayers, uint32 layerCount)
+{
+    CheckThings & current = checkList.last();
+    
+    if (current.visited)
+    {
+        checkList.RemoveLast();
+        
+        return current.pushResult;
+    }
+    else
+    {
+        current.visited = true;
+    auto entList = FindAllEntitiesFromLocationAndLayers(current.pushEnt->tilePos + pushDir, 
+                                                        checkLayers, layerCount); 
+    for (uint32 idx = 0; idx < entList.count; idx++)
+    {
+        Entity * target = entList[idx];
+        switch(target->type)
+        {
+            case ENTITY_TYPE_ELECTRIC_DOOR:
+            {
+                SM_ASSERT(target->cableType == CABLE_TYPE_DOOR, "other cable type is not reachble");
+                
+                if (DoorBlocked(target, pushDir))
+                {
+                    current.pushResult.state = PUSH_STATE_BLOCKED;
+                    current.pushResult.blockedEntity = target;
+                        return current.pushResult;
+                }
+                break;
+            }
+            case ENTITY_TYPE_GLASS:
+            {
+                if (!target->broken)
+                {
+                    current.pushResult.state = PUSH_STATE_BLOCKED;
+                    current.pushResult.blockedEntity = target;
+                        return current.pushResult;
+                }
+                break;
+            }
+            case ENTITY_TYPE_PIT:
+            case ENTITY_TYPE_WALL:
+            {
+                current.pushResult.state = PUSH_STATE_BLOCKED;
+                current.pushResult.blockedEntity = target;
+                    return current.pushResult;
+            }
+            case ENTITY_TYPE_PLAYER:
+            case ENTITY_TYPE_CLONE:
+            {
+                if (IsSlime(current.pushEnt))
+                {
+                    if (pushDir == -current.pushEnt->attachDir)
+                    {
+                    current.pushResult.state = PUSH_STATE_NONE;
+                            return current.pushResult;
+                    }
+                    current.pushResult.state = PUSH_STATE_MERGED;
+                        return current.pushResult;
+                }
+                
+                // TODO: do something about this, it's weird, should ask designer to justify this action
+                if (current.pushEnt->type == ENTITY_TYPE_BLOCK)
+                {
+                    FindAttachableResult attachResult = FindAttachable(target->tilePos + pushDir, pushDir);
+                    if (attachResult.has)
+                    {
+                        SetAttach(target, attachResult.entity, pushDir);
+                    }
+                    else if (target->attach)
+                    {
+                        attachResult = FindAttachable(target->tilePos + target->attachDir, target->attachDir);
+                        if (attachResult.has)
+                        {
+                            SetAttach(target, attachResult.entity, target->attachDir);
+                        }
+                    }
+                    }
+                
+            }
+            case ENTITY_TYPE_BLOCK:
+            {
+                {
+                    EntityLayer layers[] = { LAYER_DOOR };
+                    Entity * door = FindEntityByLocationAndLayers(target->tilePos, layers, ArrayCount(layers));
+                    if (door && DoorBlocked(door, -pushDir))
+                    {
+                        current.pushResult.state = PUSH_STATE_BLOCKED;
+                        current.pushResult.blockedEntity = target;
+                            return current.pushResult;
+                    }
+                }
+                
+                if (IsProjectable(target->tilePos, pushDir))
+                {
+                    current.pushResult.state = PUSH_STATE_PUSHED;
+                    CheckThings targetThings = {};
+                    targetThings.visited = false;
+                    targetThings.pushEnt = target;
+                    targetThings.pushResult.state = PUSH_STATE_NONE;
+                    targetThings.pushResult.blockedEntity = nullptr;
+                    targetThings.checkState = CHECK_PROJECT;
+                    checkList.Add(targetThings);
+                        return current.pushResult;
+                }
+                
+                accumulatedMass += target->mass;
+                if (accumulatedMass > startEnt->mass)
+                {
+                    current.pushResult.state = PUSH_STATE_BLOCKED;
+                    current.pushResult.blockedEntity = target;
+                        return current.pushResult;
+                }
+                
+                CheckThings newThings = {};
+                newThings.visited = false;
+                newThings.pushEnt = target;
+                newThings.pushResult = { PUSH_STATE_NONE, nullptr };
+                newThings.checkState = CHECK_MOVE;
+                checkList.Add(newThings);
+                    return current.pushResult;
+            }
+        }
+    }
+        current.pushResult.state = PUSH_STATE_MOVED;
+        
+        return current.pushResult;
+}
+}
+
+inline void ProjectCheck(Array<CheckThings, 100> & checkList, CheckThings & current, IVec2 pushDir,
+                         EntityLayer * checkLayers, uint32 layerCount)
+{
+    
+}
+
+PushCheckResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckState startState)
 {
     SM_ASSERT(startEnt->movable, "Static entity cannot be pushing blocks!");
     
@@ -59,102 +243,30 @@ PushCheckResult PushCheck(Entity * startEnt, IVec2 pushDir)
     EntityLayer checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_PIT };
     uint32 layerCount = ArrayCount(checkLayers);
     
-    struct CheckThings
-    {
-        bool visited = false;
-        Entity * pushEnt;
-        PushCheckResult pushResult;
-    };
-    
     Array<CheckThings, 100> checkList;
-    checkList.Add({ false, startEnt, { PUSH_STATE_EMPTY, nullptr } });
+    checkList.Add({ false, startState, startEnt, { PUSH_STATE_NONE, nullptr } });
     
     PushCheckResult pushResult = {};
     int32 accumulatedMass = 0;
     while (!checkList.IsEmpty())
     {
-        CheckThings & things = checkList.last();
+        CheckThings & current = checkList.last();
         
-        if (things.visited)
-        {
-            // TODO
-            checkList.RemoveLast();
-        }
-        else
-        {
-            things.visited = true;
-            
-            auto entList = FindAllEntitiesFromLocationAndLayers(things.pushEnt->tilePos + pushDir, 
-                                                              checkLayers, layerCount); 
-                                                              
-        for (uint32 idx = 0; idx < entList.count; idx++)
-        {
-            Entity * target = entList[idx];
-            switch(target->type)
+        switch(current.checkState)
+            {
+                case CHECK_MOVE:
                 {
-                    // TODO: Add entity types
-                    case ENTITY_TYPE_WALL:
-                    {
-                            things.pushResult.state = PUSH_STATE_BLOCKED;
-                            things.pushResult.blockedEntity = target;
-                        goto PushCheckFor;
-                    }
-                    case ENTITY_TYPE_BLOCK:
-                    {
-                        {
-                            EntityLayer layers[] = { LAYER_DOOR };
-                        Entity * door = FindEntityByLocationAndLayers(target->tilePos, layers, ArrayCount(layers));
-                        if (door && DoorBlocked(door, -pushDir))
-                        {
-                            things.pushResult.state = PUSH_STATE_BLOCKED;
-                            things.pushResult.blockedEntity = target;
-                                goto PushCheckFor;
-                            }
-                        } 
-                        
-                        if (IsProjectable(target->tilePos, pushDir))
-                        {
-                            things.pushResult.state = PUSH_STATE_PUSHED;
-                            Entity * pushedEntity = ProjectEntity(target, pushDir);
-                            if (pushedEntity)
-                            {
-                                CheckThings targetThings = {};
-                                targetThings.visited = true;
-                                targetThings.pushEnt = target;
-                                targetThings.pushResult.state = PUSH_STATE_PROJECTED;
-                                targetThings.pushResult.blockedEntity = nullptr;
-                                checkList.Add(targetThings);
-                                
-                                CheckThings newThings = {};
-                                newThings.visited = false;
-                                newThings.pushEnt = pushedEntity;
-                                newThings.pushResult = { PUSH_STATE_EMPTY, nullptr };
-                                checkList.Add(newThings);
-                            }
-                            goto PushCheckFor;
-                        }
-                        
-                        accumulatedMass += target->mass;
-                        if (accumulatedMass > startEnt->mass)
-                        {
-                            things.pushResult.state = PUSH_STATE_BLOCKED;
-                            things.pushResult.blockedEntity = target;
-                            goto PushCheckFor;
-                        }
-                        
-                        CheckThings newThings = {};
-                        newThings.visited = false;
-                        newThings.pushEnt = target;
-                        newThings.pushResult = { PUSH_STATE_EMPTY, nullptr };
-                        checkList.Add(newThings);
-                        
-                        goto PushCheckFor;
+                    pushResult = PushCheck(checkList, accumulatedMass, pushDir, startEnt, checkLayers, layerCount);
+                    break;
+                }
+                case CHECK_PROJECT:
+                {
+                    pushResult = ProjectCheck(checkList, pushDir, checkLayers, layerCount);
+                    break;
                     }
             }
-            }
-            PushCheckFor:;
         }
-    }
+    
     return pushResult;
     }
 

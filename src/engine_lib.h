@@ -493,10 +493,14 @@ struct IVec2
         return { x + other.x, y + other.y };
     }
 
-
     IVec2 operator-()
     {
         return { -x, -y };
+    }
+    
+    IVec2 operator*(int scale)
+    {
+         return { x * scale, y * scale };
     }
 
     bool8 operator==(IVec2 other)
@@ -508,6 +512,8 @@ struct IVec2
     {
         return !(*this == other); 
     }
+    
+    
 
     void operator += (IVec2 other)
     {
@@ -529,9 +535,13 @@ struct IVec2
         bool8 result = lenAB - (lenA + lenB) >= 0;
 
         return result;
-        
-    }
+        }
 };
+
+int Dot(IVec2 a, IVec2 b)
+{
+    return a.x * a.x + a.y * a.y;
+}
 
 float Distance(IVec2 a, IVec2 b)
 {

@@ -6,8 +6,8 @@
     "activeFile": "TileMap/Test.tmj",
     "expandedProjectPaths": [
         "TileMap",
-        ".",
-        "TlieSet"
+        "TlieSet",
+        "."
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -319,8 +319,8 @@
             "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 320.3333333333333,
-                "y": 320
+                "x": 398.9999999999999,
+                "y": 455.66666666666663
             }
         },
         "TileMap/TestRoom_2.tmj": {
@@ -452,16 +452,16 @@
     "recentFiles": [
         "TileMap/Room_3.tmj",
         "TileMap/Room_1.tmj",
-        "TileMap/Room_17.tmj",
-        "TileMap/Room_18.tmj",
-        "TileMap/Room_10.tmj",
         "TileMap/Room_13.tmj",
         "TileMap/Room_22.tmj",
         "TileMap/Room_35.tmj",
         "TileMap/Room_5.tmj",
         "TileMap/Room_6.tmj",
         "TileMap/Room_9.tmj",
-        "TileMap/Room_36.tmj"
+        "TileMap/Room_36.tmj",
+        "TileMap/room_43.tmj",
+        "TileMap/Room_25.tmj",
+        "TileMap/Room_27.tmj"
     ],
     "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
     "tileset.lastUsedFormat": "json"

@@ -14,13 +14,6 @@ inline bool8 IsSlime(Entity * entity);
 //  ========================================================================
 //              NOTE: Game Util Structs
 //  ========================================================================
-enum Direction
-{
-    LEFT,
-    RIGHT,
-    UP,
-    DOWN,
-};
 
 //  ========================================================================
 //              NOTE: Game Util Functions
@@ -87,8 +80,8 @@ Color IntToRGBA(unsigned int val)
 {
     
     unsigned char red   = (val >> 16) & 0xFF;
-    unsigned char green = (val >> 8) & 0xFF;
-    unsigned char blue  = (val >> 0) & 0xFF;
+    unsigned char green = (val >> 8)  & 0xFF;
+    unsigned char blue  = (val >> 0)  & 0xFF;
     
     Color color = { red, green, blue, 0xFF };
     

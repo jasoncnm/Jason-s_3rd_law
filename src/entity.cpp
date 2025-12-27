@@ -489,8 +489,7 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
     return result;
 }
 
-
-inline Array<Entity *, LAYER_COUNT> FindAllEntitiesFromLocationAndLayers(IVec2 pos, EntityLayer * layers, int layerCount)
+inline Array<Entity *, LAYER_COUNT> FindAllEntitiesFromLocationAndLayers(IVec2 pos, EntityLayer * layers, uint32 layerCount)
 {
     Array<Entity *, LAYER_COUNT> result;
     for (int layerIndex = 0; layerIndex , layerCount; layerIndex++)
@@ -509,9 +508,37 @@ inline Array<Entity *, LAYER_COUNT> FindAllEntitiesFromLocationAndLayers(IVec2 p
     return result;
 }
 
-inline Entity * FindEntityByLocationAndLayers(IVec2 pos, EntityLayer * layers, int arrayCount)
+inline Array<Entity *, LAYER_COUNT> FindEntitiesProjectedFromSite(IVec2 origin, IVec2 dir,
+                                                                EntityLayer * layers, uint32 layerCount)
 {
-    for (int layerIndex = 0; layerIndex < arrayCount; layerIndex++)
+    IVec2 closest = origin + dir * gameState->tileMax.SqrMagnitude();
+    SM_ASSERT(CheckOutOfBound(closest), "Initial point should be out of bouncd");
+    
+    for (int layerIndex = 0; layerIndex , layerCount; layerIndex++)
+    {
+        int layer = layers[layerIndex];
+        for (uint32 i = 0; i < gameState->entityTable[layer].count; i++)
+        {
+            Entity * ent = GetEntity(gameState->entityTable[layer][i]);
+            
+            IVec2 offset = ent->tilePos - origin;
+            int dist = Dot(dir, offset);
+            if (dist >= 0 && offset == (dir * dist) && offset.SqrMagnitude() < (closest - origin).SqrMagnitude())
+            {
+                closest = ent->tilePos;
+                break;
+            }
+        }
+    }
+    
+    Array<Entity *, LAYER_COUNT> result = FindAllEntitiesFromLocationAndLayers(closest, layers, layerCount);
+    
+    return result;
+}
+
+inline Entity * FindEntityByLocationAndLayers(IVec2 pos, EntityLayer * layers, uint32 arrayCount)
+{
+    for (uint32 layerIndex = 0; layerIndex < arrayCount; layerIndex++)
     {
         int layer = layers[layerIndex];
         auto & entityIndeices = gameState->entityTable[layer];
@@ -751,8 +778,6 @@ inline Entity * CreateSlimeClone(IVec2 tilePos)
     
 }
 
-
-
 void ShiftEntities(IVec2 startPos, IVec2 bounceDir)
 {
     Entity * last = nullptr;
@@ -801,33 +826,6 @@ inline bool8 IsProjectable(IVec2 tilePos, IVec2 pushDir)
             }
     }
     return result;
-}
-
-  Entity * ProjectEntity(Entity * bouncedEnt, IVec2 dir)
-{
-    SM_ASSERT(bouncedEnt->active, "entity does not exists");
-    SM_ASSERT(bouncedEnt->movable, "entitiy is static");
-    
-    IVec2 start = bouncedEnt->tilePos + dir;
-    
-    // IMPORTANT: the order of the layers are important, for example, we don't want to check blocks before checking doors in the same tile
-     EntityLayer checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_PIT };
-    uint32 layerCount = ArrayCount(checkLayers);
-    for (IVec2 pos = start;
-         ;
-         pos = pos + dir)
-    {
-        auto entList = FindAllEntitiesFromLocationAndLayers(pos, checkLayers, layerCount); 
-        // TODO
-        
-        if (CheckOutOfBound(pos))
-        {
-            DeleteEntity(bouncedEnt);
-            break;
-    
-        }
-    }
-    return nullptr;
 }
 
 void BounceEntity(Entity * entity, IVec2 dir)

@@ -83,12 +83,6 @@ enum GameScreen
     ENDING_SCREEN,
 };
 
-enum CheckState
-{
-    MOVE_CHECK,
-    BOUNCE_CHECK
-};
-
 struct KeyMapping
 {
     Array<int, 3> keys;
@@ -161,22 +155,6 @@ struct GameState
     bool8 simulating = false;
     
 };
-
-enum PushState
-{
-    PUSH_STATE_EMPTY,
-    PUSH_STATE_BLOCKED,
-    PUSH_STATE_PUSHED,
-    PUSH_STATE_MERGED,
-    PUSH_STATE_PROJECTED,
-};
-
-
-struct PushCheckResult
-{
-    PushState state;
-    Entity * blockedEntity;
-    };
 
 struct MoveActionResult
 {
