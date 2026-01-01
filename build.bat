@@ -1,8 +1,6 @@
 @echo off
 
-
 if "%1" == "clean" (del /Q bin\*)
-
 
 call scripts\msvc_upgrade_cmd_64.bat
  

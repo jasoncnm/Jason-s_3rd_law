@@ -55,8 +55,7 @@ enum PushState
     PUSH_STATE_BLOCKED,
     PUSH_STATE_PUSHED,
     PUSH_STATE_MERGED,
-    PUSH_STATE_ATTACHED,
-};
+    };
 
 enum CheckState
 {
@@ -73,44 +72,90 @@ struct PushCheckResult
 struct CheckThings
 {
     bool visited;
+    IVec2 pushDir;
     CheckState checkState;
     Entity * pushEnt;
     PushCheckResult pushResult;
+    
+    CheckThings * parent;
 };
 
 
 //  ========================================================================
 //              NOTE: Game Functions (internal)
 //  ========================================================================
-inline void ResolvePushAction(CheckThings * current, CheckThings * prev)
+
+inline void CheckPushState(CheckThings & current)
 {
-    SM_ASSERT(current, "curent things cannot be null");
-    
-    switch(pushResult.state)
+    switch(current.pushResult.state)
     {
         case PUSH_STATE_BLOCKED:
+        {
+            Entity * ent = current.pushEnt;
+            if (IsSlime(ent))
+            {
+                if (current.pushResult.blockedEntity->type == ENTITY_TYPE_PIT ||
+                    (current.pushResult.blockedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+                     current.pushResult.blockedEntity->cableType == CABLE_TYPE_DOOR &&
+                     !SameSide(current.pushResult.blockedEntity, ent->tilePos + current.pushDir, current.pushDir)))
+                {
+                    
+                    if (current.parent != &current)
+                    {
+                        current.parent->pushResult.state = PUSH_STATE_NONE;
+                        current.parent->pushResult.blockedEntity = nullptr;
+                    }
+                    return;
+                }
+                
+                if (ent->attachDir == -current.pushDir)
+                {
+                    
+                    CheckThings newThings = {};
+                    newThings.visited = false;
+                    newThings.pushDir = ent->attachDir;
+                    newThings.pushEnt = ent;
+                    newThings.pushResult = { PUSH_STATE_NONE, nullptr };
+                    newThings.checkState = CHECK_MOVE;
+                    newThings.parent = &current;
+                    checkList.Add(newThings);
+                    
+                    return;
+                }
+                
+                MoveEntity(ent, current.pushResult.blockedEntity, ent->tilePos, MOVE_INNER_CORNER);
+                
+            }
+            
+            if (current.parent != &current)
+            {
+                current.parent->pushResult.state = PUSH_STATE_BLOCKED;
+                current.parent->pushResult.blockedEntity = current.pushEnt;
+            }
+            
+            break;
+        }
+        case PUSH_STATE_MOVED:
         {
             
             break;
         }
+        case PUSH_STATE_PUSHED:
+        {
+            break;
         }
-    }
+        case PUSH_STATE_MERGED:
+        {
+            break;
+        }
+        }
+}
 
 inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMass, 
-                      IVec2 pushDir, Entity * startEnt, EntityLayer * checkLayers, uint32 layerCount)
+                                 int32 startMass, EntityLayer * checkLayers, uint32 layerCount)
 {
     CheckThings & current = checkList.last();
-    
-    if (current.visited)
-    {
-        checkList.RemoveLast();
-        
-        return current.pushResult;
-    }
-    else
-    {
-        current.visited = true;
-    auto entList = FindAllEntitiesFromLocationAndLayers(current.pushEnt->tilePos + pushDir, 
+    auto entList = FindAllEntitiesFromLocationAndLayers(current.pushEnt->tilePos + current.pushDir, 
                                                         checkLayers, layerCount); 
     for (uint32 idx = 0; idx < entList.count; idx++)
     {
@@ -121,7 +166,7 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
             {
                 SM_ASSERT(target->cableType == CABLE_TYPE_DOOR, "other cable type is not reachble");
                 
-                if (DoorBlocked(target, pushDir))
+                if (DoorBlocked(target, current.pushDir))
                 {
                     current.pushResult.state = PUSH_STATE_BLOCKED;
                     current.pushResult.blockedEntity = target;
@@ -151,7 +196,7 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
             {
                 if (IsSlime(current.pushEnt))
                 {
-                    if (pushDir == -current.pushEnt->attachDir)
+                    if (current.pushDir == -current.pushEnt->attachDir)
                     {
                     current.pushResult.state = PUSH_STATE_NONE;
                             return current.pushResult;
@@ -163,10 +208,10 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
                 // TODO: do something about this, it's weird, should ask designer to justify this action
                 if (current.pushEnt->type == ENTITY_TYPE_BLOCK)
                 {
-                    FindAttachableResult attachResult = FindAttachable(target->tilePos + pushDir, pushDir);
+                    FindAttachableResult attachResult = FindAttachable(target->tilePos + current.pushDir, current.pushDir);
                     if (attachResult.has)
                     {
-                        SetAttach(target, attachResult.entity, pushDir);
+                        SetAttach(target, attachResult.entity, current.pushDir);
                     }
                     else if (target->attach)
                     {
@@ -184,7 +229,7 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
                 {
                     EntityLayer layers[] = { LAYER_DOOR };
                     Entity * door = FindEntityByLocationAndLayers(target->tilePos, layers, ArrayCount(layers));
-                    if (door && DoorBlocked(door, -pushDir))
+                    if (door && DoorBlocked(door, -current.pushDir))
                     {
                         current.pushResult.state = PUSH_STATE_BLOCKED;
                         current.pushResult.blockedEntity = target;
@@ -192,21 +237,24 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
                     }
                 }
                 
-                if (IsProjectable(target->tilePos, pushDir))
+                if (IsProjectable(target->tilePos, current.pushDir))
                 {
                     current.pushResult.state = PUSH_STATE_PUSHED;
                     CheckThings targetThings = {};
                     targetThings.visited = false;
+                    targetThings.pushDir = current.pushDir;
                     targetThings.pushEnt = target;
                     targetThings.pushResult.state = PUSH_STATE_NONE;
                     targetThings.pushResult.blockedEntity = nullptr;
                     targetThings.checkState = CHECK_PROJECT;
+                    targetThings.parent = &current;
+                    
                     checkList.Add(targetThings);
                         return current.pushResult;
                 }
                 
                 accumulatedMass += target->mass;
-                if (accumulatedMass > startEnt->mass)
+                if (accumulatedMass > startMass)
                 {
                     current.pushResult.state = PUSH_STATE_BLOCKED;
                     current.pushResult.blockedEntity = target;
@@ -215,24 +263,27 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
                 
                 CheckThings newThings = {};
                 newThings.visited = false;
+                newThings.pushDir = current.pushDir;
                 newThings.pushEnt = target;
                 newThings.pushResult = { PUSH_STATE_NONE, nullptr };
                 newThings.checkState = CHECK_MOVE;
+                newThings.parent = &current;
                 checkList.Add(newThings);
                     return current.pushResult;
             }
         }
     }
+    
         current.pushResult.state = PUSH_STATE_MOVED;
         
         return current.pushResult;
 }
-}
 
-inline void ProjectCheck(Array<CheckThings, 100> & checkList, CheckThings & current, IVec2 pushDir,
-                         EntityLayer * checkLayers, uint32 layerCount)
+inline PushCheckResult ProjectCheck(Array<CheckThings, 100> & checkList, CheckThings & current, 
+                                    EntityLayer * checkLayers, uint32 layerCount)
 {
     
+    return current.pushResult;
 }
 
 PushCheckResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckState startState)
@@ -244,29 +295,56 @@ PushCheckResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckState startSt
     uint32 layerCount = ArrayCount(checkLayers);
     
     Array<CheckThings, 100> checkList;
-    checkList.Add({ false, startState, startEnt, { PUSH_STATE_NONE, nullptr } });
+    
+    CheckThings root = 
+    { false, pushDir, startState, startEnt, { PUSH_STATE_NONE, nullptr }};
+    root.parent = &root;
+    
+    checkList.Add(root);
     
     PushCheckResult pushResult = {};
+    int32 startMass = startEnt->mass;
     int32 accumulatedMass = 0;
     while (!checkList.IsEmpty())
     {
         CheckThings & current = checkList.last();
         
-        switch(current.checkState)
+        if (current.visited)
+        {
+            PushState currentState = current.pushResult.state;
+            switch(current.checkState)
             {
                 case CHECK_MOVE:
                 {
-                    pushResult = PushCheck(checkList, accumulatedMass, pushDir, startEnt, checkLayers, layerCount);
+                    CheckPushState(current);
                     break;
                 }
                 case CHECK_PROJECT:
                 {
-                    pushResult = ProjectCheck(checkList, pushDir, checkLayers, layerCount);
+                    break;
+                }
+            }
+                    checkList.RemoveLast();
+            }
+        else
+        {
+            current.visited = true;
+            
+        switch(current.checkState)
+            {
+                case CHECK_MOVE:
+                {
+                    PushCheck(checkList, accumulatedMass, startMass, checkLayers, layerCount);
+                    break;
+                }
+                case CHECK_PROJECT:
+                {
+                    ProjectCheck(checkList, current, checkLayers, layerCount);
                     break;
                     }
             }
         }
-    
+    }
     return pushResult;
     }
 
@@ -686,7 +764,6 @@ bool8 MoveAction(IVec2 actionDir)
             if (result.blocked)
             {
                 MoveEntity(player, moveResult.blockedEntity, player->tilePos, MOVE_FLAT);
-                
                 return true;
             }
             return true;
