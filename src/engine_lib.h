@@ -14,6 +14,10 @@
 #include <sys/stat.h>
 #include <vector>
 
+#include "memory.h"
+
+
+
 
 //  ========================================================================
 // NOTE: Defines
@@ -28,12 +32,6 @@
 #define DEBUG_BREAK() __builtin_trap()
 #define EXPORT_FN
 #endif
-
-#define b8 char
-#define BIT(x) 1 << (x)
-#define KB(x) (1024LL * x)
-#define MB(x) (1024LL * KB(x))
-#define GB(x) (1024LL * MB(x))
 
 typedef int8_t int8;
 typedef int16_t int16;
@@ -135,6 +133,30 @@ void _log(char * prefix, char * msg, TextColor textColor, Args... args)
 
 #endif
 
+
+//  ========================================================================
+// NOTE: Bump Allocator Functions
+//  ========================================================================
+#define BumpAllocArray(ba, count, size) BumpAlloc(ba, (count)*size)
+char * BumpAlloc(BumpAllocator * ba, size_t size)
+{
+    char * result = nullptr;
+    
+    size_t allignedSize = (size + 7) & ~ 7; // NOTE: This make sure the first 4 bits are 0
+    if (ba->used + allignedSize <= ba->capacity)
+    {
+        result = ba->memory + ba->used;
+        ba->used += allignedSize;
+    }
+    else
+    {
+        SM_ASSERT(false, "Bump Allocator is full");
+    }
+    
+    return result;
+}
+
+
 //  ========================================================================
 // NOTE: Array
 //  ========================================================================
@@ -222,55 +244,6 @@ struct Array
 
 };
 
-
-//  ========================================================================
-// NOTE: Bump Allocator
-//  ========================================================================
-struct BumpAllocator
-{
-    size_t capacity;
-    size_t used;
-    char *memory;
-
-};
-
-BumpAllocator MakeBumpAllocator(size_t size)
-{
-    BumpAllocator ba = {};
-    ba.memory = (char *)malloc(size);
-
-    if (ba.memory)
-    {
-        ba.capacity = size;
-        memset(ba.memory, 0, size); // NOTE: Set the memory to zero
-    }
-    else
-    {
-        SM_ASSERT(false, "Failed to allocate memory!");
-    }
-    
-    return ba;
-}
-
-#define BumpAllocArray(ba, count, size) BumpAlloc(ba, (count)*size)
-char * BumpAlloc(BumpAllocator * ba, size_t size)
-{
-    char * result = nullptr;
-
-    size_t allignedSize = (size + 7) & ~ 7; // NOTE: This make sure the first 4 bits are 0
-    if (ba->used + allignedSize <= ba->capacity)
-    {
-        result = ba->memory + ba->used;
-        ba->used += allignedSize;
-    }
-    else
-    {
-        SM_ASSERT(false, "Bump Allocator is full");
-    }
-
-    return result;
-    
-}
 
 //  ========================================================================
 // NOTE: File I/O

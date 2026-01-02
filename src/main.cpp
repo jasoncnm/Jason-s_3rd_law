@@ -12,6 +12,7 @@
 #include "platform.h"
 #if defined _WIN32
 #include "win32_hot_reload.cpp"
+#include "win32_memory.cpp"
 #elif defined __linux__
 #error Linux build not supported
 #elif defined __APPLE__
@@ -71,8 +72,20 @@ int main(int argumentCount, char *argumentArray[])
     //--------------------------------------------------------------------------------------
     // NOTE: Memory Allocation
     //--------------------------------------------------------------------------------------
-    BumpAllocator transientStorage = MakeBumpAllocator(MB(64));
-    BumpAllocator persistentStorage = MakeBumpAllocator(MB(256));
+    
+#if GAME_INTERNAL
+     void * baseAddress = (void *)TB(2);
+#else
+     void * baseAddress = 0;
+#endif
+    
+    size_t transientStorageSize = GB(1);
+    size_t perminentStorageSize = MB(64);
+    
+    BumpAllocator persistentStorage = MakeBumpAllocator(baseAddress, perminentStorageSize);
+    BumpAllocator transientStorage =
+        MakeBumpAllocator((uint8 *)persistentStorage.memory + persistentStorage.capacity, transientStorageSize);
+    
     gameState = (GameState *)BumpAlloc(&persistentStorage, sizeof(GameState));
     if (!gameState)
     {
@@ -87,7 +100,7 @@ int main(int argumentCount, char *argumentArray[])
     //--------------------------------------------------------------------------------------
     {
         InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jason's 3rd law");
-#if GAME_INTERNAL
+        #if GAME_INTERNAL
         
         // if (IsWindowState(FLAG_VSYNC_HINT)) ClearWindowState(FLAG_VSYNC_HINT);
         // else SetWindowState(FLAG_VSYNC_HINT);
@@ -99,6 +112,7 @@ SetWindowState(FLAG_WINDOW_TOPMOST);
         SetWindowState(FLAG_WINDOW_RESIZABLE);
         SetWindowMonitor(0);
         SetExitKey(KEY_Q);  // IMPORTANT: DEBUG ONLY !!
+         MaximizeWindow();
 
         Image icon = LoadImage("Assets/ICON/ICON.png");
         if (IsImageValid(icon))
@@ -106,8 +120,7 @@ SetWindowState(FLAG_WINDOW_TOPMOST);
             SetWindowIcon(icon); 
         } 
         UnloadImage(icon);
-        // MaximizeWindow();
-
+        
         InitAudioDevice();      // Initialize audio device
         if (!IsAudioDeviceReady())
         {

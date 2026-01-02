@@ -7,7 +7,6 @@
    $Notice: $
    ======================================================================== */
 
-
 // NOTE: empty functions meant to be replacements when
 // functions from the dll fail to load
 UPDATE_AND_RENDER(UpdateAndRenderStub) {}
@@ -28,7 +27,6 @@ GameCodeLoad(char *mainDllPath, char *tempDllPath, char *lockFilePath);
 
 static void
 GameCodeUnload(GameCode *GameCode);
-
 
 #define PLATFORM_H
 #endif

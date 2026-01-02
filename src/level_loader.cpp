@@ -437,7 +437,7 @@ void LoadTestLevel(GameState & state)
 
         state.tileMapCount = 1;
 
-        std::string fileName =  "Assets/Level_Editor/TileMap/Test.tmj";
+        std::string fileName = "Assets/Level_Editor/TileMap/Test.tmj";
 
         std::ifstream f(fileName);
         json map = json::parse(f);

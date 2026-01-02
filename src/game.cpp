@@ -85,13 +85,13 @@ struct CheckThings
 //              NOTE: Game Functions (internal)
 //  ========================================================================
 
-inline void CheckPushState(CheckThings & current)
+inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & current)
 {
+            Entity * ent = current.pushEnt;
     switch(current.pushResult.state)
     {
         case PUSH_STATE_BLOCKED:
         {
-            Entity * ent = current.pushEnt;
             if (IsSlime(ent))
             {
                 if (current.pushResult.blockedEntity->type == ENTITY_TYPE_PIT ||
@@ -99,7 +99,6 @@ inline void CheckPushState(CheckThings & current)
                      current.pushResult.blockedEntity->cableType == CABLE_TYPE_DOOR &&
                      !SameSide(current.pushResult.blockedEntity, ent->tilePos + current.pushDir, current.pushDir)))
                 {
-                    
                     if (current.parent != &current)
                     {
                         current.parent->pushResult.state = PUSH_STATE_NONE;
@@ -110,7 +109,6 @@ inline void CheckPushState(CheckThings & current)
                 
                 if (ent->attachDir == -current.pushDir)
                 {
-                    
                     CheckThings newThings = {};
                     newThings.visited = false;
                     newThings.pushDir = ent->attachDir;
@@ -120,6 +118,19 @@ inline void CheckPushState(CheckThings & current)
                     newThings.parent = &current;
                     checkList.Add(newThings);
                     
+                    return;
+                }
+                
+                if (ent->attachDir == current.pushDir)
+                {
+                    if (current.pushResult.blockedEntity->type == ENTITY_TYPE_PIT) 
+                    {
+                        current.pushResult.state = PUSH_STATE_NONE;
+                    }
+                    else if (current.parent)
+                    {
+                        MoveEntity(ent, current.parent->pushResult.blockedEntity, ent->tilePos, MOVE_FLAT);
+                    }
                     return;
                 }
                 
@@ -137,7 +148,57 @@ inline void CheckPushState(CheckThings & current)
         }
         case PUSH_STATE_MOVED:
         {
-            
+            if (IsSlime(ent))
+            {
+                IVec2 actionTilePos = ent->tilePos + current.pushDir;
+            // NOTE: no obsticale, move player
+            IVec2 standingPlatformPos = actionTilePos + ent->attachDir;
+            FindAttachableResult findResult = FindAttachable(standingPlatformPos, ent->attachDir);
+            if (findResult.has)
+            {
+                Entity * resultEntity = findResult.entity;
+                if (resultEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+                    resultEntity->cableType == CABLE_TYPE_DOOR &&
+                    !SameSide(resultEntity, standingPlatformPos, ent->attachDir))
+                {
+                    return;
+                }
+                MoveEntity(ent, findResult.entity, actionTilePos, MOVE_FLAT);
+            }
+            else
+            {
+                EntityLayer layers[] = { LAYER_SLIME };
+                Entity * slime = FindEntityByLocationAndLayers(standingPlatformPos, layers, ArrayCount(layers));
+                if (slime)
+                {
+                    ent = MergeSlimes(slime, ent);
+                }
+                else if ((!findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
+                         Abs(ent->attachDir) != Abs(current.pushDir))
+                {
+                    IVec2 newTile = standingPlatformPos;
+                    IVec2 newAttach = - current.pushDir;
+                    
+                    Entity * attachedEntity = GetEntity(ent->attachedEntityIndex);
+                    
+                    if (attachedEntity && attachedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+                        attachedEntity->cableType == CABLE_TYPE_DOOR &&
+                        !SameSide(attachedEntity, newTile, newAttach))
+                    {
+                        return;
+                    }
+                    
+                    
+                    MoveEntity(ent, attachedEntity, newTile, MOVE_OUTER_CORNER);
+                    
+                }
+                else 
+                {
+                    return;
+                }
+                
+            }
+            }
             break;
         }
         case PUSH_STATE_PUSHED:
@@ -274,7 +335,7 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
         }
     }
     
-        current.pushResult.state = PUSH_STATE_MOVED;
+    if (current.pushDir != -current.pushEnt->attachDir) current.pushResult.state = PUSH_STATE_MOVED;
         
         return current.pushResult;
 }
@@ -302,7 +363,7 @@ PushCheckResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckState startSt
     
     checkList.Add(root);
     
-    PushCheckResult pushResult = {};
+    PushCheckResult pushResult = root.pushResult;
     int32 startMass = startEnt->mass;
     int32 accumulatedMass = 0;
     while (!checkList.IsEmpty())
@@ -311,12 +372,13 @@ PushCheckResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckState startSt
         
         if (current.visited)
         {
+                    checkList.RemoveLast();
             PushState currentState = current.pushResult.state;
             switch(current.checkState)
             {
                 case CHECK_MOVE:
                 {
-                    CheckPushState(current);
+                    CheckPushState(checkList, current);
                     break;
                 }
                 case CHECK_PROJECT:
@@ -324,7 +386,7 @@ PushCheckResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckState startSt
                     break;
                 }
             }
-                    checkList.RemoveLast();
+            pushResult = current.pushResult;
             }
         else
         {
@@ -1116,7 +1178,12 @@ void GameplayUpdateAndRender()
                     
                     if (isPressed)
                     {
+                        #if 0
                         stateChanged = stateChanged || MoveAction(actionDir);
+#else
+                        PushCheckResult pushResult = ActionCheck(player, actionDir, CHECK_MOVE);
+                        stateChanged = pushResult.state != PUSH_STATE_NONE;
+                        #endif
                     }
                     
                     break;

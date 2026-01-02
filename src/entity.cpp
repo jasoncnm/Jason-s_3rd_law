@@ -492,7 +492,7 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
 inline Array<Entity *, LAYER_COUNT> FindAllEntitiesFromLocationAndLayers(IVec2 pos, EntityLayer * layers, uint32 layerCount)
 {
     Array<Entity *, LAYER_COUNT> result;
-    for (int layerIndex = 0; layerIndex , layerCount; layerIndex++)
+    for (uint32 layerIndex = 0; layerIndex < layerCount; layerIndex++)
     {
         int layer = layers[layerIndex];
         for (uint32 i = 0; i < gameState->entityTable[layer].count; i++)
