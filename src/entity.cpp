@@ -141,7 +141,8 @@ inline void DeleteEntity(Entity * entity)
     entity->tweenController.Reset();
 }
 
-inline void MoveEntity(Entity * entity, Entity * attachedEntity, IVec2 targetPos, MoveType moveType)
+inline void MoveEntity(Entity * entity, Entity * attachedEntity, 
+                       IVec2 targetPos, MoveType moveType, float (*MoveFunc)(float) = nullptr)
 {
     SM_ASSERT(entity->active, "entity does not exist");
     SM_ASSERT(entity->movable, "entity cannot be moved");
@@ -190,7 +191,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, IVec2 targetPos
             params.endVec2 = endPivot;
             params.realVec2  = &entity->pivot;
             
-            AddTween(entity->tweenController, CreateTween(params, EaseOutCubic, speed));
+            AddTween(entity->tweenController, CreateTween(params, MoveFunc, speed));
             break;
         }
         case MOVE_OUTER_CORNER:
@@ -212,8 +213,8 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, IVec2 targetPos
             params2.endVec2 = endPivot;
             params2.realVec2  = &entity->pivot;
             
-            AddTween(entity->tweenController, CreateTween(params1, EaseOutCubic, speed * 1.5f));
-            AddTween(entity->tweenController, CreateTween(params2, EaseOutCubic, speed * 1.5f));
+            AddTween(entity->tweenController, CreateTween(params1, MoveFunc, speed * 1.5f));
+            AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed * 1.5f));
             
             break;
         }
@@ -236,8 +237,8 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, IVec2 targetPos
             params2.endVec2 = endPivot;
             params2.realVec2  = &entity->pivot;
             
-            AddTween(entity->tweenController, CreateTween(params1, EaseOutCubic, speed * 2));
-            AddTween(entity->tweenController, CreateTween(params2, EaseOutCubic, speed * 2));
+            AddTween(entity->tweenController, CreateTween(params1, MoveFunc, speed * 2));
+            AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed * 2));
             
             break;
         }
@@ -718,7 +719,7 @@ inline void UpdateSlimes()
                         AddTween(slime->tweenController, CreateTween(params, nullptr,  BOUNCE_SPEED, iDist));
                     }
                     
-                    if (!attach->tweenController.NoTweens())
+                    if (!attach->tweenController.NoTweens() && !attach->tweenController.start)
                     {
                         TweenEvent & startEvent = attach->tweenController.startEvent;
                         startEvent.controller = &slime->tweenController;

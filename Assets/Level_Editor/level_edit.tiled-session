@@ -3,14 +3,33 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TileMap/Test.tmj",
+    "activeFile": "C:/Users/Jason/Desktop/Assets/Level_Editor/TileMap/Test.tmj",
     "expandedProjectPaths": [
         "TlieSet",
-        "TileMap",
-        "."
+        ".",
+        "TileMap"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
+        "C:/Users/Jason/Desktop/Assets/Level_Editor/TileMap/Room_3.tmj": {
+            "scale": 0.75,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 176.66666666666669,
+                "y": 176
+            }
+        },
+        "C:/Users/Jason/Desktop/Assets/Level_Editor/TileMap/Test.tmj": {
+            "scale": 0.75,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 1990,
+                "y": 1266
+            }
+        },
+        "C:/Users/Jason/Desktop/Assets/Level_Editor/TlieSet/tileSet.tsx": {
+            "scaleInDock": 1
+        },
         "TileMap/Room_1.tmj": {
             "scale": 0.33,
             "selectedLayer": 2,
@@ -172,11 +191,11 @@
             }
         },
         "TileMap/Room_3.tmj": {
-            "scale": 0.5,
+            "scale": 3,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 241,
-                "y": 174
+                "x": -1663.4999999999998,
+                "y": 545.1666666666667
             }
         },
         "TileMap/Room_30.tmj": {
@@ -319,8 +338,8 @@
             "scale": 4,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 476.375,
-                "y": 414.875
+                "x": 320.125,
+                "y": 320
             }
         },
         "TileMap/TestRoom_2.tmj": {
@@ -407,7 +426,8 @@
     "last.externalTilesetPath": "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/TlieSet",
     "last.worldFilePath": "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor",
     "loadedWorlds": [
-        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/maps.world"
+        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/maps.world",
+        "C:/Users/Jason/Desktop/Assets/Level_Editor/maps.world"
     ],
     "map.height": 4,
     "map.lastUsedFormat": "json",
@@ -418,22 +438,24 @@
         "TileMap/Room_5.tmj",
         "TileMap/Room_35.tmj",
         "TileMap/Room_22.tmj",
-        "TileMap/Room_13.tmj"
+        "TileMap/Room_13.tmj",
+        "C:/Users/Jason/Desktop/Assets/Level_Editor/TileMap/Room_3.tmj",
+        "C:/Users/Jason/Desktop/Assets/Level_Editor/TileMap/Test.tmj"
     ],
     "project": "level_edit.tiled-project",
     "recentFiles": [
         "TileMap/Room_3.tmj",
-        "TileMap/Room_13.tmj",
-        "TileMap/Room_22.tmj",
-        "TileMap/Room_35.tmj",
-        "TileMap/Room_5.tmj",
         "TileMap/Test.tmj",
+        "TileMap/Room_5.tmj",
+        "TileMap/Room_35.tmj",
+        "TileMap/Room_22.tmj",
+        "TileMap/Room_13.tmj",
+        "C:/Users/Jason/Desktop/Assets/Level_Editor/TileMap/Room_3.tmj",
+        "C:/Users/Jason/Desktop/Assets/Level_Editor/TileMap/Test.tmj",
         "TileMap/Room_6.tmj",
         "TileMap/Room_9.tmj",
         "TileMap/Room_36.tmj",
-        "TileMap/room_43.tmj",
-        "TileMap/Room_25.tmj",
-        "TileMap/Room_27.tmj"
+        "TileMap/room_43.tmj"
     ],
     "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
     "tileset.lastUsedFormat": "json"

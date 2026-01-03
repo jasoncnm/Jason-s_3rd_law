@@ -53,7 +53,6 @@ enum PushState
     PUSH_STATE_NONE,
     PUSH_STATE_MOVED,
     PUSH_STATE_BLOCKED,
-    PUSH_STATE_PUSHED,
     PUSH_STATE_MERGED,
     };
 
@@ -65,6 +64,7 @@ enum CheckState
 
 struct PushCheckResult
 {
+    bool8 pushing;
     PushState state;
     Entity * blockedEntity;
 };
@@ -92,117 +92,25 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
     {
         case PUSH_STATE_BLOCKED:
         {
-            if (IsSlime(ent))
-            {
-                if (current.pushResult.blockedEntity->type == ENTITY_TYPE_PIT ||
-                    (current.pushResult.blockedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
-                     current.pushResult.blockedEntity->cableType == CABLE_TYPE_DOOR &&
-                     !SameSide(current.pushResult.blockedEntity, ent->tilePos + current.pushDir, current.pushDir)))
-                {
-                    if (current.parent != &current)
-                    {
-                        current.parent->pushResult.state = PUSH_STATE_NONE;
-                        current.parent->pushResult.blockedEntity = nullptr;
-                    }
-                    return;
-                }
-                
-                if (ent->attachDir == -current.pushDir)
-                {
-                    CheckThings newThings = {};
-                    newThings.visited = false;
-                    newThings.pushDir = ent->attachDir;
-                    newThings.pushEnt = ent;
-                    newThings.pushResult = { PUSH_STATE_NONE, nullptr };
-                    newThings.checkState = CHECK_MOVE;
-                    newThings.parent = &current;
-                    checkList.Add(newThings);
-                    
-                    return;
-                }
-                
-                if (ent->attachDir == current.pushDir)
-                {
-                    if (current.pushResult.blockedEntity->type == ENTITY_TYPE_PIT) 
-                    {
-                        current.pushResult.state = PUSH_STATE_NONE;
-                    }
-                    else if (current.parent)
-                    {
-                        MoveEntity(ent, current.parent->pushResult.blockedEntity, ent->tilePos, MOVE_FLAT);
-                    }
-                    return;
-                }
-                
-                MoveEntity(ent, current.pushResult.blockedEntity, ent->tilePos, MOVE_INNER_CORNER);
-                
-            }
-            
-            if (current.parent != &current)
-            {
-                current.parent->pushResult.state = PUSH_STATE_BLOCKED;
+            current.parent->pushResult.state = PUSH_STATE_BLOCKED;
                 current.parent->pushResult.blockedEntity = current.pushEnt;
-            }
             
             break;
         }
         case PUSH_STATE_MOVED:
         {
-            if (IsSlime(ent))
+            current.parent->pushResult.state = PUSH_STATE_MOVED;
+            current.parent->pushResult.pushing = true;
+            
+            if (IsSlime(current.parent->pushEnt) && current.parent->pushEnt->attachedEntityIndex == ent->entityIndex)
             {
-                IVec2 actionTilePos = ent->tilePos + current.pushDir;
-            // NOTE: no obsticale, move player
-            IVec2 standingPlatformPos = actionTilePos + ent->attachDir;
-            FindAttachableResult findResult = FindAttachable(standingPlatformPos, ent->attachDir);
-            if (findResult.has)
-            {
-                Entity * resultEntity = findResult.entity;
-                if (resultEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
-                    resultEntity->cableType == CABLE_TYPE_DOOR &&
-                    !SameSide(resultEntity, standingPlatformPos, ent->attachDir))
-                {
-                    return;
-                }
-                MoveEntity(ent, findResult.entity, actionTilePos, MOVE_FLAT);
+                MoveEntity(ent, current.parent->pushEnt, ent->tilePos + current.pushDir, MOVE_FLAT, nullptr);
             }
             else
             {
-                EntityLayer layers[] = { LAYER_SLIME };
-                Entity * slime = FindEntityByLocationAndLayers(standingPlatformPos, layers, ArrayCount(layers));
-                if (slime)
-                {
-                    ent = MergeSlimes(slime, ent);
-                }
-                else if ((!findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
-                         Abs(ent->attachDir) != Abs(current.pushDir))
-                {
-                    IVec2 newTile = standingPlatformPos;
-                    IVec2 newAttach = - current.pushDir;
-                    
-                    Entity * attachedEntity = GetEntity(ent->attachedEntityIndex);
-                    
-                    if (attachedEntity && attachedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
-                        attachedEntity->cableType == CABLE_TYPE_DOOR &&
-                        !SameSide(attachedEntity, newTile, newAttach))
-                    {
-                        return;
-                    }
-                    
-                    
-                    MoveEntity(ent, attachedEntity, newTile, MOVE_OUTER_CORNER);
-                    
-                }
-                else 
-                {
-                    return;
-                }
-                
+                MoveEntity(ent, nullptr, ent->tilePos + current.pushDir, MOVE_FLAT, nullptr);
             }
-            }
-            break;
-        }
-        case PUSH_STATE_PUSHED:
-        {
+            
             break;
         }
         case PUSH_STATE_MERGED:
@@ -300,7 +208,7 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
                 
                 if (IsProjectable(target->tilePos, current.pushDir))
                 {
-                    current.pushResult.state = PUSH_STATE_PUSHED;
+                    current.pushResult.state = PUSH_STATE_MOVED;
                     CheckThings targetThings = {};
                     targetThings.visited = false;
                     targetThings.pushDir = current.pushDir;
@@ -326,7 +234,7 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
                 newThings.visited = false;
                 newThings.pushDir = current.pushDir;
                 newThings.pushEnt = target;
-                newThings.pushResult = { PUSH_STATE_NONE, nullptr };
+                newThings.pushResult = { false, PUSH_STATE_NONE, nullptr };
                 newThings.checkState = CHECK_MOVE;
                 newThings.parent = &current;
                 checkList.Add(newThings);
@@ -335,7 +243,7 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
         }
     }
     
-    if (current.pushDir != -current.pushEnt->attachDir) current.pushResult.state = PUSH_STATE_MOVED;
+    current.pushResult.state = PUSH_STATE_MOVED;
         
         return current.pushResult;
 }
@@ -358,22 +266,29 @@ PushCheckResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckState startSt
     Array<CheckThings, 100> checkList;
     
     CheckThings root = 
-    { false, pushDir, startState, startEnt, { PUSH_STATE_NONE, nullptr }};
+    { false, pushDir, startState, startEnt, { false, PUSH_STATE_NONE, nullptr }};
     root.parent = &root;
     
     checkList.Add(root);
     
-    PushCheckResult pushResult = root.pushResult;
     int32 startMass = startEnt->mass;
     int32 accumulatedMass = 0;
-    while (!checkList.IsEmpty())
+    while (true)
     {
         CheckThings & current = checkList.last();
         
         if (current.visited)
         {
-                    checkList.RemoveLast();
+            checkList.RemoveLast();
+            
+            // NOTE: Deal with root outside of the function
+            if (checkList.IsEmpty())
+            {
+                return current.pushResult;
+            }
+            
             PushState currentState = current.pushResult.state;
+            
             switch(current.checkState)
             {
                 case CHECK_MOVE:
@@ -385,8 +300,7 @@ PushCheckResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckState startSt
                 {
                     break;
                 }
-            }
-            pushResult = current.pushResult;
+                }
             }
         else
         {
@@ -406,9 +320,11 @@ PushCheckResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckState startSt
                     }
             }
         }
+        
     }
-    return pushResult;
+    
     }
+
 
 // TODO: Do something about BounceEntity first
 MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int accumulatedMass)
@@ -769,6 +685,7 @@ inline void Restart()
     
 }
 
+#if 0
 bool8 MoveAction(IVec2 actionDir)
 {
     Entity * player = GetEntity(gameState->playerEntityIndex);
@@ -897,6 +814,140 @@ bool8 MoveAction(IVec2 actionDir)
     
     return true;
 }
+#else
+bool8 MoveAction(IVec2 actionDir)
+{
+    Entity * player = GetEntity(gameState->playerEntityIndex);
+    SM_ASSERT(player, "player is not active");
+    if (!player->attach) return false;
+    float moveSpeed = 4.0f;
+    IVec2 currentPos = player->tilePos;
+    IVec2 actionTilePos = currentPos + actionDir;
+    if (player->attachDir == actionDir)
+    {
+        return false;
+    }
+    
+    {
+        EntityLayer layers[] = { LAYER_DOOR };
+        Entity * door = FindEntityByLocationAndLayers(currentPos, layers, ArrayCount(layers));
+        if (door && DoorBlocked(door, -actionDir))
+        {
+            return false;
+        }
+    }
+    
+    {
+        EntityLayer layers[] = { LAYER_PIT };
+        Entity * pit = FindEntityByLocationAndLayers(currentPos + player->attachDir, layers, ArrayCount(layers));
+        if (pit)
+        {
+            return false;
+        }
+    }
+    
+    PushCheckResult pushResult = ActionCheck(player, actionDir, CHECK_MOVE);
+    switch(pushResult.state)
+    {
+        case PUSH_STATE_NONE:
+        {
+            return false;
+            }
+        case PUSH_STATE_MOVED:
+        {
+            if (player->attachDir == -actionDir)
+            {
+                if (pushResult.pushing)
+                {
+                ActionCheck(player, player->attachDir, CHECK_MOVE);
+                return true;
+                }
+                return false;
+            }
+            
+            IVec2 actionTilePos = player->tilePos + actionDir;
+            // NOTE: no obsticale, move player
+            IVec2 standingPlatformPos = actionTilePos + player->attachDir;
+            FindAttachableResult findResult = FindAttachable(standingPlatformPos, player->attachDir);
+            if (findResult.has)
+            {
+                Entity * resultEntity = findResult.entity;
+                if (resultEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+                    resultEntity->cableType == CABLE_TYPE_DOOR &&
+                    !SameSide(resultEntity, standingPlatformPos, player->attachDir))
+                {
+                    return false;
+                }
+                
+                MoveEntity(player, findResult.entity, actionTilePos, MOVE_FLAT, EaseOutCubic);
+                }
+            else
+            {
+                EntityLayer layers[] = { LAYER_SLIME };
+                Entity * slime = FindEntityByLocationAndLayers(standingPlatformPos, layers, ArrayCount(layers));
+                if (slime)
+                {
+                    player = MergeSlimes(slime, player);
+                }
+                else if ((!findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
+                         Abs(player->attachDir) != Abs(actionDir))
+                {
+                    IVec2 newTile = standingPlatformPos;
+                    IVec2 newAttach = - actionDir;
+                    
+                    Entity * attachedEntity = GetEntity(player->attachedEntityIndex);
+                    
+                    if (attachedEntity && attachedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+                        attachedEntity->cableType == CABLE_TYPE_DOOR &&
+                        !SameSide(attachedEntity, newTile, newAttach))
+                    {
+                        return false;
+                    }
+                    MoveEntity(player, attachedEntity, newTile, MOVE_OUTER_CORNER, EaseOutCubic);
+                }
+                else 
+                {
+                    return false;
+                }
+                }
+            return true;
+        }
+        case PUSH_STATE_BLOCKED:
+        {
+            bool8 blockedByPit = pushResult.blockedEntity->type == ENTITY_TYPE_PIT;
+            bool8 blockedByDoor = 
+                pushResult.blockedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+                pushResult.blockedEntity->cableType == CABLE_TYPE_DOOR &&
+                !SameSide(pushResult.blockedEntity, player->tilePos + actionDir, actionDir);
+            
+            if (blockedByPit || blockedByDoor)
+            {
+                return false;
+            }
+            
+            if (player->attachDir == -actionDir)
+            {
+                PushCheckResult rResult = ActionCheck(player, player->attachDir, CHECK_MOVE);
+                if (rResult.state == PUSH_STATE_BLOCKED)
+                {
+                    MoveEntity(player, pushResult.blockedEntity, player->tilePos, MOVE_FLAT, EaseOutCubic);
+                }
+                return true;
+                }
+            MoveEntity(player, pushResult.blockedEntity, player->tilePos, MOVE_INNER_CORNER, EaseOutCubic);
+            return true;
+            }
+        case PUSH_STATE_MERGED:
+        {
+            break;
+        }
+        
+    }
+    
+    SM_ASSERT(false, "check case failed");
+    return false;
+}
+#endif
 
 bool8 SplitAction(Entity * player, IVec2 bounceDir)
 {
@@ -1178,13 +1229,8 @@ void GameplayUpdateAndRender()
                     
                     if (isPressed)
                     {
-                        #if 0
                         stateChanged = stateChanged || MoveAction(actionDir);
-#else
-                        PushCheckResult pushResult = ActionCheck(player, actionDir, CHECK_MOVE);
-                        stateChanged = pushResult.state != PUSH_STATE_NONE;
-                        #endif
-                    }
+}
                     
                     break;
                 }

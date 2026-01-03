@@ -14,24 +14,9 @@
 #include <sys/stat.h>
 #include <vector>
 
-#include "memory.h"
-
-
-
-
 //  ========================================================================
 // NOTE: Defines
 //  ========================================================================
-#ifdef _WIN32
-#define DEBUG_BREAK() __debugbreak()
-#define EXPORT_FN __declspec(dllexport)
-#elif __linux__
-#define DEBUG_BREAK() __builtin_debugtrap()
-#define EXPORT_FN
-#elif __APPLE__
-#define DEBUG_BREAK() __builtin_trap()
-#define EXPORT_FN
-#endif
 
 typedef int8_t int8;
 typedef int16_t int16;
@@ -51,111 +36,9 @@ typedef size_t memory_index;
 typedef float real32;
 typedef double real64;
 
-
-#define ArrayCount(arr) (sizeof(arr) / sizeof((arr)[0]))
-
-//  ========================================================================
-// NOTE: Logging
-//  ========================================================================
-enum TextColor
-{
-    TEXT_COLOR_BLACK,
-    TEXT_COLOR_RED,
-    TEXT_COLOR_GREEN,
-    TEXT_COLOR_YELLOW,
-    TEXT_COLOR_BLUE,
-    TEXT_COLOR_MAGENTA,
-    TEXT_COLOR_CYAN,
-    TEXT_COLOR_WHITE,
-    TEXT_COLOR_BRIGHT_BLACK,
-    TEXT_COLOR_BRIGHT_RED,
-    TEXT_COLOR_BRIGHT_GREEN,
-    TEXT_COLOR_BRIGHT_YELLOW,
-    TEXT_COLOR_BRIGHT_BLUE,
-    TEXT_COLOR_BRIGHT_MAGENTA,
-    TEXT_COLOR_BRIGHT_CYAN,
-    TEXT_COLOR_BRIGHT_WHITE,
-    TEXT_COLOR_COUNT,
-};
-
-template <typename ...Args>
-void _log(char * prefix, char * msg, TextColor textColor, Args... args)
-{
-    static char * TextColorTable[TEXT_COLOR_COUNT] =
-        {
-            "\x1b[30m", // TEXT_COLOR_BLACK,
-            "\x1b[31m", // TEXT_COLOR_RED,
-            "\x1b[32m", // TEXT_COLOR_GREEN,
-            "\x1b[33m", // TEXT_COLOR_YELLOW,
-            "\x1b[34m", // TEXT_COLOR_BLUE,
-            "\x1b[35m", // TEXT_COLOR_MAGENTA,
-            "\x1b[36m", // TEXT_COLOR_CYAN,
-             "\x1b[37m", // TEXT_COLOR_WHITE,
-            "\x1b[90m", // TEXT_COLOR_BRIGHT_BLACK,
-            "\x1b[91m", // TEXT_COLOR_BRIGHT_RED,
-            "\x1b[92m", // TEXT_COLOR_BRIGHT_GREEN,
-            "\x1b[93m", // TEXT_COLOR_BRIGHT_YELLOW,
-            "\x1b[94m", // TEXT_COLOR_BRIGHT_BLUE,
-            "\x1b[95m", // TEXT_COLOR_BRIGHT_MAGENTA,
-            "\x1b[96m", // TEXT_COLOR_BRIGHT_CYAN,
-            "\x1b[97m", // TEXT_COLOR_BRIGHT_WHITE,
-        };
-
-    char formatBuffer[8192] = {};
-    sprintf(formatBuffer, "%s %s %s \033[0m", TextColorTable[textColor], prefix, msg);
-
-    char textBuffer[8192] = {};
-    sprintf(textBuffer, formatBuffer, args...);
-
-    puts(textBuffer);
-}
-
-#if GAME_INTERNAL
-
-#define SM_TRACE(msg, ...) _log("Trace:   ", msg, TEXT_COLOR_GREEN, ##__VA_ARGS__);
-#define SM_WARN(msg, ...)  _log("Warning: ", msg, TEXT_COLOR_YELLOW, ##__VA_ARGS__);
-#define SM_ERROR(msg, ...) _log("Error:   ", msg, TEXT_COLOR_RED, ##__VA_ARGS__);
-#define SM_ASSERT(x, msg, ...)                    \
-{                                                 \
-    if (!(x))                                     \
-    {                                             \
-        SM_ERROR(msg, ##__VA_ARGS__);             \
-        DEBUG_BREAK();                            \
-    }                                             \
-}
-
-#else
-
-#define SM_TRACE(msg, ...)
-#define SM_WARN(msg, ...)
-#define SM_ERROR(msg, ...)
-#define SM_ASSERT(x, msg, ...)
-
-#endif
-
-
-//  ========================================================================
-// NOTE: Bump Allocator Functions
-//  ========================================================================
-#define BumpAllocArray(ba, count, size) BumpAlloc(ba, (count)*size)
-char * BumpAlloc(BumpAllocator * ba, size_t size)
-{
-    char * result = nullptr;
-    
-    size_t allignedSize = (size + 7) & ~ 7; // NOTE: This make sure the first 4 bits are 0
-    if (ba->used + allignedSize <= ba->capacity)
-    {
-        result = ba->memory + ba->used;
-        ba->used += allignedSize;
-    }
-    else
-    {
-        SM_ASSERT(false, "Bump Allocator is full");
-    }
-    
-    return result;
-}
-
+#include "log.h"
+#include "memory.h"
+#include "file.h"
 
 //  ========================================================================
 // NOTE: Array
@@ -244,11 +127,6 @@ struct Array
 
 };
 
-
-//  ========================================================================
-// NOTE: File I/O
-//  ========================================================================
-
 int StringLength(char *String)
 {
     int Count = 0;
@@ -275,148 +153,6 @@ void CatStrings(char *SourceA, size_t SourceACount,
     *Dest++ = 0; 
 }
 
-
-long long GetTimestamp(char * file)
-{
-    struct stat fileStat = {};
-    stat(file, &fileStat);
-    return fileStat.st_mtime;
-}
-
-bool8 FileExists(char * filePath)
-{
-    SM_ASSERT(filePath, "No file path provided!");
-
-    auto file = fopen(filePath, "rb");
-    if (!file)
-    {
-        return false;
-    }
-    fclose(file);
-
-    return true;    
-}
-
-long GetFileSize(char * filePath)
-{
-    SM_ASSERT(filePath, "No file path provided!");
-
-    long fileSize = 0;
-    
-    auto file = fopen(filePath, "rb");
-    if (!file)
-    {
-        SM_ERROR("Failed to open file: %s", filePath);
-        return 0;
-    }
-
-    fseek(file, 0, SEEK_END);
-    fileSize = ftell(file);
-    fseek(file, 0, SEEK_SET);
-        
-    fclose(file);
-
-    return fileSize;
-}
-
-// NOTE: Reads a file into a supplied buffer. We manage our own memory and therefore want more contorl over where it is allocated
-char * read_file(char * filePath, int * fileSize, char * buffer)
-{
-    SM_ASSERT(filePath, "No file pth provided!");
-    SM_ASSERT(fileSize, "No file size provided!");
-    SM_ASSERT(buffer,   "No buffer provided!");
-
-    *fileSize = 0;
-    
-    auto file = fopen(filePath, "rb");
-    if (!file)
-    {
-        SM_ERROR("Failed to open file: %s", filePath);
-        return nullptr;
-    }
-
-    fseek(file, 0, SEEK_END);
-    *fileSize = ftell(file);
-    fseek(file, 0, SEEK_SET);
-
-    memset(buffer, 0, *fileSize + 1);
-    fread(buffer, sizeof(char), *fileSize, file);
-
-    fclose(file);
-
-    return buffer;
-    
-}
-
-char * read_file(char *filePath, int * fileSize, BumpAllocator * ba)
-{
-    char * file = nullptr;
-    long fileSize2 = GetFileSize(filePath);
-    if (fileSize2)
-    {
-        char * buffer = BumpAlloc(ba, fileSize2 + 1);
-        file = read_file(filePath, fileSize, buffer);
-    }
-
-    return file;
-
-}
-
-void write_file(char * filePath, char * buffer, int size)
-{
-    SM_ASSERT(filePath, "No file path provided!");
-    SM_ASSERT(buffer,   "No buffer provided!");
-    
-    auto file = fopen(filePath, "wb");
-    if (!file)
-    {
-        SM_ERROR("Failed to open file: %s", filePath);
-        return;
-    }
-
-    fwrite(buffer, sizeof(char), size, file);
-    fclose(file);
-}
-
-bool8 copy_file(char * fileName, char * outputName, char * buffer)
-{
-    int fileSize = 0;
-    char * data = read_file(fileName, &fileSize, buffer);
-
-    auto outputFile = fopen(outputName, "wb");
-    if (!outputFile)
-    {
-        SM_ERROR("Failed to open file: %s", outputName);
-        return false;
-    }
-
-    size_t result = fwrite(data, sizeof(char), fileSize, outputFile);
-    if (!result)
-    {
-        SM_ERROR("Failed to open file: %s", outputName);
-        return false;
-    }
-
-    fclose(outputFile);
-
-    return true;
-}
-
-
-bool8 copy_file(char * fileName, char * outputName, BumpAllocator * ba)
-{
-
-    char * file = nullptr;
-    long fileSize = GetFileSize(fileName);
-    if (fileSize)
-    {
-        char * buffer = BumpAlloc(ba, fileSize + 1);
-        return copy_file(fileName, outputName, buffer);
-    }
-
-    return false;
-    
-}
 
 //  ========================================================================
 //              NOTE: Math Stuff
@@ -730,14 +466,20 @@ float EaseOutBounce(float x)
 {
     float n1 = 7.5625f;
     float d1 = 2.75f;
-
-    if (x < 1 / d1) {
+    if (x < 1 / d1)
+    {
         return n1 * x * x;
-    } else if (x < 2 / d1) {
+    } 
+    else if (x < 2 / d1)
+    {
         return n1 * (x -= 1.5f / d1) * x + 0.75f;
-    } else if (x < 2.5 / d1) {
+    } 
+    else if (x < 2.5 / d1)
+    {
         return n1 * (x -= 2.25f / d1) * x + 0.9375f;
-    } else {
+    } 
+    else
+    {
         return n1 * (x -= 2.625f / d1) * x + 0.984375f;
     }
 }
@@ -753,5 +495,6 @@ float EaseInOutBounce(float x)
         ? (1 - EaseOutBounce(1 - 2 * x)) / 2
         : (1 + EaseOutBounce(2 * x - 1)) / 2;
 }
+
 #define ENGINE_LIB_H
 #endif

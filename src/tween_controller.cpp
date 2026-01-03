@@ -37,9 +37,8 @@ void TweenController::Reset()
 // NOTE: Every frame
 void TweenController::Update()
 {
-    
     if (start)
-        {
+    {
             start = false;
             playing = true;
             }
