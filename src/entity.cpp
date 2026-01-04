@@ -10,7 +10,7 @@
 
 inline bool8 DoorBlocked(Entity * door, IVec2 reachDir);
 inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir);
-
+inline bool8 IsDoor(Entity * door);
 
 inline Entity * GetEntity(int i)
 {
@@ -156,7 +156,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity,
         dir.x = dir.x == 0 ? 0 : Sign(dir.x);
         dir.y = dir.y == 0 ? 0 : Sign(dir.y);
         
-        SM_ASSERT(dir.SqrMagnitude() == 1, "Invalid bounce direction");
+        SM_ASSERT(IsDoor(entity) || IsDoor(attachedEntity) || dir.SqrMagnitude() == 1, "Invalid bounce direction");
         
         if (IsSlime(entity))
         {

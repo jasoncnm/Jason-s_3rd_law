@@ -129,13 +129,23 @@ inline void CheckProjectState(Array<CheckThings, 100> & checkList, CheckThings &
         {
             Entity * blockedEntity = current.pushResult.blockedEntity;
             IVec2 targetPos = blockedEntity->tilePos - current.pushDir;
+            
+            if (blockedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR && DoorBlocked(blockedEntity, -current.pushDir))
+            {
+                targetPos = blockedEntity->tilePos;
+            }
+            
             MoveEntity(ent, blockedEntity, targetPos, BOUNCE_FLAT, nullptr);
             break;
+        }
+        case PUSH_STATE_MOVED:
+        {
+            
         }
     }
 }
 
-inline void  PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMass, 
+inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMass, 
                                  int32 startMass, EntityLayer * checkLayers, uint32 layerCount)
 {
     CheckThings & current = checkList.last();
@@ -258,32 +268,39 @@ inline void ProjectCheck(Array<CheckThings, 100> & checkList, int32 & accumulate
             switch(target->type)
             {
                 case ENTITY_TYPE_PLAYER:
-                {
-                    break;
-                }
                 case ENTITY_TYPE_CLONE:
                 {
+                    // TODO
                     break;
                 }
                 case ENTITY_TYPE_BLOCK:
                 {
+                    CheckThings newThings = {};
+                    newThings.visited = false;
+                    newThings.pushDir = current.pushDir;
+                    newThings.pushEnt = target;
+                    newThings.pushResult = { false, PUSH_STATE_NONE, nullptr };
+                    newThings.checkState = CHECK_MOVE;
+                    newThings.parent = &current;
+                    checkList.Add(newThings);
                     break;
                 }
                 case ENTITY_TYPE_GLASS:
                 {
                     if (!target->broken && IsSlime(current.pushEnt))
                     {
+                        // TODO
                         
                         return;
                     }
-                    
+                    SetGlassBeBroken(target);
                     break;
                 }
                 case ENTITY_TYPE_ELECTRIC_DOOR:
                 {
                     SM_ASSERT(target->cableType == CABLE_TYPE_DOOR, "other cable type is not reachble");
                     
-                    if (DoorBlocked(target, current.pushDir))
+                    if (DoorBlocked(target, current.pushDir) || DoorBlocked(target, -current.pushDir))
                     {
                         current.pushResult.state = PUSH_STATE_BLOCKED;
                         current.pushResult.blockedEntity = target;

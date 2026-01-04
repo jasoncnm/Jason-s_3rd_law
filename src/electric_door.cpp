@@ -394,9 +394,13 @@ inline bool8 DoorBlocked(Entity * door, IVec2 reachDir)
     return result;
 }
 
+inline bool8 IsDoor(Entity * door)
+{
+    return door->active && door->type == ENTITY_TYPE_ELECTRIC_DOOR && door->cableType == CABLE_TYPE_DOOR;
+}
+
 inline bool8 CheckDoor(IVec2 tilePos)
 {
-    
     bool8 result = false;
     for (uint32 i = 0; i < Door_Indices.count; i++)
     {
