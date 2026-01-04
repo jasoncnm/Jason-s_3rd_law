@@ -1,0 +1,370 @@
+{
+    "maps": [
+        {
+            "fileName": "TileMap/Room_3.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 704,
+            "y": -352
+        },
+        {
+            "fileName": "TileMap/Room_1.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 0,
+            "y": 0
+        },
+        {
+            "fileName": "TileMap/Room_2.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 352,
+            "y": 0
+        },
+        {
+            "fileName": "TileMap/Room_4.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1056,
+            "y": -352
+        },
+        {
+            "fileName": "TileMap/Room_5.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1408,
+            "y": -352
+        },
+        {
+            "fileName": "TileMap/Room_6.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 704,
+            "y": 0
+        },
+        {
+            "fileName": "TileMap/Room_7.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1408,
+            "y": 0
+        },
+        {
+            "fileName": "TileMap/Room_8.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1408,
+            "y": 704
+        },
+        {
+            "fileName": "TileMap/Room_9.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1056,
+            "y": 0
+        },
+        {
+            "fileName": "TileMap/Room_10.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 352,
+            "y": 352
+        },
+        {
+            "fileName": "TileMap/Room_11.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 352,
+            "y": -352
+        },
+        {
+            "fileName": "TileMap/Room_12.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 352,
+            "y": -1056
+        },
+        {
+            "fileName": "TileMap/Room_13.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 0,
+            "y": -1056
+        },
+        {
+            "fileName": "TileMap/Test.tmj",
+            "height": 640,
+            "width": 640,
+            "x": -1216,
+            "y": -192
+        },
+        {
+            "fileName": "TileMap/Room_14.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 0,
+            "y": -352
+        },
+        {
+            "fileName": "TileMap/Room_15.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1408,
+            "y": 352
+        },
+        {
+            "fileName": "TileMap/Room_16.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1408,
+            "y": 1408
+        },
+        {
+            "fileName": "TileMap/Room_17.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1056,
+            "y": 1408
+        },
+        {
+            "fileName": "TileMap/Room_18.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 704,
+            "y": 1408
+        },
+        {
+            "fileName": "TileMap/Room_19.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 704,
+            "y": 1056
+        },
+        {
+            "fileName": "TileMap/Room_20.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1056,
+            "y": 1056
+        },
+        {
+            "fileName": "TileMap/Room_21.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1056,
+            "y": 704
+        },
+        {
+            "fileName": "TileMap/Room_22.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 704,
+            "y": 704
+        },
+        {
+            "fileName": "TileMap/Room_23.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 352,
+            "y": 1056
+        },
+        {
+            "fileName": "TileMap/Room_24.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 0,
+            "y": 1056
+        },
+        {
+            "fileName": "TileMap/Room_25.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1760,
+            "y": 0
+        },
+        {
+            "fileName": "TileMap/Room_26.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 352,
+            "y": -704
+        },
+        {
+            "fileName": "TileMap/Room_27.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1056,
+            "y": 352
+        },
+        {
+            "fileName": "TileMap/Room_28.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 0,
+            "y": -352
+        },
+        {
+            "fileName": "TileMap/Room_29.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 704,
+            "y": 352
+        },
+        {
+            "fileName": "TileMap/Room_30.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1408,
+            "y": -1760
+        },
+        {
+            "fileName": "TileMap/Room_31.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1056,
+            "y": 704
+        },
+        {
+            "fileName": "TileMap/Room_32.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1408,
+            "y": 1056
+        },
+        {
+            "fileName": "TileMap/Room_33.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 704,
+            "y": -704
+        },
+        {
+            "fileName": "TileMap/Room_34.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1056,
+            "y": -704
+        },
+        {
+            "fileName": "TileMap/Room_35.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1408,
+            "y": -704
+        },
+        {
+            "fileName": "TileMap/Room_36.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1760,
+            "y": -704
+        },
+        {
+            "fileName": "TileMap/Room_37.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1408,
+            "y": -1056
+        },
+        {
+            "fileName": "TileMap/Room_38.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1408,
+            "y": -1408
+        },
+        {
+            "fileName": "TileMap/Room_39.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 1056,
+            "y": -1408
+        },
+        {
+            "fileName": "TileMap/Room_40.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 0,
+            "y": -704
+        },
+        {
+            "fileName": "TileMap/Room_41.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 0,
+            "y": 352
+        },
+        {
+            "fileName": "TileMap/Room_42.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 0,
+            "y": 704
+        },
+        {
+            "fileName": "TileMap/room_43.tmj",
+            "height": 224,
+            "width": 224,
+            "x": 2112,
+            "y": 64
+        },
+        {
+            "fileName": "TileMap/TestRoom_4.tmj",
+            "height": 480,
+            "width": 480,
+            "x": 3648,
+            "y": -1472
+        },
+        {
+            "fileName": "TileMap/TestRoom_2.tmj",
+            "height": 160,
+            "width": 160,
+            "x": 3488,
+            "y": -1312
+        },
+        {
+            "fileName": "TileMap/TestRoom_3.tmj",
+            "height": 320,
+            "width": 320,
+            "x": 3168,
+            "y": -1376
+        },
+        {
+            "fileName": "TileMap/TestRoom_5.tmj",
+            "height": 224,
+            "width": 224,
+            "x": 3648,
+            "y": -1696
+        },
+        {
+            "fileName": "TileMap/TestRoom_6.tmj",
+            "height": 224,
+            "width": 256,
+            "x": 3872,
+            "y": -1696
+        },
+        {
+            "fileName": "TileMap/TestRoom_7.tmj",
+            "height": 384,
+            "width": 160,
+            "x": 3488,
+            "y": -1696
+        },
+        {
+            "fileName": "TileMap/TestRoom_8.tmj",
+            "height": 192,
+            "width": 320,
+            "x": 3168,
+            "y": -1696
+        },
+        {
+            "fileName": "TileMap/TestRoom_9.tmj",
+            "height": 128,
+            "width": 320,
+            "x": 3168,
+            "y": -1504
+        }
+    ],
+    "onlyShowAdjacentMaps": false,
+    "type": "world"
+}
