@@ -120,7 +120,22 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
         }
 }
 
-inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMass, 
+inline void CheckProjectState(Array<CheckThings, 100> & checkList, CheckThings &  current)
+{
+    Entity * ent = current.pushEnt;
+    switch(current.pushResult.state)
+    {
+        case PUSH_STATE_BLOCKED:
+        {
+            Entity * blockedEntity = current.pushResult.blockedEntity;
+            IVec2 targetPos = blockedEntity->tilePos - current.pushDir;
+            MoveEntity(ent, blockedEntity, targetPos, BOUNCE_FLAT, nullptr);
+            break;
+        }
+    }
+}
+
+inline void  PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMass, 
                                  int32 startMass, EntityLayer * checkLayers, uint32 layerCount)
 {
     CheckThings & current = checkList.last();
@@ -139,7 +154,7 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
                 {
                     current.pushResult.state = PUSH_STATE_BLOCKED;
                     current.pushResult.blockedEntity = target;
-                        return current.pushResult;
+                        return;
                 }
                 break;
             }
@@ -149,16 +164,9 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
                 {
                     current.pushResult.state = PUSH_STATE_BLOCKED;
                     current.pushResult.blockedEntity = target;
-                        return current.pushResult;
+                        return;
                 }
                 break;
-            }
-            case ENTITY_TYPE_PIT:
-            case ENTITY_TYPE_WALL:
-            {
-                current.pushResult.state = PUSH_STATE_BLOCKED;
-                current.pushResult.blockedEntity = target;
-                    return current.pushResult;
             }
             case ENTITY_TYPE_PLAYER:
             case ENTITY_TYPE_CLONE:
@@ -167,31 +175,19 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
                 {
                     if (current.pushDir == -current.pushEnt->attachDir)
                     {
-                    current.pushResult.state = PUSH_STATE_NONE;
-                            return current.pushResult;
+                        current.pushResult.state = PUSH_STATE_NONE;
+                        return;
                     }
                     current.pushResult.state = PUSH_STATE_MERGED;
-                        return current.pushResult;
+                    return;
                 }
-                
-                // TODO: do something about this, it's weird, should ask designer to justify this action
-                if (current.pushEnt->type == ENTITY_TYPE_BLOCK)
-                {
-                    FindAttachableResult attachResult = FindAttachable(target->tilePos + current.pushDir, current.pushDir);
-                    if (attachResult.has)
-                    {
-                        SetAttach(target, attachResult.entity, current.pushDir);
-                    }
-                    else if (target->attach)
-                    {
-                        attachResult = FindAttachable(target->tilePos + target->attachDir, target->attachDir);
-                        if (attachResult.has)
-                        {
-                            SetAttach(target, attachResult.entity, target->attachDir);
-                        }
-                    }
-                    }
-                
+                }
+            case ENTITY_TYPE_PIT:
+            case ENTITY_TYPE_WALL:
+            {
+                current.pushResult.state = PUSH_STATE_BLOCKED;
+                current.pushResult.blockedEntity = target;
+                    return;
             }
             case ENTITY_TYPE_BLOCK:
             {
@@ -202,7 +198,7 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
                     {
                         current.pushResult.state = PUSH_STATE_BLOCKED;
                         current.pushResult.blockedEntity = target;
-                            return current.pushResult;
+                            return;
                     }
                 }
                 
@@ -219,7 +215,7 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
                     targetThings.parent = &current;
                     
                     checkList.Add(targetThings);
-                        return current.pushResult;
+                        return;
                 }
                 
                 accumulatedMass += target->mass;
@@ -227,7 +223,7 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
                 {
                     current.pushResult.state = PUSH_STATE_BLOCKED;
                     current.pushResult.blockedEntity = target;
-                        return current.pushResult;
+                        return;
                 }
                 
                 CheckThings newThings = {};
@@ -238,21 +234,82 @@ inline PushCheckResult PushCheck(Array<CheckThings, 100> & checkList, int32 & ac
                 newThings.checkState = CHECK_MOVE;
                 newThings.parent = &current;
                 checkList.Add(newThings);
-                    return current.pushResult;
+                    return;
             }
         }
     }
     
     current.pushResult.state = PUSH_STATE_MOVED;
         
-        return current.pushResult;
+        return;
 }
 
-inline PushCheckResult ProjectCheck(Array<CheckThings, 100> & checkList, CheckThings & current, 
-                                    EntityLayer * checkLayers, uint32 layerCount)
+inline void ProjectCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMass,
+                         EntityLayer * checkLayers, uint32 layerCount)
 {
+    CheckThings & current = checkList.last();
     
-    return current.pushResult;
+    for (IVec2 pos = current.pushEnt->tilePos + current.pushDir; ; pos += current.pushDir)
+    {
+    auto entList = FindAllEntitiesFromLocationAndLayers(pos, checkLayers, layerCount); 
+        for (uint32 idx = 0; idx < entList.count; idx++)
+        {
+            Entity * target = entList[idx];
+            switch(target->type)
+            {
+                case ENTITY_TYPE_PLAYER:
+                {
+                    break;
+                }
+                case ENTITY_TYPE_CLONE:
+                {
+                    break;
+                }
+                case ENTITY_TYPE_BLOCK:
+                {
+                    break;
+                }
+                case ENTITY_TYPE_GLASS:
+                {
+                    if (!target->broken && IsSlime(current.pushEnt))
+                    {
+                        
+                        return;
+                    }
+                    
+                    break;
+                }
+                case ENTITY_TYPE_ELECTRIC_DOOR:
+                {
+                    SM_ASSERT(target->cableType == CABLE_TYPE_DOOR, "other cable type is not reachble");
+                    
+                    if (DoorBlocked(target, current.pushDir))
+                    {
+                        current.pushResult.state = PUSH_STATE_BLOCKED;
+                        current.pushResult.blockedEntity = target;
+                        return;
+                    }
+                    
+                    break;
+                }
+                case ENTITY_TYPE_WALL:
+                case ENTITY_TYPE_PIT:
+                {
+                    current.pushResult.state = PUSH_STATE_BLOCKED;
+                    current.pushResult.blockedEntity = target;
+                    return;
+                }
+                }
+        }
+        
+        if (CheckOutOfBound(pos))
+        {
+            current.pushEnt->tilePos = pos;
+            DeleteEntity(current.pushEnt);
+        }
+        
+    }
+    
 }
 
 PushCheckResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckState startState)
@@ -298,6 +355,7 @@ PushCheckResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckState startSt
                 }
                 case CHECK_PROJECT:
                 {
+                    CheckProjectState(checkList, current);
                     break;
                 }
                 }
@@ -315,7 +373,7 @@ PushCheckResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckState startSt
                 }
                 case CHECK_PROJECT:
                 {
-                    ProjectCheck(checkList, current, checkLayers, layerCount);
+                    ProjectCheck(checkList, accumulatedMass, checkLayers, layerCount);
                     break;
                     }
             }

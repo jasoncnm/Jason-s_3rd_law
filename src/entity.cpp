@@ -245,6 +245,20 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity,
         case BOUNCE_FLAT:
         {
             
+            float dist = Vector2Distance(startPivot, endPivot);
+            float tileDist = dist / MAP_TILE_SIZE;
+            
+            float speed = BOUNCE_SPEED;
+            
+            TweenParams params = {};
+            params.paramType = PARAM_TYPE_VECTOR2;
+            params.startVec2 = startPivot;
+            params.endVec2 = endPivot;
+            params.realVec2  = &entity->pivot;
+            
+            AddTween(entity->tweenController, CreateTween(params, MoveFunc, speed, tileDist));
+            
+            
             break;
         }
     }
