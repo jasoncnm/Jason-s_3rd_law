@@ -143,8 +143,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                 }
                 case ENTITY_TYPE_BLOCK:
                 {
-                    
-CheckThings newThings = {};
+                    CheckThings newThings = {};
                     newThings.visited = false;
                     newThings.pushDir = pushDir;
                     newThings.pushEnt = projectedEnt;
@@ -278,6 +277,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 if (IsProjectable(target->tilePos, current.pushDir))
                 {
                     current.pushResult.state = STATE_MOVED;
+                    // TODO: Maybe not a good idea to call this here. Separate the project logic and the push logic 
                     ProjectAndCheck(target, checkList, current.pushDir, accumulatedMass, checkLayers, layerCount);
                     return;
                 }
