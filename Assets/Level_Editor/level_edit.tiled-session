@@ -5,9 +5,9 @@
     },
     "activeFile": "TileMap/Test.tmj",
     "expandedProjectPaths": [
+        "TileMap",
         ".",
-        "TlieSet",
-        "TileMap"
+        "TlieSet"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -335,11 +335,11 @@
             }
         },
         "TileMap/Test.tmj": {
-            "scale": 2,
-            "selectedLayer": 0,
+            "scale": 1.5,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 508.75,
-                "y": 361.75
+                "x": 503.33333333333337,
+                "y": 545
             }
         },
         "TileMap/TestRoom_2.tmj": {
@@ -438,20 +438,18 @@
         "TileMap/Room_5.tmj",
         "TileMap/Room_35.tmj",
         "TileMap/Room_22.tmj",
-        "TileMap/Room_13.tmj",
-        "C:/Users/Jason/Desktop/Assets/Level_Editor/TileMap/Room_3.tmj",
-        "C:/Users/Jason/Desktop/Assets/Level_Editor/TileMap/Test.tmj"
+        "TileMap/Room_13.tmj"
     ],
     "project": "level_edit.tiled-project",
     "recentFiles": [
         "TileMap/Room_3.tmj",
-        "C:/Users/Jason/Desktop/Assets/Level_Editor/TileMap/Test.tmj",
-        "C:/Users/Jason/Desktop/Assets/Level_Editor/TileMap/Room_3.tmj",
         "TileMap/Room_13.tmj",
         "TileMap/Room_22.tmj",
         "TileMap/Room_35.tmj",
         "TileMap/Room_5.tmj",
         "TileMap/Test.tmj",
+        "C:/Users/Jason/Desktop/Assets/Level_Editor/TileMap/Test.tmj",
+        "C:/Users/Jason/Desktop/Assets/Level_Editor/TileMap/Room_3.tmj",
         "TileMap/Room_6.tmj",
         "TileMap/Room_9.tmj",
         "TileMap/Room_36.tmj",

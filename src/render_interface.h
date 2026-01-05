@@ -155,30 +155,7 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields)
     {
         // Update star's timer
         stars[i].z -= dt * flySpeed;
-#if 0
-        int random = GetRandomValue(INT_MIN, INT_MAX);
-
-        if (random % 2 == 0)
-        {
-            stars[i].x += 0.5f * cosf(time);
-        }
-        else
-        {
-            stars[i].x += 0.5f * sinf(time);
-        }
-        
-        random = GetRandomValue(INT_MIN, INT_MAX);
-
-        if (random % 2 == 0)
-        {
-            stars[i].y += 0.5f * sinf(time);
-        }
-        else
-        {
-            stars[i].y += 0.5f * cosf(time);
-        }
-#endif
-        // Calculate the screen position
+// Calculate the screen position
         starsScreenPos[i] =
             {
                 screenWidth *  0.5f + stars[i].x/stars[i].z,
@@ -200,7 +177,7 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields)
     {
         // Make the radius grow as the star ages
         float radius = Lerp(stars[i].z, 1.0f, 5.0f);
-        Color color = ColorLerp(SKYBLUE, DARKPURPLE, stars[i].z);
+        Color color = ColorLerp(DARKPURPLE, SKYBLUE, stars[i].z);
         // Draw the circle
         DrawCircleV(starsScreenPos[i], radius, color);
     } 
