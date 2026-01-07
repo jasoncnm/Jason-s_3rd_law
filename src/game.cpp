@@ -48,13 +48,20 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 //  ========================================================================
 //              NOTE: Game Structs (internal)
 //  ========================================================================
-enum CheckState
+enum PushState
 {
-    STATE_NONE,
-    STATE_MOVED,
-    STATE_BLOCKED,
-    STATE_MERGED,
+    PUSH_NONE,
+    PUSH_MOVED,
+    PUSH_BLOCKED,
+    PUSH_MERGED,
     };
+
+enum ProjectState
+{
+    PROJECT_NONE,
+    PROJECT_MOVED,
+    PROJECT_SLIME_ATTACHED,
+};
 
 enum CheckType
 {
@@ -62,11 +69,17 @@ enum CheckType
     CHECK_PROJECT,
 };
 
-struct CheckResult
+struct PushResult
 {
     bool8 pushing;
-     CheckState state;
+      PushState state;
     Entity * blockedEntity;
+};
+
+struct ProjectedResult
+{
+    ProjectState state;
+    Entity * attachEntity;
 };
 
 struct CheckThings
@@ -75,8 +88,8 @@ struct CheckThings
     IVec2 pushDir;
      CheckType checkType;
     Entity * pushEnt;
-    CheckResult pushResult;
-    
+     PushResult pushResult;
+    ProjectedResult projectedResult;
     CheckThings * parent;
 };
 
@@ -85,21 +98,43 @@ struct CheckThings
 //              NOTE: Game Functions (internal)
 //  ========================================================================
 
+inline void CheckProjectState(Array<CheckThings, 100> & checkList, 
+                              CheckThings & current)
+{
+    Entity * ent = current.pushEnt;
+    switch(current.projectedResult.state)
+    {
+        case PROJECT_MOVED:
+        {
+            if(IsSlime(ent))
+            {
+                // TODO
+            }
+            else
+            {
+                
+            }
+            
+            break;
+        }
+        }
+}
+
 inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & current)
 {
             Entity * ent = current.pushEnt;
     switch(current.pushResult.state)
     {
-        case STATE_BLOCKED:
+        case PUSH_BLOCKED:
         {
-            current.parent->pushResult.state = STATE_BLOCKED;
+            current.parent->pushResult.state = PUSH_BLOCKED;
                 current.parent->pushResult.blockedEntity = current.pushEnt;
             
             break;
         }
-        case STATE_MOVED:
+        case PUSH_MOVED:
         {
-            current.parent->pushResult.state = STATE_MOVED;
+            current.parent->pushResult.state = PUSH_MOVED;
             current.parent->pushResult.pushing = true;
             
             if (IsSlime(current.parent->pushEnt) && current.parent->pushEnt->attachedEntityIndex == ent->entityIndex)
@@ -113,7 +148,7 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
             
             break;
         }
-        case STATE_MERGED:
+        case PUSH_MERGED:
         {
             break;
         }
@@ -147,8 +182,8 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     newThings.visited = false;
                     newThings.pushDir = pushDir;
                     newThings.pushEnt = projectedEnt;
-                    newThings.pushResult = { false, STATE_NONE, nullptr };
-                    newThings.checkType = CHECK_MOVE;
+                    newThings.pushResult = { false, PUSH_NONE, nullptr };
+                    newThings.checkType = CHECK_PROJECT;
                     newThings.parent = &newThings;
                     checkList.Add(newThings);
                     
@@ -224,7 +259,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 
                 if (DoorBlocked(target, current.pushDir))
                 {
-                    current.pushResult.state = STATE_BLOCKED;
+                    current.pushResult.state = PUSH_BLOCKED;
                     current.pushResult.blockedEntity = target;
                         return;
                 }
@@ -234,7 +269,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
             {
                 if (!target->broken)
                 {
-                    current.pushResult.state = STATE_BLOCKED;
+                    current.pushResult.state = PUSH_BLOCKED;
                     current.pushResult.blockedEntity = target;
                         return;
                 }
@@ -247,17 +282,17 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 {
                     if (current.pushDir == -current.pushEnt->attachDir)
                     {
-                        current.pushResult.state = STATE_NONE;
+                        current.pushResult.state = PUSH_NONE;
                         return;
                     }
-                    current.pushResult.state = STATE_MERGED;
+                    current.pushResult.state = PUSH_MERGED;
                     return;
                 }
                 }
             case ENTITY_TYPE_PIT:
             case ENTITY_TYPE_WALL:
             {
-                current.pushResult.state = STATE_BLOCKED;
+                current.pushResult.state = PUSH_BLOCKED;
                 current.pushResult.blockedEntity = target;
                     return;
             }
@@ -268,7 +303,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                     Entity * door = FindEntityByLocationAndLayers(target->tilePos, layers, ArrayCount(layers));
                     if (door && DoorBlocked(door, -current.pushDir))
                     {
-                        current.pushResult.state = STATE_BLOCKED;
+                        current.pushResult.state = PUSH_BLOCKED;
                         current.pushResult.blockedEntity = target;
                             return;
                     }
@@ -276,7 +311,8 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 
                 if (IsProjectable(target->tilePos, current.pushDir))
                 {
-                    current.pushResult.state = STATE_MOVED;
+                    current.pushResult.state = PUSH_MOVED;
+                    current.pushResult.pushing = true;
                     // TODO: Maybe not a good idea to call this here. Separate the project logic and the push logic 
                     ProjectAndCheck(target, checkList, current.pushDir, accumulatedMass, checkLayers, layerCount);
                     return;
@@ -285,7 +321,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 accumulatedMass += target->mass;
                 if (accumulatedMass > startMass)
                 {
-                    current.pushResult.state = STATE_BLOCKED;
+                    current.pushResult.state = PUSH_BLOCKED;
                     current.pushResult.blockedEntity = target;
                         return;
                 }
@@ -294,7 +330,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 newThings.visited = false;
                 newThings.pushDir = current.pushDir;
                 newThings.pushEnt = target;
-                newThings.pushResult = { false, STATE_NONE, nullptr };
+                newThings.pushResult = { false, PUSH_NONE, nullptr };
                 newThings.checkType = CHECK_MOVE;
                 newThings.parent = &current;
                 checkList.Add(newThings);
@@ -303,13 +339,13 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
         }
     }
     
-    current.pushResult.state = STATE_MOVED;
+    current.pushResult.state = PUSH_MOVED;
         
         return;
 }
 
 
-CheckResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
+PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
 {
     SM_ASSERT(startEnt->movable, "Static entity cannot be pushing blocks!");
     
@@ -320,7 +356,7 @@ CheckResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
     Array<CheckThings, 100> checkList;
     
     CheckThings root = 
-    { false, pushDir, startState, startEnt, { false, STATE_NONE, nullptr }};
+    { false, pushDir, startState, startEnt, { false, PUSH_NONE, nullptr }};
     root.parent = &root;
     
     checkList.Add(root);
@@ -338,8 +374,16 @@ CheckResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
                 break;
             }
             checkList.RemoveLast();
-            CheckState currentState = current.pushResult.state;
-            CheckPushState(checkList, current);
+            PushState currentState = current.pushResult.state;
+            
+            if (current.checkType == CHECK_MOVE)
+            {
+                CheckPushState(checkList, current);
+            }
+            else if (current.checkType == CHECK_PROJECT)
+            {
+                CheckProjectState(checkList, current);
+            }
                     }
         else
         {
@@ -872,14 +916,14 @@ bool8 MoveAction(IVec2 actionDir)
         }
     }
     
-    CheckResult pushResult = ActionCheck(player, actionDir, CHECK_MOVE);
+    PushResult pushResult = ActionCheck(player, actionDir, CHECK_MOVE);
     switch(pushResult.state)
     {
-        case STATE_NONE:
+        case PUSH_NONE:
         {
             return false;
             }
-        case STATE_MOVED:
+        case PUSH_MOVED:
         {
             if (player->attachDir == -actionDir)
             {
@@ -938,7 +982,7 @@ bool8 MoveAction(IVec2 actionDir)
                 }
             return true;
         }
-        case STATE_BLOCKED:
+        case PUSH_BLOCKED:
         {
             bool8 blockedByPit = pushResult.blockedEntity->type == ENTITY_TYPE_PIT;
             bool8 blockedByDoor = 
@@ -953,8 +997,8 @@ bool8 MoveAction(IVec2 actionDir)
             
             if (player->attachDir == -actionDir)
             {
-                CheckResult rResult = ActionCheck(player, player->attachDir, CHECK_MOVE);
-                if (rResult.state == STATE_BLOCKED)
+                PushResult rResult = ActionCheck(player, player->attachDir, CHECK_MOVE);
+                if (rResult.state == PUSH_BLOCKED)
                 {
                     MoveEntity(player, pushResult.blockedEntity, player->tilePos, MOVE_FLAT, EaseOutCubic);
                 }
@@ -963,7 +1007,7 @@ bool8 MoveAction(IVec2 actionDir)
             MoveEntity(player, pushResult.blockedEntity, player->tilePos, MOVE_INNER_CORNER, EaseOutCubic);
             return true;
             }
-        case STATE_MERGED:
+        case PUSH_MERGED:
         {
             break;
         }
