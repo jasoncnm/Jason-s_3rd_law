@@ -325,16 +325,20 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
             {
                 CheckPushState(checkList, current);
             }
-            else if (current.checkType == CHECK_PROJECT)
-            {
-                //CheckProjectState(checkList, current);
-            }
+            
                     }
         else
         {
             current.visited = true;
             
-            PushCheck(checkList, accumulatedMass, startMass, checkLayers, layerCount);
+            if (current.checkType == CHECK_PROJECT)
+            {
+                ProjectAndCheck(current.pushEnt, checkList, current.pushDir, accumulatedMass, checkLayers, layerCount);
+            }
+            else
+            {
+                PushCheck(checkList, accumulatedMass, startMass, checkLayers, layerCount);
+            }
                     }
     }
     
@@ -698,136 +702,6 @@ inline void Restart()
     
 }
 
-#if 0
-bool8 MoveAction(IVec2 actionDir)
-{
-    Entity * player = GetEntity(gameState->playerEntityIndex);
-    SM_ASSERT(player, "player is not active");
-    
-    if (!player->attach) return false;
-    
-    float moveSpeed = 4.0f;
-    
-    IVec2 currentPos = player->tilePos;
-    IVec2 actionTilePos = currentPos + actionDir;
-    if (player->attachDir == actionDir)
-    {
-        return false;
-    }
-    
-    {
-        EntityLayer layers[] = { LAYER_DOOR };
-        Entity * door = FindEntityByLocationAndLayers(currentPos, layers, ArrayCount(layers));
-        if (door && DoorBlocked(door, -actionDir))
-        {
-            return false;
-        }
-    }
-    
-    {
-        EntityLayer layers[] = { LAYER_PIT };
-        Entity * pit = FindEntityByLocationAndLayers(currentPos + player->attachDir, layers, ArrayCount(layers));
-        if (pit)
-        {
-            return false;
-        }
-    }
-    
-    MoveActionResult moveResult = MoveActionCheck(player, player, actionTilePos, actionDir, 0);
-    
-    if (moveResult.merged)
-    {
-        return true;
-    }
-    else if (moveResult.blocked)
-    {
-        if (moveResult.blockedEntity->type == ENTITY_TYPE_PIT ||
-            (moveResult.blockedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
-             moveResult.blockedEntity->cableType == CABLE_TYPE_DOOR &&
-             !SameSide(moveResult.blockedEntity, actionTilePos, actionDir)))
-        {
-            return false;
-        }
-        
-        if (player->attachDir == -actionDir)
-        {
-            // NOTE: Bounce with the block
-            MoveActionResult result = MoveActionCheck(player, player, player->tilePos + player->attachDir, player->attachDir, 0);
-            if (result.blocked)
-            {
-                MoveEntity(player, moveResult.blockedEntity, player->tilePos, MOVE_FLAT);
-                return true;
-            }
-            return true;
-        }
-        
-        MoveEntity(player, moveResult.blockedEntity, player->tilePos, MOVE_INNER_CORNER);
-        return true;
-    }
-    else if (player->attachDir == -actionDir)
-    {
-        if (moveResult.pushed)
-        {
-            // NOTE: Bounce with the block
-            MoveActionResult result = MoveActionCheck(player, player, player->tilePos + player->attachDir, player->attachDir, 0);
-            return true;
-        }
-        return false;
-    }
-    
-    SM_ASSERT(player->active, "player is not active");
-    
-    // NOTE: no obsticale, move player
-    IVec2 standingPlatformPos = actionTilePos + player->attachDir;
-    FindAttachableResult findResult = FindAttachable(standingPlatformPos, player->attachDir);
-    if (findResult.has)
-    {
-        Entity * resultEntity = findResult.entity;
-        if (resultEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
-            resultEntity->cableType == CABLE_TYPE_DOOR &&
-            !SameSide(resultEntity, standingPlatformPos, player->attachDir))
-        {
-            return false;
-        }
-        MoveEntity(player, findResult.entity, actionTilePos, MOVE_FLAT);
-        }
-    else
-    {
-        EntityLayer layers[] = { LAYER_SLIME };
-        Entity * slime = FindEntityByLocationAndLayers(standingPlatformPos, layers, ArrayCount(layers));
-        if (slime)
-        {
-            player = MergeSlimes(slime, player);
-        }
-        else if ((!findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
-                 Abs(player->attachDir) != Abs(actionDir))
-        {
-            IVec2 newTile = standingPlatformPos;
-            IVec2 newAttach = - actionDir;
-            
-            Entity * attachedEntity = GetEntity(player->attachedEntityIndex);
-            
-            if (attachedEntity && attachedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
-                attachedEntity->cableType == CABLE_TYPE_DOOR &&
-                !SameSide(attachedEntity, newTile, newAttach))
-            {
-                return false;
-            }
-            
-            
-            MoveEntity(player, attachedEntity, newTile, MOVE_OUTER_CORNER);
-            
-        }
-        else 
-        {
-            return false;
-        }
-        
-    }
-    
-    return true;
-}
-#else
 bool8 MoveAction(IVec2 actionDir)
 {
     Entity * player = GetEntity(gameState->playerEntityIndex);
@@ -960,7 +834,6 @@ bool8 MoveAction(IVec2 actionDir)
     SM_ASSERT(false, "check case failed");
     return false;
 }
-#endif
 
 bool8 SplitAction(Entity * player, IVec2 bounceDir)
 {

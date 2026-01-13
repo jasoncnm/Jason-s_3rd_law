@@ -180,7 +180,7 @@ inline bool8 PowerOnCable(Entity * cable, bool8 & end)
             if (entity)
             {
                 Vector2 moveStart = GetTilePivot(entity);
-                ActionCheck(cable, bounceDir, CHECK_PROJECT);
+                ActionCheck(entity, bounceDir, CHECK_PROJECT);
                 Vector2 moveEnd = GetTilePivot(entity);
                 
                 #if 0
