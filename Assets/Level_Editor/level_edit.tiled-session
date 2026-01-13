@@ -335,11 +335,11 @@
             }
         },
         "TileMap/Test.tmj": {
-            "scale": 2,
+            "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 275.25,
-                "y": 316.75
+                "x": 2800.5,
+                "y": 204.5
             }
         },
         "TileMap/TestRoom_2.tmj": {

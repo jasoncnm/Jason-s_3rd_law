@@ -87,6 +87,7 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
         }
         case PUSH_MERGED:
         {
+            MergeSlimes(current.pushResult.mergeEntity, ent); 
             break;
         }
         }
@@ -232,6 +233,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                         return;
                     }
                     current.pushResult.state = PUSH_MERGED;
+                    current.pushResult.mergeEntity = target;
                     return;
                 }
                 }
@@ -353,211 +355,6 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
     // NOTE: Deal with root outside of the function
     return checkList.last().pushResult;
     }
-
-// TODO: to be deleted
-MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int accumulatedMass)
-{
-    SM_ASSERT(startEntity->movable, "Static entity cannot be pushing blocks!");
-    
-    // IMPORTANT: the order of the layers are important, for example, we don't want to check blocks before checking doors in the same tile
-    int checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_PIT };
-    
-    MoveActionResult result = { false, false, false, nullptr };
-    for (int layerIndex = 0; layerIndex < ArrayCount(checkLayers); layerIndex++)
-    {
-        int layer = checkLayers[layerIndex];
-        
-        auto & entityTable = gameState->entityTable[layer];
-        for (uint32 i = 0; i < entityTable.count; i++)
-        {
-            Entity * target = GetEntity(entityTable[i]);
-            if (target && target->tilePos == blockNextPos)
-            {
-                switch(target->type)
-                {
-                    case ENTITY_TYPE_GLASS:
-                    {
-                        if (!target->broken)
-                        {
-                            result.blocked = true;
-                            result.blockedEntity = target;
-                            return result;
-                        }
-                        break;
-                    }
-                    case ENTITY_TYPE_ELECTRIC_DOOR:
-                    {
-                        if (target->cableType == CABLE_TYPE_DOOR && DoorBlocked(target, pushDir))
-                        {
-                            result.blocked = true;
-                            result.blockedEntity = target;
-                            return result;
-                        }
-                        
-                        break;
-                    }
-                    case ENTITY_TYPE_PIT:
-                    case ENTITY_TYPE_WALL:
-                    {
-                        result.blocked = true;
-                        result.blockedEntity = target;
-                        return result;
-                    }
-                    case ENTITY_TYPE_PLAYER:
-                    case ENTITY_TYPE_CLONE:
-                    {
-                        if (pushEntity->type == ENTITY_TYPE_CLONE || pushEntity->type == ENTITY_TYPE_PLAYER)
-                        {
-                            if (pushDir == -pushEntity->attachDir)
-                            {
-                                result.pushed = false;
-                                return result;
-                            }
-                            result.merged = true;
-                            MergeSlimes(target, pushEntity);
-                            return result;
-                        }
-                        
-                        if (pushEntity->type == ENTITY_TYPE_BLOCK)
-                        {
-                            FindAttachableResult attachResult = FindAttachable(target->tilePos + pushDir, pushDir);
-                            if (attachResult.has)
-                            {
-                                SetAttach(target, attachResult.entity, pushDir);
-                            }
-                            else if (target->attach)
-                            {
-                                attachResult = FindAttachable(target->tilePos + target->attachDir, target->attachDir);
-                                if (attachResult.has)
-                                {
-                                    SetAttach(target, attachResult.entity, target->attachDir);
-                                }
-                            }
-                            // SetAttach(target, pushEntity, -pushDir);
-                        }
-                        
-                    }
-                    case ENTITY_TYPE_BLOCK:
-                    {
-                        EntityLayer layers[] = { LAYER_DOOR };
-                        Entity * door = FindEntityByLocationAndLayers(target->tilePos, layers, ArrayCount(layers));
-                        if (door && DoorBlocked(door, -pushDir))
-                        {
-                            result.pushed = false;
-                            result.blocked = true;
-                            result.blockedEntity = target;
-                            
-                            return result;
-                        }
-                        
-                        if (IsProjectable(target->tilePos, pushDir))
-                        {
-                            result.pushed = true;
-                            
-                            IVec2 startTile = target->tilePos;
-                            Vector2 moveStart = GetTilePivot(target);
-                            
-                            BounceEntity(target, pushDir);
-                            
-                            Vector2 moveEnd = GetTilePivot(target);
-                            float dist = Vector2Distance(moveStart, moveEnd);
-                            float tileDist = dist / MAP_TILE_SIZE;
-                            
-                            if (!Vector2Equals(moveStart, moveEnd))
-                            {
-                                TweenParams params = {};
-                                params.paramType = PARAM_TYPE_VECTOR2;
-                                params.startVec2 = moveStart;
-                                params.endVec2 = moveEnd;
-                                params.realVec2  = &target->pivot;
-                                
-                                AddTween(target->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, tileDist));
-                                
-                                if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
-                                {
-                                    pushEntity->tweenController.endEvent.controller = &target->tweenController;
-                                    }
-                                else
-                                {
-                                    OnPlayEvent(&target->tweenController);
-                                }
-                                
-                                if (!target->active)
-                                {
-                                    target->active = true;
-                                    target->tweenController.endEvent.deleteEntity = target;
-                                    }
-                                
-                            }
-                            else
-                            {
-                                result.pushed = false;
-                                result.blocked = true;
-                                result.blockedEntity = target;
-                            }
-                            return result;
-                        }
-                        else
-                        {
-                            
-                            int newAccumulatedMass = accumulatedMass + target->mass;
-                            if (newAccumulatedMass > startEntity->mass)
-                            {
-                                result.blockedEntity = target;
-                                result.blocked = true;
-                                return result;
-                            }
-                            
-                            
-                            result = MoveActionCheck(startEntity, target, blockNextPos + pushDir, pushDir, newAccumulatedMass);
-                            
-                            if (!result.blocked)
-                            {
-                                IVec2 startTile = target->tilePos;
-                                result.pushed = true;
-                                
-                                Vector2 moveStart = GetTilePivot(target);
-                                SetEntityPosition(target, nullptr, blockNextPos + pushDir);
-                                
-                                Vector2 moveEnd = GetTilePivot(target);
-                                float dist = Vector2Distance(moveStart, moveEnd);
-                                float iDist = dist / MAP_TILE_SIZE;
-                                
-                                TweenParams params = {};
-                                params.paramType = PARAM_TYPE_VECTOR2;
-                                params.startVec2 = moveStart;
-                                params.endVec2 = moveEnd;
-                                params.realVec2  = &target->pivot;
-                                
-                                AddTween(target->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, iDist));
-                                
-                                if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
-                                {
-                                    pushEntity->tweenController.endEvent.controller = &target->tweenController;
-                                    }
-                                else
-                                {
-                                    OnPlayEvent(&target->tweenController);
-                                }
-                            }
-                            else
-                            {
-                                result.blockedEntity = target;
-                            }
-                            
-                            return result;
-                        }
-                        
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    
-    return result;
-}
-
 
 inline float GetCameraZoom(Map & currentMap)
 {
@@ -834,7 +631,9 @@ bool8 MoveAction(IVec2 actionDir)
             }
         case PUSH_MERGED:
         {
-            break;
+            
+            MergeSlimes(pushResult.mergeEntity, player);
+            return true;
         }
         
     }
@@ -852,20 +651,10 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
     player->tileSize = GetSlimeSize(player);
     
     Entity * clone = CreateSlimeClone(player->tilePos);
-    IVec2 playerStartTile = player->tilePos;
-    IVec2 cloneStartTile = playerStartTile;
-    Vector2 playerStart = GetTilePivot(player->tilePos, player->tileSize);
-    Vector2 cloneStart = GetTilePivot(clone->tilePos, clone->tileSize);
+    player->attach = false;
     
-    BounceEntity(player, bounceDir);
-    BounceEntity(clone, -bounceDir);
-    
-    
-    Vector2 playerEnd = player->attach ?
-        GetTilePivot(player->tilePos, player->tileSize, player->attachDir) : GetTilePivot(player->tilePos, player->tileSize);
-    
-    Vector2 cloneEnd = clone->attach ?
-        GetTilePivot(clone->tilePos, clone->tileSize, clone->attachDir) : GetTilePivot(clone->tilePos, clone->tileSize);
+    ActionCheck(player, bounceDir, CHECK_PROJECT);
+    ActionCheck(clone, -bounceDir, CHECK_PROJECT);
     
     if (player->tilePos == clone->tilePos)
     {
@@ -873,36 +662,6 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
         return false;
     }
     
-    if (playerStartTile != player->tilePos)
-    {
-        float dist = Vector2Distance(playerStart, playerEnd);
-        float tileDist = dist / MAP_TILE_SIZE;
-        
-        TweenParams params = {};
-        params.paramType = PARAM_TYPE_VECTOR2;
-        params.startVec2 = playerStart;
-        params.endVec2 = playerEnd;
-        params.realVec2  = &player->pivot;
-        
-        AddTween(player->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, tileDist));
-        OnPlayEvent(&player->tweenController);
-    }
-    
-    if (cloneStartTile != clone->tilePos)
-    {
-        float dist = Vector2Distance(cloneStart, cloneEnd);
-        float tileDist = dist / MAP_TILE_SIZE;
-        
-        TweenParams params = {};
-        params.paramType = PARAM_TYPE_VECTOR2;
-        params.startVec2 = cloneStart;
-        params.endVec2 = cloneEnd;
-        params.realVec2  = &clone->pivot;
-        
-        AddTween(clone->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, tileDist));
-        OnPlayEvent(&clone->tweenController);
-        
-    }
     return true;
 }
 

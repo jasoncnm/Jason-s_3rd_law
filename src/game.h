@@ -183,6 +183,7 @@ struct PushResult
     bool8 pushing;
     PushState state;
     Entity * blockedEntity;
+    Entity * mergeEntity;
 };
 
 struct CheckThings

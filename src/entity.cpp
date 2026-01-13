@@ -660,6 +660,7 @@ inline MoveSlimeUntilBlockResult SlimeMoveTowardsUntilBlocked(Entity * entity, I
     
 }
 
+// TODO: update this
 inline void UpdateSlimes()
 {
     auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
@@ -849,6 +850,8 @@ inline bool8 IsProjectable(IVec2 tilePos, IVec2 pushDir)
     return result;
 }
 
+#if 0
+
 void BounceEntity(Entity * entity, IVec2 dir)
 {
     SM_ASSERT(entity->active, "entity does not exists");
@@ -977,3 +980,4 @@ void BounceEntity(Entity * entity, IVec2 dir)
 
     }
 }
+#endif
