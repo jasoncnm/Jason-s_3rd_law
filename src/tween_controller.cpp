@@ -11,14 +11,14 @@
 
 void HandleTweenEvent(TweenEvent & event)
 {
-    if (event.controller && event.OnPlayFunc)
+    if (event.controller)
     {
-        event.OnPlayFunc(event.controller);
+        OnPlayEvent(event.controller);
     }
 
-    if (event.deleteEntity && event.OnDeleteFunc)
+    if (event.deleteEntity)
     {
-        event.OnDeleteFunc(event.deleteEntity);
+        OnDeleteEvent(event.deleteEntity);
     }
 
     event.Reset();

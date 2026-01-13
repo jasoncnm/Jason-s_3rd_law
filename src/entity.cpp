@@ -141,8 +141,8 @@ inline void DeleteEntity(Entity * entity)
     entity->tweenController.Reset();
 }
 
-inline void MoveEntity(Entity * entity, Entity * attachedEntity, 
-                       IVec2 targetPos, MoveType moveType, float (*MoveFunc)(float) = nullptr)
+inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * playEvent,
+                       IVec2 targetPos, MoveType moveType, float (*MoveFunc)(float))
 {
     SM_ASSERT(entity->active, "entity does not exist");
     SM_ASSERT(entity->movable, "entity cannot be moved");
@@ -264,8 +264,17 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity,
     }
     
     // TODO: Controll the play conditions
-    if (!entity->tweenController.NoTweens()) OnPlayEvent(&entity->tweenController);
-    
+    if (!entity->tweenController.NoTweens())
+    {
+        if (playEvent)
+        {
+            playEvent->controller = &entity->tweenController;
+            }
+        else
+        {
+        OnPlayEvent(&entity->tweenController);
+        }
+    }
 }
 
 inline void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir)
@@ -394,10 +403,8 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
 
         TweenEvent & endEvent = mergedSlime->tweenController.endEvent;
         endEvent.controller = &mergeSlime->tweenController;
-        endEvent.OnPlayFunc = OnPlayEvent;
         endEvent.deleteEntity = mergedSlime;
-        endEvent.OnDeleteFunc = OnDeleteEvent;
-
+        
         OnPlayEvent(&mergedSlime->tweenController);
         
     }
@@ -737,8 +744,7 @@ inline void UpdateSlimes()
                     {
                         TweenEvent & startEvent = attach->tweenController.startEvent;
                         startEvent.controller = &slime->tweenController;
-                        startEvent.OnPlayFunc = OnPlayEvent;
-                    }
+                        }
                     else
                     {
                         OnPlayEvent(&slime->tweenController);

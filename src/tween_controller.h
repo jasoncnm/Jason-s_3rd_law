@@ -16,20 +16,15 @@ struct TweenController;
 struct TweenEvent
 {
     TweenController * controller = nullptr;
-    void (*OnPlayFunc)(TweenController * controller) = nullptr;
-
+    
     Entity * deleteEntity = nullptr;
-    void (*OnDeleteFunc)(Entity * deleteEntity) = nullptr;
     
     
     void Reset()
     {
         controller = nullptr;
-        OnPlayFunc = nullptr;
-
         deleteEntity = nullptr;
-        OnDeleteFunc = nullptr;
-    }
+        }
     
 };
 

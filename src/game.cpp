@@ -56,13 +56,6 @@ enum PushState
     PUSH_MERGED,
     };
 
-enum ProjectState
-{
-    PROJECT_NONE,
-    PROJECT_MOVED,
-    PROJECT_SLIME_ATTACHED,
-};
-
 enum CheckType
 {
     CHECK_MOVE,
@@ -76,12 +69,6 @@ struct PushResult
     Entity * blockedEntity;
 };
 
-struct ProjectedResult
-{
-    ProjectState state;
-    Entity * attachEntity;
-};
-
 struct CheckThings
 {
     bool visited;
@@ -89,7 +76,6 @@ struct CheckThings
      CheckType checkType;
     Entity * pushEnt;
      PushResult pushResult;
-    ProjectedResult projectedResult;
     CheckThings * parent;
 };
 
@@ -97,28 +83,6 @@ struct CheckThings
 //  ========================================================================
 //              NOTE: Game Functions (internal)
 //  ========================================================================
-
-inline void CheckProjectState(Array<CheckThings, 100> & checkList, 
-                              CheckThings & current)
-{
-    Entity * ent = current.pushEnt;
-    switch(current.projectedResult.state)
-    {
-        case PROJECT_MOVED:
-        {
-            if(IsSlime(ent))
-            {
-                // TODO
-            }
-            else
-            {
-                
-            }
-            
-            break;
-        }
-        }
-}
 
 inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & current)
 {
@@ -137,13 +101,17 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
             current.parent->pushResult.state = PUSH_MOVED;
             current.parent->pushResult.pushing = true;
             
+            TweenEvent * playEvent = nullptr;
+            TweenController & c = current.parent->pushEnt->tweenController;
+            if (!c.NoTweens()) playEvent = &c.endEvent;
+            
             if (IsSlime(current.parent->pushEnt) && current.parent->pushEnt->attachedEntityIndex == ent->entityIndex)
             {
-                MoveEntity(ent, current.parent->pushEnt, ent->tilePos + current.pushDir, MOVE_FLAT, nullptr);
+                MoveEntity(ent, current.parent->pushEnt, playEvent, ent->tilePos + current.pushDir, MOVE_FLAT, nullptr);
             }
             else
             {
-                MoveEntity(ent, nullptr, ent->tilePos + current.pushDir, MOVE_FLAT, nullptr);
+                MoveEntity(ent, nullptr, playEvent, ent->tilePos + current.pushDir, MOVE_FLAT, nullptr);
             }
             
             break;
@@ -162,6 +130,8 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                             EntityLayer * checkLayers, 
                             uint32 layerCount)
 {
+    Entity * pushEnt = checkList.last().pushEnt;
+    
     for (IVec2 pos = projectedEnt->tilePos + pushDir; ; pos += pushDir)
     {
         auto entList = FindAllEntitiesFromLocationAndLayers(pos, checkLayers, layerCount); 
@@ -187,15 +157,15 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     newThings.parent = &newThings;
                     checkList.Add(newThings);
                     
-                    if (IsSlime(projectedEnt))
+                    TweenEvent * playEvent = nullptr;
+                    if (!pushEnt->tweenController.NoTweens())
                     {
-                        // TODO: after check needed
+                         playEvent = &pushEnt->tweenController.endEvent;
                     }
-                    else
-                    {
-                        MoveEntity(projectedEnt, nullptr, pos - pushDir, BOUNCE_FLAT, nullptr);
+                    
+                    MoveEntity(projectedEnt, target, playEvent, pos - pushDir, BOUNCE_FLAT, nullptr);
                         return;
-                        }
+                        
                     
 break;
                 }
@@ -226,7 +196,7 @@ break;
                     {
                         targetPos = blockedEntity->tilePos;
                     }
-                    MoveEntity(projectedEnt, blockedEntity, targetPos, BOUNCE_FLAT, nullptr);
+                    MoveEntity(projectedEnt, blockedEntity, nullptr, targetPos, BOUNCE_FLAT, nullptr);
                     return;
                 }
             }
@@ -382,7 +352,7 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
             }
             else if (current.checkType == CHECK_PROJECT)
             {
-                CheckProjectState(checkList, current);
+                //CheckProjectState(checkList, current);
             }
                     }
         else
@@ -518,8 +488,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                                 if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
                                 {
                                     pushEntity->tweenController.endEvent.controller = &target->tweenController;
-                                    pushEntity->tweenController.endEvent.OnPlayFunc = OnPlayEvent;
-                                }
+                                    }
                                 else
                                 {
                                     OnPlayEvent(&target->tweenController);
@@ -529,8 +498,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                                 {
                                     target->active = true;
                                     target->tweenController.endEvent.deleteEntity = target;
-                                    target->tweenController.endEvent.OnDeleteFunc = DeleteEntity;
-                                }
+                                    }
                                 
                             }
                             else
@@ -578,8 +546,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
                                 if ((startTile - pushEntity->tilePos).SqrMagnitude() > 1)
                                 {
                                     pushEntity->tweenController.endEvent.controller = &target->tweenController;
-                                    pushEntity->tweenController.endEvent.OnPlayFunc = OnPlayEvent;
-                                }
+                                    }
                                 else
                                 {
                                     OnPlayEvent(&target->tweenController);
@@ -949,7 +916,7 @@ bool8 MoveAction(IVec2 actionDir)
                     return false;
                 }
                 
-                MoveEntity(player, findResult.entity, actionTilePos, MOVE_FLAT, EaseOutCubic);
+                MoveEntity(player, findResult.entity, nullptr, actionTilePos, MOVE_FLAT, EaseOutCubic);
                 }
             else
             {
@@ -973,7 +940,7 @@ bool8 MoveAction(IVec2 actionDir)
                     {
                         return false;
                     }
-                    MoveEntity(player, attachedEntity, newTile, MOVE_OUTER_CORNER, EaseOutCubic);
+                    MoveEntity(player, attachedEntity, nullptr, newTile, MOVE_OUTER_CORNER, EaseOutCubic);
                 }
                 else 
                 {
@@ -1000,11 +967,11 @@ bool8 MoveAction(IVec2 actionDir)
                 PushResult rResult = ActionCheck(player, player->attachDir, CHECK_MOVE);
                 if (rResult.state == PUSH_BLOCKED)
                 {
-                    MoveEntity(player, pushResult.blockedEntity, player->tilePos, MOVE_FLAT, EaseOutCubic);
+                    MoveEntity(player, pushResult.blockedEntity, nullptr, player->tilePos, MOVE_FLAT, EaseOutCubic);
                 }
                 return true;
                 }
-            MoveEntity(player, pushResult.blockedEntity, player->tilePos, MOVE_INNER_CORNER, EaseOutCubic);
+            MoveEntity(player, pushResult.blockedEntity, nullptr, player->tilePos, MOVE_INNER_CORNER, EaseOutCubic);
             return true;
             }
         case PUSH_MERGED:
