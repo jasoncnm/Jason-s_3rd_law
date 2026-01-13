@@ -99,7 +99,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                             EntityLayer * checkLayers, 
                             uint32 layerCount)
 {
-    Entity * pushEnt = checkList.last().pushEnt;
+    Entity * pushEnt = checkList.last().parent->pushEnt;
     
     for (IVec2 pos = projectedEnt->tilePos + pushDir; ; pos += pushDir)
     {
@@ -259,7 +259,16 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 {
                     current.pushResult.state = PUSH_MOVED;
                     current.pushResult.pushing = true;
-                    ProjectAndCheck(target, checkList, current.pushDir, accumulatedMass, checkLayers, layerCount);
+                    
+                    CheckThings newThings = {};
+                    newThings.visited = false;
+                    newThings.pushDir = current.pushDir;
+                    newThings.pushEnt = target;
+                    newThings.pushResult = { false, PUSH_NONE, nullptr };
+                    newThings.checkType = CHECK_PROJECT;
+                    newThings.parent = &current;
+                    checkList.Add(newThings);
+                    
                     return;
                 }
                 
@@ -301,7 +310,7 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
     Array<CheckThings, 100> checkList;
     
     CheckThings root = 
-    { false, pushDir, startState, startEnt, { false, PUSH_NONE, nullptr }};
+    { false, pushDir, startState, startEnt, { false, PUSH_NONE, nullptr } };
     root.parent = &root;
     
     checkList.Add(root);
@@ -325,8 +334,7 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
             {
                 CheckPushState(checkList, current);
             }
-            
-                    }
+            }
         else
         {
             current.visited = true;
