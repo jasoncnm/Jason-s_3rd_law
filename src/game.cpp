@@ -48,37 +48,6 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 //  ========================================================================
 //              NOTE: Game Structs (internal)
 //  ========================================================================
-enum PushState
-{
-    PUSH_NONE,
-    PUSH_MOVED,
-    PUSH_BLOCKED,
-    PUSH_MERGED,
-    };
-
-enum CheckType
-{
-    CHECK_MOVE,
-    CHECK_PROJECT,
-};
-
-struct PushResult
-{
-    bool8 pushing;
-      PushState state;
-    Entity * blockedEntity;
-};
-
-struct CheckThings
-{
-    bool visited;
-    IVec2 pushDir;
-     CheckType checkType;
-    Entity * pushEnt;
-     PushResult pushResult;
-    CheckThings * parent;
-};
-
 
 //  ========================================================================
 //              NOTE: Game Functions (internal)
@@ -153,7 +122,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     newThings.pushDir = pushDir;
                     newThings.pushEnt = projectedEnt;
                     newThings.pushResult = { false, PUSH_NONE, nullptr };
-                    newThings.checkType = CHECK_PROJECT;
+                    newThings.checkType = CHECK_NONE;
                     newThings.parent = &newThings;
                     checkList.Add(newThings);
                     
@@ -196,7 +165,14 @@ break;
                     {
                         targetPos = blockedEntity->tilePos;
                     }
-                    MoveEntity(projectedEnt, blockedEntity, nullptr, targetPos, BOUNCE_FLAT, nullptr);
+                    
+                    TweenEvent * playEvent = nullptr;
+                    if (!pushEnt->tweenController.NoTweens())
+                    {
+                        playEvent = &pushEnt->tweenController.endEvent;
+                    }
+                    
+                    MoveEntity(projectedEnt, blockedEntity, playEvent, targetPos, BOUNCE_FLAT, nullptr);
                     return;
                 }
             }
@@ -283,7 +259,6 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 {
                     current.pushResult.state = PUSH_MOVED;
                     current.pushResult.pushing = true;
-                    // TODO: Maybe not a good idea to call this here. Separate the project logic and the push logic 
                     ProjectAndCheck(target, checkList, current.pushDir, accumulatedMass, checkLayers, layerCount);
                     return;
                 }
@@ -358,6 +333,7 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
         else
         {
             current.visited = true;
+            
             PushCheck(checkList, accumulatedMass, startMass, checkLayers, layerCount);
                     }
     }

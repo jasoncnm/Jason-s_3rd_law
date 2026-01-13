@@ -163,6 +163,38 @@ struct MoveActionResult
     bool8 merged;
     Entity * blockedEntity;
 };
+enum PushState
+{
+    PUSH_NONE,
+    PUSH_MOVED,
+    PUSH_BLOCKED,
+    PUSH_MERGED,
+};
+
+enum CheckType
+{
+    CHECK_NONE,
+    CHECK_MOVE,
+    CHECK_PROJECT,
+};
+
+struct PushResult
+{
+    bool8 pushing;
+    PushState state;
+    Entity * blockedEntity;
+};
+
+struct CheckThings
+{
+    bool visited;
+    IVec2 pushDir;
+    CheckType checkType;
+    Entity * pushEnt;
+    PushResult pushResult;
+    CheckThings * parent;
+};
+
 
 // ----------------------------------------------------
 // NOTE: Game Globals
@@ -177,6 +209,7 @@ static Memory * gameMemory;
 //              NOTE: Game Functions 
 //  ========================================================================
 MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int accumulatedMass);
+PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState);
 
 
 
