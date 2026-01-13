@@ -175,7 +175,7 @@ inline bool8 PowerOnCable(Entity * cable, bool8 & end)
                 
             }
 
-            EntityLayer layers[] = { LAYER_BLOCK };
+            EntityLayer layers[] = { LAYER_BLOCK, LAYER_SLIME };
             Entity * entity = FindEntityByLocationAndLayers(cable->tilePos + bounceDir, layers, ArrayCount(layers));
             if (entity)
             {
@@ -183,47 +183,12 @@ inline bool8 PowerOnCable(Entity * cable, bool8 & end)
                 ActionCheck(entity, bounceDir, CHECK_PROJECT);
                 Vector2 moveEnd = GetTilePivot(entity);
                 
-                #if 0
-                BounceEntity(entity, bounceDir);
-#endif
                 if (Vector2Equals(moveStart, moveEnd))
                 {
                     ShiftEntities(entity->tilePos, bounceDir);                    
                 }
             }
-            else
-            {
-                EntityLayer layers[] = { LAYER_SLIME };
-                entity = FindEntityByLocationAndLayers(cable->tilePos + bounceDir, layers, ArrayCount(layers));
-                if (entity)
-                {
-                    Vector2 moveStart = GetTilePivot(entity);
-                    BounceEntity(entity, bounceDir);
-                    Vector2 moveEnd = GetTilePivot(entity);
-                    if (!Vector2Equals(moveStart, moveEnd))
-                    {
-                
-                        float dist = Vector2Distance(moveStart, moveEnd);
-                        float iDist = dist / MAP_TILE_SIZE;
-
-                        TweenParams params = {};
-                        params.paramType = PARAM_TYPE_VECTOR2;
-                        params.startVec2 = moveStart;
-                        params.endVec2 = moveEnd;
-                        params.realVec2  = &entity->pivot;
-
-                                            
-                        AddTween(entity->tweenController, CreateTween(params, nullptr,  BOUNCE_SPEED, iDist));
-                        OnPlayEvent(&entity->tweenController);
-                        
-                    }
-                    else
-                    {
-                        ShiftEntities(entity->tilePos, bounceDir);                    
-                    }
-                }
-            }
-
+            
             cable->tilePos = cable->tilePos + offset;
         }
         
