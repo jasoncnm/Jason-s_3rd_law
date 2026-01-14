@@ -3,7 +3,11 @@
         "height": 4300,
         "width": 2
     },
+<<<<<<< HEAD
     "activeFile": "TileMap/Test.tmj",
+=======
+    "activeFile": "TileMap/Room_30.tmj",
+>>>>>>> hongliang
     "expandedProjectPaths": [
         ".",
         "TlieSet",
@@ -199,11 +203,19 @@
             }
         },
         "TileMap/Room_30.tmj": {
+<<<<<<< HEAD
             "scale": 0.75,
             "selectedLayer": -1,
             "viewCenter": {
                 "x": 187.33333333333326,
                 "y": 1138
+=======
+            "scale": 1,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 331.5,
+                "y": 731.5
+>>>>>>> hongliang
             }
         },
         "TileMap/Room_32.tmj": {
@@ -255,19 +267,32 @@
             }
         },
         "TileMap/Room_38.tmj": {
+<<<<<<< HEAD
             "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
                 "x": 217,
                 "y": 1197
+=======
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 331.5,
+                "y": 379.5
+>>>>>>> hongliang
             }
         },
         "TileMap/Room_39.tmj": {
             "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
+<<<<<<< HEAD
                 "x": 569,
                 "y": 1197
+=======
+                "x": 176.5,
+                "y": 176
+>>>>>>> hongliang
             }
         },
         "TileMap/Room_40.tmj": {
@@ -294,7 +319,34 @@
                 "y": -296.66666666666674
             }
         },
+        "TileMap/Room_45.tmj": {
+            "scale": 1,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 683.5,
+                "y": 731.5
+            }
+        },
         "TileMap/Room_5.tmj": {
+<<<<<<< HEAD
+=======
+            "scale": 2,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 176.25,
+                "y": 176
+            }
+        },
+        "TileMap/Room_6.tmj": {
+            "scale": 1,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 1035.5,
+                "y": -1028.5
+            }
+        },
+        "TileMap/Room_7.tmj": {
+>>>>>>> hongliang
             "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
@@ -438,7 +490,8 @@
         "TileMap/Room_5.tmj",
         "TileMap/Room_35.tmj",
         "TileMap/Room_22.tmj",
-        "TileMap/Room_13.tmj"
+        "TileMap/Room_13.tmj",
+        "TileMap/Room_45.tmj"
     ],
     "project": "level_edit.tiled-project",
     "recentFiles": [
