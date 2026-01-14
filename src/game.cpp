@@ -739,7 +739,7 @@ inline bool8 SlimeSelection(Entity * player)
     
     bool8 stateChanged = false;
     
-    if (JustPressed(POSSES_KEY))// TODO: UnComment // && gameState->lv2Map && gameState->lv2Map->firstEnter)
+    if (JustPressed(POSSES_KEY)) //  && gameState->lv2Map && gameState->lv2Map->firstEnter)
     {
         
         Entity * nextPlayerEntity = nullptr;
@@ -1238,9 +1238,8 @@ UPDATE_AND_RENDER(UpdateAndRender)
     }
     
     Color colorA = IntToRGBA(0x222f);
-    Color colorB = IntToRGBA(0x3322);
     
-    gameState->bgColor = ColorLerp(colorA, colorB, sinf((float)GetTime() * 0.01f));
+    gameState->bgColor = colorA;
     
     switch(gameState->currentScreen)
     {

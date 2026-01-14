@@ -650,7 +650,7 @@ void ShiftEntities(IVec2 startPos, IVec2 bounceDir)
 
 inline bool8 IsProjectable(IVec2 tilePos, IVec2 pushDir)
 {
-    EntityLayer checkLayers[] = { LAYER_WALL, LAYER_GLASS, LAYER_BLOCK, LAYER_PIT, LAYER_DOOR };
+    EntityLayer checkLayers[] = { LAYER_WALL, LAYER_GLASS, LAYER_BLOCK, LAYER_PIT, LAYER_DOOR, LAYER_SLIME };
       uint32 layerCount = ArrayCount(checkLayers);
     IVec2 dirs[4] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
     
