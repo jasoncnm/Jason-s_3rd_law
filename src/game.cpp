@@ -16,6 +16,7 @@
 /*
 
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
+- Fix weird animation bugs 
 
   TODO: Things that I can do beside arts and design I guess
 - Make The Save File Less buggy! (Serialize It, so that game won't break when level/code change)

@@ -662,7 +662,8 @@ inline bool8 IsProjectable(IVec2 tilePos, IVec2 pushDir)
         if (ent)
         {
             if ((ent->type == ENTITY_TYPE_ELECTRIC_DOOR) &&
-                (ent->cableType != CABLE_TYPE_DOOR || !SameSide(ent, ent->tilePos, dirs[i])))
+                (ent->cableType != CABLE_TYPE_DOOR || !SameSide(ent, ent->tilePos, dirs[i]))
+                || (ent->type == ENTITY_TYPE_GLASS && ent->broken))
             {
                 continue;
             }

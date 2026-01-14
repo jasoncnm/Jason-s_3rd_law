@@ -135,11 +135,11 @@
             }
         },
         "TileMap/Room_24.tmj": {
-            "scale": 1,
-            "selectedLayer": 0,
+            "scale": 2,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 176.5,
-                "y": 176
+                "x": -1104.25,
+                "y": -739.75
             }
         },
         "TileMap/Room_25.tmj": {
