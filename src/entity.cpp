@@ -142,10 +142,11 @@ inline void DeleteEntity(Entity * entity)
 }
 
 inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * playEvent,
-                       IVec2 targetPos, MoveType moveType, float (*MoveFunc)(float))
+                       IVec2 targetPos, float (*MoveFunc)(float))
 {
     SM_ASSERT(entity->active, "entity does not exist");
     SM_ASSERT(entity->movable, "entity cannot be moved");
+    Entity old = *entity;
     
     Vector2 startPivot = GetTilePivot(entity);
     entity->tilePos = targetPos;
@@ -180,24 +181,48 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
     }
     Vector2 endPivot = GetTilePivot(entity);
     
-    switch(moveType)
+                float speed = (MoveFunc == PLAYER_MOVE_FUNC) ? SLIME_MOVE_SPEED : BOUNCE_SPEED;
+    if (IsSlime(entity))
     {
-        case MOVE_FLAT:
+         IVec2 offset = targetPos - old.tilePos;
+        
+        if ((Abs(offset).x == 0 || Abs(offset).y == 0))
         {
-            float speed = IsSlime(entity) ? SLIME_MOVE_SPEED : BOUNCE_SPEED;
-            TweenParams params = {};
-            params.paramType = PARAM_TYPE_VECTOR2;
-            params.startVec2 = startPivot;
-            params.endVec2 = endPivot;
-            params.realVec2  = &entity->pivot;
-            
-            AddTweenUnique(entity->tweenController, CreateTween(params, MoveFunc, speed));
-            break;
+            if (Abs(old.attachDir) == Abs(entity->attachDir))
+            {
+                float dist = Vector2Distance(startPivot, endPivot);
+                float tileDist = dist / MAP_TILE_SIZE;
+                
+                TweenParams params = {};
+                params.paramType = PARAM_TYPE_VECTOR2;
+                params.startVec2 = startPivot;
+                params.endVec2 = endPivot;
+                params.realVec2  = &entity->pivot;
+                AddTweenUnique(entity->tweenController, CreateTween(params, MoveFunc, speed, tileDist));
+            }
+            else
+            {
+                IVec2 dir = entity->attachDir;
+                Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({ (float)dir.x, (float)dir.y },
+                                                                          0.5f * (MAP_TILE_SIZE - entity->tileSize)));
+                TweenParams params1 = {};
+                params1.paramType = PARAM_TYPE_VECTOR2;
+                params1.startVec2 = startPivot;
+                params1.endVec2 = middlePivot;
+                params1.realVec2  = &entity->pivot;
+                
+                TweenParams params2 = {};
+                params2.paramType = PARAM_TYPE_VECTOR2;
+                params2.startVec2 = middlePivot;
+                params2.endVec2 = endPivot;
+                params2.realVec2  = &entity->pivot;
+                
+                uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed * 2));
+                AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed * 2), channel);
+                }
         }
-        case MOVE_OUTER_CORNER:
+        else
         {
-            float speed = IsSlime(entity) ? SLIME_MOVE_SPEED : BOUNCE_SPEED;
-            
             IVec2 dir = -entity->attachDir;
             Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({ (float)dir.x, (float)dir.y },
                                                                       0.5f * (MAP_TILE_SIZE + entity->tileSize)));
@@ -213,55 +238,26 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
             params2.endVec2 = endPivot;
             params2.realVec2  = &entity->pivot;
             
-             uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed * 1.5f));
+            uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed * 1.5f));
             AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed * 1.5f), channel);
             
-            break;
         }
-        case MOVE_INNER_CORNER:
-        {
-            float speed = IsSlime(entity) ? SLIME_MOVE_SPEED : BOUNCE_SPEED;
-            
-            IVec2 dir = entity->attachDir;
-            Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({ (float)dir.x, (float)dir.y },
-                                                                                                       0.5f * (MAP_TILE_SIZE - entity->tileSize)));
-            TweenParams params1 = {};
-            params1.paramType = PARAM_TYPE_VECTOR2;
-            params1.startVec2 = startPivot;
-            params1.endVec2 = middlePivot;
-            params1.realVec2  = &entity->pivot;
-            
-            TweenParams params2 = {};
-            params2.paramType = PARAM_TYPE_VECTOR2;
-            params2.startVec2 = middlePivot;
-            params2.endVec2 = endPivot;
-            params2.realVec2  = &entity->pivot;
-            
-            uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed * 2));
-            AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed * 2), channel);
-            
-            break;
         }
-        case BOUNCE_FLAT:
-        {
-            
-            float dist = Vector2Distance(startPivot, endPivot);
-            float tileDist = dist / MAP_TILE_SIZE;
-            
-            float speed = BOUNCE_SPEED;
-            
-            TweenParams params = {};
-            params.paramType = PARAM_TYPE_VECTOR2;
-            params.startVec2 = startPivot;
-            params.endVec2 = endPivot;
-            params.realVec2  = &entity->pivot;
-            
-            AddTweenUnique(entity->tweenController, CreateTween(params, MoveFunc, speed, tileDist));
-            break;
+    else
+    {
+        float dist = Vector2Distance(startPivot, endPivot);
+        float tileDist = dist / MAP_TILE_SIZE;
+        
+        TweenParams params = {};
+        params.paramType = PARAM_TYPE_VECTOR2;
+        params.startVec2 = startPivot;
+        params.endVec2 = endPivot;
+        params.realVec2  = &entity->pivot;
+        
+        AddTweenUnique(entity->tweenController, CreateTween(params, MoveFunc, speed, tileDist));
         }
-    }
     
-    // TODO: Improve Controll
+    // TODO: Improve Control
     if (!entity->tweenController.NoTweens())
     {
         if (playEvent)
@@ -584,11 +580,11 @@ inline void UpdateSlimes()
                 {
                     if (attach->tweenController.start || attach->tweenController.playing)
                     {
-                        MoveEntity(slime, attach, nullptr, newPos, BOUNCE_FLAT, nullptr);
+                        MoveEntity(slime, attach, nullptr, newPos, nullptr);
                     }
                     else if (!attach->tweenController.NoTweens())
                     {
-                        MoveEntity(slime, attach, &attach->tweenController.startEvent, newPos, BOUNCE_FLAT, nullptr);
+                        MoveEntity(slime, attach, &attach->tweenController.startEvent, newPos, nullptr);
                     }
                 }
                 }
