@@ -123,8 +123,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                 {
                     if (IsSlime(projectedEnt))
                     {
-                    // TODO
-                         
+                        MergeSlimes(target, projectedEnt);
                         return;
                     }
                     
@@ -696,7 +695,10 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
     ActionCheck(player, bounceDir, CHECK_PROJECT);
     ActionCheck(clone, -bounceDir, CHECK_PROJECT);
     
-    if (player->tilePos == clone->tilePos)
+    Entity * playerAttach = GetEntity(player->attachedEntityIndex);
+    Entity * cloneAttach = GetEntity(clone->attachedEntityIndex);
+    
+    if ((playerAttach->tilePos - player->attachDir) == (cloneAttach->tilePos - clone->attachDir))
     {
         player->tweenController.Reset();
         player->mass += clone->mass;
