@@ -205,6 +205,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
         {
             projectedEnt->tilePos = pos;
             DeleteEntity(projectedEnt);
+            return;
         }
         
     }
@@ -1114,7 +1115,7 @@ void GameplayUpdateAndRender()
         
         EndMode2D();
         
-#if GAME_INTERNAL
+#if 0 // GAME_INTERNAL
         // #if 0
         // NOTE: UI Draw Game Informations
         
