@@ -77,11 +77,11 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
             
             if (IsSlime(current.parent->pushEnt) && current.parent->pushEnt->attachedEntityIndex == ent->entityIndex)
             {
-                MoveEntity(ent, current.parent->pushEnt, playEvent, ent->tilePos + current.pushDir, nullptr);
+                MoveEntity(ent, current.parent->pushEnt, playEvent, ent->tilePos + current.pushDir, BLOCK_MOVE_FUNC);
             }
             else
             {
-                MoveEntity(ent, nullptr, playEvent, ent->tilePos + current.pushDir,  nullptr);
+                MoveEntity(ent, nullptr, playEvent, ent->tilePos + current.pushDir,  BLOCK_MOVE_FUNC);
             }
             
             break;
@@ -129,7 +129,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                 }
                 
                 Entity * attach = defered ? pushEnt : blockedEntity;
-                MoveEntity(projectedEnt, attach, playEvent, targetPos,  nullptr);
+                MoveEntity(projectedEnt, attach, playEvent, targetPos,  BLOCK_MOVE_FUNC);
                 return;
             }
             
@@ -160,7 +160,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         return;
                     }
                     
-                    MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir,  nullptr);
+                    MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir,  BLOCK_MOVE_FUNC);
                         
                         return;
                     }
@@ -177,14 +177,14 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     
                     Entity * attach = defered ? pushEnt : target;
                     
-                    MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,  nullptr);
+                    MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,  BLOCK_MOVE_FUNC);
                         return;
                 }
                 case ENTITY_TYPE_GLASS:
                 {
                     if (!target->broken && IsSlime(projectedEnt))
                     {
-                        MoveEntity(projectedEnt, target, nullptr, pos - pushDir,  nullptr); 
+                        MoveEntity(projectedEnt, target, nullptr, pos - pushDir,  BLOCK_MOVE_FUNC); 
                         return;
                     }
                     SetGlassBeBroken(target);
@@ -211,7 +211,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     }
                     
                     Entity * attach = defered ? pushEnt : blockedEntity;
-                    MoveEntity(projectedEnt, attach, playEvent, targetPos,  nullptr);
+                    MoveEntity(projectedEnt, attach, playEvent, targetPos,  BLOCK_MOVE_FUNC);
                     return;
                 }
             }
@@ -395,7 +395,7 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
                         playEvent = &parent->parent->pushEnt->tweenController.endEvent;
                     }
                     MoveEntity(parent->pushEnt, nullptr, playEvent, 
-                               current.pushEnt->tilePos - current.pushDir,  nullptr);
+                               current.pushEnt->tilePos - current.pushDir,  BLOCK_MOVE_FUNC);
                 }
             }
             }
@@ -420,7 +420,6 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
 
 inline float GetCameraZoom(Map & currentMap)
 {
-    
     int newWidth = GetScreenWidth();
     int newHeight = GetScreenHeight();
     int mapMax = (currentMap.width > currentMap.height) ? currentMap.width : currentMap.height;
@@ -429,6 +428,36 @@ inline float GetCameraZoom(Map & currentMap)
     (newWidth < newHeight) ? zoom *= newWidth : zoom *= newHeight;
     
     return zoom;
+}
+
+inline void UpdateCameraToTileMapSmooth(Map & map, Vector2 pos, uint32 mapIndex)
+{
+    gameState->cameraTweenController.Reset();
+    
+    // TODO adjust move and zoom speed based on move and zoom distance
+    
+    TweenParams params = {};
+    params.paramType = PARAM_TYPE_VECTOR2;
+    params.startVec2 = gameState->camera.target;
+    params.endVec2 = pos;
+    params.realVec2  = &gameState->camera.target;
+    AddTweenUnique(gameState->cameraTweenController, CreateTween(params, CAMERA_MOVE_FUNC, 1.7f));
+    
+    Map & lastMap = gameState->tileMaps[gameState->currentMapIndex];
+    float oldZoom = gameState->camera.zoom;
+    float newZoom = GetCameraZoom(map);
+    if (!FloatEquals(oldZoom, newZoom))
+    {
+        TweenParams params = {};
+        params.paramType = PARAM_TYPE_FLOAT;
+        params.startF = oldZoom;
+        params.endF = newZoom;
+        params.realF  = &gameState->camera.zoom;
+        AddTweenUnique(gameState->cameraTweenController, CreateTween(params, CAMERA_ZOOM_FUNC, 1.7f));
+    }
+    
+    OnPlayEvent(&gameState->cameraTweenController);
+    gameState->currentMapIndex = mapIndex;
 }
 
 inline bool8 UpdateCamera()
@@ -457,6 +486,12 @@ inline bool8 UpdateCamera()
         {
             
             Vector2 pos = TilePositionToPixelPosition(map.width * 0.5f + map.tilePos.x + 0.5f, map.height * 0.5f + map.tilePos.y + 0.5f);
+            
+            if (IsKeyPressed(KEY_TAB))
+            {
+                UpdateCameraToTileMapSmooth(map, pos, i);
+            }
+            
             if (!Vector2Equals(pos, gameState->camera.target))
             {
                 if (!map.firstEnter)
@@ -479,30 +514,7 @@ inline bool8 UpdateCamera()
                 
                 if (gameState->currentMapIndex != i)
                 {
-                    gameState->cameraTweenController.Reset();
-                    
-                    TweenParams params = {};
-                    params.paramType = PARAM_TYPE_VECTOR2;
-                    params.startVec2 = gameState->camera.target;
-                    params.endVec2 = pos;
-                    params.realVec2  = &gameState->camera.target;
-                    AddTween(gameState->cameraTweenController, CreateTween(params, CAMERA_MOVE_FUNC, 1.7f), 0);
-                    
-                    Map & lastMap = gameState->tileMaps[gameState->currentMapIndex];
-                    float oldZoom = GetCameraZoom(lastMap);
-                    float newZoom = GetCameraZoom(map);
-                    if (!FloatEquals(oldZoom, newZoom))
-                    {
-                        TweenParams params = {};
-                        params.paramType = PARAM_TYPE_FLOAT;
-                        params.startF = oldZoom;
-                        params.endF = newZoom;
-                        params.realF  = &gameState->camera.zoom;
-                        AddTween(gameState->cameraTweenController, CreateTween(params, CAMERA_MOVE_FUNC, 1.7f), 1);
-                    }
-                    
-                    OnPlayEvent(&gameState->cameraTweenController);
-                    gameState->currentMapIndex = i;
+                    UpdateCameraToTileMapSmooth(map, pos, i);
                 }
                 
                 updated = true;
@@ -800,7 +812,6 @@ inline bool8 SlimeSelection(Entity * player)
     return stateChanged;
 }
 
-// TODO: Use Tile Bitmasking
 void UpdateSprite(EntityLayer layer)
 {
     auto & entityIndexArray = gameState->entityTable[layer];
@@ -865,37 +876,8 @@ void GameplayUpdateAndRender()
         //if (gameState->camera.zoom > 10.0f) gameState->camera.zoom = 10.0f;
         if (gameState->camera.zoom < 0.1f) gameState->camera.zoom = 0.1f;
         
-        float moveSpeed = 200.0f;
-        
-        // NOTE: Camera Move
-        if (IsDown(MOUSE_RIGHT))
-        {
-            if (IsDown(UP_KEY))
-            {
-                gameState->camera.target.y -= moveSpeed * GetFrameTime();
-            }
-            if (IsDown(DOWN_KEY))
-            {
-                gameState->camera.target.y += moveSpeed * GetFrameTime();
-                
-            }
-            if (IsDown(LEFT_KEY))
-            {
-                gameState->camera.target.x -= moveSpeed * GetFrameTime();
-                
-            }
-            if (IsDown(RIGHT_KEY))
-            {
-                gameState->camera.target.x += moveSpeed * GetFrameTime();
-            }
-            
-        }
-        else
-        {
             UpdateCamera();
         }
-        
-    }
     
     // NOTE: Actions
     {

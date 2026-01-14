@@ -580,11 +580,11 @@ inline void UpdateSlimes()
                 {
                     if (attach->tweenController.start || attach->tweenController.playing)
                     {
-                        MoveEntity(slime, attach, nullptr, newPos, nullptr);
+                        MoveEntity(slime, attach, nullptr, newPos, BLOCK_MOVE_FUNC);
                     }
                     else if (!attach->tweenController.NoTweens())
                     {
-                        MoveEntity(slime, attach, &attach->tweenController.startEvent, newPos, nullptr);
+                        MoveEntity(slime, attach, &attach->tweenController.startEvent, newPos, BLOCK_MOVE_FUNC);
                     }
                 }
                 }
