@@ -102,6 +102,14 @@ inline void ProjectAndCheck(Entity * projectedEnt,
 {
     Entity * pushEnt = checkList.last().parent->pushEnt;
     
+    TweenEvent * playEvent = nullptr;
+    if (!pushEnt->tweenController.NoTweens())
+    {
+        playEvent = &pushEnt->tweenController.endEvent;
+    }
+    
+    bool8 defered = checkList.last().parent->pushResult.state == PROJECT_DEFERRED;
+    
     for (IVec2 pos = projectedEnt->tilePos + pushDir; ; pos += pushDir)
     {
         auto entList = FindAllEntitiesFromLocationAndLayers(pos, checkLayers, layerCount); 
@@ -113,9 +121,33 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                 case ENTITY_TYPE_PLAYER:
                 case ENTITY_TYPE_CLONE:
                 {
+                    if (IsSlime(projectedEnt))
+                    {
                     // TODO
-                    break;
-                }
+                         
+                        return;
+                    }
+                    
+                    if (!target->attach)
+                    {
+                    // NOTE one special case 
+                        checkList.last().pushResult.state = PROJECT_DEFERRED;
+                        
+                        CheckThings second = {};
+                        second.visited = false;
+                        second.pushDir = pushDir;
+                        second.pushEnt = target;
+                        second.checkType = CHECK_PROJECT;
+                        second.parent = &checkList.last();
+                        checkList.Add(second);
+                        
+                        return;
+                    }
+                    
+                    MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir, BOUNCE_FLAT, nullptr);
+                        
+                        return;
+                    }
                 case ENTITY_TYPE_BLOCK:
                 {
                     CheckThings newThings = {};
@@ -127,27 +159,22 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     newThings.parent = &newThings;
                     checkList.Add(newThings);
                     
-                    TweenEvent * playEvent = nullptr;
-                    if (!pushEnt->tweenController.NoTweens())
-                    {
-                         playEvent = &pushEnt->tweenController.endEvent;
-                    }
+                    Entity * attach = defered ? pushEnt : target;
                     
-                    MoveEntity(projectedEnt, target, playEvent, pos - pushDir, BOUNCE_FLAT, nullptr);
+                    MoveEntity(projectedEnt, attach, playEvent, pos - pushDir, BOUNCE_FLAT, nullptr);
                         return;
-                        
-                    
-break;
                 }
                 case ENTITY_TYPE_GLASS:
                 {
                     if (!target->broken && IsSlime(projectedEnt))
                     {
-                        // TODO
-                        
+                        MoveEntity(projectedEnt, target, nullptr, pos - pushDir, BOUNCE_FLAT, nullptr); 
                         return;
                     }
                     SetGlassBeBroken(target);
+                    Entity * attachSlime = FindAttachSlime(target);
+                    if (attachSlime) attachSlime->attach = false;
+                    
                     break;
                 }
                 case ENTITY_TYPE_ELECTRIC_DOOR:
@@ -167,13 +194,8 @@ break;
                         targetPos = blockedEntity->tilePos;
                     }
                     
-                    TweenEvent * playEvent = nullptr;
-                    if (!pushEnt->tweenController.NoTweens())
-                    {
-                        playEvent = &pushEnt->tweenController.endEvent;
-                    }
-                    
-                    MoveEntity(projectedEnt, blockedEntity, playEvent, targetPos, BOUNCE_FLAT, nullptr);
+                    Entity * attach = defered ? pushEnt : blockedEntity;
+                    MoveEntity(projectedEnt, attach, playEvent, targetPos, BOUNCE_FLAT, nullptr);
                     return;
                 }
             }
@@ -335,6 +357,21 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
             if (current.checkType == CHECK_MOVE)
             {
                 CheckPushState(checkList, current);
+            }
+            else if (current.checkType == CHECK_PROJECT)
+            {
+                // TODO: What I'm doing here is hacky
+                CheckThings * parent = current.parent;
+                if (parent->pushEnt != current.pushEnt && parent->pushResult.state == PROJECT_DEFERRED)
+                {
+                    TweenEvent * playEvent = nullptr;
+                    if (!parent->parent->pushEnt->tweenController.NoTweens())
+                    {
+                        playEvent = &parent->parent->pushEnt->tweenController.endEvent;
+                    }
+                    MoveEntity(parent->pushEnt, nullptr, playEvent, 
+                               current.pushEnt->tilePos - current.pushDir, BOUNCE_FLAT, nullptr);
+                }
             }
             }
         else
@@ -647,6 +684,9 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
      
     if (player->mass < 2) return false;
     
+    uint32 oldAttachIndex = player->attachedEntityIndex;
+    IVec2 oldAttachDirection = player->attachDir;
+    
     player->mass--;
     player->tileSize = GetSlimeSize(player);
     
@@ -658,9 +698,14 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
     
     if (player->tilePos == clone->tilePos)
     {
-        player = MergeSlimes( clone, player);
-        return false;
-    }
+        player->tweenController.Reset();
+        player->mass += clone->mass;
+        player->tileSize = GetSlimeSize(player);
+        player->attach = true;
+        player->attachedEntityIndex = oldAttachIndex;
+        player->attachDir = oldAttachDirection;
+            DeleteEntity(clone);
+        }
     
     return true;
 }
@@ -858,7 +903,7 @@ void GameplayUpdateAndRender()
                     
                     if (IsDown(LEFT_KEY))
                     {
-                        actionDir = {-1 , 0};                    
+                        actionDir = { -1 , 0};                    
                         isPressed = true;
                     }
                     
@@ -935,7 +980,7 @@ void GameplayUpdateAndRender()
             }
         }
         
-        UpdateElectricDoor();
+         UpdateElectricDoor();
         
         UpdateSlimes();
         

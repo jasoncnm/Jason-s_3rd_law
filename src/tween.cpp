@@ -7,17 +7,6 @@
    ======================================================================== */
 #include "tween.h"
 
-#if 0
-void AdjustAnimatingSpeed(Entity * entity, float ratio)
-{
-    for (int animationIndex = 0; animationIndex < entity->moveAniQueue.count; animationIndex++)
-    {
-        MoveAnimation & ani = entity->moveAniQueue[animationIndex];
-        ani.move_dt *= ratio;
-    }
-}
-#endif
-
 Tween CreateTween(TweenParams params, float (*Easing)(float), float animateSpeed, float target_t)
 {
     Tween tween;

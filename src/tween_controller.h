@@ -13,6 +13,7 @@
 
 struct TweenController;
 
+// TODO: improve control, need start/end event per channel
 struct TweenEvent
 {
     TweenController * controller = nullptr;
@@ -67,6 +68,7 @@ struct TweenController
 void HandleEvent(TweenEvent & event);
     
 void AddTween(TweenController & controller, Tween tween, int channel = 0);
+uint32 AddTweenUnique(TweenController & controller, Tween tween);
 
 // NOTE: Get a play event to play    
 void OnPlayEvent(TweenController * controller);

@@ -73,6 +73,24 @@ void AddTween(TweenController & controller, Tween tween, int channel)
     controller.channels[channel].Add(tween);
 }
 
+ uint32 AddTweenUnique(TweenController & controller, Tween tween)
+{
+    bool added = false;
+    for (int channel = 0; channel < MAX_CHANNEL; channel++)
+    {
+         auto & queue = controller.channels[channel];
+        if (queue.IsEmpty())
+        {
+            added = true;
+            AddTween(controller, tween, channel);
+            return channel;
+            }
+    }
+    
+    SM_ERROR("Channel FULL!!");
+    return 0;
+    }
+
 void OnPlayEvent(TweenController * controller)
 {
     SM_ASSERT(controller, "controller is null");

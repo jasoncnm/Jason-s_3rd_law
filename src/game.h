@@ -169,6 +169,7 @@ enum PushState
     PUSH_MOVED,
     PUSH_BLOCKED,
     PUSH_MERGED,
+    PROJECT_DEFERRED,
 };
 
 enum CheckType
