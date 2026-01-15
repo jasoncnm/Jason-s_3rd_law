@@ -880,6 +880,7 @@ void GameplayUpdateAndRender()
         }
     
     // NOTE: Actions
+    if (!gameState->simulating)
     {
         // NOTE: Recored if State Changes
         static bool8 stateChanged = false;
@@ -979,9 +980,7 @@ void GameplayUpdateAndRender()
                 Restart();
             }
         }
-        
-        
-    }
+        }
     
     // NOTE: Simulate
     {
@@ -1083,7 +1082,7 @@ void GameplayUpdateAndRender()
         
         EndMode2D();
         
-#if 0 // GAME_INTERNAL
+#if GAME_INTERNAL
         // #if 0
         // NOTE: UI Draw Game Informations
         
@@ -1106,6 +1105,11 @@ void GameplayUpdateAndRender()
         
         int posX = GetScreenWidth() - MeasureText("Entity Action State: FFFFFFFFFFFFFFFFFFFF", 20);
         DebugDrawPlayerActionState(player->actionState, posX, 50, 20, IntToRGBA(0x923eed));
+        
+        if (gameState->simulating)
+        {
+            DrawText("Game Simulating", gameState->screenWidth / 4, gameState->screenHeight / 4, 20, RED);
+            }
         
 #endif
         
