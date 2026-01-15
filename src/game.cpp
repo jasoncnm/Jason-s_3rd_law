@@ -727,7 +727,7 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
     player->mass--;
     player->tileSize = GetSlimeSize(player);
     
-    Entity * clone = CreateSlimeClone(player->tilePos);
+    Entity * clone = CreateSlimeClone(player);
     player->attach = false;
     
     ActionCheck(player, bounceDir, CHECK_PROJECT);
@@ -880,8 +880,7 @@ void GameplayUpdateAndRender()
         }
     
     // NOTE: Actions
-    if (!gameState->simulating)
-    {
+     {
         // NOTE: Recored if State Changes
         static bool8 stateChanged = false;
         
@@ -980,7 +979,9 @@ void GameplayUpdateAndRender()
                 Restart();
             }
         }
-        }
+        
+        
+    }
     
     // NOTE: Simulate
     {

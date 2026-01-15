@@ -460,7 +460,7 @@ inline void UpdateElectricDoor()
 
         EntityLayer layers[] = { LAYER_BLOCK };
         Entity * block = FindEntityByLocationAndLayers(source->tilePos, layers, ArrayCount(layers));
-        if (block && block->tweenController.NoTweens() &&  !gameState->simulating)
+        if (block && block->tweenController.NoTweens())
         {
             block->actionState = FREEZE_STATE;
             if (!source->conductive)
@@ -547,7 +547,7 @@ inline void UpdateElectricDoor()
             {
                 EntityLayer layers[] = { LAYER_BLOCK };
                 Entity * entity = FindEntityByLocationAndLayers(connection->tilePos, layers, ArrayCount(layers));
-                if (entity && entity->tweenController.NoTweens() && !gameState->simulating)
+                if (entity && entity->tweenController.NoTweens())
                 {
                     if (connection->hasPower)
                     {

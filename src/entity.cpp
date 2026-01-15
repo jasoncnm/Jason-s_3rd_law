@@ -592,29 +592,30 @@ inline void UpdateSlimes()
     }
     }
 
-inline Entity * CreateSlimeClone(IVec2 tilePos)
+inline Entity * CreateSlimeClone(Entity * ent)
 {
+    IVec2 tilePos = ent->tilePos;
+    
     auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
     Entity * freeEntity = nullptr;
     for (uint32 i = 0; i < slimeEntityIndices.count; i++)
     {
-        Entity * entity = &gameState->entities[slimeEntityIndices[i]];
-        if (!entity->active)
+        Entity * slime = &gameState->entities[slimeEntityIndices[i]];
+        if (!slime->active)
         {
-            freeEntity = entity;
+        freeEntity = slime;
+            *freeEntity = *ent;
+            freeEntity->entityIndex = slimeEntityIndices[i];
+        freeEntity->active = true;
+        freeEntity->tilePos = tilePos;
+        freeEntity->type = ENTITY_TYPE_CLONE;
+        freeEntity->mass = 1;
+        freeEntity->tileSize = GetSlimeSize(freeEntity);
+        freeEntity->color = GRAY;
+        freeEntity->attach = false;   
         }
     }
-
-    SM_ASSERT(freeEntity, "slimes slots are full");
-
-    freeEntity->active = true;
-    freeEntity->tilePos = tilePos;
-    freeEntity->type = ENTITY_TYPE_CLONE;
-    freeEntity->mass = 1;
-    freeEntity->tileSize = GetSlimeSize(freeEntity);
-    freeEntity->color = GRAY;
-    freeEntity->attach = false;    
-
+SM_ASSERT(freeEntity, "slimes slots are full");
     return freeEntity;
     
 }
