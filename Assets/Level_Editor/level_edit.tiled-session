@@ -91,11 +91,11 @@
             }
         },
         "TileMap/Room_16.tmj": {
-            "scale": 0.33,
+            "scale": 3,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 175.75757575757586,
-                "y": 174.24242424242425
+                "x": 41.166666666666686,
+                "y": 209.16666666666666
             }
         },
         "TileMap/Room_17.tmj": {
@@ -139,11 +139,11 @@
             }
         },
         "TileMap/Room_24.tmj": {
-            "scale": 0.75,
-            "selectedLayer": 0,
+            "scale": 0.33,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 659.3333333333333,
-                "y": -390
+                "x": 822.727272727273,
+                "y": -1359.090909090909
             }
         },
         "TileMap/Room_25.tmj": {
@@ -211,11 +211,11 @@
             }
         },
         "TileMap/Room_32.tmj": {
-            "scale": 1,
+            "scale": 2,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176,
-                "y": 175.5
+                "x": 146.25,
+                "y": -2591.75
             }
         },
         "TileMap/Room_33.tmj": {
@@ -243,11 +243,11 @@
             }
         },
         "TileMap/Room_36.tmj": {
-            "scale": 0.75,
+            "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.66666666666669,
-                "y": 176
+                "x": -923.5,
+                "y": -58.5
             }
         },
         "TileMap/Room_37.tmj": {
@@ -307,11 +307,11 @@
             }
         },
         "TileMap/Room_45.tmj": {
-            "scale": 0.75,
-            "selectedLayer": 0,
+            "scale": 0.33,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": -391.33333333333326,
-                "y": 1314
+                "x": -231.81818181818153,
+                "y": 1456.0606060606062
             }
         },
         "TileMap/Room_46.tmj": {

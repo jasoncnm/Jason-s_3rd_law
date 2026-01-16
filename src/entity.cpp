@@ -611,8 +611,7 @@ inline Entity * CreateSlimeClone(Entity * ent)
         freeEntity->type = ENTITY_TYPE_CLONE;
         freeEntity->mass = 1;
         freeEntity->tileSize = GetSlimeSize(freeEntity);
-        freeEntity->color = GRAY;
-        freeEntity->attach = false;   
+        freeEntity->color = GRAY;  
         }
     }
 SM_ASSERT(freeEntity, "slimes slots are full");

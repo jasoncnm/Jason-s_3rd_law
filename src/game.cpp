@@ -731,7 +731,6 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
     player->attach = false;
     
     ActionCheck(player, bounceDir, CHECK_PROJECT);
-    ActionCheck(clone, -bounceDir, CHECK_PROJECT);
     
     Entity * playerAttach = GetEntity(player->attachedEntityIndex);
     Entity * cloneAttach = GetEntity(clone->attachedEntityIndex);
