@@ -30,8 +30,8 @@
             "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 176.66666666666669,
-                "y": 176
+                "x": 1081.9999999999998,
+                "y": 643.3333333333333
             }
         },
         "TileMap/Room_1.tmj": {
@@ -203,11 +203,11 @@
             }
         },
         "TileMap/Room_30.tmj": {
-            "scale": 1,
-            "selectedLayer": 2,
+            "scale": 0.5,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": -1106.5,
-                "y": 1317.5
+                "x": -1007,
+                "y": 1669
             }
         },
         "TileMap/Room_31.tmj": {
@@ -318,8 +318,8 @@
             "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 2257,
-                "y": 379
+                "x": -57,
+                "y": 533
             }
         },
         "TileMap/Room_45.tmj": {
@@ -362,6 +362,22 @@
                 "y": 176
             }
         },
+        "TileMap/Room_50.tmj": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 1294.3333333333335,
+                "y": -62.33333333333337
+            }
+        },
+        "TileMap/Room_51.tmj": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 838.5,
+                "y": 67.5
+            }
+        },
         "TileMap/Room_6.tmj": {
             "scale": 0.75,
             "selectedLayer": 1,
@@ -398,8 +414,8 @@
             "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 619,
-                "y": 863
+                "x": 2097,
+                "y": 709
             }
         },
         "TileMap/TestRoom_2.tmj": {
@@ -419,11 +435,11 @@
             }
         },
         "TileMap/TestRoom_4.tmj": {
-            "scale": 0.5,
+            "scale": 0.33,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -589,
-                "y": 1043
+                "x": -2501.5151515151515,
+                "y": 2140.909090909091
             }
         },
         "TileMap/TestRoom_5.tmj": {
