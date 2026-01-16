@@ -38,8 +38,8 @@ inline bool8 CheckOutOfBound(IVec2 tilePos)
 IVec2 PixelPositionToTilePos(float x, float y)
 {
     IVec2 result;
-    result.x = (int32)((x + MAP_TILE_SIZE/2) / MAP_TILE_SIZE);
-    result.y = (int32)((y + MAP_TILE_SIZE/2) / MAP_TILE_SIZE);
+    result.x = (int32)((x + MAP_TILE_SIZE/2.0f) / MAP_TILE_SIZE);
+    result.y = (int32)((y + MAP_TILE_SIZE/2.0f) / MAP_TILE_SIZE);
     
     return result;
 }
@@ -91,6 +91,24 @@ Vector2 GetTilePivot(Entity * entity)
     return topLeft;
 }
 
+
+void DrawTile(IVec2 tilePos, Color color)
+{
+    Vector2 pivot = GetTilePivot(tilePos, MAP_TILE_SIZE);
+    Rectangle rect = { pivot.x, pivot.y, MAP_TILE_SIZE, MAP_TILE_SIZE };
+    DrawRectangleRec(rect, color);
+}
+
+
+IVec2 PivotToTilePos(Vector2 pivot, float tileSize)
+{
+    Vector2 center = Vector2Add(pivot, { tileSize * 0.5f, tileSize * 0.5f });
+    center.x += MAP_TILE_SIZE * (center.x > 0 ? 0.5f : -0.5f);
+    center.y += MAP_TILE_SIZE * (center.y > 0 ? 0.5f : -0.5f);
+    return PixelPositionToTilePos(center);
+}
+
+
 Color IntToRGBA(unsigned int val)
 {
     
@@ -101,13 +119,6 @@ Color IntToRGBA(unsigned int val)
     Color color = { red, green, blue, 0xFF };
     
     return color;
-}
-
-void DrawTile(IVec2 tilePos, Color color)
-{
-    Vector2 pivot = GetTilePivot(tilePos, MAP_TILE_SIZE);
-    Rectangle rect = { pivot.x, pivot.y, MAP_TILE_SIZE, MAP_TILE_SIZE };
-    DrawRectangleRec(rect, color);
 }
 
 #define GAME_UTIL_H

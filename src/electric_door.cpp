@@ -487,7 +487,7 @@ inline void UpdateElectricDoor()
                 if (slime)
                 {
                     // TODO: need to avoid multiple collisions
-                    if (CheckCollisionPointRec(slime->pivot, GetEntityRect(connection)))
+                    if (PivotToTilePos(slime->pivot, slime->tileSize) == connection->tilePos)
                     {
                         if (connection->hasPower)
                         {

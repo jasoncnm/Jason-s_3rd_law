@@ -139,11 +139,11 @@
             }
         },
         "TileMap/Room_24.tmj": {
-            "scale": 0.5,
+            "scale": 1,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 175,
-                "y": 176
+                "x": 1539.5,
+                "y": -2149.5
             }
         },
         "TileMap/Room_25.tmj": {
@@ -206,8 +206,8 @@
             "scale": 1,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 176.5,
-                "y": 176
+                "x": -1106.5,
+                "y": 1317.5
             }
         },
         "TileMap/Room_31.tmj": {
@@ -235,11 +235,11 @@
             }
         },
         "TileMap/Room_34.tmj": {
-            "scale": 0.5,
+            "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 174,
-                "y": 175
+                "x": 271.5,
+                "y": -696.5
             }
         },
         "TileMap/Room_35.tmj": {
@@ -291,27 +291,27 @@
             }
         },
         "TileMap/Room_40.tmj": {
-            "scale": 2,
-            "selectedLayer": 1,
+            "scale": 1,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.25,
-                "y": 176
+                "x": 1005.5,
+                "y": -90.5
             }
         },
         "TileMap/Room_41.tmj": {
             "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 175,
-                "y": 176
+                "x": -813,
+                "y": 773
             }
         },
         "TileMap/Room_42.tmj": {
             "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 175,
-                "y": 176
+                "x": -813,
+                "y": 421
             }
         },
         "TileMap/Room_44.tmj": {
@@ -344,6 +344,14 @@
             "viewCenter": {
                 "x": 176.125,
                 "y": 176
+            }
+        },
+        "TileMap/Room_48.tmj": {
+            "scale": 0.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": -109,
+                "y": 1125
             }
         },
         "TileMap/Room_5.tmj": {
@@ -387,11 +395,11 @@
             }
         },
         "TileMap/Test.tmj": {
-            "scale": 0.33,
+            "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 319.6969696969697,
-                "y": 321.21212121212113
+                "x": 619,
+                "y": 863
             }
         },
         "TileMap/TestRoom_2.tmj": {
