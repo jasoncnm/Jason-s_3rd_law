@@ -486,7 +486,8 @@ inline void UpdateElectricDoor()
                 Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
                 if (slime)
                 {
-                    if (CheckCollisionRecs(GetEntityRect(slime), GetEntityRect(connection)))
+                    // TODO: need to avoid multiple collisions
+                    if (CheckCollisionPointRec(slime->pivot, GetEntityRect(connection)))
                     {
                         if (connection->hasPower)
                         {
@@ -595,5 +596,4 @@ inline void UpdateElectricDoor()
         }
 
     }
-        
 }

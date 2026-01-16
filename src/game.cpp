@@ -790,7 +790,7 @@ inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount)
                     color = LIME;
                 }
                 DrawSprite(gameState->camera, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, color);
-            }
+                }
         }
     } 
 }

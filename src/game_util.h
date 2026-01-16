@@ -34,6 +34,21 @@ inline bool8 CheckOutOfBound(IVec2 tilePos)
     return CheckOutOfBound(tilePos.x, tilePos.y);
 }
 
+// TODO not correct
+IVec2 PixelPositionToTilePos(float x, float y)
+{
+    IVec2 result;
+    result.x = (int32)((x + MAP_TILE_SIZE/2) / MAP_TILE_SIZE);
+    result.y = (int32)((y + MAP_TILE_SIZE/2) / MAP_TILE_SIZE);
+    
+    return result;
+}
+
+IVec2 PixelPositionToTilePos(Vector2 pos)
+{
+    return PixelPositionToTilePos(pos.x, pos.y);
+}
+
 Vector2 TilePositionToPixelPosition(float tileX, float tileY)
 {
     
@@ -86,6 +101,13 @@ Color IntToRGBA(unsigned int val)
     Color color = { red, green, blue, 0xFF };
     
     return color;
+}
+
+void DrawTile(IVec2 tilePos, Color color)
+{
+    Vector2 pivot = GetTilePivot(tilePos, MAP_TILE_SIZE);
+    Rectangle rect = { pivot.x, pivot.y, MAP_TILE_SIZE, MAP_TILE_SIZE };
+    DrawRectangleRec(rect, color);
 }
 
 #define GAME_UTIL_H

@@ -585,6 +585,10 @@ inline void UpdateSlimes()
                     else if (!attach->tweenController.NoTweens())
                     {
                         MoveEntity(slime, attach, &attach->tweenController.startEvent, newPos, BLOCK_MOVE_FUNC);
+                    } 
+                    else
+                    {
+                        SM_ASSERT(false, "what happend?");
                     }
                 }
                 }
