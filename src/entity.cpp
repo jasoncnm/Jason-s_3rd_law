@@ -659,6 +659,7 @@ inline bool8 IsProjectable(Entity * projEnt, IVec2 pushDir)
         Entity * ent = FindEntityByLocationAndLayers(tilePos + dirs[i], checkLayers, layerCount);
         if (ent)
         {
+            // NOTE: slime dose not block the block if it is attach to the block...
             if ((ent->type == ENTITY_TYPE_ELECTRIC_DOOR) &&
                 (ent->cableType != CABLE_TYPE_DOOR || !SameSide(ent, ent->tilePos, dirs[i])) ||
                 (ent->type == ENTITY_TYPE_GLASS && ent->broken) ||
