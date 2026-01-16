@@ -613,6 +613,9 @@ bool8 MoveAction(IVec2 actionDir)
     }
     
     PushResult pushResult = ActionCheck(player, actionDir, CHECK_MOVE);
+    
+    UpdateSlimes();
+    
     switch(pushResult.state)
     {
         case PUSH_NONE:
@@ -952,7 +955,6 @@ void GameplayUpdateAndRender()
         }
         
          UpdateElectricDoor();
-        
         UpdateSlimes();
         
         // NOTE: Undo and Restart
