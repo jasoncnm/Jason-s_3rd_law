@@ -644,8 +644,10 @@ void ShiftEntities(IVec2 startPos, IVec2 bounceDir)
     }
 }
 
-inline bool8 IsProjectable(IVec2 tilePos, IVec2 pushDir)
+inline bool8 IsProjectable(Entity * projEnt, IVec2 pushDir)
 {
+    IVec2 tilePos = projEnt->tilePos;
+    
     EntityLayer checkLayers[] = { LAYER_WALL, LAYER_GLASS, LAYER_BLOCK, LAYER_PIT, LAYER_DOOR, LAYER_SLIME };
       uint32 layerCount = ArrayCount(checkLayers);
     IVec2 dirs[4] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
@@ -658,12 +660,13 @@ inline bool8 IsProjectable(IVec2 tilePos, IVec2 pushDir)
         if (ent)
         {
             if ((ent->type == ENTITY_TYPE_ELECTRIC_DOOR) &&
-                (ent->cableType != CABLE_TYPE_DOOR || !SameSide(ent, ent->tilePos, dirs[i]))
-                || (ent->type == ENTITY_TYPE_GLASS && ent->broken)
-                || (IsSlime(ent) && ent->attach && dirs[i] != pushDir))
+                (ent->cableType != CABLE_TYPE_DOOR || !SameSide(ent, ent->tilePos, dirs[i])) ||
+                (ent->type == ENTITY_TYPE_GLASS && ent->broken) ||
+                (IsSlime(ent) && (!ent->attach || GetEntity(ent->attachedEntityIndex) == projEnt)))
             {
                 continue;
             }
+            
             result = false;
             break;
             }

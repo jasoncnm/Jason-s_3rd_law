@@ -79,6 +79,11 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
             {
                 MoveEntity(ent, current.parent->pushEnt, playEvent, ent->tilePos + current.pushDir, BLOCK_MOVE_FUNC);
             }
+            else if (IsSlime(ent) && ent->attach)
+            {
+                Entity * attachEntity = GetEntity(ent->attachedEntityIndex);
+                MoveEntity(ent, attachEntity, playEvent, ent->tilePos + current.pushDir,  BLOCK_MOVE_FUNC);
+            }
             else
             {
                 MoveEntity(ent, nullptr, playEvent, ent->tilePos + current.pushDir,  BLOCK_MOVE_FUNC);
@@ -144,7 +149,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         return;
                     }
                     
-                    if (!target->attach)
+                    if (!target->attach || target->attachDir == -pushDir)
                     {
                     // NOTE one special case 
                         checkList.last().pushResult.state = PROJECT_DEFERRED;
@@ -283,6 +288,19 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                     current.pushResult.mergeEntity = target;
                     return;
                 }
+                else if (target->attachDir == -current.pushDir)
+                {
+                    // TODO
+                    CheckThings newThings = {};
+                    newThings.visited = false;
+                    newThings.pushDir = current.pushDir;
+                    newThings.pushEnt = target;
+                    newThings.pushResult = { false, PUSH_NONE, nullptr };
+                    newThings.checkType = CHECK_MOVE;
+                    newThings.parent = &current;
+                    checkList.Add(newThings);
+                    return;
+                }
                 }
             case ENTITY_TYPE_PIT:
             case ENTITY_TYPE_WALL:
@@ -304,7 +322,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                     }
                 }
                 
-                if (IsProjectable(target->tilePos, current.pushDir))
+                if (IsProjectable(target, current.pushDir))
                 {
                     current.pushResult.state = PUSH_MOVED;
                     current.pushResult.pushing = true;
