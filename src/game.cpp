@@ -448,7 +448,7 @@ inline float GetCameraZoom(Map & currentMap)
     float zoom = (zoom_per_tile / mapMax);
     (newWidth < newHeight) ? zoom *= newWidth : zoom *= newHeight;
     
-    return zoom;
+    return zoom - 0.5f;
 }
 
 inline void UpdateCameraToTileMapSmooth(Map & map, Vector2 pos, uint32 mapIndex)
