@@ -134,6 +134,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                 }
                 
                 Entity * attach = defered ? pushEnt : blockedEntity;
+                
                 MoveEntity(projectedEnt, attach, playEvent, targetPos,  BLOCK_MOVE_FUNC);
                 return;
             }
@@ -291,6 +292,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 else if (target->attachDir == -current.pushDir)
                 {
                     // TODO
+                    #if 0
                     CheckThings newThings = {};
                     newThings.visited = false;
                     newThings.pushDir = current.pushDir;
@@ -300,6 +302,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                     newThings.parent = &current;
                     checkList.Add(newThings);
                     return;
+                    #endif
                 }
                 }
             case ENTITY_TYPE_PIT:
@@ -791,12 +794,13 @@ inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount)
                 }
                 DrawSprite(gameState->camera, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, color);
                 
+                #if 0
                 if (IsSlime(entity))
                 {
                     DrawCircleV(Vector2Add(entity->pivot, {entity->tileSize/2, entity->tileSize/2}), 3, ColorAlpha(YELLOW, 0.8f));
                     DrawTile(PivotToTilePos(entity->pivot, entity->tileSize), ColorAlpha(RED, 0.5f));
                     }
-                
+                #endif
                 }
         }
     } 
@@ -1109,8 +1113,7 @@ void GameplayUpdateAndRender()
         
         EndMode2D();
         
-#if GAME_INTERNAL
-        // #if 0
+#if 0 // GAME_INTERNAL
         // NOTE: UI Draw Game Informations
         
         Entity * player = GetEntity(gameState->playerEntityIndex);
