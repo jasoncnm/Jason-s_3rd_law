@@ -35,7 +35,7 @@ jobs:
           New-Item -ItemType Directory -Path release -Force
           Copy-Item bin/* release/ -Recurse -Force
           Copy-Item assets/ release/assets/ -Recurse -Force
-          Compress-Archive -Path release/* -Force -DestinationPath release.zip
+          Compress-Archive -Path release/* -DestinationPath release.zip -Force 
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
