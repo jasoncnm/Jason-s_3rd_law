@@ -20,7 +20,4 @@ jobs:
 
       - name: Verify build outputs
         run: |
-          if not exist "bin\game.exe" (
-            echo "Build output not found!"
-            exit 1
-          )
+          bin\game.exe
