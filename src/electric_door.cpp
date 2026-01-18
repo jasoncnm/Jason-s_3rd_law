@@ -198,21 +198,18 @@ inline bool8 PowerOnCable(Entity * cable, bool8 & end)
     else if (cable->cableType == CABLE_TYPE_CONNECTION_POINT)
     {
         cable->hasPower = true;
-        if (!cable->conductive)
-        {
             EntityLayer layers[] = { LAYER_SLIME, LAYER_BLOCK };
-            bool8 has = FindEntityByLocationAndLayers(cable->tilePos, layers, ArrayCount(layers)) != nullptr;
-
-            if (has)
-            {
-                cable->conductive = true;
-                end = false;
-            }
-            else
-            {
-                end = true;
-            }
+        Entity * has = FindEntityByLocationAndLayers(cable->tilePos, layers, ArrayCount(layers));
+        if (has)
+        {
+            has->actionState = FREEZE_STATE;
+            cable->conductive = true;
+            end = false;
         }
+        else if (!cable->conductive)
+        {
+end = true;
+            }
         else
         {
             end = false;
@@ -465,6 +462,7 @@ inline void UpdateElectricDoor()
         Entity * block = FindEntityByLocationAndLayers(source->tilePos, layers, ArrayCount(layers));
         if (block && block->tweenController.NoTweens())
         {
+            block->actionState = FREEZE_STATE;
             if (!source->conductive)
                 OnSourcePowerOn(sourceCableIndex);
         }
@@ -488,7 +486,8 @@ inline void UpdateElectricDoor()
                 Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
                 if (slime)
                 {
-                    if (CheckCollisionRecs(GetEntityRect(slime), GetEntityRect(connection)))
+                    // TODO: need to avoid multiple collisions
+                    if (PivotToTilePos(slime->pivot, slime->tileSize) == connection->tilePos)
                     {
                         if (connection->hasPower)
                         {
@@ -597,5 +596,4 @@ inline void UpdateElectricDoor()
         }
 
     }
-        
 }

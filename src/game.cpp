@@ -77,11 +77,16 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
             
             if (IsSlime(current.parent->pushEnt) && current.parent->pushEnt->attachedEntityIndex == ent->entityIndex)
             {
-                MoveEntity(ent, current.parent->pushEnt, playEvent, ent->tilePos + current.pushDir, MOVE_FLAT, nullptr);
+                MoveEntity(ent, current.parent->pushEnt, playEvent, ent->tilePos + current.pushDir, BLOCK_MOVE_FUNC);
+            }
+            else if (IsSlime(ent) && ent->attach)
+            {
+                Entity * attachEntity = GetEntity(ent->attachedEntityIndex);
+                MoveEntity(ent, attachEntity, playEvent, ent->tilePos + current.pushDir,  BLOCK_MOVE_FUNC);
             }
             else
             {
-                MoveEntity(ent, nullptr, playEvent, ent->tilePos + current.pushDir, MOVE_FLAT, nullptr);
+                MoveEntity(ent, nullptr, playEvent, ent->tilePos + current.pushDir,  BLOCK_MOVE_FUNC);
             }
             
             break;
@@ -117,6 +122,23 @@ inline void ProjectAndCheck(Entity * projectedEnt,
         for (uint32 idx = 0; idx < entList.count; idx++)
         {
             Entity * target = entList[idx];
+            
+            if (target->actionState == FREEZE_STATE)
+            {
+                Entity * blockedEntity = target;
+                IVec2 targetPos = blockedEntity->tilePos - pushDir;
+                
+                if (blockedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR && DoorBlocked(blockedEntity, -pushDir))
+                {
+                    targetPos = blockedEntity->tilePos;
+                }
+                
+                Entity * attach = defered ? pushEnt : blockedEntity;
+                
+                MoveEntity(projectedEnt, attach, playEvent, targetPos,  BLOCK_MOVE_FUNC);
+                return;
+            }
+            
             switch(target->type)
             {
                 case ENTITY_TYPE_PLAYER:
@@ -128,7 +150,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         return;
                     }
                     
-                    if (!target->attach)
+                    if (!target->attach || target->attachDir == -pushDir)
                     {
                     // NOTE one special case 
                         checkList.last().pushResult.state = PROJECT_DEFERRED;
@@ -144,7 +166,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         return;
                     }
                     
-                    MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir, BOUNCE_FLAT, nullptr);
+                    MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir,  BLOCK_MOVE_FUNC);
                         
                         return;
                     }
@@ -161,14 +183,14 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     
                     Entity * attach = defered ? pushEnt : target;
                     
-                    MoveEntity(projectedEnt, attach, playEvent, pos - pushDir, BOUNCE_FLAT, nullptr);
+                    MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,  BLOCK_MOVE_FUNC);
                         return;
                 }
                 case ENTITY_TYPE_GLASS:
                 {
                     if (!target->broken && IsSlime(projectedEnt))
                     {
-                        MoveEntity(projectedEnt, target, nullptr, pos - pushDir, BOUNCE_FLAT, nullptr); 
+                        MoveEntity(projectedEnt, target, nullptr, pos - pushDir,  BLOCK_MOVE_FUNC); 
                         return;
                     }
                     SetGlassBeBroken(target);
@@ -195,7 +217,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     }
                     
                     Entity * attach = defered ? pushEnt : blockedEntity;
-                    MoveEntity(projectedEnt, attach, playEvent, targetPos, BOUNCE_FLAT, nullptr);
+                    MoveEntity(projectedEnt, attach, playEvent, targetPos,  BLOCK_MOVE_FUNC);
                     return;
                 }
             }
@@ -221,6 +243,14 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
     for (uint32 idx = 0; idx < entList.count; idx++)
     {
         Entity * target = entList[idx];
+        
+        if (target->actionState == FREEZE_STATE)
+        {
+            current.pushResult.state = PUSH_BLOCKED;
+            current.pushResult.blockedEntity = target;
+            return;
+            }
+        
         switch(target->type)
         {
             case ENTITY_TYPE_ELECTRIC_DOOR:
@@ -259,6 +289,21 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                     current.pushResult.mergeEntity = target;
                     return;
                 }
+                else if (target->attachDir == -current.pushDir)
+                {
+                    // TODO
+                    #if 0
+                    CheckThings newThings = {};
+                    newThings.visited = false;
+                    newThings.pushDir = current.pushDir;
+                    newThings.pushEnt = target;
+                    newThings.pushResult = { false, PUSH_NONE, nullptr };
+                    newThings.checkType = CHECK_MOVE;
+                    newThings.parent = &current;
+                    checkList.Add(newThings);
+                    return;
+                    #endif
+                }
                 }
             case ENTITY_TYPE_PIT:
             case ENTITY_TYPE_WALL:
@@ -280,7 +325,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                     }
                 }
                 
-                if (IsProjectable(target->tilePos, current.pushDir))
+                if (IsProjectable(target, current.pushDir))
                 {
                     current.pushResult.state = PUSH_MOVED;
                     current.pushResult.pushing = true;
@@ -371,7 +416,7 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
                         playEvent = &parent->parent->pushEnt->tweenController.endEvent;
                     }
                     MoveEntity(parent->pushEnt, nullptr, playEvent, 
-                               current.pushEnt->tilePos - current.pushDir, BOUNCE_FLAT, nullptr);
+                               current.pushEnt->tilePos - current.pushDir,  BLOCK_MOVE_FUNC);
                 }
             }
             }
@@ -396,7 +441,6 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
 
 inline float GetCameraZoom(Map & currentMap)
 {
-    
     int newWidth = GetScreenWidth();
     int newHeight = GetScreenHeight();
     int mapMax = (currentMap.width > currentMap.height) ? currentMap.width : currentMap.height;
@@ -405,6 +449,36 @@ inline float GetCameraZoom(Map & currentMap)
     (newWidth < newHeight) ? zoom *= newWidth : zoom *= newHeight;
     
     return zoom;
+}
+
+inline void UpdateCameraToTileMapSmooth(Map & map, Vector2 pos, uint32 mapIndex)
+{
+    gameState->cameraTweenController.Reset();
+    
+    // TODO adjust move and zoom speed based on move and zoom distance
+    
+    TweenParams params = {};
+    params.paramType = PARAM_TYPE_VECTOR2;
+    params.startVec2 = gameState->camera.target;
+    params.endVec2 = pos;
+    params.realVec2  = &gameState->camera.target;
+    AddTweenUnique(gameState->cameraTweenController, CreateTween(params, CAMERA_MOVE_FUNC, 1.7f));
+    
+    Map & lastMap = gameState->tileMaps[gameState->currentMapIndex];
+    float oldZoom = gameState->camera.zoom;
+    float newZoom = GetCameraZoom(map);
+    if (!FloatEquals(oldZoom, newZoom))
+    {
+        TweenParams params = {};
+        params.paramType = PARAM_TYPE_FLOAT;
+        params.startF = oldZoom;
+        params.endF = newZoom;
+        params.realF  = &gameState->camera.zoom;
+        AddTweenUnique(gameState->cameraTweenController, CreateTween(params, CAMERA_ZOOM_FUNC, 1.7f));
+    }
+    
+    OnPlayEvent(&gameState->cameraTweenController);
+    gameState->currentMapIndex = mapIndex;
 }
 
 inline bool8 UpdateCamera()
@@ -433,6 +507,12 @@ inline bool8 UpdateCamera()
         {
             
             Vector2 pos = TilePositionToPixelPosition(map.width * 0.5f + map.tilePos.x + 0.5f, map.height * 0.5f + map.tilePos.y + 0.5f);
+            
+            if (IsKeyPressed(KEY_TAB))
+            {
+                UpdateCameraToTileMapSmooth(map, pos, i);
+            }
+            
             if (!Vector2Equals(pos, gameState->camera.target))
             {
                 if (!map.firstEnter)
@@ -455,30 +535,7 @@ inline bool8 UpdateCamera()
                 
                 if (gameState->currentMapIndex != i)
                 {
-                    gameState->cameraTweenController.Reset();
-                    
-                    TweenParams params = {};
-                    params.paramType = PARAM_TYPE_VECTOR2;
-                    params.startVec2 = gameState->camera.target;
-                    params.endVec2 = pos;
-                    params.realVec2  = &gameState->camera.target;
-                    AddTween(gameState->cameraTweenController, CreateTween(params, EaseOutCubic, 1.7f), 0);
-                    
-                    Map & lastMap = gameState->tileMaps[gameState->currentMapIndex];
-                    float oldZoom = GetCameraZoom(lastMap);
-                    float newZoom = GetCameraZoom(map);
-                    if (!FloatEquals(oldZoom, newZoom))
-                    {
-                        TweenParams params = {};
-                        params.paramType = PARAM_TYPE_FLOAT;
-                        params.startF = oldZoom;
-                        params.endF = newZoom;
-                        params.realF  = &gameState->camera.zoom;
-                        AddTween(gameState->cameraTweenController, CreateTween(params, EaseOutCubic, 1.7f), 1);
-                    }
-                    
-                    OnPlayEvent(&gameState->cameraTweenController);
-                    gameState->currentMapIndex = i;
+                    UpdateCameraToTileMapSmooth(map, pos, i);
                 }
                 
                 updated = true;
@@ -577,6 +634,9 @@ bool8 MoveAction(IVec2 actionDir)
     }
     
     PushResult pushResult = ActionCheck(player, actionDir, CHECK_MOVE);
+    
+    UpdateSlimes();
+    
     switch(pushResult.state)
     {
         case PUSH_NONE:
@@ -609,7 +669,7 @@ bool8 MoveAction(IVec2 actionDir)
                     return false;
                 }
                 
-                MoveEntity(player, findResult.entity, nullptr, actionTilePos, MOVE_FLAT, EaseOutCubic);
+                MoveEntity(player, findResult.entity, nullptr, actionTilePos, PLAYER_MOVE_FUNC);
                 }
             else
             {
@@ -633,7 +693,7 @@ bool8 MoveAction(IVec2 actionDir)
                     {
                         return false;
                     }
-                    MoveEntity(player, attachedEntity, nullptr, newTile, MOVE_OUTER_CORNER, EaseOutCubic);
+                    MoveEntity(player, attachedEntity, nullptr, newTile, PLAYER_MOVE_FUNC);
                 }
                 else 
                 {
@@ -660,11 +720,11 @@ bool8 MoveAction(IVec2 actionDir)
                 PushResult rResult = ActionCheck(player, player->attachDir, CHECK_MOVE);
                 if (rResult.state == PUSH_BLOCKED)
                 {
-                    MoveEntity(player, pushResult.blockedEntity, nullptr, player->tilePos, MOVE_FLAT, EaseOutCubic);
+                    MoveEntity(player, pushResult.blockedEntity, nullptr, player->tilePos, PLAYER_MOVE_FUNC);
                 }
                 return true;
                 }
-            MoveEntity(player, pushResult.blockedEntity, nullptr, player->tilePos, MOVE_INNER_CORNER, EaseOutCubic);
+            MoveEntity(player, pushResult.blockedEntity, nullptr, player->tilePos, PLAYER_MOVE_FUNC);
             return true;
             }
         case PUSH_MERGED:
@@ -691,11 +751,10 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
     player->mass--;
     player->tileSize = GetSlimeSize(player);
     
-    Entity * clone = CreateSlimeClone(player->tilePos);
+    Entity * clone = CreateSlimeClone(player);
     player->attach = false;
     
     ActionCheck(player, bounceDir, CHECK_PROJECT);
-    ActionCheck(clone, -bounceDir, CHECK_PROJECT);
     
     Entity * playerAttach = GetEntity(player->attachedEntityIndex);
     Entity * cloneAttach = GetEntity(clone->attachedEntityIndex);
@@ -728,8 +787,21 @@ inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount)
             Entity * entity = GetEntity(entityIndexArray[i]);
             if (entity)
             {
-                DrawSprite(gameState->camera, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, entity->color);
-            }
+                Color color = entity->color;
+                if (entity->actionState == FREEZE_STATE)
+                {
+                    color = LIME;
+                }
+                DrawSprite(gameState->camera, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, color);
+                
+                #if 0
+                if (IsSlime(entity))
+                {
+                    DrawCircleV(Vector2Add(entity->pivot, {entity->tileSize/2, entity->tileSize/2}), 3, ColorAlpha(YELLOW, 0.8f));
+                    DrawTile(PivotToTilePos(entity->pivot, entity->tileSize), ColorAlpha(RED, 0.5f));
+                    }
+                #endif
+                }
         }
     } 
 }
@@ -771,7 +843,6 @@ inline bool8 SlimeSelection(Entity * player)
     return stateChanged;
 }
 
-// TODO: Use Tile Bitmasking
 void UpdateSprite(EntityLayer layer)
 {
     auto & entityIndexArray = gameState->entityTable[layer];
@@ -836,57 +907,15 @@ void GameplayUpdateAndRender()
         //if (gameState->camera.zoom > 10.0f) gameState->camera.zoom = 10.0f;
         if (gameState->camera.zoom < 0.1f) gameState->camera.zoom = 0.1f;
         
-        float moveSpeed = 200.0f;
-        
-        // NOTE: Camera Move
-        if (IsDown(MOUSE_RIGHT))
-        {
-            if (IsDown(UP_KEY))
-            {
-                gameState->camera.target.y -= moveSpeed * GetFrameTime();
-            }
-            if (IsDown(DOWN_KEY))
-            {
-                gameState->camera.target.y += moveSpeed * GetFrameTime();
-                
-            }
-            if (IsDown(LEFT_KEY))
-            {
-                gameState->camera.target.x -= moveSpeed * GetFrameTime();
-                
-            }
-            if (IsDown(RIGHT_KEY))
-            {
-                gameState->camera.target.x += moveSpeed * GetFrameTime();
-            }
-            
-        }
-        else
-        {
             UpdateCamera();
         }
-        
-    }
     
     // NOTE: Actions
-    {
+     {
         // NOTE: Recored if State Changes
         static bool8 stateChanged = false;
         
         Entity * player = GetEntity(gameState->playerEntityIndex);
-        
-        // NOTE: Control Action State
-        if (JustPressed(SPLIT_KEY))
-        {
-            if (player->actionState == SPLIT_STATE)
-            {
-                player->actionState = MOVE_STATE;
-            }
-            else if (player->actionState == MOVE_STATE && player->mass > 1)
-            {
-                player->actionState = SPLIT_STATE;
-            }
-        }
         
         UndoState prevState = { gameState->playerEntityIndex, gameState->entities.GetVectorSTD() };
         
@@ -898,8 +927,17 @@ void GameplayUpdateAndRender()
             {
                 case MOVE_STATE:
                 {
-                    // NOTE: read input
                     gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = false;
+                    
+                    // NOTE: read input
+                    if (JustPressed(SPLIT_KEY))
+                    {
+                        IVec2 splitDir = -player->attachDir;
+                        
+                        stateChanged = stateChanged || SplitAction(player, splitDir);
+                        
+                        break;
+                    }
                     
                     IVec2 actionDir = { 0 };
                     
@@ -936,46 +974,7 @@ void GameplayUpdateAndRender()
                     
                     break;
                 }
-                case SPLIT_STATE:
-                {
-                    // NOTE: Split Arrow Buttons
-                    gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = true;
-                    
-                    bool8 split = false;
-                    if (JustPressed(LEFT_KEY))
-                    {
-                        //  shoot left and bounce right
-                        split = SplitAction(player, { -1, 0 });
-                    }
-                    
-                    if (JustPressed(RIGHT_KEY))
-                    {
-                        //  shoot right and bounce left
-                        split = SplitAction(player, { 1, 0 });
-                    }
-                    
-                    if (JustPressed(UP_KEY))
-                    {
-                        //  shoot up and bounce down
-                        split = SplitAction(player, { 0, -1 });
-                    }
-                    
-                    if (JustPressed(DOWN_KEY))
-                    {
-                        //  shoot down and bounce up
-                        split = SplitAction(player, { 0, 1 });
-                    }
-                    
-                    if (split)
-                    {
-                        gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = false;
-                        stateChanged = stateChanged || split;
-                        player->actionState = MOVE_STATE;
-                    }
-                    break;
                 }
-                
-            }
             
             if (stateChanged && !gameState->simulating)
             {
@@ -985,7 +984,6 @@ void GameplayUpdateAndRender()
         }
         
          UpdateElectricDoor();
-        
         UpdateSlimes();
         
         // NOTE: Undo and Restart
@@ -1116,7 +1114,6 @@ void GameplayUpdateAndRender()
         EndMode2D();
         
 #if 0 // GAME_INTERNAL
-        // #if 0
         // NOTE: UI Draw Game Informations
         
         Entity * player = GetEntity(gameState->playerEntityIndex);
@@ -1126,9 +1123,9 @@ void GameplayUpdateAndRender()
         
         DrawText(TextFormat("Player pivot (%.2f, %.2f), mouse world (%.2f, %.2f)",
                             player->pivot.x, player->pivot.y, mousePos.x, mousePos.y ), 10, 200, 20, GREEN);
-        DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Entity Count: %i",
+        DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
                             centerPos.x, centerPos.y,
-                            player->mass, gameState->entities.count), 10, 140, 20, GREEN);
+                            player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
         DrawText(TextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f",
                             gameState->camera.target.x, gameState->camera.target.y,
                             gameState->camera.offset.x, gameState->camera.offset.y, gameState->camera.zoom), 10, 50, 20, RAYWHITE);
@@ -1138,6 +1135,11 @@ void GameplayUpdateAndRender()
         
         int posX = GetScreenWidth() - MeasureText("Entity Action State: FFFFFFFFFFFFFFFFFFFF", 20);
         DebugDrawPlayerActionState(player->actionState, posX, 50, 20, IntToRGBA(0x923eed));
+        
+        if (gameState->simulating)
+        {
+            DrawText("Game Simulating", gameState->screenWidth / 4, gameState->screenHeight / 4, 20, RED);
+            }
         
 #endif
         

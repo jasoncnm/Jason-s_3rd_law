@@ -115,7 +115,7 @@ void DrawSprite(Camera2D camera, Texture2D texture, Sprite & sprite, Vector2 top
     {
         // Draw a part of a texture defined by a rectangle with 'pro' parameters
         DrawTexturePro(texture,  source,  dest, { 0, 0 }, 0, color);
-    }
+        }
 }
 
 void DrawError()

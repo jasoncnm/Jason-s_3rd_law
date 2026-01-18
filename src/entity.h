@@ -47,16 +47,6 @@ enum ActionState
     FREEZE_STATE,
 };
 
-enum MoveType
-{
-    MOVE_NONE,
-    MOVE_FLAT,
-    MOVE_INNER_CORNER,
-    MOVE_OUTER_CORNER,
-    BOUNCE_FLAT,
-    MOVE_TYPE_COUNT,
-};
-
 struct Entity
 {
     

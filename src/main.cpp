@@ -135,7 +135,7 @@ SetWindowState(FLAG_WINDOW_TOPMOST);
             return -1;
         }
         
-        GenTextureMipmaps(&gameState->texture);
+         GenTextureMipmaps(&gameState->texture);
         SetTextureFilter(gameState->texture, TEXTURE_FILTER_POINT);
         gameState->currentScreen = TITLE_SCREEN;
         gameState->bgColor = ColorLerp(DARKBLUE, BLACK, 0.69f);

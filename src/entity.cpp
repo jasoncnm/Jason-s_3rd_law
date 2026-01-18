@@ -142,10 +142,11 @@ inline void DeleteEntity(Entity * entity)
 }
 
 inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * playEvent,
-                       IVec2 targetPos, MoveType moveType, float (*MoveFunc)(float))
+                       IVec2 targetPos, float (*MoveFunc)(float))
 {
     SM_ASSERT(entity->active, "entity does not exist");
     SM_ASSERT(entity->movable, "entity cannot be moved");
+    Entity old = *entity;
     
     Vector2 startPivot = GetTilePivot(entity);
     entity->tilePos = targetPos;
@@ -180,24 +181,60 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
     }
     Vector2 endPivot = GetTilePivot(entity);
     
-    switch(moveType)
+    if (Vector2Equals(startPivot, endPivot))
     {
-        case MOVE_FLAT:
+        SM_ASSERT(false, "entity not moving");
+        return;
+    }
+    
+                float speed = (MoveFunc == PLAYER_MOVE_FUNC) ? SLIME_MOVE_SPEED : BOUNCE_SPEED;
+    if (IsSlime(entity))
+    {
+         IVec2 offset = targetPos - old.tilePos;
+        
+        if ((Abs(offset).x == 0 || Abs(offset).y == 0))
         {
-            float speed = IsSlime(entity) ? SLIME_MOVE_SPEED : BOUNCE_SPEED;
-            TweenParams params = {};
-            params.paramType = PARAM_TYPE_VECTOR2;
-            params.startVec2 = startPivot;
-            params.endVec2 = endPivot;
-            params.realVec2  = &entity->pivot;
-            
-            AddTweenUnique(entity->tweenController, CreateTween(params, MoveFunc, speed));
-            break;
+            if (Abs(old.attachDir) == Abs(entity->attachDir))
+            {
+                float dist = Vector2Distance(startPivot, endPivot);
+                float tileDist = dist / MAP_TILE_SIZE;
+                
+                TweenParams params = {};
+                params.paramType = PARAM_TYPE_VECTOR2;
+                params.startVec2 = startPivot;
+                params.endVec2 = endPivot;
+                params.realVec2  = &entity->pivot;
+                AddTweenUnique(entity->tweenController, CreateTween(params, MoveFunc, speed, tileDist));
+            }
+            else
+            {
+                
+                Vector2 middlePivot = GetTilePivot(targetPos, old.tileSize, old.attachDir);
+                
+                IVec2 dir = entity->attachDir;
+                 middlePivot = Vector2Add(middlePivot, Vector2Scale({ (float)dir.x, (float)dir.y },
+                                                                          0.5f * (MAP_TILE_SIZE - entity->tileSize)));
+                TweenParams params1 = {};
+                params1.paramType = PARAM_TYPE_VECTOR2;
+                params1.startVec2 = startPivot;
+                params1.endVec2 = middlePivot;
+                params1.realVec2  = &entity->pivot;
+                
+                TweenParams params2 = {};
+                params2.paramType = PARAM_TYPE_VECTOR2;
+                params2.startVec2 = middlePivot;
+                params2.endVec2 = endPivot;
+                params2.realVec2  = &entity->pivot;
+                
+                float dist = Vector2Distance(startPivot, middlePivot);
+                float tileDist = dist / MAP_TILE_SIZE;
+                
+                uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed, tileDist));
+                AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed * 2), channel);
+                }
         }
-        case MOVE_OUTER_CORNER:
+        else
         {
-            float speed = IsSlime(entity) ? SLIME_MOVE_SPEED : BOUNCE_SPEED;
-            
             IVec2 dir = -entity->attachDir;
             Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({ (float)dir.x, (float)dir.y },
                                                                       0.5f * (MAP_TILE_SIZE + entity->tileSize)));
@@ -213,55 +250,26 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
             params2.endVec2 = endPivot;
             params2.realVec2  = &entity->pivot;
             
-             uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed * 1.5f));
+            uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed * 1.5f));
             AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed * 1.5f), channel);
             
-            break;
         }
-        case MOVE_INNER_CORNER:
-        {
-            float speed = IsSlime(entity) ? SLIME_MOVE_SPEED : BOUNCE_SPEED;
-            
-            IVec2 dir = entity->attachDir;
-            Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({ (float)dir.x, (float)dir.y },
-                                                                                                       0.5f * (MAP_TILE_SIZE - entity->tileSize)));
-            TweenParams params1 = {};
-            params1.paramType = PARAM_TYPE_VECTOR2;
-            params1.startVec2 = startPivot;
-            params1.endVec2 = middlePivot;
-            params1.realVec2  = &entity->pivot;
-            
-            TweenParams params2 = {};
-            params2.paramType = PARAM_TYPE_VECTOR2;
-            params2.startVec2 = middlePivot;
-            params2.endVec2 = endPivot;
-            params2.realVec2  = &entity->pivot;
-            
-            uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed * 2));
-            AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed * 2), channel);
-            
-            break;
         }
-        case BOUNCE_FLAT:
-        {
-            
-            float dist = Vector2Distance(startPivot, endPivot);
-            float tileDist = dist / MAP_TILE_SIZE;
-            
-            float speed = BOUNCE_SPEED;
-            
-            TweenParams params = {};
-            params.paramType = PARAM_TYPE_VECTOR2;
-            params.startVec2 = startPivot;
-            params.endVec2 = endPivot;
-            params.realVec2  = &entity->pivot;
-            
-            AddTweenUnique(entity->tweenController, CreateTween(params, MoveFunc, speed, tileDist));
-            break;
+    else
+    {
+        float dist = Vector2Distance(startPivot, endPivot);
+        float tileDist = dist / MAP_TILE_SIZE;
+        
+        TweenParams params = {};
+        params.paramType = PARAM_TYPE_VECTOR2;
+        params.startVec2 = startPivot;
+        params.endVec2 = endPivot;
+        params.realVec2  = &entity->pivot;
+        
+        AddTweenUnique(entity->tweenController, CreateTween(params, MoveFunc, speed, tileDist));
         }
-    }
     
-    // TODO: Improve Controll
+    // TODO: Improve Control
     if (!entity->tweenController.NoTweens())
     {
         if (playEvent)
@@ -567,6 +575,31 @@ inline Entity * FindAttachSlime(Entity * attachObject)
     return attachSlime;
     }
 
+inline Entity * FindBlockEntityFromTo(IVec2 from, IVec2 to, IVec2 dir)
+{
+    EntityLayer checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_PIT };
+    
+    Entity * result = nullptr;
+    for (IVec2 pos = from; ; pos += dir)
+    {
+        Entity * ent = FindEntityByLocationAndLayers(pos, checkLayers, ArrayCount(checkLayers));
+        if (ent)
+        {
+            if (ent->type == ENTITY_TYPE_GLASS && ent->broken ||
+                ent->type == ENTITY_TYPE_ELECTRIC_DOOR && !DoorBlocked(ent, dir)) continue;
+            result = ent;
+            break;
+        }
+        
+        if (pos == to)
+        {
+            break;
+        }
+    }
+    
+    return result;
+}
+
 inline void UpdateSlimes()
 {
     auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
@@ -582,43 +615,61 @@ inline void UpdateSlimes()
                 IVec2 newPos = attach->tilePos - slime->attachDir;
                 if (oldPos != newPos)
                 {
-                    if (attach->tweenController.start || attach->tweenController.playing)
+                    
+                    TweenEvent * playEvent = nullptr;
+                    if (!(attach->tweenController.start || attach->tweenController.playing) && !attach->tweenController.NoTweens())
                     {
-                        MoveEntity(slime, attach, nullptr, newPos, BOUNCE_FLAT, nullptr);
+                        playEvent = &attach->tweenController.startEvent;
                     }
-                    else if (!attach->tweenController.NoTweens())
+                    
+                    IVec2 dir = newPos - oldPos;
+                    SM_ASSERT(((dir.x != 0 && dir.y == 0) || (dir.y != 0 && dir.x == 0 )), "invalid direction");
+                    dir.x = dir.x != 0 ? Sign(dir.x) : 0;
+                    dir.y = dir.y != 0 ? Sign(dir.y) : 0;
+                    
+                    Entity * blockedEnt = FindBlockEntityFromTo(oldPos + dir, newPos, dir);
+                     if (blockedEnt)
                     {
-                        MoveEntity(slime, attach, &attach->tweenController.startEvent, newPos, BOUNCE_FLAT, nullptr);
+                        if (IsSlime(blockedEnt))
+                        {
+                            MergeSlimes(blockedEnt, slime);
+                        return;
+                        }
+                        MoveEntity(slime, blockedEnt, playEvent, blockedEnt->tilePos - dir, BLOCK_MOVE_FUNC);
                     }
-                }
+                    else 
+                    {
+                        MoveEntity(slime, attach, playEvent, newPos, BLOCK_MOVE_FUNC);
+                    }
+                    }
                 }
         }
     }
     }
 
-inline Entity * CreateSlimeClone(IVec2 tilePos)
+inline Entity * CreateSlimeClone(Entity * ent)
 {
+    IVec2 tilePos = ent->tilePos;
+    
     auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
     Entity * freeEntity = nullptr;
     for (uint32 i = 0; i < slimeEntityIndices.count; i++)
     {
-        Entity * entity = &gameState->entities[slimeEntityIndices[i]];
-        if (!entity->active)
+        Entity * slime = &gameState->entities[slimeEntityIndices[i]];
+        if (!slime->active)
         {
-            freeEntity = entity;
+        freeEntity = slime;
+            *freeEntity = *ent;
+            freeEntity->entityIndex = slimeEntityIndices[i];
+        freeEntity->active = true;
+        freeEntity->tilePos = tilePos;
+        freeEntity->type = ENTITY_TYPE_CLONE;
+        freeEntity->mass = 1;
+        freeEntity->tileSize = GetSlimeSize(freeEntity);
+        freeEntity->color = GRAY;  
         }
     }
-
-    SM_ASSERT(freeEntity, "slimes slots are full");
-
-    freeEntity->active = true;
-    freeEntity->tilePos = tilePos;
-    freeEntity->type = ENTITY_TYPE_CLONE;
-    freeEntity->mass = 1;
-    freeEntity->tileSize = GetSlimeSize(freeEntity);
-    freeEntity->color = GRAY;
-    freeEntity->attach = false;    
-
+SM_ASSERT(freeEntity, "slimes slots are full");
     return freeEntity;
     
 }
@@ -648,8 +699,10 @@ void ShiftEntities(IVec2 startPos, IVec2 bounceDir)
     }
 }
 
-inline bool8 IsProjectable(IVec2 tilePos, IVec2 pushDir)
+inline bool8 IsProjectable(Entity * projEnt, IVec2 pushDir)
 {
+    IVec2 tilePos = projEnt->tilePos;
+    
     EntityLayer checkLayers[] = { LAYER_WALL, LAYER_GLASS, LAYER_BLOCK, LAYER_PIT, LAYER_DOOR, LAYER_SLIME };
       uint32 layerCount = ArrayCount(checkLayers);
     IVec2 dirs[4] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
@@ -661,13 +714,24 @@ inline bool8 IsProjectable(IVec2 tilePos, IVec2 pushDir)
         Entity * ent = FindEntityByLocationAndLayers(tilePos + dirs[i], checkLayers, layerCount);
         if (ent)
         {
+            // NOTE: slime dose not block the block if it is attach to the block...
             if ((ent->type == ENTITY_TYPE_ELECTRIC_DOOR) &&
-                (ent->cableType != CABLE_TYPE_DOOR || !SameSide(ent, ent->tilePos, dirs[i]))
-                || (ent->type == ENTITY_TYPE_GLASS && ent->broken)
-                || (IsSlime(ent) && ent->attach && dirs[i] != pushDir))
+                (ent->cableType != CABLE_TYPE_DOOR || !SameSide(ent, ent->tilePos, dirs[i])) ||
+                (ent->type == ENTITY_TYPE_GLASS && ent->broken) ||
+                (IsSlime(ent) && 
+                 #if 0
+                 (!ent->attach || 
+                  (GetEntity(ent->attachedEntityIndex) == projEnt) ||
+                  #endif
+                  dirs[i] != pushDir
+                  #if 0
+                  )
+#endif
+                 ))
             {
                 continue;
             }
+            
             result = false;
             break;
             }
