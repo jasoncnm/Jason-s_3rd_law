@@ -37,4 +37,6 @@ jobs:
           overwrite: true
           body: "This is my release text"
           files: |
-            bin/*
+            bin/game.exe
+            bin/game_code.dll
+            bin/raylib.dll
