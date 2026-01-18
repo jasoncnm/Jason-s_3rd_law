@@ -3,6 +3,8 @@ name: Windows CI - Build C++ raylib Game
 on:
   push:
     branches: [ main ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main ]
 jobs:
@@ -17,7 +19,16 @@ jobs:
           submodules: recursive
       - uses: ilammy/msvc-dev-cmd@v1.4.1
 
-      - name: Build with build.bat
+      - name: Build The Game
         run: |
           .\scripts\msvc-build-raylib.bat
           .\scripts\msvc-build-debug.bat
+
+      - name: Upload to Release
+        if: startsWith(github.ref, 'refs/tags/') && success()
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            bin/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
