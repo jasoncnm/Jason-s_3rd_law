@@ -13,7 +13,8 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-        
+        with:
+          submodules: recursive
       - uses: ilammy/msvc-dev-cmd@v1.4.1
 
       - name: Build with build.bat
