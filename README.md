@@ -27,4 +27,4 @@ build clean
 Any code outside of ```main.cpp```, ```platform.h```, and ```win32_hot_reload.cpp``` can be recompiled and see the changes during game runtime.
 
 # Video showcase
-[link](https://www.youtube.com/watch?v=DW0J4LAYtxA&t=110s)
+[![Watch the video](https://img.youtube.com/vi/DW0J4LAYtxA/hqdefault.jpg)](https://www.youtube.com/embed/DW0J4LAYtxA)
