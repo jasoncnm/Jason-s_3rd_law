@@ -36,7 +36,6 @@ jobs:
           mkdir release/assets
           cp bin/* release/
           cp -R assets/ release/assets/
-          zip release.zip release
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
@@ -46,4 +45,4 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
           body: "This is my release text"
-          file: release.zip
+          path: release/
