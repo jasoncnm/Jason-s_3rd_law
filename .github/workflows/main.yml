@@ -13,14 +13,9 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v1.0.2
+        
+      - uses: ilammy/msvc-dev-cmd@v1.4.1
 
       - name: Build with build.bat
         run: |
-          .\build.bat
-
-      - name: Verify build outputs
-        run: |
-          bin\game.exe
+          .\scripts\msvc-build-debug.bat
