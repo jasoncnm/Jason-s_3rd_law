@@ -18,4 +18,5 @@ jobs:
 
       - name: Build with build.bat
         run: |
+          .\scripts\msvc-build-raylib.bat
           .\scripts\msvc-build-debug.bat
