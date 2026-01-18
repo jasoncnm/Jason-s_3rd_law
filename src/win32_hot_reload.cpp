@@ -1,7 +1,5 @@
 #include "platform.h"
 
-#include "WinDef.h"
-#include "winbase.h"
 #include "libloaderapi.h"
 
 // Creates a copy of the main dll, and loads that copy

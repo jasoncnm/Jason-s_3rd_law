@@ -6,6 +6,8 @@ call scripts\msvc_upgrade_cmd_64.bat
  
 call scripts\msvc-build-raylib.bat
 
-REM call scripts\msvc-build-release.bat
-
-call scripts\msvc-build-debug.bat
+if "%1" == "release" (
+	call scripts\msvc-build-release.bat
+) else if "%1" == "" (
+	call scripts\msvc-build-debug.bat
+)
