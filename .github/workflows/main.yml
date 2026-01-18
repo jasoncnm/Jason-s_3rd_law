@@ -37,7 +37,7 @@ jobs:
           cp -R assets/ release/assets/
 
       - name: Upload to Release Artifact
-        uses: softprops/upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: release-files
           path: release/
