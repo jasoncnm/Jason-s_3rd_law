@@ -21,7 +21,7 @@ hotrun.bat
 ```
 
 # Alternative Method to Run
-Go to the latest successful Actions and download and the 'release-file' artifacts. And Run 
+Go to the latest successful [Actions](https://github.com/jasoncnm/Jason-s_3rd_law/actions) and download and the 'release-file' artifacts. And Run 
 ```
 game.exe
 ```
