@@ -24,13 +24,10 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Draw Tile Grid with texture to reduce draw call
 - Create a load menu to choose save file
   - Drag and drop save file could be fun
-  - smooth pixelperfect transition
   - top down lights / spotlight rendering
   - add particles
-  - Dropdown console commands 
   - Texture filtering when zooming out (is mipmapping come handy here?)
-  - Viewport scaling IMPORTANT: DO we really need this ? TODO: YES!!
-  - Assets Managment
+  - Viewport scaling IMPORTANT: DO we really need this ? 
   - Bit masking with tile rules
 
   NOTE: done
@@ -1044,6 +1041,45 @@ void GameplayUpdateAndRender()
     } 
     
     
+    Entity * player = GetPlayer();
+    if (player->tweenController.NoTweens())
+    {
+        EntityLayer layer[] = { LAYER_PORTAL };
+        Entity * portal = FindEntityByLocationAndLayers(player->tilePos, layer, 1);
+        if (portal && portal->type == ENTITY_TYPE_TUT_PORTAL)
+        {
+            // TODO: temp
+            CleanUpGame();
+            LoadTileMapsAndEntities(*gameState, TUTORIALS_PATH);
+            gameState->currentScreen = GAME_TUT_SCREEN;
+            return;
+        }
+    }
+    else if (gameState->currentScreen == GAME_TUT_SCREEN)
+    {
+        for (uint32 i = 0; i < gameState->entityTable[LAYER_BLOCK].count; i++)
+        {
+            Entity * block = GetEntity(gameState->entityTable[LAYER_BLOCK][i]);
+            if (block && block->tweenController.NoTweens())
+            {
+            EntityLayer layer[] = { LAYER_PORTAL };
+                Entity * portal = FindEntityByLocationAndLayers(block->tilePos, layer, 1);
+                if (portal && portal->type == ENTITY_TYPE_MAIN_PORTAL)
+                {
+                    // TODO: temp
+                    CleanUpGame();
+                    LoadTileMapsAndEntities(*gameState, MAIN_PATH);
+                    gameState->currentScreen = GAME_MAIN_SCREEN;
+                    return;
+                }
+                    
+            }
+            
+        }
+        
+    }
+    
+    
     // NOTE: Arrow Setup
     {
         IVec2 centerPos = GetPlayer()->tilePos;
@@ -1080,7 +1116,7 @@ void GameplayUpdateAndRender()
              DrawTileMap(gameState->camera, map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
         }
         
-        EntityLayer orderedDrawLayers[] = { LAYER_BLOCK, LAYER_WALL, LAYER_CABLE, LAYER_PIT,  LAYER_DOOR, LAYER_SLIME, LAYER_GLASS };
+        EntityLayer orderedDrawLayers[] = { LAYER_PORTAL, LAYER_BLOCK, LAYER_WALL, LAYER_CABLE, LAYER_PIT,  LAYER_DOOR, LAYER_SLIME, LAYER_GLASS };
         
         int count = ArrayCount(orderedDrawLayers);
         DrawSpriteLayers(orderedDrawLayers, count);
@@ -1297,8 +1333,8 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
             if (GuiButton(bounds, NewGameText))
             {
-                LoadTileMapsAndEntities(*gameState);
-                gameState->currentScreen = GAMEPLAY_SCREEN;
+                LoadTileMapsAndEntities(*gameState, MAIN_PATH);
+                gameState->currentScreen = GAME_MAIN_SCREEN;
             }
             
             // TODO: Experimental features, Very breakable!!!
@@ -1313,7 +1349,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                            fileName, 100);
                 if (FileExists(fileName))
                 {
-                    LoadTileMapsAndEntities(*gameState);
+                    LoadTileMapsAndEntities(*gameState, MAIN_PATH);
                     
                     // IMPORTANT: Assumming game has only one level, where entities are not add/delete from staring the new game and saving the game
                     //            and the mapping array in gameState and electricDoorSystem are correct
@@ -1332,7 +1368,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                     }
                     
                     // memcpy(gameState->entities.elements, data, dataSize);
-                    gameState->currentScreen = GAMEPLAY_SCREEN;
+                    gameState->currentScreen = GAME_MAIN_SCREEN;
                 }
                 else
                 {
@@ -1345,7 +1381,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             if (GuiButton(bounds, TestLevel))
             {
                 LoadTestLevel(*gameState);
-                gameState->currentScreen = GAMEPLAY_SCREEN;
+                gameState->currentScreen = GAME_MAIN_SCREEN;
                 
             }
             
@@ -1381,7 +1417,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
             if (GuiButton(bounds, ContinueGameText))
             {
-                gameState->currentScreen = GAMEPLAY_SCREEN;
+                gameState->currentScreen = GAME_MAIN_SCREEN;
             }
             
             // TODO: Experimental features, Very breakable!!!
@@ -1444,9 +1480,9 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
             break;
         }
-        case GAMEPLAY_SCREEN:
+        case GAME_TUT_SCREEN:
+        case GAME_MAIN_SCREEN:
         {
-            
             if (!gameState->initialized)
             {
                 InitializeGame();                    
@@ -1458,7 +1494,6 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 gameState->currentScreen = PAUSE_MENU_SCREEN;
                 for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
             }
-            
             break;
         }
         case ENDING_SCREEN:

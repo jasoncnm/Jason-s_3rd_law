@@ -16,7 +16,8 @@
 using json = nlohmann::json;
 
 // TODO: separate world into test levels and main levels
-#define WORLD_PATH "Assets/Level_Editor/maps.world"
+#define MAIN_PATH "Assets/Level_Editor/main.world"
+#define TUTORIALS_PATH "Assets/Level_Editor/tutorials.world"
 #define LEVELS_PATH "Assets/Level_Editor/"
 #define LEVEL_2_ROOM_NAME "TileMap/Room_24.tmj"
 #define TEST_LEVEL_ONE_NAME "TileMap/Test.tmj"
@@ -28,11 +29,14 @@ using json = nlohmann::json;
 enum TileID
 {
     PLAYER_1 = 32,
-    BLOCK    = 33,
     WALL     = 34,
+    BLOCK    = 33,
     BLOCK_2  = 12,
     GLASS    = 46,
     PIT      = 35,
+    TUT_1    = 13,
+    TUT_2    = 14,
+    MAIN_PORTAL = 15,
     
     DOOR_LEFT  = 82,
     DOOR_RIGHT = 83,
@@ -97,7 +101,7 @@ struct TileMapSrc
 
 void ReloadTileMap(TileMapSrc & mapSrc);
 
-void LoadTileMapsAndEntities(GameState & state);
+void LoadTileMapsAndEntities(GameState & state, char * worldPath);
 
 
 #define LEVEL_LOADER_H

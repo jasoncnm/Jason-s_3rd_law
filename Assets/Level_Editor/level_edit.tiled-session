@@ -1,9 +1,13 @@
 {
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
     "activeFile": "TileMap/Room_17.tmj",
     "expandedProjectPaths": [
         ".",
-        "TileMap",
-        "TlieSet"
+        "TlieSet",
+        "TileMap"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -46,11 +50,11 @@
             }
         },
         "TileMap/Room_1.tmj": {
-            "scale": 0.5,
-            "selectedLayer": 2,
+            "scale": 3,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 175,
-                "y": 176
+                "x": -335.1666666666667,
+                "y": -121.5
             }
         },
         "TileMap/Room_10.tmj": {
@@ -174,11 +178,11 @@
             }
         },
         "TileMap/Room_26.tmj": {
-            "scale": 0.75,
+            "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.66666666666669,
-                "y": 176
+                "x": 703,
+                "y": 267
             }
         },
         "TileMap/Room_26.tmx": {
@@ -198,7 +202,7 @@
             }
         },
         "TileMap/Room_28.tmj": {
-            "scale": 0.5,
+            "scale": 0.75,
             "selectedLayer": 0,
             "viewCenter": {
                 "x": 176.66666666666669,
@@ -214,11 +218,11 @@
             }
         },
         "TileMap/Room_3.tmj": {
-            "scale": 0.75,
+            "scale": 3,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 219.33333333333331,
-                "y": 174.66666666666663
+                "x": -638.8333333333333,
+                "y": 505.5
             }
         },
         "TileMap/Room_30.tmj": {
@@ -286,7 +290,7 @@
             }
         },
         "TileMap/Room_38.tmj": {
-            "scale": 0.25,
+            "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
                 "x": 175,
@@ -313,8 +317,8 @@
             "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 175,
-                "y": 176
+                "x": 1207,
+                "y": -393
             }
         },
         "TileMap/Room_41.tmj": {
@@ -517,6 +521,22 @@
                 "y": 213.63636363636397
             }
         },
+        "TileMap/tutorial_1.tmj": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 208.33333333333331,
+                "y": 285.66666666666663
+            }
+        },
+        "TileMap/tutorial_2.tmj": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": -13.666666666666629,
+                "y": 285.66666666666663
+            }
+        },
         "TlieSet/tileSet.tsj": {
             "scaleInDock": 0.75,
             "scaleInEditor": 1
@@ -526,9 +546,16 @@
             "scaleInEditor": 1
         }
     },
+    "last.worldFilePath": "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor",
     "loadedWorlds": [
-        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/maps.world"
+        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/maps.world",
+        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/tutorials.world",
+        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/main.world",
+        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/tutorials.world"
     ],
+    "map.height": 11,
+    "map.lastUsedFormat": "json",
+    "map.width": 11,
     "openFiles": [
         "TileMap/Room_3.tmj",
         "TileMap/Test.tmj",
