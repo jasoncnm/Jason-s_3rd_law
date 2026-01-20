@@ -618,6 +618,15 @@ bool8 MoveAction(IVec2 actionDir)
         Entity * door = FindEntityByLocationAndLayers(currentPos, layers, ArrayCount(layers));
         if (door && DoorBlocked(door, -actionDir))
         {
+            if (actionDir == -player->attachDir)
+            {
+            PushResult rResult = ActionCheck(player, player->attachDir, CHECK_MOVE);
+            if (rResult.state != PUSH_BLOCKED)
+            {
+                    return true;
+            }
+            }
+            
             Vector2 dir = { (float)actionDir.x, (float)actionDir.y };
             Vector2 startPivot = GetTilePivot(player);
             Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale(dir, .2f * (MAP_TILE_SIZE - player->tileSize)));
@@ -756,7 +765,6 @@ bool8 MoveAction(IVec2 actionDir)
             }
         case PUSH_MERGED:
         {
-            
             MergeSlimes(pushResult.mergeEntity, player);
             return true;
         }

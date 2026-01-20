@@ -190,6 +190,7 @@ inline bool8 PowerOnCable(Entity * cable, bool8 & end)
             }
             
             cable->tilePos = cable->tilePos + offset;
+            cable->pivot = GetTilePivot(cable);
         }
         
         GetSource(cable->sourceIndex)->sourceLit = true;
