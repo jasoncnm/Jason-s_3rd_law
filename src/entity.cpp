@@ -208,10 +208,10 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
             }
             else
             {
-                
+                Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({(float)offset.x, (float)offset.y}, MAP_TILE_SIZE));
                  
                 IVec2 dir = entity->attachDir;
-                Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({ (float)dir.x, (float)dir.y },
+                 middlePivot = Vector2Add(middlePivot, Vector2Scale({ (float)dir.x, (float)dir.y },
                                                                           0.5f * (MAP_TILE_SIZE - entity->tileSize)));
                 
                 TweenParams params1 = {};
