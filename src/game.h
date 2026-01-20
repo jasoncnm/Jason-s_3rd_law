@@ -26,7 +26,7 @@
 
 #define MAX_GAMEPAD 5
 
-#define MAX_ENTITIES 5000
+#define MAX_ENTITIES 10000
 
 #define STAR_COUNT 500
 
@@ -156,7 +156,8 @@ struct GameState
     int currentMapIndex;
     int screenWidth = SCREEN_WIDTH;
     int screenHeight = SCREEN_HEIGHT;
-    GameScreen currentScreen = TITLE_SCREEN;    
+    GameScreen currentScreen = TITLE_SCREEN;
+    UndoState lastState;
     
     bool8 initialized;
     bool8 simulating = false;

@@ -560,6 +560,7 @@ inline bool8 UpdateCamera()
 
 inline void SetUndoEntities(std::vector<Entity> & undoEntities)
 {
+    gameState->entities.count = (uint32)undoEntities.size();
     for (int i = 0; i < undoEntities.size(); i++)
     {
         Entity e = undoEntities[i];
@@ -617,7 +618,36 @@ bool8 MoveAction(IVec2 actionDir)
         Entity * door = FindEntityByLocationAndLayers(currentPos, layers, ArrayCount(layers));
         if (door && DoorBlocked(door, -actionDir))
         {
-            return false;
+            Vector2 dir = { (float)actionDir.x, (float)actionDir.y };
+            Vector2 startPivot = GetTilePivot(player);
+            Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale(dir, .2f * (MAP_TILE_SIZE - player->tileSize)));
+            
+            player->attach = true;
+            player->attachedEntityIndex = door->entityIndex;
+            player->attachDir = actionDir;
+            
+            Vector2 endPivot = Vector2Subtract(GetTilePivot(player), Vector2Scale(dir, 5.0f));
+            
+            TweenParams params1 = {};
+            params1.paramType = PARAM_TYPE_VECTOR2;
+            params1.startVec2 = startPivot;
+            params1.endVec2 = middlePivot;
+            params1.realVec2  = &player->pivot;
+            
+            TweenParams params2 = {};
+            params2.paramType = PARAM_TYPE_VECTOR2;
+            params2.startVec2 = middlePivot;
+            params2.endVec2 = endPivot;
+            params2.realVec2  = &player->pivot;
+            
+            float dist = Vector2Distance(startPivot, middlePivot);
+            float tileDist = dist / MAP_TILE_SIZE;
+            
+            uint32 channel = AddTweenUnique(player->tweenController, CreateTween(params1, PLAYER_MOVE_FUNC, SLIME_MOVE_SPEED, tileDist));
+            
+            AddTween(player->tweenController, CreateTween(params2, PLAYER_MOVE_FUNC, SLIME_MOVE_SPEED * 2), channel);
+            OnPlayEvent(&player->tweenController);
+            return true;
         }
     }
     
@@ -1032,7 +1062,7 @@ void GameplayUpdateAndRender()
                 else
                 {
                     if (entity->actionState == ANIMATE_STATE) SetActionState(entity, MOVE_STATE);
-                    entity->pivot = GetTilePivot(entity);
+                    //entity->pivot = GetTilePivot(entity);
                     // entity->tweenController.HandleAnimationNotPlaying();
                 }
             } 
@@ -1044,14 +1074,36 @@ void GameplayUpdateAndRender()
     Entity * player = GetPlayer();
     if (player->tweenController.NoTweens())
     {
-        EntityLayer layer[] = { LAYER_PORTAL };
+        EntityLayer layer[] = { LAYER_BLOCK };
         Entity * portal = FindEntityByLocationAndLayers(player->tilePos, layer, 1);
         if (portal && portal->type == ENTITY_TYPE_TUT_PORTAL)
         {
             // TODO: temp
+            gameState->lastState = undoStack.back();
+            
+            portal = &gameState->lastState.undoEntities[portal->entityIndex];
+            
+            if (portal->spriteID == SPRITE_TUT_1)
+            {
+                portal->mass = 1;
+                portal->spriteID = SPRITE_BLOCK;
+                }
+            else if (portal->spriteID == SPRITE_TUT_2)
+            {
+                portal->mass = 2;
+                portal->spriteID = SPRITE_BLOCK_2;
+            }
+            
+            portal->movable = true;
+            portal->type = ENTITY_TYPE_BLOCK;
+            portal->sprite = GetSprite(portal->spriteID);
+            portal->color = WHITE;
+            
+            
             CleanUpGame();
             LoadTileMapsAndEntities(*gameState, TUTORIALS_PATH);
             gameState->currentScreen = GAME_TUT_SCREEN;
+            for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
             return;
         }
     }
@@ -1068,8 +1120,11 @@ void GameplayUpdateAndRender()
                 {
                     // TODO: temp
                     CleanUpGame();
-                    LoadTileMapsAndEntities(*gameState, MAIN_PATH);
+                     LoadTileMapsAndEntities(*gameState, MAIN_PATH);
+                    gameState->playerEntityIndex = gameState->lastState.playerIndex;
+                    SetUndoEntities(gameState->lastState.undoEntities);
                     gameState->currentScreen = GAME_MAIN_SCREEN;
+                    for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
                     return;
                 }
                     
@@ -1078,7 +1133,6 @@ void GameplayUpdateAndRender()
         }
         
     }
-    
     
     // NOTE: Arrow Setup
     {
@@ -1149,7 +1203,7 @@ void GameplayUpdateAndRender()
         
         EndMode2D();
         
-#if 0 // GAME_INTERNAL
+#if 1 // GAME_INTERNAL
         // NOTE: UI Draw Game Informations
         
         Entity * player = GetEntity(gameState->playerEntityIndex);
@@ -1218,14 +1272,17 @@ void InitializeGame()
         {
             int index = slimeEntityIndices[i];
             Entity * entity = GetEntity(index);
-            if (!entity) continue;
+            if (!entity || entity->attach) continue; 
             
-            IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
+            IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} }; 
             
             for (int j = 0; j < 4; j++)
             {
                 if (AttachSlime(entity, directions[j])) break;
             }
+            
+            entity->pivot = GetTilePivot(entity);
+            
         }
     }
     

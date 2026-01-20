@@ -148,7 +148,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
     SM_ASSERT(entity->movable, "entity cannot be moved");
     Entity old = *entity;
     
-    Vector2 startPivot = GetTilePivot(entity);
+    Vector2 startPivot = entity->pivot;
     entity->tilePos = targetPos;
     if (attachedEntity)
     {
@@ -157,7 +157,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         dir.x = dir.x == 0 ? 0 : Sign(dir.x);
         dir.y = dir.y == 0 ? 0 : Sign(dir.y);
         
-        SM_ASSERT(IsDoor(entity) || IsDoor(attachedEntity) || dir.SqrMagnitude() == 1, "Invalid bounce direction");
+        SM_ASSERT(IsDoor(entity) || IsDoor(attachedEntity) || dir.SqrMagnitude() == 1, "Invalid direction");
         
         if (IsSlime(entity))
         {
@@ -209,11 +209,11 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
             else
             {
                 
-                Vector2 middlePivot = GetTilePivot(targetPos, old.tileSize, old.attachDir);
-                
+                 
                 IVec2 dir = entity->attachDir;
-                 middlePivot = Vector2Add(middlePivot, Vector2Scale({ (float)dir.x, (float)dir.y },
+                Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({ (float)dir.x, (float)dir.y },
                                                                           0.5f * (MAP_TILE_SIZE - entity->tileSize)));
+                
                 TweenParams params1 = {};
                 params1.paramType = PARAM_TYPE_VECTOR2;
                 params1.startVec2 = startPivot;

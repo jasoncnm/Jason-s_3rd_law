@@ -348,7 +348,7 @@ void SetupEntityTable(GameState & state)
                 }
                 case ENTITY_TYPE_TUT_PORTAL:
                 {
-                    state.entityTable[LAYER_PORTAL].Add(entity->entityIndex);
+                    state.entityTable[LAYER_BLOCK].Add(entity->entityIndex);
                     break;
                 }
                 case ENTITY_TYPE_MAIN_PORTAL:
