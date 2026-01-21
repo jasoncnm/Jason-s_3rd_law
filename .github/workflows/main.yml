@@ -32,7 +32,7 @@ jobs:
         run: |
           mkdir release
           cp bin/* release/
-          cp -R assets/ release/
+          cp -R Assets/ release/
 
       - name: Upload to Release Artifact
         uses: actions/upload-artifact@v4
