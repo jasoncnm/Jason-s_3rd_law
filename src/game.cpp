@@ -715,7 +715,7 @@ bool8 MoveAction(IVec2 actionDir)
                 {
                     player = MergeSlimes(slime, player);
                 }
-                else if ((!findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
+                else if ((!findResult.has || !findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
                          Abs(player->attachDir) != Abs(actionDir))
                 {
                     IVec2 newTile = standingPlatformPos;
