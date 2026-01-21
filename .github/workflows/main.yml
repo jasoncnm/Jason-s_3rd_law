@@ -25,8 +25,7 @@ jobs:
 
       - name: Build The Game
         run: |
-          .\scripts\msvc-build-raylib.bat
-          .\scripts\msvc-build-debug.bat
+          .\build.bat release
 
       - name: Prepare Release Files
         shell: bash

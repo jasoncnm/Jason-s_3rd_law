@@ -91,6 +91,7 @@ struct Entity
     bool8 left = false, right = false, up = false, down = false;
     bool8 sourceLit = false;
     bool8 hasPower = false;
+    bool8 changed = false;
     
     bool8 active = false;
 };

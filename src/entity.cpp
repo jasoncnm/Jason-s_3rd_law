@@ -148,10 +148,13 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
     SM_ASSERT(entity->movable, "entity cannot be moved");
     Entity old = *entity;
     
+    entity->changed = true;
+    
     Vector2 startPivot = entity->pivot;
     entity->tilePos = targetPos;
     if (attachedEntity)
     {
+        attachedEntity->changed = true;
         IVec2 dir = (attachedEntity->tilePos - entity->tilePos);
         
         dir.x = dir.x == 0 ? 0 : Sign(dir.x);
@@ -359,7 +362,10 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
 {
     SM_ASSERT(mergeSlime->active && mergedSlime->active, "entity does not exist");
     SM_ASSERT(mergeSlime != mergedSlime, "Entity cannot merge itself");
-
+    
+    mergedSlime->changed = true;
+    mergeSlime->changed = true;
+    
     if (mergedSlime->entityIndex == gameState->playerEntityIndex)
     {
         mergeSlime->type = ENTITY_TYPE_PLAYER;
@@ -686,6 +692,7 @@ void ShiftEntities(IVec2 startPos, IVec2 bounceDir)
             Entity * entity = GetEntity(i);
             if (entity && entity != last && entity->movable && entity->tilePos == pos)
             {
+                entity->changed = true;
                 last = entity;
                 entity->tilePos += bounceDir;
                 empty = false;
