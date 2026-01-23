@@ -362,7 +362,7 @@ void SetupEntityTable(GameState & state)
 
 void LoadTileMapsAndEntities(GameState & state, char * worldPath)
 {
-
+    SM_TRACE("worldPath: %s", worldPath);
     unsigned int tileCountX = 0, tileCountY = 0;
     IVec2 offset = { 50 - 12, 50 - 6 };
 
@@ -397,11 +397,19 @@ void LoadTileMapsAndEntities(GameState & state, char * worldPath)
             int mapHeight = (int)map["height"] / tileWidth;
             int startPosX = (int)map["x"] / tileWidth + 1;
             int startPosY = (int)map["y"] / tileWidth + 1;
-
+            
+            std::string ID = FindFileNameFromPath(fileName).c_str();
+            // Source - https://stackoverflow.com/a
+            // Posted by Pixelchemist
+            // Retrieved 2026-01-23, License - CC BY-SA 3.0
+            std::string::size_type const p(ID.find_last_of('.'));
+            std::string mapName = ID.substr(0, p);
+            
             Map tileMap = {};
+            strcpy(tileMap.mapID, mapName.c_str());
             tileMap.tilePos = { startPosX, startPosY };
             tileMap.width = mapWidth, tileMap.height =  mapHeight;
-
+            
             state.tileMaps[index] = tileMap;
             
             if (fileName == LEVEL_2_ROOM_NAME)

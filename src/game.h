@@ -114,6 +114,7 @@ struct UndoState
 
 struct Map
 {
+    char mapID[100];
     UndoState initUndoState;
     
     Entity playerEnter;

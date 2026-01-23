@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 #include <vector>
 #include <thread>
+#include <string>
 
 //  ========================================================================
 // NOTE: Defines
@@ -154,6 +155,15 @@ void CatStrings(char *SourceA, size_t SourceACount,
     *Dest++ = 0; 
 }
 
+std::string FindFileNameFromPath(std::string path)
+{
+    // Source - https://stackoverflow.com/a
+    // Posted by Pixelchemist
+    // Retrieved 2026-01-23, License - CC BY-SA 3.0
+    
+    return path.substr(path.find_last_of("/\\") + 1);
+        
+}
 
 //  ========================================================================
 //              NOTE: Math Stuff

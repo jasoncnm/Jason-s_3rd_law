@@ -1158,7 +1158,13 @@ void GameplayUpdateAndRender()
             
             
             CleanUpGame();
-            LoadTileMapsAndEntities(*gameState, TUTORIALS_PATH);
+            
+             char * currentMapID = gameState->tileMaps[gameState->currentMapIndex].mapID;
+            
+            char worldPath[100];
+            sprintf(worldPath, "%s%s_Tutorial.world", LEVELS_PATH, currentMapID);
+            
+            LoadTileMapsAndEntities(*gameState, worldPath);
             gameState->currentScreen = GAME_TUT_SCREEN;
             for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
             return;
