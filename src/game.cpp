@@ -289,7 +289,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 else if (target->attachDir == -current.pushDir)
                 {
                     // TODO
-                    #if 0
+                    #if 1
                     CheckThings newThings = {};
                     newThings.visited = false;
                     newThings.pushDir = current.pushDir;
@@ -322,7 +322,55 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                     }
                 }
                 
-                if (IsProjectable(target, current.pushDir))
+                
+                bool isProjectable = true;
+                
+                { // NOTE: IsProjectable
+                IVec2 tilePos = target->tilePos;
+                IVec2 dirs[4] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+                for (uint32 i = 0; i < 4; i++)
+                {
+                    if (dirs[i] == -current.pushDir) continue;
+                    Entity * ent = FindEntityByLocationAndLayers(tilePos + dirs[i], checkLayers, layerCount);
+                    if (ent)
+                    {
+                        // NOTE: slime dose not block the block if it is attach to the block...
+                        if ((ent->type == ENTITY_TYPE_ELECTRIC_DOOR) &&
+                            (ent->cableType != CABLE_TYPE_DOOR || !SameSide(ent, ent->tilePos, dirs[i])) ||
+                            (ent->type == ENTITY_TYPE_GLASS && ent->broken) ||
+                            (IsSlime(ent) && (!ent->attach || dirs[i] != current.pushDir)))
+                        {
+                            
+                            continue;
+                        }
+#if 1
+                            else if (IsSlime(ent) && GetEntity(ent->attachedEntityIndex) == target)
+                        {
+                                if (dirs[i] == current.pushDir)
+                                {
+                                    // TODO: very weird edge case behavior
+                                    Entity * blockedEntity = FindEntityByLocationAndLayers(ent->tilePos + dirs[i],
+                                                                                           checkLayers, layerCount);
+                                    if (blockedEntity)
+                                    {
+                                        if (blockedEntity->type != ENTITY_TYPE_GLASS || !blockedEntity->broken)
+                                        {
+                                        current.pushResult.state = PUSH_BLOCKED;
+                                            current.pushResult.blockedEntity = target;
+                                        }
+                                        return;
+                                    }
+                                }
+                            continue;
+                        }
+#endif
+                         isProjectable = false;
+                        break;
+                    }
+                }
+                }
+                
+                if (isProjectable)
                 {
                     current.pushResult.state = PUSH_MOVED;
                     current.pushResult.pushing = true;
@@ -790,6 +838,7 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
     player->attach = false;
     
     ActionCheck(player, bounceDir, CHECK_PROJECT);
+    ActionCheck(clone, -bounceDir, CHECK_PROJECT);
     
     Entity * playerAttach = GetEntity(player->attachedEntityIndex);
     Entity * cloneAttach = GetEntity(clone->attachedEntityIndex);
@@ -1168,7 +1217,7 @@ void GameplayUpdateAndRender()
         
         ClearBackground(gameState->bgColor);
         
-        UpdateAndDrawStarFieldBG(&gameState->starFields);
+         UpdateAndDrawStarFieldBG(&gameState->starFields);
         
         BeginMode2D(gameState->camera);
         

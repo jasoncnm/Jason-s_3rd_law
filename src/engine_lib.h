@@ -13,6 +13,7 @@
 #include <cmath>
 #include <sys/stat.h>
 #include <vector>
+#include <thread>
 
 //  ========================================================================
 // NOTE: Defines

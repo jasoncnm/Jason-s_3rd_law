@@ -147,6 +147,11 @@ SetWindowState(FLAG_WINDOW_TOPMOST);
             return -1;
         }
         
+        gameState->starFields.starTexture = LoadRenderTexture(24,24);
+        BeginTextureMode(gameState->starFields.starTexture);
+        DrawCircle(12, 12, 10, WHITE);
+        EndTextureMode();
+        
          GenTextureMipmaps(&gameState->texture);
         SetTextureFilter(gameState->texture, TEXTURE_FILTER_POINT);
         gameState->currentScreen = TITLE_SCREEN;
@@ -186,5 +191,6 @@ SetWindowState(FLAG_WINDOW_TOPMOST);
         CloseAudioDevice();
         CloseWindow();
         UnloadTexture(gameState->texture);
+        UnloadRenderTexture(gameState->starFields.starTexture);
     } 
 }
