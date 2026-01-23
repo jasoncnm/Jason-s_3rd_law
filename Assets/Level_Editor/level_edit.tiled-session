@@ -1,9 +1,9 @@
 {
-    "activeFile": "C:/Users/Jason/Downloads/release-files (1)/Assets/Level_Editor/TileMap/Room_9.tmj",
+    "activeFile": "TileMap/Room_17.tmj",
     "expandedProjectPaths": [
+        ".",
         "TileMap",
-        "TlieSet",
-        "."
+        "TlieSet"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -35,57 +35,6 @@
             }
         },
         "C:/Users/Jason/Desktop/Level_Editor/TlieSet/tileSet.tsx": {
-            "scaleInDock": 1
-        },
-        "C:/Users/Jason/Downloads/release-files (1)/Assets/Level_Editor/TileMap/Room_0.tmj": {
-            "scale": 1.5,
-            "selectedLayer": 1,
-            "viewCenter": {
-                "x": 217,
-                "y": 467
-            }
-        },
-        "C:/Users/Jason/Downloads/release-files (1)/Assets/Level_Editor/TileMap/Room_28.tmj": {
-            "scale": 0.75,
-            "selectedLayer": 0,
-            "viewCenter": {
-                "x": -48.66666666666674,
-                "y": 771.3333333333333
-            }
-        },
-        "C:/Users/Jason/Downloads/release-files (1)/Assets/Level_Editor/TileMap/Room_3.tmj": {
-            "scale": 1.5,
-            "selectedLayer": 0,
-            "viewCenter": {
-                "x": -911.6666666666666,
-                "y": 374.3333333333333
-            }
-        },
-        "C:/Users/Jason/Downloads/release-files (1)/Assets/Level_Editor/TileMap/Room_40.tmj": {
-            "scale": 1,
-            "selectedLayer": 1,
-            "viewCenter": {
-                "x": 874.5,
-                "y": 510.5
-            }
-        },
-        "C:/Users/Jason/Downloads/release-files (1)/Assets/Level_Editor/TileMap/Room_48.tmj": {
-            "scale": 1,
-            "selectedLayer": 0,
-            "viewCenter": {
-                "x": 985.5,
-                "y": 618.5
-            }
-        },
-        "C:/Users/Jason/Downloads/release-files (1)/Assets/Level_Editor/TileMap/Room_9.tmj": {
-            "scale": 1,
-            "selectedLayer": 0,
-            "viewCenter": {
-                "x": -885.5,
-                "y": 158.5
-            }
-        },
-        "C:/Users/Jason/Downloads/release-files (1)/Assets/Level_Editor/TlieSet/tileSet.tsx": {
             "scaleInDock": 1
         },
         "TileMap/Room_0.tmj": {
@@ -164,8 +113,8 @@
             "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 528.3333333333333,
-                "y": 192.33333333333331
+                "x": -195.66666666666663,
+                "y": -169.66666666666663
             }
         },
         "TileMap/Room_18.tmj": {
@@ -340,7 +289,7 @@
             "scale": 0.25,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 174,
+                "x": 175,
                 "y": 176
             }
         },
@@ -578,7 +527,7 @@
         }
     },
     "loadedWorlds": [
-        "C:/Users/Jason/Downloads/release-files (1)/Assets/Level_Editor/main.world"
+        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/maps.world"
     ],
     "openFiles": [
         "TileMap/Room_3.tmj",
@@ -603,13 +552,7 @@
         "TileMap/Room_30.tmj",
         "TileMap/Room_38.tmj",
         "TileMap/Room_24.tmj",
-        "TileMap/Room_40.tmj",
-        "C:/Users/Jason/Downloads/release-files (1)/Assets/Level_Editor/TileMap/Room_3.tmj",
-        "C:/Users/Jason/Downloads/release-files (1)/Assets/Level_Editor/TileMap/Room_0.tmj",
-        "C:/Users/Jason/Downloads/release-files (1)/Assets/Level_Editor/TileMap/Room_28.tmj",
-        "C:/Users/Jason/Downloads/release-files (1)/Assets/Level_Editor/TileMap/Room_40.tmj",
-        "C:/Users/Jason/Downloads/release-files (1)/Assets/Level_Editor/TileMap/Room_48.tmj",
-        "C:/Users/Jason/Downloads/release-files (1)/Assets/Level_Editor/TileMap/Room_9.tmj"
+        "TileMap/Room_40.tmj"
     ],
     "project": "level_edit.tiled-project",
     "recentFiles": [
@@ -621,9 +564,9 @@
         "TileMap/Room_44.tmj",
         "TileMap/Room_50.tmj",
         "TileMap/Room_51.tmj",
-        "TileMap/Room_17.tmj",
-        "TileMap/Room_21.tmj",
-        "TileMap/room_43.tmj",
-        "TileMap/Room_15.tmj"
+        "TileMap/Room_40.tmj",
+        "TileMap/Room_24.tmj",
+        "TileMap/Room_38.tmj",
+        "TileMap/Room_30.tmj"
     ]
 }
