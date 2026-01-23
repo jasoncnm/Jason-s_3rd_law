@@ -190,6 +190,7 @@ inline bool8 PowerOnCable(Entity * cable, bool8 & end)
             }
             
             cable->tilePos = cable->tilePos + offset;
+            cable->pivot = GetTilePivot(cable);
         }
         
         GetSource(cable->sourceIndex)->sourceLit = true;
@@ -239,7 +240,9 @@ bool8 OnSourcePowerOn(int currentIndex)
         
         Entity * cable = GetEntity(Cable_Indices[index]);
         SM_ASSERT(cable, "entity is not active");
-
+        
+        cable->changed = true;
+        
         bool8 end = false;
         bool _open = PowerOnCable(cable, end);
         doorOpened = _open || doorOpened;
@@ -280,6 +283,8 @@ void ShutDownPower(int currentCableIndex)
         callStack.RemoveLast();
         
         Entity * cable = GetEntity(Cable_Indices[currentIndex]);
+        
+        cable->changed = true;
 
         cable->conductive = false;
         if (cable->cableType == CABLE_TYPE_CONNECTION_POINT)

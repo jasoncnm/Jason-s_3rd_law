@@ -26,7 +26,7 @@
 
 #define MAX_GAMEPAD 5
 
-#define MAX_ENTITIES 5000
+#define MAX_ENTITIES 10000
 
 #define STAR_COUNT 500
 
@@ -83,7 +83,8 @@ enum GameScreen
 {
     TITLE_SCREEN,
     MENU_SCREEN,
-    GAMEPLAY_SCREEN,
+    GAME_MAIN_SCREEN,
+    GAME_TUT_SCREEN,
     PAUSE_MENU_SCREEN,
     ENDING_SCREEN,
 };
@@ -113,6 +114,7 @@ struct UndoState
 
 struct Map
 {
+    char mapID[100];
     UndoState initUndoState;
     
     Entity playerEnter;
@@ -155,7 +157,9 @@ struct GameState
     int currentMapIndex;
     int screenWidth = SCREEN_WIDTH;
     int screenHeight = SCREEN_HEIGHT;
-    int currentScreen = TITLE_SCREEN;    
+    GameScreen currentScreen = TITLE_SCREEN;
+    UndoState lastState;
+    
     bool8 initialized;
     bool8 simulating = false;
     
@@ -217,6 +221,7 @@ static Memory * gameMemory;
 //  ========================================================================
 MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int accumulatedMass);
 PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState);
+void CleanUpGame();
 
 
 

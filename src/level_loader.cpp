@@ -211,6 +211,18 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
         
         SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
+    else if (id == TUT_1)
+    {
+        entityResult = AddEntity(ENTITY_TYPE_TUT_PORTAL, tilePos, SPRITE_TUT_1);
+    }
+    else if (id == TUT_2)
+    {
+        entityResult = AddEntity(ENTITY_TYPE_TUT_PORTAL, tilePos, SPRITE_TUT_2);
+    }
+    else if (id == MAIN_PORTAL)
+    {
+        entityResult = AddEntity(ENTITY_TYPE_MAIN_PORTAL, tilePos, SPRITE_MAIN_PORTAL);
+    }
     else
     {
         SM_ASSERT(false, "Unable to register ID (%d)", id);
@@ -334,14 +346,23 @@ void SetupEntityTable(GameState & state)
                     state.entityTable[LAYER_PIT].Add(entity->entityIndex);
                     break;
                 }
+                case ENTITY_TYPE_TUT_PORTAL:
+                {
+                    state.entityTable[LAYER_BLOCK].Add(entity->entityIndex);
+                    break;
+                }
+                case ENTITY_TYPE_MAIN_PORTAL:
+                {
+                    state.entityTable[LAYER_PORTAL].Add(entity->entityIndex);
+                }
             }
         }
     }
 }
 
-void LoadTileMapsAndEntities(GameState & state)
+void LoadTileMapsAndEntities(GameState & state, char * worldPath)
 {
-
+    SM_TRACE("worldPath: %s", worldPath);
     unsigned int tileCountX = 0, tileCountY = 0;
     IVec2 offset = { 50 - 12, 50 - 6 };
 
@@ -353,7 +374,7 @@ void LoadTileMapsAndEntities(GameState & state)
 
         state.currentMapIndex = -1;
         
-        std::ifstream f(WORLD_PATH);
+        std::ifstream f(worldPath);
         json worldData = json::parse(f);
 
         auto tileMaps = worldData["maps"];
@@ -376,11 +397,19 @@ void LoadTileMapsAndEntities(GameState & state)
             int mapHeight = (int)map["height"] / tileWidth;
             int startPosX = (int)map["x"] / tileWidth + 1;
             int startPosY = (int)map["y"] / tileWidth + 1;
-
+            
+            std::string ID = FindFileNameFromPath(fileName).c_str();
+            // Source - https://stackoverflow.com/a
+            // Posted by Pixelchemist
+            // Retrieved 2026-01-23, License - CC BY-SA 3.0
+            std::string::size_type const p(ID.find_last_of('.'));
+            std::string mapName = ID.substr(0, p);
+            
             Map tileMap = {};
+            strcpy(tileMap.mapID, mapName.c_str());
             tileMap.tilePos = { startPosX, startPosY };
             tileMap.width = mapWidth, tileMap.height =  mapHeight;
-
+            
             state.tileMaps[index] = tileMap;
             
             if (fileName == LEVEL_2_ROOM_NAME)

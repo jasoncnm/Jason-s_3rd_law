@@ -24,13 +24,10 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Draw Tile Grid with texture to reduce draw call
 - Create a load menu to choose save file
   - Drag and drop save file could be fun
-  - smooth pixelperfect transition
   - top down lights / spotlight rendering
   - add particles
-  - Dropdown console commands 
   - Texture filtering when zooming out (is mipmapping come handy here?)
-  - Viewport scaling IMPORTANT: DO we really need this ? TODO: YES!!
-  - Assets Managment
+  - Viewport scaling IMPORTANT: DO we really need this ? 
   - Bit masking with tile rules
 
   NOTE: done
@@ -292,7 +289,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 else if (target->attachDir == -current.pushDir)
                 {
                     // TODO
-                    #if 0
+                    #if 1
                     CheckThings newThings = {};
                     newThings.visited = false;
                     newThings.pushDir = current.pushDir;
@@ -325,7 +322,55 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                     }
                 }
                 
-                if (IsProjectable(target, current.pushDir))
+                
+                bool isProjectable = true;
+                
+                { // NOTE: IsProjectable
+                IVec2 tilePos = target->tilePos;
+                IVec2 dirs[4] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+                for (uint32 i = 0; i < 4; i++)
+                {
+                    if (dirs[i] == -current.pushDir) continue;
+                    Entity * ent = FindEntityByLocationAndLayers(tilePos + dirs[i], checkLayers, layerCount);
+                    if (ent)
+                    {
+                        // NOTE: slime dose not block the block if it is attach to the block...
+                        if ((ent->type == ENTITY_TYPE_ELECTRIC_DOOR) &&
+                            (ent->cableType != CABLE_TYPE_DOOR || !SameSide(ent, ent->tilePos, dirs[i])) ||
+                            (ent->type == ENTITY_TYPE_GLASS && ent->broken) ||
+                            (IsSlime(ent) && (!ent->attach || dirs[i] != current.pushDir)))
+                        {
+                            
+                            continue;
+                        }
+#if 1
+                            else if (IsSlime(ent) && GetEntity(ent->attachedEntityIndex) == target)
+                        {
+                                if (dirs[i] == current.pushDir)
+                                {
+                                    // TODO: very weird edge case behavior
+                                    Entity * blockedEntity = FindEntityByLocationAndLayers(ent->tilePos + dirs[i],
+                                                                                           checkLayers, layerCount);
+                                    if (blockedEntity)
+                                    {
+                                        if (blockedEntity->type != ENTITY_TYPE_GLASS || !blockedEntity->broken)
+                                        {
+                                        current.pushResult.state = PUSH_BLOCKED;
+                                            current.pushResult.blockedEntity = target;
+                                        }
+                                        return;
+                                    }
+                                }
+                            continue;
+                        }
+#endif
+                         isProjectable = false;
+                        break;
+                    }
+                }
+                }
+                
+                if (isProjectable)
                 {
                     current.pushResult.state = PUSH_MOVED;
                     current.pushResult.pushing = true;
@@ -563,6 +608,7 @@ inline bool8 UpdateCamera()
 
 inline void SetUndoEntities(std::vector<Entity> & undoEntities)
 {
+    gameState->entities.count = (uint32)undoEntities.size();
     for (int i = 0; i < undoEntities.size(); i++)
     {
         Entity e = undoEntities[i];
@@ -620,7 +666,45 @@ bool8 MoveAction(IVec2 actionDir)
         Entity * door = FindEntityByLocationAndLayers(currentPos, layers, ArrayCount(layers));
         if (door && DoorBlocked(door, -actionDir))
         {
-            return false;
+            if (actionDir == -player->attachDir)
+            {
+            PushResult rResult = ActionCheck(player, player->attachDir, CHECK_MOVE);
+            if (rResult.state != PUSH_BLOCKED)
+            {
+                    return true;
+            }
+            }
+            
+            Vector2 dir = { (float)actionDir.x, (float)actionDir.y };
+            Vector2 startPivot = GetTilePivot(player);
+            Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale(dir, .2f * (MAP_TILE_SIZE - player->tileSize)));
+            
+            player->attach = true;
+            player->attachedEntityIndex = door->entityIndex;
+            player->attachDir = actionDir;
+            
+            Vector2 endPivot = Vector2Subtract(GetTilePivot(player), Vector2Scale(dir, 5.0f));
+            
+            TweenParams params1 = {};
+            params1.paramType = PARAM_TYPE_VECTOR2;
+            params1.startVec2 = startPivot;
+            params1.endVec2 = middlePivot;
+            params1.realVec2  = &player->pivot;
+            
+            TweenParams params2 = {};
+            params2.paramType = PARAM_TYPE_VECTOR2;
+            params2.startVec2 = middlePivot;
+            params2.endVec2 = endPivot;
+            params2.realVec2  = &player->pivot;
+            
+            float dist = Vector2Distance(startPivot, middlePivot);
+            float tileDist = dist / MAP_TILE_SIZE;
+            
+            uint32 channel = AddTweenUnique(player->tweenController, CreateTween(params1, PLAYER_MOVE_FUNC, SLIME_MOVE_SPEED, tileDist));
+            
+            AddTween(player->tweenController, CreateTween(params2, PLAYER_MOVE_FUNC, SLIME_MOVE_SPEED * 2), channel);
+            OnPlayEvent(&player->tweenController);
+            return true;
         }
     }
     
@@ -679,7 +763,7 @@ bool8 MoveAction(IVec2 actionDir)
                 {
                     player = MergeSlimes(slime, player);
                 }
-                else if ((!findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
+                else if ((!findResult.has || !findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
                          Abs(player->attachDir) != Abs(actionDir))
                 {
                     IVec2 newTile = standingPlatformPos;
@@ -729,7 +813,6 @@ bool8 MoveAction(IVec2 actionDir)
             }
         case PUSH_MERGED:
         {
-            
             MergeSlimes(pushResult.mergeEntity, player);
             return true;
         }
@@ -755,6 +838,7 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
     player->attach = false;
     
     ActionCheck(player, bounceDir, CHECK_PROJECT);
+    ActionCheck(clone, -bounceDir, CHECK_PROJECT);
     
     Entity * playerAttach = GetEntity(player->attachedEntityIndex);
     Entity * cloneAttach = GetEntity(clone->attachedEntityIndex);
@@ -1035,7 +1119,7 @@ void GameplayUpdateAndRender()
                 else
                 {
                     if (entity->actionState == ANIMATE_STATE) SetActionState(entity, MOVE_STATE);
-                    entity->pivot = GetTilePivot(entity);
+                    //entity->pivot = GetTilePivot(entity);
                     // entity->tweenController.HandleAnimationNotPlaying();
                 }
             } 
@@ -1043,6 +1127,75 @@ void GameplayUpdateAndRender()
         
     } 
     
+    
+    Entity * player = GetPlayer();
+    if (player->tweenController.NoTweens())
+    {
+        EntityLayer layer[] = { LAYER_BLOCK };
+        Entity * portal = FindEntityByLocationAndLayers(player->tilePos, layer, 1);
+        if (portal && portal->type == ENTITY_TYPE_TUT_PORTAL)
+        {
+            // TODO: temp
+            gameState->lastState = undoStack.back();
+            
+            portal = &gameState->lastState.undoEntities[portal->entityIndex];
+            
+            if (portal->spriteID == SPRITE_TUT_1)
+            {
+                portal->mass = 1;
+                portal->spriteID = SPRITE_BLOCK;
+                }
+            else if (portal->spriteID == SPRITE_TUT_2)
+            {
+                portal->mass = 2;
+                portal->spriteID = SPRITE_BLOCK_2;
+            }
+            
+            portal->movable = true;
+            portal->type = ENTITY_TYPE_BLOCK;
+            portal->sprite = GetSprite(portal->spriteID);
+            portal->color = WHITE;
+            
+            
+            CleanUpGame();
+            
+             char * currentMapID = gameState->tileMaps[gameState->currentMapIndex].mapID;
+            
+            char worldPath[100];
+            sprintf(worldPath, "%s%s_Tutorial.world", LEVELS_PATH, currentMapID);
+            
+            LoadTileMapsAndEntities(*gameState, worldPath);
+            gameState->currentScreen = GAME_TUT_SCREEN;
+            for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
+            return;
+        }
+    }
+    else if (gameState->currentScreen == GAME_TUT_SCREEN)
+    {
+        for (uint32 i = 0; i < gameState->entityTable[LAYER_BLOCK].count; i++)
+        {
+            Entity * block = GetEntity(gameState->entityTable[LAYER_BLOCK][i]);
+            if (block && block->tweenController.NoTweens())
+            {
+            EntityLayer layer[] = { LAYER_PORTAL };
+                Entity * portal = FindEntityByLocationAndLayers(block->tilePos, layer, 1);
+                if (portal && portal->type == ENTITY_TYPE_MAIN_PORTAL)
+                {
+                    // TODO: temp
+                    CleanUpGame();
+                     LoadTileMapsAndEntities(*gameState, MAIN_PATH);
+                    gameState->playerEntityIndex = gameState->lastState.playerIndex;
+                    SetUndoEntities(gameState->lastState.undoEntities);
+                    gameState->currentScreen = GAME_MAIN_SCREEN;
+                    for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
+                    return;
+                }
+                    
+            }
+            
+        }
+        
+    }
     
     // NOTE: Arrow Setup
     {
@@ -1070,7 +1223,7 @@ void GameplayUpdateAndRender()
         
         ClearBackground(gameState->bgColor);
         
-        UpdateAndDrawStarFieldBG(&gameState->starFields);
+         UpdateAndDrawStarFieldBG(&gameState->starFields);
         
         BeginMode2D(gameState->camera);
         
@@ -1080,7 +1233,7 @@ void GameplayUpdateAndRender()
              DrawTileMap(gameState->camera, map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
         }
         
-        EntityLayer orderedDrawLayers[] = { LAYER_BLOCK, LAYER_WALL, LAYER_CABLE, LAYER_PIT,  LAYER_DOOR, LAYER_SLIME, LAYER_GLASS };
+        EntityLayer orderedDrawLayers[] = { LAYER_PORTAL, LAYER_BLOCK, LAYER_WALL, LAYER_CABLE, LAYER_PIT,  LAYER_DOOR, LAYER_SLIME, LAYER_GLASS };
         
         int count = ArrayCount(orderedDrawLayers);
         DrawSpriteLayers(orderedDrawLayers, count);
@@ -1113,7 +1266,7 @@ void GameplayUpdateAndRender()
         
         EndMode2D();
         
-#if 0 // GAME_INTERNAL
+#if 1 // GAME_INTERNAL
         // NOTE: UI Draw Game Informations
         
         Entity * player = GetEntity(gameState->playerEntityIndex);
@@ -1182,14 +1335,17 @@ void InitializeGame()
         {
             int index = slimeEntityIndices[i];
             Entity * entity = GetEntity(index);
-            if (!entity) continue;
+            if (!entity || entity->attach) continue; 
             
-            IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
+            IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} }; 
             
             for (int j = 0; j < 4; j++)
             {
                 if (AttachSlime(entity, directions[j])) break;
             }
+            
+            entity->pivot = GetTilePivot(entity);
+            
         }
     }
     
@@ -1297,8 +1453,8 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
             if (GuiButton(bounds, NewGameText))
             {
-                LoadTileMapsAndEntities(*gameState);
-                gameState->currentScreen = GAMEPLAY_SCREEN;
+                LoadTileMapsAndEntities(*gameState, MAIN_PATH);
+                gameState->currentScreen = GAME_MAIN_SCREEN;
             }
             
             // TODO: Experimental features, Very breakable!!!
@@ -1313,7 +1469,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                            fileName, 100);
                 if (FileExists(fileName))
                 {
-                    LoadTileMapsAndEntities(*gameState);
+                    LoadTileMapsAndEntities(*gameState, MAIN_PATH);
                     
                     // IMPORTANT: Assumming game has only one level, where entities are not add/delete from staring the new game and saving the game
                     //            and the mapping array in gameState and electricDoorSystem are correct
@@ -1332,7 +1488,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                     }
                     
                     // memcpy(gameState->entities.elements, data, dataSize);
-                    gameState->currentScreen = GAMEPLAY_SCREEN;
+                    gameState->currentScreen = GAME_MAIN_SCREEN;
                 }
                 else
                 {
@@ -1345,7 +1501,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             if (GuiButton(bounds, TestLevel))
             {
                 LoadTestLevel(*gameState);
-                gameState->currentScreen = GAMEPLAY_SCREEN;
+                gameState->currentScreen = GAME_MAIN_SCREEN;
                 
             }
             
@@ -1381,7 +1537,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
             if (GuiButton(bounds, ContinueGameText))
             {
-                gameState->currentScreen = GAMEPLAY_SCREEN;
+                gameState->currentScreen = GAME_MAIN_SCREEN;
             }
             
             // TODO: Experimental features, Very breakable!!!
@@ -1444,9 +1600,9 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
             break;
         }
-        case GAMEPLAY_SCREEN:
+        case GAME_TUT_SCREEN:
+        case GAME_MAIN_SCREEN:
         {
-            
             if (!gameState->initialized)
             {
                 InitializeGame();                    
@@ -1458,7 +1614,6 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 gameState->currentScreen = PAUSE_MENU_SCREEN;
                 for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
             }
-            
             break;
         }
         case ENDING_SCREEN:

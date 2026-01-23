@@ -1,5 +1,6 @@
 # Prerequisites
 *.d
+*.zip
 
 # Compiled Object files
 *.slo
@@ -43,6 +44,9 @@
 *.pdb
 *.a
 *.o
+*.rdi
+
+/data/save_data/*
 
 *.vsidx
 *.ipch
@@ -51,8 +55,5 @@ bin/.vs/game/v17/*
 setup
 jason_room_proj
 
-!/bin/game.exe
-!/bin/game_code.dll
-!/bin/raylib*
 jason_room_proj
 u_Jason

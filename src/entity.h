@@ -19,6 +19,7 @@ enum EntityLayer
     LAYER_SLIME,
     LAYER_BLOCK,
     LAYER_PIT,
+    LAYER_PORTAL,
     
     LAYER_COUNT,
 };
@@ -34,6 +35,8 @@ enum EntityType
     ENTITY_TYPE_GLASS,
     ENTITY_TYPE_ELECTRIC_DOOR,
     ENTITY_TYPE_PIT,
+    ENTITY_TYPE_TUT_PORTAL,
+    ENTITY_TYPE_MAIN_PORTAL,
     
     ENTITY_TYPE_COUNT,
 };
@@ -88,6 +91,7 @@ struct Entity
     bool8 left = false, right = false, up = false, down = false;
     bool8 sourceLit = false;
     bool8 hasPower = false;
+    bool8 changed = false;
     
     bool8 active = false;
 };

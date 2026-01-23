@@ -19,9 +19,9 @@
 
 struct StarFields
 {
+    RenderTexture starTexture;
     bool8 initialized = false;
     Vector3 stars[STAR_COUNT];
-    Vector2 starsScreenPos[STAR_COUNT];
     float flySpeed = 0.1f;    
 };
 
@@ -123,10 +123,36 @@ void DrawError()
     DrawText("SOMETHING IS WRONG PLEASE UNDO(Z) OR RESET(R)", GetScreenWidth() / 2, GetScreenHeight() / 2, 20, RED);
 }
 
+void UpdateStarField(Vector3 * stars, Vector2 * starsScreenPos, float flySpeed, float dt,
+                              int screenWidth, int screenHeight, uint32 start, uint32 end)
+{
+    for (uint32 i = start; i < end; i++)
+    {
+    // Update star's timer
+    stars[i].z -= dt * flySpeed;
+    // Calculate the screen position
+        starsScreenPos[i] =
+    {
+        screenWidth *  0.5f + stars[i].x/stars[i].z,
+        screenHeight * 0.5f + stars[i].y/stars[i].z,
+    };
+    
+        // If the star is too old, or offscreen, it dies and we make a new random one
+        if ((stars[i].z < 0.0f) || (starsScreenPos[i].x < 0) || (starsScreenPos[i].y < 0.0f) ||
+            (starsScreenPos[i].x > screenWidth) || (starsScreenPos[i].y > screenHeight))
+        {
+            stars[i].x = (float)GetRandomValue(-screenWidth / 2, screenWidth / 2);
+            stars[i].y = (float)GetRandomValue(-screenHeight / 2, screenHeight / 2);
+            stars[i].z = 1.0f;
+        }
+        
+    }
+    }
+
 // TODO: parallelize the operation
 void UpdateAndDrawStarFieldBG(StarFields * starFields)
 {
-
+    #if 1
     if (!starFields->initialized)
     {
         starFields->initialized = true;
@@ -142,46 +168,38 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields)
     }
     
     Vector3 * stars = starFields->stars;
-    Vector2 * starsScreenPos = starFields->starsScreenPos;
-    uint32 starCount = STAR_COUNT;
     float flySpeed = starFields->flySpeed;
-        
+    
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
     static float time = 0;    
     float dt = GetFrameTime();
     time += dt;
-    for (uint32 i = 0; i < starCount; i++)
+    
+    uint32 chunck = STAR_COUNT / 4;
+    
+    Vector2 sp[STAR_COUNT] = {};
+    Vector2 * starsScreenPos = sp;
+    
+    for (uint32 tid = 0; tid < 4; tid++)
     {
-        // Update star's timer
-        stars[i].z -= dt * flySpeed;
-// Calculate the screen position
-        starsScreenPos[i] =
-            {
-                screenWidth *  0.5f + stars[i].x/stars[i].z,
-                screenHeight * 0.5f + stars[i].y/stars[i].z,
-            };
-
-        // If the star is too old, or offscreen, it dies and we make a new random one
-        if ((stars[i].z < 0.0f) || (starsScreenPos[i].x < 0) || (starsScreenPos[i].y < 0.0f) ||
-            (starsScreenPos[i].x > screenWidth) || (starsScreenPos[i].y > screenHeight))
-        {
-            stars[i].x = (float)GetRandomValue(-screenWidth / 2, screenWidth / 2);
-            stars[i].y = (float)GetRandomValue(-screenHeight / 2, screenHeight / 2);
-            stars[i].z = 1.0f;
-        }
+        int start = tid * chunck;
+        int end = (tid + 1) * chunck;
+        if (end > STAR_COUNT) end = STAR_COUNT;
+        
+        UpdateStarField(stars, starsScreenPos, flySpeed,  dt, screenWidth, screenHeight,
+                        start, end);
 
     }
-
-    for (uint32 i = 0; i < starCount; i++)
+    
+for (uint32 i = 0; i < STAR_COUNT; i++)
     {
-        // Make the radius grow as the star ages
-        float radius = Lerp(stars[i].z, 1.0f, 5.0f);
+         float radius = Lerp(stars[i].z, 1, 5);
         Color color = ColorLerp(DARKPURPLE, SKYBLUE, stars[i].z);
-        // Draw the circle
         DrawCircleV(starsScreenPos[i], radius, color);
-    } 
-
+    }
+    
+    #endif
 }
 
 #define RENDER_INTERFACE_H

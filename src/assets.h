@@ -39,6 +39,9 @@ enum SpriteID
     SPRITE_GLASS_BROKEN,
     SPRITE_SLIME_1,
     SPRITE_PIT,
+    SPRITE_TUT_1,
+    SPRITE_TUT_2,
+    SPRITE_MAIN_PORTAL,
 
     SPRITE_CABLE_CONNECTION,
 
@@ -141,6 +144,27 @@ Sprite GetSprite(SpriteID spriteID)
         {
             sprite.altasOffset = { 0, 0 };
             sprite.spriteSize = { 1, 1 };
+            break;
+        }
+        case SPRITE_MAIN_PORTAL:
+        {
+            sprite.altasOffset = { 128, 32 };
+            sprite.spriteSize = { 32, 32 };
+            
+            break;
+        }
+        case SPRITE_TUT_1:
+        {
+            sprite.altasOffset = { 64, 32 };
+            sprite.spriteSize = { 32, 32 };
+            
+            break;
+        }
+        case SPRITE_TUT_2:
+        {
+            sprite.altasOffset = { 96, 32 };
+            sprite.spriteSize = { 32, 32 };
+            
             break;
         }
         case SPRITE_PIT:

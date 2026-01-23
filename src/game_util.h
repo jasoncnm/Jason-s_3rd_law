@@ -34,7 +34,6 @@ inline bool8 CheckOutOfBound(IVec2 tilePos)
     return CheckOutOfBound(tilePos.x, tilePos.y);
 }
 
-// TODO not correct
 IVec2 PixelPositionToTilePos(float x, float y)
 {
     IVec2 result;

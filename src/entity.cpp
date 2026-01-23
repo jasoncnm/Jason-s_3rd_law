@@ -148,16 +148,19 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
     SM_ASSERT(entity->movable, "entity cannot be moved");
     Entity old = *entity;
     
-    Vector2 startPivot = GetTilePivot(entity);
+    entity->changed = true;
+    
+    Vector2 startPivot = entity->pivot;
     entity->tilePos = targetPos;
     if (attachedEntity)
     {
+        attachedEntity->changed = true;
         IVec2 dir = (attachedEntity->tilePos - entity->tilePos);
         
         dir.x = dir.x == 0 ? 0 : Sign(dir.x);
         dir.y = dir.y == 0 ? 0 : Sign(dir.y);
         
-        SM_ASSERT(IsDoor(entity) || IsDoor(attachedEntity) || dir.SqrMagnitude() == 1, "Invalid bounce direction");
+        SM_ASSERT(IsDoor(entity) || IsDoor(attachedEntity) || dir.SqrMagnitude() == 1, "Invalid direction");
         
         if (IsSlime(entity))
         {
@@ -208,12 +211,12 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
             }
             else
             {
-                
-                Vector2 middlePivot = GetTilePivot(targetPos, old.tileSize, old.attachDir);
-                
+                Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({(float)offset.x, (float)offset.y}, MAP_TILE_SIZE));
+                 
                 IVec2 dir = entity->attachDir;
                  middlePivot = Vector2Add(middlePivot, Vector2Scale({ (float)dir.x, (float)dir.y },
                                                                           0.5f * (MAP_TILE_SIZE - entity->tileSize)));
+                
                 TweenParams params1 = {};
                 params1.paramType = PARAM_TYPE_VECTOR2;
                 params1.startVec2 = startPivot;
@@ -359,7 +362,10 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
 {
     SM_ASSERT(mergeSlime->active && mergedSlime->active, "entity does not exist");
     SM_ASSERT(mergeSlime != mergedSlime, "Entity cannot merge itself");
-
+    
+    mergedSlime->changed = true;
+    mergeSlime->changed = true;
+    
     if (mergedSlime->entityIndex == gameState->playerEntityIndex)
     {
         mergeSlime->type = ENTITY_TYPE_PLAYER;
@@ -644,6 +650,7 @@ inline void UpdateSlimes()
                     }
                 }
         }
+        
     }
     }
 
@@ -666,7 +673,9 @@ inline Entity * CreateSlimeClone(Entity * ent)
         freeEntity->type = ENTITY_TYPE_CLONE;
         freeEntity->mass = 1;
         freeEntity->tileSize = GetSlimeSize(freeEntity);
-        freeEntity->color = GRAY;  
+            freeEntity->color = GRAY;  
+            freeEntity->pivot = GetTilePivot(freeEntity);
+            freeEntity->changed = true;
         }
     }
 SM_ASSERT(freeEntity, "slimes slots are full");
@@ -685,6 +694,7 @@ void ShiftEntities(IVec2 startPos, IVec2 bounceDir)
             Entity * entity = GetEntity(i);
             if (entity && entity != last && entity->movable && entity->tilePos == pos)
             {
+                entity->changed = true;
                 last = entity;
                 entity->tilePos += bounceDir;
                 empty = false;
@@ -697,44 +707,4 @@ void ShiftEntities(IVec2 startPos, IVec2 bounceDir)
             break;            
         }
     }
-}
-
-inline bool8 IsProjectable(Entity * projEnt, IVec2 pushDir)
-{
-    IVec2 tilePos = projEnt->tilePos;
-    
-    EntityLayer checkLayers[] = { LAYER_WALL, LAYER_GLASS, LAYER_BLOCK, LAYER_PIT, LAYER_DOOR, LAYER_SLIME };
-      uint32 layerCount = ArrayCount(checkLayers);
-    IVec2 dirs[4] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-    
-    bool result = true;
-    for (uint32 i = 0; i < 4; i++)
-    {
-        if (dirs[i] == -pushDir) continue;
-        Entity * ent = FindEntityByLocationAndLayers(tilePos + dirs[i], checkLayers, layerCount);
-        if (ent)
-        {
-            // NOTE: slime dose not block the block if it is attach to the block...
-            if ((ent->type == ENTITY_TYPE_ELECTRIC_DOOR) &&
-                (ent->cableType != CABLE_TYPE_DOOR || !SameSide(ent, ent->tilePos, dirs[i])) ||
-                (ent->type == ENTITY_TYPE_GLASS && ent->broken) ||
-                (IsSlime(ent) && 
-                 #if 0
-                 (!ent->attach || 
-                  (GetEntity(ent->attachedEntityIndex) == projEnt) ||
-                  #endif
-                  dirs[i] != pushDir
-                  #if 0
-                  )
-#endif
-                 ))
-            {
-                continue;
-            }
-            
-            result = false;
-            break;
-            }
-    }
-    return result;
 }

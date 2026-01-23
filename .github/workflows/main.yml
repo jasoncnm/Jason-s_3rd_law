@@ -1,0 +1,42 @@
+name: Windows CI - Build C++ raylib Game
+
+permissions:
+  contents: write 
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+jobs:
+  build:
+    name: Build on Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: ilammy/msvc-dev-cmd@v1.4.1
+
+      - name: Build The Game
+        run: |
+          .\build.bat release
+
+      - name: Prepare Release Files
+        shell: bash
+        run: |
+          mkdir release
+          cp -R bin/ release/
+          cp -R Assets/ release/
+          cp hotrun.bat release/ 
+
+      - name: Upload to Release Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-files
+          path: release/
