@@ -814,10 +814,10 @@
         },
         {
             "fileName": "TileMap/Path_56.tmj",
-            "height": 96,
+            "height": 160,
             "width": 224,
             "x": 1408,
-            "y": 1024
+            "y": 992
         },
         {
             "fileName": "TileMap/Path_57.tmj",
@@ -993,6 +993,13 @@
             "width": 224,
             "x": -320,
             "y": 1600
+        },
+        {
+            "fileName": "TileMap/Path_76.tmj",
+            "height": 96,
+            "width": 224,
+            "x": 1408,
+            "y": 3904
         }
     ],
     "onlyShowAdjacentMaps": false,
