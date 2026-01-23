@@ -31,8 +31,9 @@ jobs:
         shell: bash
         run: |
           mkdir release
-          cp bin/* release/
+          cp -R bin/* release/
           cp -R Assets/ release/
+          cp hotrun.bat release/ 
 
       - name: Upload to Release Artifact
         uses: actions/upload-artifact@v4
