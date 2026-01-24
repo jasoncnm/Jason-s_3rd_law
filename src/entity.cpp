@@ -350,7 +350,7 @@ inline void SetGlassBeBroken(Entity * glass)
 
 inline float GetSlimeSize(int mass)
 {
-    return mass == 1 ? 0.5f * MAP_TILE_SIZE : 0.8f * MAP_TILE_SIZE;
+    return mass == 1 ? 0.5f * MAP_TILE_SIZE : 0.7f * MAP_TILE_SIZE;
 }
 
 inline float GetSlimeSize(Entity * slime)
