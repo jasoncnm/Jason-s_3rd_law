@@ -836,7 +836,7 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
     
     Entity * clone = CreateSlimeClone(player);
     player->attach = false;
-    
+    player->pivot = GetTilePivot(player);
     ActionCheck(player, bounceDir, CHECK_PROJECT);
     ActionCheck(clone, -bounceDir, CHECK_PROJECT);
     
