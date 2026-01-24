@@ -1021,6 +1021,20 @@
             "width": 352,
             "x": -96,
             "y": 5856
+        },
+        {
+            "fileName": "TileMap/Path_79.tmj",
+            "height": 352,
+            "width": 224,
+            "x": 256,
+            "y": 6080
+        },
+        {
+            "fileName": "TileMap/Room_59.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 480,
+            "y": 6080
         }
     ],
     "onlyShowAdjacentMaps": false,
