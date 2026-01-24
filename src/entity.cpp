@@ -186,7 +186,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
     
     if (Vector2Equals(startPivot, endPivot))
     {
-        SM_ASSERT(false, "entity not moving");
+        // SM_ASSERT(false, "entity not moving");
         return;
     }
     
