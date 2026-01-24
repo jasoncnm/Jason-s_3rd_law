@@ -1266,7 +1266,7 @@ void GameplayUpdateAndRender()
         
         EndMode2D();
         
-#if 1 // GAME_INTERNAL
+#if 0 // GAME_INTERNAL
         // NOTE: UI Draw Game Informations
         
         Entity * player = GetEntity(gameState->playerEntityIndex);
