@@ -185,21 +185,22 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                 }
                 case ENTITY_TYPE_GLASS:
                 {
-                    if (!target->broken && IsSlime(projectedEnt))
+                    if (target->broken || !IsSlime(projectedEnt))
                     {
-                        MoveEntity(projectedEnt, target, nullptr, pos - pushDir,  BLOCK_MOVE_FUNC); 
-                        return;
-                    }
                     SetGlassBeBroken(target);
                     Entity * attachSlime = FindAttachSlime(target);
-                    if (attachSlime) attachSlime->attach = false;
-                    
+                    if (attachSlime) 
+                    {
+                        attachSlime->attach = false;
+                        attachSlime->pivot = GetTilePivot(attachSlime);
+                        }
                     break;
+                    }
                 }
                 case ENTITY_TYPE_ELECTRIC_DOOR:
                 {
-                    SM_ASSERT(target->cableType == CABLE_TYPE_DOOR, "other cable type is not reachble");
-                    bool8 blocked = DoorBlocked(target, pushDir) || DoorBlocked(target, -pushDir);
+                    // SM_ASSERT(target->cableType == CABLE_TYPE_DOOR, "other cable type is not reachble");
+                    bool8 blocked = target->type == ENTITY_TYPE_GLASS || (DoorBlocked(target, pushDir) || DoorBlocked(target, -pushDir));
                     if (!blocked) break;
                 }
                 case ENTITY_TYPE_WALL:
@@ -357,8 +358,8 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                                         {
                                         current.pushResult.state = PUSH_BLOCKED;
                                             current.pushResult.blockedEntity = target;
-                                        }
                                         return;
+                                        }
                                     }
                                 }
                             continue;
