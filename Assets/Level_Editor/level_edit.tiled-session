@@ -5,9 +5,9 @@
     },
     "activeFile": "TileMap/Test.tmj",
     "expandedProjectPaths": [
+        "TlieSet",
         ".",
-        "TileMap",
-        "TlieSet"
+        "TileMap"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -565,11 +565,11 @@
             }
         },
         "TileMap/Test.tmj": {
-            "scale": 2,
+            "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 320.25,
-                "y": 320
+                "x": 540.9999999999999,
+                "y": 589
             }
         },
         "TileMap/TestRoom_2.tmj": {
