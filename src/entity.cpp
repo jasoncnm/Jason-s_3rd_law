@@ -288,7 +288,6 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         
         }
     
-    // TODO: Improve Control
     if (!entity->tweenController.NoTweens())
     {
         if (playEvent)
@@ -358,7 +357,7 @@ inline void SetActionState(Entity * entity, ActionState state)
 
 inline void SetGlassBeBroken(Entity * glass)
 {
-    SM_ASSERT(glass->active, "entity does not exist");
+    SM_ASSERT(glass && glass->active, "entity does not exist");
     
     glass->broken = true;
     glass->sprite = GetSprite(SPRITE_GLASS_BROKEN);

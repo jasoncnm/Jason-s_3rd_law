@@ -22,7 +22,10 @@ Tween CreateTween(TweenParams params, float (*Easing)(float), float animateSpeed
  void Tween::UpdateEntityVal()
 {
     SM_ASSERT(target_t, "Divide by zero");
-    
+    if (t == 0)
+    {
+        HandleEvent(startEvent);
+    }
     
     float delta = GetFrameTime() * dt;
     
@@ -33,6 +36,7 @@ Tween CreateTween(TweenParams params, float (*Easing)(float), float animateSpeed
     
     if (t > target_t)
     {
+        HandleEvent(endEvent);
         t = target_t;
     }
     
@@ -64,4 +68,44 @@ Tween CreateTween(TweenParams params, float (*Easing)(float), float animateSpeed
         }
     }
     
+}
+
+void HandleEvent(TweenEvent & event)
+{
+    if (event.controller)
+    {
+        OnPlayEvent(event.controller);
+    }
+    
+    if (event.deleteEntity)
+    {
+        OnDeleteEvent(event.deleteEntity);
+    }
+    
+    if (event.breakEntity)
+    {
+        OnBreakGlass(event.breakEntity);
+    }
+    
+    event.Reset();
+}
+
+void OnPlayEvent(TweenController * controller)
+{
+    SM_ASSERT(controller, "controller is null");
+    controller->start   = true;
+    HandleEvent(controller->startEvent);
+}
+
+
+void OnDeleteEvent(Entity * deleteEntity)
+{
+    SM_ASSERT(deleteEntity, "entity is null");
+    DeleteEntity(deleteEntity);
+}
+
+void OnBreakGlass(Entity * glass)
+{
+    SM_ASSERT(glass, "entity is null");
+    SetGlassBeBroken(glass);
 }

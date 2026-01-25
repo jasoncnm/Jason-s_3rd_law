@@ -194,7 +194,13 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     
                     MoveEntity(projectedEnt, nullptr, playEvent, target->tilePos, BLOCK_MOVE_FUNC);
                     
-                    SetGlassBeBroken(target);
+                    int channel = projectedEnt->tweenController.FindMovingChannel();
+                    
+                    Tween & current = projectedEnt->tweenController.channels[channel].last();
+                    
+                    current.endEvent.breakEntity = target;
+                    
+                    // SetGlassBeBroken(target);
                     Entity * attachSlime = FindAttachSlime(target);
                     if (attachSlime) attachSlime->attach = false;
                     

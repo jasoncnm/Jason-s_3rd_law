@@ -9,21 +9,6 @@
 #include "tween_controller.h"
 
 
-void HandleTweenEvent(TweenEvent & event)
-{
-    if (event.controller)
-    {
-        OnPlayEvent(event.controller);
-    }
-
-    if (event.deleteEntity)
-    {
-        OnDeleteEvent(event.deleteEntity);
-    }
-
-    event.Reset();
-}
-
 int TweenController::FindMovingChannel()
 {
     int result = -1;
@@ -79,20 +64,11 @@ void TweenController::Update()
                 queue.Clear();
             }
             
-            #if 0
-            if (!queue.IsEmpty())
-            {
-                if (queue[0].UpdateEntityVal())
-                    {
-                        queue.RemoveIdxAndSwap(0);
-                    }
-            }
-            #endif
             }
         
         if (NoTweens())
         {
-            HandleTweenEvent(endEvent);
+            HandleEvent(endEvent);
             Reset();
         }
         
@@ -123,17 +99,3 @@ void AddTween(TweenController & controller, Tween tween, int channel)
     SM_ERROR("Channel FULL!!");
     return 0;
     }
-
-void OnPlayEvent(TweenController * controller)
-{
-    SM_ASSERT(controller, "controller is null");
-    controller->start   = true;
-    HandleTweenEvent(controller->startEvent);
-}
-
-
-void OnDeleteEvent(Entity * deleteEntity)
-{
-    SM_ASSERT(deleteEntity, "entity is null");
-    DeleteEntity(deleteEntity);
-}

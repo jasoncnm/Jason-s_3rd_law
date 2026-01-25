@@ -7,6 +7,25 @@
    $Notice: $
    ======================================================================== */
 
+
+
+struct TweenController;
+// TODO: improve control, need start/end event per channel
+struct TweenEvent
+{
+    TweenController * controller = nullptr;
+    Entity * deleteEntity = nullptr;
+    Entity * breakEntity = nullptr;
+    
+    void Reset()
+    {
+        breakEntity = nullptr;
+        controller = nullptr;
+        deleteEntity = nullptr;
+    }
+    
+};
+
 enum ParamType
 {
     PARAM_TYPE_NONE,
@@ -33,6 +52,7 @@ struct TweenParams
             Vector2 endVec2;
             Vector2 * realVec2;
         };
+        
     };
 };
 
@@ -44,6 +64,9 @@ struct Tween
     float t = 0;
     float target_t = 1;
     float dt;
+    
+    TweenEvent startEvent;
+    TweenEvent endEvent;
 
     bool8 End()
     {
@@ -57,6 +80,16 @@ struct Tween
 };
 
 Tween CreateTween(TweenParams params, float (*Easing)(float) = nullptr, float animateSpeed = 5.0f, float target_t = 1.0f);
+
+
+// NOTE: Handle event
+void HandleEvent(TweenEvent & event);
+// NOTE: Get a play event to play    
+void OnPlayEvent(TweenController * controller);
+
+void OnDeleteEvent(Entity * deleteEntity);
+
+void OnBreakGlass(Entity * breakEntity);
 
     
 #define TWEEN_H

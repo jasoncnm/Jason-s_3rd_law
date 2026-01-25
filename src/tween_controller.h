@@ -11,27 +11,9 @@
 
 #define MAX_CHANNEL 5
 
-struct TweenController;
-
-// TODO: improve control, need start/end event per channel
-struct TweenEvent
-{
-    TweenController * controller = nullptr;
-    
-    Entity * deleteEntity = nullptr;
-    
-    
-    void Reset()
-    {
-        controller = nullptr;
-        deleteEntity = nullptr;
-        }
-    
-};
-
 struct TweenController
 {
-    using TweeningQueue = Array<Tween, 10>;
+    using TweeningQueue = Array<Tween, 20>;
 
     bool8 start   = false;
     bool8 playing = false;
@@ -66,16 +48,8 @@ struct TweenController
     
 };
 
-// NOTE: Handle event
-void HandleEvent(TweenEvent & event);
-    
 void AddTween(TweenController & controller, Tween tween, int channel = 0);
 uint32 AddTweenUnique(TweenController & controller, Tween tween);
-
-// NOTE: Get a play event to play    
-void OnPlayEvent(TweenController * controller);
-
-void OnDeleteEvent(Entity * deleteEntity);
 
 
 #define TWEEN_CONTROLLER_H
