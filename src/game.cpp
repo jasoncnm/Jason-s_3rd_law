@@ -404,10 +404,13 @@ else if (IsSlime(ent) && GetEntity(ent->attachedEntityIndex) == target)
                             }
                             else if (ent->type == ENTITY_TYPE_BLOCK && dirs[i] == current.pushDir)
                             {
-                                continue;
+                                if (current.pushEnt->type == ENTITY_TYPE_BLOCK)
+                                {
+                                    continue;
+                                }
+                                // TODO: very weird edge case behavior
                             }
-                            
-isProjectable = false;
+                            isProjectable = false;
                         break;
                     }
                 }
