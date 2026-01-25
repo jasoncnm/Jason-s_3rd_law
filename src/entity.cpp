@@ -150,7 +150,8 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
     
     entity->changed = true;
     
-    Vector2 startPivot = entity->pivot;
+    // Vector2 startPivot = entity->pivot;
+    Vector2 startPivot = GetTilePivot(entity);
     entity->tilePos = targetPos;
     if (attachedEntity)
     {
@@ -207,6 +208,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 params.startVec2 = startPivot;
                 params.endVec2 = endPivot;
                 params.realVec2  = &entity->pivot;
+                
                 AddTweenUnique(entity->tweenController, CreateTween(params, MoveFunc, speed, tileDist));
             }
             else
@@ -263,13 +265,27 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         float dist = Vector2Distance(startPivot, endPivot);
         float tileDist = dist / MAP_TILE_SIZE;
         
-        TweenParams params = {};
-        params.paramType = PARAM_TYPE_VECTOR2;
-        params.startVec2 = startPivot;
-        params.endVec2 = endPivot;
-        params.realVec2  = &entity->pivot;
+        TweenParams param = {};
+        param.paramType = PARAM_TYPE_VECTOR2;
+        param.startVec2 = startPivot;
+        param.endVec2 = endPivot;
+        param.realVec2  = &entity->pivot;
         
-        AddTweenUnique(entity->tweenController, CreateTween(params, MoveFunc, speed, tileDist));
+        int channel = entity->tweenController.FindMovingChannel();
+        
+        if (channel < 0)
+        {
+            AddTweenUnique(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist));
+        }
+        else
+        {
+            AddTween(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist), channel);
+            
+        }
+        
+        SM_TRACE("channel: %d", channel);
+        SM_TRACE("end tile pos: %d", targetPos.x);
+        
         }
     
     // TODO: Improve Control

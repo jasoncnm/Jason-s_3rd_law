@@ -106,6 +106,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
     Entity * pushEnt = checkList.last().parent->pushEnt;
     
     TweenEvent * playEvent = nullptr;
+    
     if (!pushEnt->tweenController.NoTweens())
     {
         playEvent = &pushEnt->tweenController.endEvent;
@@ -190,6 +191,9 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         MoveEntity(projectedEnt, target, nullptr, pos - pushDir,  BLOCK_MOVE_FUNC); 
                         return;
                     }
+                    
+                    MoveEntity(projectedEnt, nullptr, playEvent, target->tilePos, BLOCK_MOVE_FUNC);
+                    
                     SetGlassBeBroken(target);
                     Entity * attachSlime = FindAttachSlime(target);
                     if (attachSlime) attachSlime->attach = false;
@@ -1266,7 +1270,7 @@ void GameplayUpdateAndRender()
         
         EndMode2D();
         
-#if 1 // GAME_INTERNAL
+#if 0 // GAME_INTERNAL
         // NOTE: UI Draw Game Informations
         
         Entity * player = GetEntity(gameState->playerEntityIndex);

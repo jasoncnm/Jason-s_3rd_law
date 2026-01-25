@@ -45,6 +45,8 @@ struct TweenController
     
     // NOTE: Update Every frame
     void Update();
+    
+    int FindMovingChannel();
 
     bool8 NoTweens()
     {

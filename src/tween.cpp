@@ -19,12 +19,22 @@ Tween CreateTween(TweenParams params, float (*Easing)(float), float animateSpeed
     return tween;
 }
 
-
-bool8 Tween::UpdateEntityVal()
+ void Tween::UpdateEntityVal()
 {
     SM_ASSERT(target_t, "Divide by zero");
-
-    bool8 end = Update();
+    
+    
+    float delta = GetFrameTime() * dt;
+    
+    if (t < target_t)
+    {
+        t += delta;
+    }
+    
+    if (t > target_t)
+    {
+        t = target_t;
+    }
     
     float current_t = t / target_t;
 
@@ -54,6 +64,4 @@ bool8 Tween::UpdateEntityVal()
         }
     }
     
-    return end;
-
 }

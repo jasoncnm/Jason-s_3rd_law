@@ -24,6 +24,20 @@ void HandleTweenEvent(TweenEvent & event)
     event.Reset();
 }
 
+int TweenController::FindMovingChannel()
+{
+    int result = -1;
+    for (int i = 0; i < MAX_CHANNEL; i++)
+    {
+        if (!channels[i].IsEmpty() && channels[i].last().params.paramType == PARAM_TYPE_VECTOR2)
+        {
+            result = i;
+        }
+    }
+    
+    return result;
+}
+
 void TweenController::Reset()
 {
     start = playing = false;
@@ -47,14 +61,33 @@ void TweenController::Update()
         {
             for (int channel = 0; channel < MAX_CHANNEL; channel++)
             {
-                TweeningQueue & queue = channels[channel];
-                if (!queue.IsEmpty())
+            TweeningQueue & queue = channels[channel];
+            
+            bool end = true;
+            for (uint32 queueIdx = 0; queueIdx < queue.count; queueIdx++)
+            {
+                if (!queue[queueIdx].End())
                 {
-                    if (queue[0].UpdateEntityVal())
+                    end = false;
+                    queue[queueIdx].UpdateEntityVal();
+                    break;
+                }
+                }
+            
+            if (end)
+            {
+                queue.Clear();
+            }
+            
+            #if 0
+            if (!queue.IsEmpty())
+            {
+                if (queue[0].UpdateEntityVal())
                     {
                         queue.RemoveIdxAndSwap(0);
                     }
-                    }
+            }
+            #endif
             }
         
         if (NoTweens())
