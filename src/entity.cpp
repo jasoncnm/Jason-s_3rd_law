@@ -370,7 +370,6 @@ inline void SetGlassBeBroken(Entity * glass)
 {
     SM_ASSERT(glass && glass->active, "entity does not exist");
     
-    glass->broken = true;
     glass->sprite = GetSprite(SPRITE_GLASS_BROKEN);
 }
 
@@ -660,8 +659,19 @@ inline void UpdateSlimes()
                     dir.y = dir.y != 0 ? Sign(dir.y) : 0;
                     
                     Entity * blockedEnt = FindBlockEntityFromTo(oldPos + dir, newPos, dir);
-                     if (blockedEnt)
+                    if (blockedEnt)
                     {
+                        
+                        if ((blockedEnt->type == ENTITY_TYPE_GLASS &&
+                                 blockedEnt->broken) ||
+                            (blockedEnt->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+                             blockedEnt->cableType == CABLE_TYPE_DOOR &&
+                             DoorBlocked(blockedEnt, dir)))
+                        {
+                            continue;
+                        }
+
+                        
                         if (IsSlime(blockedEnt))
                         {
                             MergeSlimes(blockedEnt, slime);

@@ -227,6 +227,8 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     
                     current.endEvent.breakEntity = target;
                     
+                    
+                    target->broken = true;
                     // SetGlassBeBroken(target);
                     Entity * attachSlime = FindAttachSlime(target);
                     if (attachSlime) attachSlime->attach = false;
@@ -1326,6 +1328,7 @@ void GameplayUpdateAndRender()
         
         Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
         
+        #if 0
         DrawText(TextFormat("TotalLine: %d, Connection: %d, Door: %d, TotalSource: %d",
                                      Cable_Indices.count,
                                      CP_Indices.count,
@@ -1356,7 +1359,10 @@ void GameplayUpdateAndRender()
         DrawText("Arrow Direction to Shoot, R KEY to Restart, Z KEY to undo", 10, 10, 20, RAYWHITE);
         
         DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
-        
+        #endif
+        DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
+                            centerPos.x, centerPos.y,
+                            player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
         
         
         int posX = GetScreenWidth() - MeasureText("Entity Action State: FFFFFFFFFFFFFFFFFFFF", 20);
