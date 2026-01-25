@@ -13,7 +13,7 @@
 
 struct TweenController
 {
-    using TweeningQueue = Array<Tween, 20>;
+    using TweeningQueue = Array<Tween, 15>;
 
     bool8 start   = false;
     bool8 playing = false;

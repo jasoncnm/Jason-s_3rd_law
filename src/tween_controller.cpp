@@ -55,7 +55,7 @@ void TweenController::Update()
                 {
                     end = false;
                     queue[queueIdx].UpdateEntityVal();
-                    break;
+                     break;
                 }
                 }
             

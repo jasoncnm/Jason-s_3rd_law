@@ -392,8 +392,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                             
                             continue;
                         }
-#if 1
-                            else if (IsSlime(ent) && GetEntity(ent->attachedEntityIndex) == target)
+else if (IsSlime(ent) && GetEntity(ent->attachedEntityIndex) == target)
                         {
                                 if (dirs[i] == current.pushDir)
                                 {
@@ -411,9 +410,13 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                                     }
                                 }
                             continue;
-                        }
-#endif
-                         isProjectable = false;
+                            }
+                            else if (ent->type == ENTITY_TYPE_BLOCK && dirs[i] == current.pushDir)
+                            {
+                                continue;
+                            }
+                            
+isProjectable = false;
                         break;
                     }
                 }
