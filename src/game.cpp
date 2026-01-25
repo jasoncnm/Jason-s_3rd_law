@@ -107,6 +107,19 @@ inline void ProjectAndCheck(Entity * projectedEnt,
     
     TweenEvent * playEvent = nullptr;
     
+    CheckThings * thing = checkList.last().parent;
+    while(thing->parent != thing)
+    {
+        Entity * ent = thing->pushEnt;
+        
+        if (!ent->tweenController.NoTweens())
+        {
+            playEvent = &ent->tweenController.endEvent;
+            break;
+        }
+        thing = thing->parent;
+    }
+    
     if (!pushEnt->tweenController.NoTweens())
     {
         playEvent = &pushEnt->tweenController.endEvent;
@@ -148,6 +161,8 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         return;
                     }
                     
+                    Entity * attach = nullptr;
+                    
                     if (!target->attach || target->attachDir == -pushDir)
                     {
                     // NOTE one special case 
@@ -161,10 +176,11 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         second.parent = &checkList.last();
                         checkList.Add(second);
                         
-                        return;
+                        attach = target;
+                        
                     }
                     
-                    MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir,  BLOCK_MOVE_FUNC);
+                    MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,  BLOCK_MOVE_FUNC);
                         
                         return;
                     }
@@ -176,10 +192,21 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     newThings.pushEnt = projectedEnt;
                     newThings.pushResult = { false, PUSH_NONE, nullptr };
                     newThings.checkType = CHECK_NONE;
-                    newThings.parent = &newThings;
+                    newThings.parent = &checkList.last();
                     checkList.Add(newThings);
                     
-                    Entity * attach = defered ? pushEnt : target;
+                    Entity * attach = target;
+                    
+                    if (defered)
+                    {
+                        attach = pushEnt;
+                        if (!pushEnt->tweenController.NoTweens())
+                        {
+                            int channel = pushEnt->tweenController.FindMovingChannel();
+                            Tween & current = pushEnt->tweenController.channels[channel].last();
+                            playEvent = &current.endEvent;
+                        }
+                    }
                     
                     MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,  BLOCK_MOVE_FUNC);
                         return;
@@ -192,7 +219,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         return;
                     }
                     
-                    MoveEntity(projectedEnt, nullptr, playEvent, target->tilePos, BLOCK_MOVE_FUNC);
+                    MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir, BLOCK_MOVE_FUNC);
                     
                     int channel = projectedEnt->tweenController.FindMovingChannel();
                     
@@ -223,7 +250,19 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         targetPos = blockedEntity->tilePos;
                     }
                     
-                    Entity * attach = defered ? pushEnt : blockedEntity;
+                    Entity * attach = blockedEntity;
+                    
+                    if (defered)
+                    {
+                        attach = pushEnt;
+                        if (!pushEnt->tweenController.NoTweens())
+                        {
+                        int channel = pushEnt->tweenController.FindMovingChannel();
+                        Tween & current = pushEnt->tweenController.channels[channel].last();
+                            playEvent = &current.endEvent;
+                        }
+                        }
+                    
                     MoveEntity(projectedEnt, attach, playEvent, targetPos,  BLOCK_MOVE_FUNC);
                     return;
                 }
@@ -1276,7 +1315,7 @@ void GameplayUpdateAndRender()
         
         EndMode2D();
         
-#if 0 // GAME_INTERNAL
+#if  GAME_INTERNAL
         // NOTE: UI Draw Game Informations
         
         Entity * player = GetEntity(gameState->playerEntityIndex);
