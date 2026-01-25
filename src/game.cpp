@@ -1326,17 +1326,38 @@ void GameplayUpdateAndRender()
         
         Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
         
+        DrawText(TextFormat("TotalLine: %d, Connection: %d, Door: %d, TotalSource: %d",
+                                     Cable_Indices.count,
+                                     CP_Indices.count,
+                                     Door_Indices.count,
+                                     Source_Indices.count
+                                     ), 10, 280, 20, GREEN);
+        
+        DrawText(TextFormat("TotalEntities: %d, TotalWall: %d, TotalDoor: %d, TotalCable: %d, TotalGlass: %d, TotalSlime %d, TotalBlock: %d, TotalPit: %d, TotalPortal %d", gameState->entities.count,
+                                     gameState->entityTable[LAYER_WALL].count,
+                                     gameState->entityTable[LAYER_DOOR].count,
+                                     gameState->entityTable[LAYER_CABLE].count,
+                                     gameState->entityTable[LAYER_GLASS].count,
+                                     gameState->entityTable[LAYER_SLIME].count,
+                                     gameState->entityTable[LAYER_BLOCK].count,
+                                     gameState->entityTable[LAYER_PIT].count,
+                                     gameState->entityTable[LAYER_PORTAL].count
+                                     ), 10, 250, 20, GREEN);
+        
         DrawText(TextFormat("Player pivot (%.2f, %.2f), mouse world (%.2f, %.2f)",
                             player->pivot.x, player->pivot.y, mousePos.x, mousePos.y ), 10, 200, 20, GREEN);
         DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
                             centerPos.x, centerPos.y,
-                            player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
+                                     player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
+        
         DrawText(TextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f",
                             gameState->camera.target.x, gameState->camera.target.y,
                             gameState->camera.offset.x, gameState->camera.offset.y, gameState->camera.zoom), 10, 50, 20, RAYWHITE);
         DrawText("Arrow Direction to Shoot, R KEY to Restart, Z KEY to undo", 10, 10, 20, RAYWHITE);
         
         DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
+        
+        
         
         int posX = GetScreenWidth() - MeasureText("Entity Action State: FFFFFFFFFFFFFFFFFFFF", 20);
         DebugDrawPlayerActionState(player->actionState, posX, 50, 20, IntToRGBA(0x923eed));

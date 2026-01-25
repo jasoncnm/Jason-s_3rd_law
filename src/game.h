@@ -26,7 +26,7 @@
 
 #define MAX_GAMEPAD 5
 
-#define MAX_ENTITIES 10000
+#define MAX_ENTITIES 7000
 
 #define STAR_COUNT 500
 
