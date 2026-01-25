@@ -70,8 +70,12 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
             
             TweenEvent * playEvent = nullptr;
             TweenController & c = current.parent->pushEnt->tweenController;
-            if (!c.NoTweens()) playEvent = &c.endEvent;
-            
+            if (!c.NoTweens()) 
+            {
+                int channel = c.FindMovingChannel();
+                Tween & ani = c.channels[channel].last();
+                playEvent = &ani.endEvent;
+                }
             if (IsSlime(current.parent->pushEnt) && current.parent->pushEnt->attachedEntityIndex == ent->entityIndex)
             {
                 MoveEntity(ent, current.parent->pushEnt, playEvent, ent->tilePos + current.pushDir, BLOCK_MOVE_FUNC);
@@ -114,15 +118,14 @@ inline void ProjectAndCheck(Entity * projectedEnt,
         
         if (!ent->tweenController.NoTweens())
         {
-            playEvent = &ent->tweenController.endEvent;
+            int channel = ent->tweenController.FindMovingChannel();
+            Tween & current = ent->tweenController.channels[channel].last();
+            playEvent = &current.endEvent;
+            
+            // playEvent = &ent->tweenController.endEvent;
             break;
         }
         thing = thing->parent;
-    }
-    
-    if (!pushEnt->tweenController.NoTweens())
-    {
-        playEvent = &pushEnt->tweenController.endEvent;
     }
     
     bool8 defered = checkList.last().parent->pushResult.state == PROJECT_DEFERRED;
@@ -200,13 +203,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     if (defered)
                     {
                         attach = pushEnt;
-                        if (!pushEnt->tweenController.NoTweens())
-                        {
-                            int channel = pushEnt->tweenController.FindMovingChannel();
-                            Tween & current = pushEnt->tweenController.channels[channel].last();
-                            playEvent = &current.endEvent;
                         }
-                    }
                     
                     MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,  BLOCK_MOVE_FUNC);
                         return;
@@ -257,12 +254,6 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     if (defered)
                     {
                         attach = pushEnt;
-                        if (!pushEnt->tweenController.NoTweens())
-                        {
-                        int channel = pushEnt->tweenController.FindMovingChannel();
-                        Tween & current = pushEnt->tweenController.channels[channel].last();
-                            playEvent = &current.endEvent;
-                        }
                         }
                     
                     MoveEntity(projectedEnt, attach, playEvent, targetPos,  BLOCK_MOVE_FUNC);
@@ -339,8 +330,6 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 }
                 else if (target->attachDir == -current.pushDir)
                 {
-                    // TODO
-                    #if 1
                     CheckThings newThings = {};
                     newThings.visited = false;
                     newThings.pushDir = current.pushDir;
@@ -350,7 +339,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                     newThings.parent = &current;
                     checkList.Add(newThings);
                     return;
-                    #endif
+                    
                 }
                 }
             case ENTITY_TYPE_PIT:
