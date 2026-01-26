@@ -1157,14 +1157,23 @@ void GameplayUpdateAndRender()
             
         }
         
-         UpdateElectricDoor();
-        UpdateSlimes();
-        
-        if (stateChanged && !gameState->simulating)
+        if (stateChanged)
         {
             gameState->undoStack.push_back(prevPlayerIndex, prevState);
         }
         
+        UpdateElectricDoor();
+        UpdateSlimes();
+        
+    }
+    else
+    {
+        
+        UpdateElectricDoor();
+        UpdateSlimes();
+        
+    }
+    
         // NOTE: Undo and Restart
         {
             static bool8 repeat = false;
@@ -1190,8 +1199,6 @@ void GameplayUpdateAndRender()
         }
         
         
-    }
-    
     // NOTE: Simulate
     {
         gameState->simulating = false;

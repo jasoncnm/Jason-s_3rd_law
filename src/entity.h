@@ -108,29 +108,6 @@ struct FindAttachableResult
     bool8 has;
 };
 
-struct MoveSlimeUntilBlockResult
-{
-    bool8 merged = false;
-};
-
-struct BounceEntityResult
-{
-    enum BounceState
-    {
-        STOP_AT_CONTACT_POS,
-        PASS_THROUGHT_CONTACT_POS,
-        PASS_THROUGHT_CONTACT_POS_AND_BROKE_GLASSES,
-    };
-    BounceState bounceState;
-    
-    IVec2 contactPos;
-    IVec2 finalPos;
-    
-    Entity * contactEntity;
-    
-    Array<Entity *, 20> brokenGlasses;
-};
-
 
 #define ENTITY_H
 #endif
