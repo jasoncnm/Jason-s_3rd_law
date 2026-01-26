@@ -681,6 +681,8 @@ inline void UpdateSlimes()
                     }
                     else 
                     {
+                        if (slime->tweenController.playing) slime->tweenController.Reset();
+                        
                         MoveEntity(slime, attach, playEvent, newPos, BLOCK_MOVE_FUNC);
                     }
                     }

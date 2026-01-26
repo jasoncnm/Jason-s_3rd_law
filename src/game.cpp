@@ -1193,9 +1193,14 @@ void GameplayUpdateAndRender()
     {
         gameState->simulating = false;
         // NOTE: Update: Entity
-        for (uint32 i = 0; i < gameState->entities.count; i++)
+        EntityLayer simulateLayers[] = { LAYER_BLOCK, LAYER_SLIME };
+        for (uint32 idx = 0; idx < ArrayCount(simulateLayers); idx++)
         {
-            Entity * entity = GetEntity(i);
+            uint32 layer = simulateLayers[idx];
+            auto & entList = gameState->entityTable[layer];
+            for (uint32 entIdx = 0; entIdx < entList.count; entIdx++)
+            {
+                Entity * entity = GetEntity(entList[entIdx]);
             if (entity)
             {
                 if (!entity->tweenController.NoTweens())
@@ -1218,7 +1223,7 @@ void GameplayUpdateAndRender()
         }
         
     } 
-    
+    }
     
     Entity * player = GetPlayer();
     if (player->tweenController.NoTweens())

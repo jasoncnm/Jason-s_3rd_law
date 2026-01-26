@@ -177,6 +177,7 @@ struct UndoStack
 // NOTE: GameState
 struct GameState
 {
+    // TODO: Undo Stack is still too big and has very limited max undo steps
     UndoStack undoStack;
     
     Camera2D camera;
@@ -259,7 +260,6 @@ struct CheckThings
 // ----------------------------------------------------
 // NOTE: Game Globals
 // ----------------------------------------------------
-// TODO: Very piggy undo stack, each action we push a copy of the entire game entities to the stack
 
 static GameState * gameState;
 static Memory * gameMemory;
