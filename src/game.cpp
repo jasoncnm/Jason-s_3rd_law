@@ -51,6 +51,50 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 //              NOTE: Game Functions (internal)
 //  ========================================================================
 
+inline UndoState GetCurrentState()
+{
+    EntityLayer pushLayers[] = {
+        LAYER_DOOR,
+         LAYER_CABLE,
+        LAYER_GLASS,
+        LAYER_SLIME,
+        LAYER_BLOCK,
+    };
+    uint32 layerCount = ArrayCount(pushLayers);
+    
+    uint32 count = 0;
+    for (uint32 idx = 0; idx < layerCount; idx++)
+    {
+        uint32 layer = pushLayers[idx];
+        count += gameState->entityTable[layer].count;
+    }
+    
+    std::vector<Entity> entities(count);
+    uint32 index = 0;
+    for (uint32 idx = 0; idx < layerCount; idx++)
+    {
+        uint32 layer = pushLayers[idx];
+        auto & entList = gameState->entityTable[layer];
+        for (uint32 entId = 0; entId < entList.count; entId++)
+        {
+            Entity * ent = GetEntity(entList[entId]);
+            if (ent && layer == LAYER_CABLE && ent->cableType == CABLE_TYPE_CONNECT)
+            {
+                ent = nullptr;
+            }
+            
+            if (ent)
+            {
+                entities[index++] = *ent;
+            }
+        }
+    }
+    
+    UndoState state = { gameState->playerEntityIndex, entities };
+    
+    return state;
+    }
+
 inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & current)
 {
             Entity * ent = current.pushEnt;
@@ -654,20 +698,24 @@ inline bool8 UpdateCamera()
 
 inline void SetUndoEntities(std::vector<Entity> & undoEntities)
 {
-    gameState->entities.count = (uint32)undoEntities.size();
+    if (gameState->entities.count < (uint32)undoEntities.size())
+        gameState->entities.count = (uint32)undoEntities.size();
+    
     for (int i = 0; i < undoEntities.size(); i++)
     {
-        Entity e = undoEntities[i];
-        gameState->entities[i] = e;
-        gameState->entities[i].tweenController.Reset();
+        Entity & e = undoEntities[i];
+        gameState->entities[e.entityIndex] = e;
+        gameState->entities[e.entityIndex].tweenController.Reset();
         
         if (IsSlime(&e) && (e.actionState == ANIMATE_STATE || e.actionState == SPLIT_STATE))
         {
-            gameState->entities[i].actionState = MOVE_STATE;
+            gameState->entities[e.entityIndex].actionState = MOVE_STATE;
         }
         
     }
 }
+
+
 
 inline void Undo()
 {
@@ -682,9 +730,8 @@ inline void Undo()
 
 inline void Restart()
 {
-    UndoState state = { gameState->playerEntityIndex, gameState->entities.GetVectorSTD() };
-    gameState->undoStack.push_back(state);    
-    
+    UndoState state = GetCurrentState();
+    gameState->undoStack.push_back(state);
     Map & currentMap = gameState->tileMaps[gameState->currentMapIndex];
     
     UndoState & initState = currentMap.initUndoState;
@@ -1048,7 +1095,7 @@ void GameplayUpdateAndRender()
         
         Entity * player = GetEntity(gameState->playerEntityIndex);
         
-        UndoState prevState = { gameState->playerEntityIndex, gameState->entities.GetVectorSTD() };
+        UndoState prevState = GetCurrentState();
         
         // NOTE SlimeSelection
         stateChanged = SlimeSelection(player);
@@ -1185,7 +1232,14 @@ void GameplayUpdateAndRender()
             // TODO: temp
             gameState->lastState = gameState->undoStack.back();
             
-            portal = &gameState->lastState.undoEntities[portal->entityIndex];
+            for (uint32 idx = 0; idx < gameState->lastState.undoEntities.size(); idx ++)
+            {
+                Entity * e = &gameState->lastState.undoEntities[idx];
+                if (portal->entityIndex == e->entityIndex)
+                {
+                    portal = e;
+                }
+                }
             
             if (portal->spriteID == SPRITE_TUT_1)
             {
@@ -1351,8 +1405,8 @@ void GameplayUpdateAndRender()
                             gameState->camera.offset.x, gameState->camera.offset.y, gameState->camera.zoom), 10, 50, 20, RAYWHITE);
         DrawText("Arrow Direction to Shoot, R KEY to Restart, Z KEY to undo", 10, 10, 20, RAYWHITE);
         
-        DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
         #endif
+        DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
         DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
                             centerPos.x, centerPos.y,
                             player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
@@ -1547,6 +1601,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 gameState->currentScreen = GAME_MAIN_SCREEN;
             }
             
+            #if 0
             // TODO: Experimental features, Very breakable!!!
             const char * LoadGameText = "load game";
             bounds.y += 200;
@@ -1585,6 +1640,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                     SM_ERROR("faile to open file %s", fileName);                    
                 }
             };
+#endif
             
             const char * TestLevel = "test level";
             bounds.y += 200;
@@ -1630,6 +1686,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 gameState->currentScreen = GAME_MAIN_SCREEN;
             }
             
+            #if 0
             // TODO: Experimental features, Very breakable!!!
             const char * SaveGameText = "save game";
             bounds.y += 200;
@@ -1677,6 +1734,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                     }
                 } 
             }
+#endif
             
             const char * QuitMenuText = "quit to main menu";
             bounds.y += 200;
