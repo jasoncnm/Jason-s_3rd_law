@@ -732,9 +732,20 @@ void ShiftEntities(IVec2 startPos, IVec2 bounceDir)
             Entity * entity = GetEntity(i);
             if (entity && entity != last && entity->movable && entity->tilePos == pos)
             {
-                entity->changed = true;
                 last = entity;
-                entity->tilePos += bounceDir;
+                // entity->tilePos += bounceDir;
+                Entity * attach = nullptr;
+                IVec2 targetPos = entity->tilePos + bounceDir;
+                if (IsSlime(entity) && entity->attach)
+                {
+                    FindAttachableResult result = FindAttachable(targetPos + entity->attachDir, entity->attachDir);
+                    if (result.has)
+                    {
+                        attach = result.entity;
+                    }
+                }
+                
+                MoveEntity(entity, attach, nullptr, targetPos, BLOCK_MOVE_FUNC);
                 empty = false;
                 break;
             }
