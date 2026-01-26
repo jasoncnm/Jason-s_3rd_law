@@ -1419,7 +1419,6 @@ void GameplayUpdateAndRender()
         DrawText("Arrow Direction to Shoot, R KEY to Restart, Z KEY to undo", 10, 10, 20, RAYWHITE);
         
         #endif
-        DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
         DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
                             centerPos.x, centerPos.y,
                             player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
@@ -1437,6 +1436,7 @@ void GameplayUpdateAndRender()
             }
         
 #endif
+        DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
         
         EndDrawing();
     }    
