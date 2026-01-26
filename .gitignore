@@ -39,8 +39,6 @@
 /.vs
 
 .vscode/
-*.exe
-*.dll
 *.obj
 *.ilk
 *.exp
@@ -52,9 +50,6 @@
 
 /data/save_data/*
 
-*.vsidx
-*.ipch
-*.db
 setup
 jason_room_proj
 
