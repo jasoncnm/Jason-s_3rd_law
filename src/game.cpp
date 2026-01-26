@@ -51,7 +51,7 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 //              NOTE: Game Functions (internal)
 //  ========================================================================
 
-inline UndoState GetCurrentState()
+inline EntityArray GetCurrentStateEntities()
 {
     EntityLayer pushLayers[] = {
         LAYER_DOOR,
@@ -62,15 +62,17 @@ inline UndoState GetCurrentState()
     };
     uint32 layerCount = ArrayCount(pushLayers);
     
-    uint32 count = 0;
+    uint32 len = 0;
     for (uint32 idx = 0; idx < layerCount; idx++)
     {
         uint32 layer = pushLayers[idx];
-        count += gameState->entityTable[layer].count;
+         len += gameState->entityTable[layer].count;
     }
     
-    std::vector<Entity> entities(count);
-    uint32 index = 0;
+    Entity * entities =
+    (Entity *)BumpAllocArray(gameMemory->transientStorage, len, sizeof(Entity));
+    
+    uint32 i = 0;
     for (uint32 idx = 0; idx < layerCount; idx++)
     {
         uint32 layer = pushLayers[idx];
@@ -83,14 +85,12 @@ inline UndoState GetCurrentState()
                 continue;
             }
             
-            entities[index++] = ent;
+            entities[i++] = ent;
             
         }
     }
     
-    UndoState state = { gameState->playerEntityIndex, entities };
-    
-    return state;
+    return { i, entities };
     }
 
 inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & current)
@@ -704,6 +704,7 @@ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
         Entity & e = undoEntities[i];
         gameState->entities[e.entityIndex] = e;
         gameState->entities[e.entityIndex].tweenController.Reset();
+        gameState->entities[e.entityIndex].pivot = GetTilePivot(&e);
         
         if (IsSlime(&e) && (e.actionState == ANIMATE_STATE || e.actionState == SPLIT_STATE))
         {
@@ -728,8 +729,8 @@ inline void Undo()
 
 inline void Restart()
 {
-    UndoState state = GetCurrentState();
-    gameState->undoStack.push_back(state);
+     EntityArray ea = GetCurrentStateEntities();
+    gameState->undoStack.push_back(gameState->playerEntityIndex, ea);
     Map & currentMap = gameState->tileMaps[gameState->currentMapIndex];
     
     UndoState & initState = currentMap.initUndoState;
@@ -1086,14 +1087,16 @@ void GameplayUpdateAndRender()
             UpdateCamera();
         }
     
+    // NOTE: Recored if State Changes
+    bool8 stateChanged = false;
+    
     // NOTE: Actions
-     {
-        // NOTE: Recored if State Changes
-        static bool8 stateChanged = false;
+    if (!gameState->simulating) {
         
         Entity * player = GetEntity(gameState->playerEntityIndex);
         
-        UndoState prevState = GetCurrentState();
+        EntityArray prevState = GetCurrentStateEntities();
+        uint32 prevPlayerIndex = gameState->playerEntityIndex;
         
         // NOTE SlimeSelection
         stateChanged = SlimeSelection(player);
@@ -1152,15 +1155,15 @@ void GameplayUpdateAndRender()
                 }
                 }
             
-            if (stateChanged && !gameState->simulating)
-            {
-                stateChanged = false;
-                gameState->undoStack.push_back(prevState);
-                }
         }
         
          UpdateElectricDoor();
         UpdateSlimes();
+        
+        if (stateChanged && !gameState->simulating)
+        {
+            gameState->undoStack.push_back(prevPlayerIndex, prevState);
+        }
         
         // NOTE: Undo and Restart
         {
@@ -1487,8 +1490,10 @@ void InitializeGame()
     // NOTE: Initalize gameState->undoStack record
     gameState->undoStack.reset();
     
-    UndoState state = { gameState->playerEntityIndex, gameState->entities.GetVectorSTD() };
-    gameState->undoStack.push_back(state);
+    #if 0
+    EntityArray ea = GetCurrentStateEntities();
+    gameState->undoStack.push_back(gameState->playerEntityIndex, ea);
+#endif
     
     gameState->currentMapIndex = -1;
     gameState->simulating = false;

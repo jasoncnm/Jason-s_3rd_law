@@ -128,17 +128,22 @@ struct Map
     bool8 firstEnter = false;
 };
 
+struct EntityArray
+{
+    uint32 entityCount;
+    Entity * entities;
+};
+
 
 struct UndoStack
 {
     UndoState undoStack[MAX_UNDO];
-    int last = 0;
+    int last = 1;
     uint32 count = 0;
     
     UndoState & back()
     {
-        int idx = (last - 1) < 0 ? MAX_UNDO - 1 : (last - 1);
-        return undoStack[idx];
+        return undoStack[last - 1];
     }
     
     void pop_back()
@@ -147,18 +152,25 @@ struct UndoStack
         {
             last--;
             
-            if (last < 0) last = MAX_UNDO - 1;
+            if (last <= 0) last = MAX_UNDO;
             
             count--;
             
         }
     }
     
-    void push_back(UndoState & state)
+    void push_back(uint32 playerIndex, EntityArray & ea)
     {
-        undoStack[last] = state;
-        last = (last + 1) % MAX_UNDO;
-        if (++count > MAX_UNDO) count = MAX_UNDO;
+        last++;
+        count++;
+        if (last > MAX_UNDO) last = 1;
+        if (count > MAX_UNDO) count = MAX_UNDO;
+        
+        UndoState & state = undoStack[last - 1];
+        state.playerIndex = playerIndex;
+        state.undoEntities.clear();
+        state.undoEntities.insert(state.undoEntities.begin(), &ea.entities[0], &ea.entities[ea.entityCount]);
+        
          }
     
     bool empty()
@@ -168,7 +180,8 @@ struct UndoStack
     
     void reset()
     {
-        last = count = 0;
+        count = 0;
+        last = 1;
     }
     
 };
