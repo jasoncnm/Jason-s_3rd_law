@@ -507,5 +507,14 @@ float EaseInOutBounce(float x)
         : (1 + EaseOutBounce(2 * x - 1)) / 2;
 }
 
+void
+Pack32(uint32 val,uint8 *dest)
+{
+    dest[0] = (uint8)((val & 0xff000000) >> 24);
+    dest[1] = (uint8)((val & 0x00ff0000) >> 16);
+    dest[2] = (uint8)((val & 0x0000ff00) >>  8);
+    dest[3] = (uint8)((val & 0x000000ff))      ;
+}
+
 #define ENGINE_LIB_H
 #endif

@@ -7,7 +7,7 @@
    $Notice: $
    ======================================================================== */
 
-#define RAYLIB_GUI_STYLE_PATH  "src/vendor/raygui/styles/cyber/style_cyber.rgs"
+#define RAYLIB_GUI_STYLE_PATH  "Assets/UI/style_cyber.rgs"
 
 struct Arrow
 {

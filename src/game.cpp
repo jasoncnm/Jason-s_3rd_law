@@ -1471,6 +1471,19 @@ UPDATE_AND_RENDER(UpdateAndRender)
     
     gameState->bgColor = colorA;
     
+    #if 0
+    static int i = 0;
+    if (gameState->initialized)
+    {
+        std::string key = std::to_string(i);
+        
+        int hash = ComputeCRC32((unsigned char *)key.c_str(), (int)key.size()) % gameState->entities.count;
+        SM_TRACE("key: %d, hash: %d", i, hash);
+        
+        i = (i + 1) % gameState->entities.count;
+    }
+#endif
+    
     switch(gameState->currentScreen)
     {
         case TITLE_SCREEN:
