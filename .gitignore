@@ -2,6 +2,8 @@
 *.d
 *.zip
 
+/bin
+
 # Compiled Object files
 *.slo
 *.lo
@@ -49,7 +51,6 @@
 *.rdi
 
 /data/save_data/*
-/bin
 
 *.vsidx
 *.ipch
