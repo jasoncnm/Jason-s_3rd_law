@@ -48,6 +48,7 @@
 *.o
 *.rdi
 
+/data/save_data/*
 
 setup
 jason_room_proj
