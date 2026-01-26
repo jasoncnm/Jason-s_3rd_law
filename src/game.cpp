@@ -671,18 +671,19 @@ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
 
 inline void Undo()
 {
-    UndoState & undoState = undoStack.back();
+    UndoState & undoState = gameState->undoStack.back();
     gameState->playerEntityIndex = undoState.playerIndex;
     
     std::vector<Entity> & undoEntities = undoState.undoEntities;
     SetUndoEntities(undoEntities);        
-    undoStack.pop_back();
+    gameState->undoStack.pop_back();
 }
 
 
 inline void Restart()
 {
-    undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });    
+    UndoState state = { gameState->playerEntityIndex, gameState->entities.GetVectorSTD() };
+    gameState->undoStack.push_back(state);    
     
     Map & currentMap = gameState->tileMaps[gameState->currentMapIndex];
     
@@ -1109,8 +1110,8 @@ void GameplayUpdateAndRender()
             if (stateChanged && !gameState->simulating)
             {
                 stateChanged = false;
-                undoStack.push_back(prevState);
-            }
+                gameState->undoStack.push_back(prevState);
+                }
         }
         
          UpdateElectricDoor();
@@ -1123,7 +1124,7 @@ void GameplayUpdateAndRender()
             
             timeSinceLastPress -= GetFrameTime();
             
-            if (timeSinceLastPress < 0 && IsDown(UNDO_KEY) && !undoStack.empty())
+            if (timeSinceLastPress < 0 && IsDown(UNDO_KEY) && !gameState->undoStack.empty())
             {
                 // NOTE: Undo
                 Undo();
@@ -1182,7 +1183,7 @@ void GameplayUpdateAndRender()
         if (portal && portal->type == ENTITY_TYPE_TUT_PORTAL)
         {
             // TODO: temp
-            gameState->lastState = undoStack.back();
+            gameState->lastState = gameState->undoStack.back();
             
             portal = &gameState->lastState.undoEntities[portal->entityIndex];
             
@@ -1356,6 +1357,9 @@ void GameplayUpdateAndRender()
                             centerPos.x, centerPos.y,
                             player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
         
+        DrawText(TextFormat("UndoStack Count: %d, last index: %d",
+                            gameState->undoStack.count, gameState->undoStack.last - 1), 10, 170, 20, GREEN);
+        
         
         int posX = GetScreenWidth() - MeasureText("Entity Action State: FFFFFFFFFFFFFFFFFFFF", 20);
         DebugDrawPlayerActionState(player->actionState, posX, 50, 20, IntToRGBA(0x923eed));
@@ -1423,9 +1427,11 @@ void InitializeGame()
     // NOTE: SetUp Electric Door
     SetUpElectricDoor();
     
-    // NOTE: Initalize undoStack record
-    undoStack = std::vector<UndoState>();
-    undoStack.push_back({ gameState->playerEntityIndex, gameState->entities.GetVectorSTD() });
+    // NOTE: Initalize gameState->undoStack record
+    gameState->undoStack.reset();
+    
+    UndoState state = { gameState->playerEntityIndex, gameState->entities.GetVectorSTD() };
+    gameState->undoStack.push_back(state);
     
     gameState->currentMapIndex = -1;
     gameState->simulating = false;
@@ -1434,7 +1440,7 @@ void InitializeGame()
 
 void CleanUpGame()
 {
-    undoStack = std::vector<UndoState>();
+    gameState->undoStack.reset();
     CleanUpKeyMapping();
     
     gameState->initialized = false;    

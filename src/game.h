@@ -37,6 +37,8 @@
 #define CAMERA_MOVE_FUNC EaseOutCubic
 #define CAMERA_ZOOM_FUNC EaseInOutCubic
 
+#define MAX_UNDO 30
+
 constexpr float zoom_per_tile = 19.0f / 600.0f;
 constexpr float press_freq = 0.2f;
 
@@ -126,9 +128,57 @@ struct Map
     bool8 firstEnter = false;
 };
 
+
+struct UndoStack
+{
+    UndoState undoStack[MAX_UNDO];
+    int last = 0;
+    uint32 count = 0;
+    
+    UndoState & back()
+    {
+        int idx = (last - 1) < 0 ? MAX_UNDO - 1 : (last - 1);
+        return undoStack[idx];
+    }
+    
+    void pop_back()
+    {
+        if (count > 0)
+        {
+            last--;
+            
+            if (last < 0) last = MAX_UNDO - 1;
+            
+            count--;
+            
+        }
+    }
+    
+    void push_back(UndoState & state)
+    {
+        undoStack[last] = state;
+        last = (last + 1) % MAX_UNDO;
+        if (++count > MAX_UNDO) count = MAX_UNDO;
+         }
+    
+    bool empty()
+    {
+        return count == 0;
+    }
+    
+    void reset()
+    {
+        last = count = 0;
+    }
+    
+};
+
+
 // NOTE: GameState
 struct GameState
 {
+    UndoStack undoStack;
+    
     Camera2D camera;
     TweenController cameraTweenController;
     
@@ -206,12 +256,10 @@ struct CheckThings
     CheckThings * parent;
 };
 
-
 // ----------------------------------------------------
 // NOTE: Game Globals
 // ----------------------------------------------------
 // TODO: Very piggy undo stack, each action we push a copy of the entire game entities to the stack
-static std::vector<UndoState> undoStack;
 
 static GameState * gameState;
 static Memory * gameMemory;
