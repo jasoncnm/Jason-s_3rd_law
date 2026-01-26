@@ -9,19 +9,18 @@
 #include "tween_controller.h"
 
 
-void HandleTweenEvent(TweenEvent & event)
+int TweenController::FindMovingChannel()
 {
-    if (event.controller)
+    int result = -1;
+    for (int i = 0; i < MAX_CHANNEL; i++)
     {
-        OnPlayEvent(event.controller);
+        if (!channels[i].IsEmpty() && channels[i].last().params.paramType == PARAM_TYPE_VECTOR2)
+        {
+            result = i;
+        }
     }
-
-    if (event.deleteEntity)
-    {
-        OnDeleteEvent(event.deleteEntity);
-    }
-
-    event.Reset();
+    
+    return result;
 }
 
 void TweenController::Reset()
@@ -47,19 +46,29 @@ void TweenController::Update()
         {
             for (int channel = 0; channel < MAX_CHANNEL; channel++)
             {
-                TweeningQueue & queue = channels[channel];
-                if (!queue.IsEmpty())
+            TweeningQueue & queue = channels[channel];
+            
+            bool end = true;
+            for (uint32 queueIdx = 0; queueIdx < queue.count; queueIdx++)
+            {
+                if (!queue[queueIdx].End())
                 {
-                    if (queue[0].UpdateEntityVal())
-                    {
-                        queue.RemoveIdxAndSwap(0);
-                    }
-                    }
+                    end = false;
+                    queue[queueIdx].UpdateEntityVal();
+                     break;
+                }
+                }
+            
+            if (end)
+            {
+                queue.Clear();
+            }
+            
             }
         
         if (NoTweens())
         {
-            HandleTweenEvent(endEvent);
+            HandleEvent(endEvent);
             Reset();
         }
         
@@ -90,17 +99,3 @@ void AddTween(TweenController & controller, Tween tween, int channel)
     SM_ERROR("Channel FULL!!");
     return 0;
     }
-
-void OnPlayEvent(TweenController * controller)
-{
-    SM_ASSERT(controller, "controller is null");
-    controller->start   = true;
-    HandleTweenEvent(controller->startEvent);
-}
-
-
-void OnDeleteEvent(Entity * deleteEntity)
-{
-    SM_ASSERT(deleteEntity, "entity is null");
-    DeleteEntity(deleteEntity);
-}

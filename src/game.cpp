@@ -70,8 +70,12 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
             
             TweenEvent * playEvent = nullptr;
             TweenController & c = current.parent->pushEnt->tweenController;
-            if (!c.NoTweens()) playEvent = &c.endEvent;
-            
+            if (!c.NoTweens()) 
+            {
+                int channel = c.FindMovingChannel();
+                Tween & ani = c.channels[channel].last();
+                playEvent = &ani.endEvent;
+                }
             if (IsSlime(current.parent->pushEnt) && current.parent->pushEnt->attachedEntityIndex == ent->entityIndex)
             {
                 MoveEntity(ent, current.parent->pushEnt, playEvent, ent->tilePos + current.pushDir, BLOCK_MOVE_FUNC);
@@ -106,9 +110,22 @@ inline void ProjectAndCheck(Entity * projectedEnt,
     Entity * pushEnt = checkList.last().parent->pushEnt;
     
     TweenEvent * playEvent = nullptr;
-    if (!pushEnt->tweenController.NoTweens())
+    
+    CheckThings * thing = checkList.last().parent;
+    while(thing->parent != thing)
     {
-        playEvent = &pushEnt->tweenController.endEvent;
+        Entity * ent = thing->pushEnt;
+        
+        if (!ent->tweenController.NoTweens())
+        {
+            int channel = ent->tweenController.FindMovingChannel();
+            Tween & current = ent->tweenController.channels[channel].last();
+            playEvent = &current.endEvent;
+            
+            // playEvent = &ent->tweenController.endEvent;
+            break;
+        }
+        thing = thing->parent;
     }
     
     bool8 defered = checkList.last().parent->pushResult.state == PROJECT_DEFERRED;
@@ -147,6 +164,8 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         return;
                     }
                     
+                    Entity * attach = nullptr;
+                    
                     if (!target->attach || target->attachDir == -pushDir)
                     {
                     // NOTE one special case 
@@ -160,10 +179,11 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         second.parent = &checkList.last();
                         checkList.Add(second);
                         
-                        return;
+                        attach = target;
+                        
                     }
                     
-                    MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir,  BLOCK_MOVE_FUNC);
+                    MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,  BLOCK_MOVE_FUNC);
                         
                         return;
                     }
@@ -175,10 +195,15 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     newThings.pushEnt = projectedEnt;
                     newThings.pushResult = { false, PUSH_NONE, nullptr };
                     newThings.checkType = CHECK_NONE;
-                    newThings.parent = &newThings;
+                    newThings.parent = &checkList.last();
                     checkList.Add(newThings);
                     
-                    Entity * attach = defered ? pushEnt : target;
+                    Entity * attach = target;
+                    
+                    if (defered)
+                    {
+                        attach = pushEnt;
+                        }
                     
                     MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,  BLOCK_MOVE_FUNC);
                         return;
@@ -190,7 +215,18 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         MoveEntity(projectedEnt, target, nullptr, pos - pushDir,  BLOCK_MOVE_FUNC); 
                         return;
                     }
-                    SetGlassBeBroken(target);
+                    
+                    MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir, BLOCK_MOVE_FUNC);
+                    
+                    int channel = projectedEnt->tweenController.FindMovingChannel();
+                    
+                    Tween & current = projectedEnt->tweenController.channels[channel].last();
+                    
+                    current.endEvent.breakEntity = target;
+                    
+                    
+                    target->broken = true;
+                    // SetGlassBeBroken(target);
                     Entity * attachSlime = FindAttachSlime(target);
                     if (attachSlime) attachSlime->attach = false;
                     
@@ -213,7 +249,13 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         targetPos = blockedEntity->tilePos;
                     }
                     
-                    Entity * attach = defered ? pushEnt : blockedEntity;
+                    Entity * attach = blockedEntity;
+                    
+                    if (defered)
+                    {
+                        attach = pushEnt;
+                        }
+                    
                     MoveEntity(projectedEnt, attach, playEvent, targetPos,  BLOCK_MOVE_FUNC);
                     return;
                 }
@@ -288,8 +330,6 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 }
                 else if (target->attachDir == -current.pushDir)
                 {
-                    // TODO
-                    #if 1
                     CheckThings newThings = {};
                     newThings.visited = false;
                     newThings.pushDir = current.pushDir;
@@ -299,7 +339,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                     newThings.parent = &current;
                     checkList.Add(newThings);
                     return;
-                    #endif
+                    
                 }
                 }
             case ENTITY_TYPE_PIT:
@@ -343,8 +383,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                             
                             continue;
                         }
-#if 1
-                            else if (IsSlime(ent) && GetEntity(ent->attachedEntityIndex) == target)
+else if (IsSlime(ent) && GetEntity(ent->attachedEntityIndex) == target)
                         {
                                 if (dirs[i] == current.pushDir)
                                 {
@@ -362,9 +401,16 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                                     }
                                 }
                             continue;
-                        }
-#endif
-                         isProjectable = false;
+                            }
+                            else if (ent->type == ENTITY_TYPE_BLOCK && dirs[i] == current.pushDir)
+                            {
+                                if (current.pushEnt->type == ENTITY_TYPE_BLOCK)
+                                {
+                                    continue;
+                                }
+                                // TODO: very weird edge case behavior
+                            }
+                            isProjectable = false;
                         break;
                     }
                 }
@@ -1266,7 +1312,7 @@ void GameplayUpdateAndRender()
         
         EndMode2D();
         
-#if 1 // GAME_INTERNAL
+#if  GAME_INTERNAL
         // NOTE: UI Draw Game Informations
         
         Entity * player = GetEntity(gameState->playerEntityIndex);
@@ -1274,17 +1320,42 @@ void GameplayUpdateAndRender()
         
         Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
         
+        #if 0
+        DrawText(TextFormat("TotalLine: %d, Connection: %d, Door: %d, TotalSource: %d",
+                                     Cable_Indices.count,
+                                     CP_Indices.count,
+                                     Door_Indices.count,
+                                     Source_Indices.count
+                                     ), 10, 280, 20, GREEN);
+        
+        DrawText(TextFormat("TotalEntities: %d, TotalWall: %d, TotalDoor: %d, TotalCable: %d, TotalGlass: %d, TotalSlime %d, TotalBlock: %d, TotalPit: %d, TotalPortal %d", gameState->entities.count,
+                                     gameState->entityTable[LAYER_WALL].count,
+                                     gameState->entityTable[LAYER_DOOR].count,
+                                     gameState->entityTable[LAYER_CABLE].count,
+                                     gameState->entityTable[LAYER_GLASS].count,
+                                     gameState->entityTable[LAYER_SLIME].count,
+                                     gameState->entityTable[LAYER_BLOCK].count,
+                                     gameState->entityTable[LAYER_PIT].count,
+                                     gameState->entityTable[LAYER_PORTAL].count
+                                     ), 10, 250, 20, GREEN);
+        
         DrawText(TextFormat("Player pivot (%.2f, %.2f), mouse world (%.2f, %.2f)",
                             player->pivot.x, player->pivot.y, mousePos.x, mousePos.y ), 10, 200, 20, GREEN);
         DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
                             centerPos.x, centerPos.y,
-                            player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
+                                     player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
+        
         DrawText(TextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f",
                             gameState->camera.target.x, gameState->camera.target.y,
                             gameState->camera.offset.x, gameState->camera.offset.y, gameState->camera.zoom), 10, 50, 20, RAYWHITE);
         DrawText("Arrow Direction to Shoot, R KEY to Restart, Z KEY to undo", 10, 10, 20, RAYWHITE);
         
         DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
+        #endif
+        DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
+                            centerPos.x, centerPos.y,
+                            player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
+        
         
         int posX = GetScreenWidth() - MeasureText("Entity Action State: FFFFFFFFFFFFFFFFFFFF", 20);
         DebugDrawPlayerActionState(player->actionState, posX, 50, 20, IntToRGBA(0x923eed));
@@ -1399,6 +1470,19 @@ UPDATE_AND_RENDER(UpdateAndRender)
     Color colorA = IntToRGBA(0x222f);
     
     gameState->bgColor = colorA;
+    
+    #if 0
+    static int i = 0;
+    if (gameState->initialized)
+    {
+        std::string key = std::to_string(i);
+        
+        int hash = ComputeCRC32((unsigned char *)key.c_str(), (int)key.size()) % gameState->entities.count;
+        SM_TRACE("key: %d, hash: %d", i, hash);
+        
+        i = (i + 1) % gameState->entities.count;
+    }
+#endif
     
     switch(gameState->currentScreen)
     {

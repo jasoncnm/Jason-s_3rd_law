@@ -86,20 +86,22 @@ int main(int argumentCount, char *argumentArray[])
 #if GAME_INTERNAL
      void * baseAddress = (void *)TB(2);
 
-    size_t transientStorageSize = GB(1);
-    size_t perminentStorageSize = MB(64);
+    size_t transientStorageSize = MB(500);
+    size_t perminentStorageSize = GB(1);
     
     BumpAllocator persistentStorage = MakeBumpAllocator(baseAddress, perminentStorageSize);
     BumpAllocator transientStorage =
         MakeBumpAllocator((uint8 *)persistentStorage.memory + persistentStorage.capacity, transientStorageSize);
     #else
     
-    BumpAllocator persistentStorage = MakeBumpAllocator(MB(64));
-    BumpAllocator transientStorage = MakeBumpAllocator(MB(64));
+    BumpAllocator persistentStorage = MakeBumpAllocator(MB(128));
+    BumpAllocator transientStorage = MakeBumpAllocator(MB(128));
     
 #endif
     
-    gameState = (GameState *)BumpAlloc(&persistentStorage, sizeof(GameState));
+    size_t gameStateSize = sizeof(GameState);
+    
+    gameState = (GameState *)BumpAlloc(&persistentStorage, gameStateSize);
     if (!gameState)
     {
         SM_ERROR("Failed to allocate gameState");
@@ -116,7 +118,7 @@ int main(int argumentCount, char *argumentArray[])
         
         // if (IsWindowState(FLAG_VSYNC_HINT)) ClearWindowState(FLAG_VSYNC_HINT);
         // else SetWindowState(FLAG_VSYNC_HINT);
-SetWindowState(FLAG_WINDOW_TOPMOST);
+// SetWindowState(FLAG_WINDOW_TOPMOST);
         
         // SetTargetFPS(30);
 #endif

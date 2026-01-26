@@ -8,6 +8,6 @@ call scripts\msvc-build-raylib.bat
 
 if "%1" == "release" (
 	call scripts\msvc-build-release.bat
-) else if "%1" == "" (
+) else  (
 	call scripts\msvc-build-debug.bat
 )

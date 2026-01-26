@@ -150,7 +150,8 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
     
     entity->changed = true;
     
-    Vector2 startPivot = entity->pivot;
+    // Vector2 startPivot = entity->pivot;
+    Vector2 startPivot = GetTilePivot(entity);
     entity->tilePos = targetPos;
     if (attachedEntity)
     {
@@ -202,13 +203,25 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 float dist = Vector2Distance(startPivot, endPivot);
                 float tileDist = dist / MAP_TILE_SIZE;
                 
-                TweenParams params = {};
-                params.paramType = PARAM_TYPE_VECTOR2;
-                params.startVec2 = startPivot;
-                params.endVec2 = endPivot;
-                params.realVec2  = &entity->pivot;
-                AddTweenUnique(entity->tweenController, CreateTween(params, MoveFunc, speed, tileDist));
-            }
+                TweenParams param = {};
+                param.paramType = PARAM_TYPE_VECTOR2;
+                param.startVec2 = startPivot;
+                param.endVec2 = endPivot;
+                param.realVec2  = &entity->pivot;
+                
+                
+                int channel = entity->tweenController.FindMovingChannel();
+                
+                if (channel < 0)
+                {
+                    AddTweenUnique(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist));
+                }
+                else
+                {
+                    AddTween(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist), channel);
+                    
+                }
+                }
             else
             {
                 Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({(float)offset.x, (float)offset.y}, MAP_TILE_SIZE));
@@ -263,16 +276,29 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         float dist = Vector2Distance(startPivot, endPivot);
         float tileDist = dist / MAP_TILE_SIZE;
         
-        TweenParams params = {};
-        params.paramType = PARAM_TYPE_VECTOR2;
-        params.startVec2 = startPivot;
-        params.endVec2 = endPivot;
-        params.realVec2  = &entity->pivot;
+        TweenParams param = {};
+        param.paramType = PARAM_TYPE_VECTOR2;
+        param.startVec2 = startPivot;
+        param.endVec2 = endPivot;
+        param.realVec2  = &entity->pivot;
         
-        AddTweenUnique(entity->tweenController, CreateTween(params, MoveFunc, speed, tileDist));
+        int channel = entity->tweenController.FindMovingChannel();
+        
+        if (channel < 0)
+        {
+            AddTweenUnique(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist));
+        }
+        else
+        {
+            AddTween(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist), channel);
+            
+        }
+        
+        SM_TRACE("channel: %d", channel);
+        SM_TRACE("end tile pos: %d", targetPos.x);
+        
         }
     
-    // TODO: Improve Control
     if (!entity->tweenController.NoTweens())
     {
         if (playEvent)
@@ -342,9 +368,8 @@ inline void SetActionState(Entity * entity, ActionState state)
 
 inline void SetGlassBeBroken(Entity * glass)
 {
-    SM_ASSERT(glass->active, "entity does not exist");
+    SM_ASSERT(glass && glass->active, "entity does not exist");
     
-    glass->broken = true;
     glass->sprite = GetSprite(SPRITE_GLASS_BROKEN);
 }
 
@@ -634,8 +659,19 @@ inline void UpdateSlimes()
                     dir.y = dir.y != 0 ? Sign(dir.y) : 0;
                     
                     Entity * blockedEnt = FindBlockEntityFromTo(oldPos + dir, newPos, dir);
-                     if (blockedEnt)
+                    if (blockedEnt)
                     {
+                        
+                        if ((blockedEnt->type == ENTITY_TYPE_GLASS &&
+                                 blockedEnt->broken) ||
+                            (blockedEnt->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+                             blockedEnt->cableType == CABLE_TYPE_DOOR &&
+                             DoorBlocked(blockedEnt, dir)))
+                        {
+                            continue;
+                        }
+
+                        
                         if (IsSlime(blockedEnt))
                         {
                             MergeSlimes(blockedEnt, slime);

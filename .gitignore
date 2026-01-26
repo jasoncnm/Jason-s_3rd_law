@@ -2,6 +2,8 @@
 *.d
 *.zip
 
+/bin
+
 # Compiled Object files
 *.slo
 *.lo
@@ -29,14 +31,14 @@
 *.lib
 
 # Executables
+*.exe
+*.dll
 *.out
 *.app
 *.sln
 /.vs
 
 .vscode/
-*.exe
-*.dll
 *.obj
 *.ilk
 *.exp
@@ -48,10 +50,6 @@
 
 /data/save_data/*
 
-*.vsidx
-*.ipch
-*.db
-bin/.vs/game/v17/*
 setup
 jason_room_proj
 
