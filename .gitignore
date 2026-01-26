@@ -47,11 +47,11 @@
 *.rdi
 
 /data/save_data/*
+/bin
 
 *.vsidx
 *.ipch
 *.db
-bin/.vs/game/v17/*
 setup
 jason_room_proj
 
