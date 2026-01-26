@@ -185,21 +185,22 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                 }
                 case ENTITY_TYPE_GLASS:
                 {
-                    if (!target->broken && IsSlime(projectedEnt))
+                    if (target->broken || !IsSlime(projectedEnt))
                     {
-                        MoveEntity(projectedEnt, target, nullptr, pos - pushDir,  BLOCK_MOVE_FUNC); 
-                        return;
-                    }
                     SetGlassBeBroken(target);
                     Entity * attachSlime = FindAttachSlime(target);
-                    if (attachSlime) attachSlime->attach = false;
-                    
+                    if (attachSlime) 
+                    {
+                        attachSlime->attach = false;
+                        attachSlime->pivot = GetTilePivot(attachSlime);
+                        }
                     break;
+                    }
                 }
                 case ENTITY_TYPE_ELECTRIC_DOOR:
                 {
-                    SM_ASSERT(target->cableType == CABLE_TYPE_DOOR, "other cable type is not reachble");
-                    bool8 blocked = DoorBlocked(target, pushDir) || DoorBlocked(target, -pushDir);
+                    // SM_ASSERT(target->cableType == CABLE_TYPE_DOOR, "other cable type is not reachble");
+                    bool8 blocked = target->type == ENTITY_TYPE_GLASS || (DoorBlocked(target, pushDir) || DoorBlocked(target, -pushDir));
                     if (!blocked) break;
                 }
                 case ENTITY_TYPE_WALL:
@@ -357,8 +358,8 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                                         {
                                         current.pushResult.state = PUSH_BLOCKED;
                                             current.pushResult.blockedEntity = target;
-                                        }
                                         return;
+                                        }
                                     }
                                 }
                             continue;
@@ -677,32 +678,51 @@ bool8 MoveAction(IVec2 actionDir)
             
             Vector2 dir = { (float)actionDir.x, (float)actionDir.y };
             Vector2 startPivot = GetTilePivot(player);
-            Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale(dir, .2f * (MAP_TILE_SIZE - player->tileSize)));
             
             player->attach = true;
             player->attachedEntityIndex = door->entityIndex;
             player->attachDir = actionDir;
             
-            Vector2 endPivot = Vector2Subtract(GetTilePivot(player), Vector2Scale(dir, 5.0f));
+            Vector2 endPivot = Vector2Subtract(GetTilePivot(player), Vector2Scale(dir, 4.7f));
             
-            TweenParams params1 = {};
-            params1.paramType = PARAM_TYPE_VECTOR2;
-            params1.startVec2 = startPivot;
-            params1.endVec2 = middlePivot;
-            params1.realVec2  = &player->pivot;
+            if (player->mass == 1)
+            {
+                Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale(dir, .2f * (MAP_TILE_SIZE - player->tileSize)));
+                
+                TweenParams params1 = {};
+                params1.paramType = PARAM_TYPE_VECTOR2;
+                params1.startVec2 = startPivot;
+                params1.endVec2 = middlePivot;
+                params1.realVec2  = &player->pivot;
+                
+                TweenParams params2 = {};
+                params2.paramType = PARAM_TYPE_VECTOR2;
+                params2.startVec2 = middlePivot;
+                params2.endVec2 = endPivot;
+                params2.realVec2  = &player->pivot;
+                
+                float dist = Vector2Distance(startPivot, middlePivot);
+                float tileDist = dist / MAP_TILE_SIZE;
+                
+                uint32 channel = AddTweenUnique(player->tweenController, CreateTween(params1, PLAYER_MOVE_FUNC, SLIME_MOVE_SPEED, tileDist));
+                
+                AddTween(player->tweenController, CreateTween(params2, PLAYER_MOVE_FUNC, SLIME_MOVE_SPEED * 2), channel);
+            }
+            else
+            {
+                
+                TweenParams params2 = {};
+                params2.paramType = PARAM_TYPE_VECTOR2;
+                params2.startVec2 = startPivot;
+                params2.endVec2 = endPivot;
+                params2.realVec2  = &player->pivot;
+                
+                float dist = Vector2Distance(startPivot, endPivot);
+                float tileDist = dist / MAP_TILE_SIZE;
+                
+                uint32 channel = AddTweenUnique(player->tweenController, CreateTween(params2, PLAYER_MOVE_FUNC, SLIME_MOVE_SPEED, tileDist));
+                }
             
-            TweenParams params2 = {};
-            params2.paramType = PARAM_TYPE_VECTOR2;
-            params2.startVec2 = middlePivot;
-            params2.endVec2 = endPivot;
-            params2.realVec2  = &player->pivot;
-            
-            float dist = Vector2Distance(startPivot, middlePivot);
-            float tileDist = dist / MAP_TILE_SIZE;
-            
-            uint32 channel = AddTweenUnique(player->tweenController, CreateTween(params1, PLAYER_MOVE_FUNC, SLIME_MOVE_SPEED, tileDist));
-            
-            AddTween(player->tweenController, CreateTween(params2, PLAYER_MOVE_FUNC, SLIME_MOVE_SPEED * 2), channel);
             OnPlayEvent(&player->tweenController);
             return true;
         }
@@ -851,7 +871,8 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
         player->attach = true;
         player->attachedEntityIndex = oldAttachIndex;
         player->attachDir = oldAttachDirection;
-            DeleteEntity(clone);
+        DeleteEntity(clone);
+        player->pivot = GetTilePivot(player);
         }
     
     return true;
@@ -1266,7 +1287,7 @@ void GameplayUpdateAndRender()
         
         EndMode2D();
         
-#if 1 // GAME_INTERNAL
+#if 0 // GAME_INTERNAL
         // NOTE: UI Draw Game Informations
         
         Entity * player = GetEntity(gameState->playerEntityIndex);

@@ -123,7 +123,7 @@ SetWindowState(FLAG_WINDOW_TOPMOST);
         
         SetWindowState(FLAG_WINDOW_RESIZABLE);
         SetWindowMonitor(0);
-        SetExitKey(KEY_Q);  // IMPORTANT: DEBUG ONLY !!
+        SetExitKey(KEY_F4);  // IMPORTANT: DEBUG ONLY !!
          MaximizeWindow();
 
         Image icon = LoadImage("Assets/ICON/ICON.png");
