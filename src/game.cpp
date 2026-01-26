@@ -77,16 +77,14 @@ inline UndoState GetCurrentState()
         auto & entList = gameState->entityTable[layer];
         for (uint32 entId = 0; entId < entList.count; entId++)
         {
-            Entity * ent = GetEntity(entList[entId]);
-            if (ent && layer == LAYER_CABLE && ent->cableType == CABLE_TYPE_CONNECT)
+            Entity & ent = gameState->entities[entList[entId]];
+            if (layer == LAYER_CABLE && ent.cableType == CABLE_TYPE_CONNECT)
             {
-                ent = nullptr;
+                continue;
             }
             
-            if (ent)
-            {
-                entities[index++] = *ent;
-            }
+            entities[index++] = ent;
+            
         }
     }
     
