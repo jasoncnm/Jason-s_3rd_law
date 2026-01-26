@@ -19,8 +19,8 @@ cl /LD %RAYLIB_DEFINES%  /Fe: "raylib" %RAYLIB% /link %LIBRARIES%
 
 popd
 
-copy %LIBPATH%\raylib.h   %LIBPATH%\..
-copy %LIBPATH%\raymath.h  %LIBPATH%\..
+copy %LIBPATH%\raylib.h   src
+copy %LIBPATH%\raymath.h  src
 
 copy %LIBPATH%\raylib.dll bin
 copy %LIBPATH%\raylib.lib bin
