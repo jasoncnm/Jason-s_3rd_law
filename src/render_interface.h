@@ -72,16 +72,7 @@ void DrawTileMap(Camera2D camera, IVec2 startPos, IVec2 dim, Color tileColor, Co
 
             if (CheckCollisionRecs(source, GetCameraRect(camera)))
             {
-#if 0
-                // NOTE: Draw tiles from id (and tile borders)
-                DrawRectangle(
-                    x * tileSize,
-                    y * tileSize,
-                    tileSize,
-                    tileSize,
-                    tileColor);
-#endif
-                
+
                 DrawRectangleLinesEx(source, .5f, gridColor);
                 // DrawRectangleLines(x * tileSize, y * tileSize, tileSize, tileSize, gridColor);
             }                     
@@ -149,10 +140,8 @@ void UpdateStarField(Vector3 * stars, Vector2 * starsScreenPos, float flySpeed, 
     }
     }
 
-// TODO: parallelize the operation
 void UpdateAndDrawStarFieldBG(StarFields * starFields)
 {
-    #if 1
     if (!starFields->initialized)
     {
         starFields->initialized = true;
@@ -199,8 +188,7 @@ for (uint32 i = 0; i < STAR_COUNT; i++)
         DrawCircleV(starsScreenPos[i], radius, color);
     }
     
-    #endif
-}
+    }
 
 #define RENDER_INTERFACE_H
 #endif
