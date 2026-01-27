@@ -944,7 +944,9 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
         player->attach = true;
         player->attachedEntityIndex = oldAttachIndex;
         player->attachDir = oldAttachDirection;
-            DeleteEntity(clone);
+        player->pivot = GetTilePivot(player);
+        DeleteEntity(clone);
+        return false;
         }
     
     return true;
@@ -989,7 +991,7 @@ inline bool8 SlimeSelection(Entity * player)
     
     bool8 stateChanged = false;
     
-    if (JustPressed(POSSES_KEY) && gameState->lv2Map && gameState->lv2Map->firstEnter)
+    if (JustPressed(POSSES_KEY))// && gameState->lv2Map && gameState->lv2Map->firstEnter)
     {
         
         Entity * nextPlayerEntity = nullptr;
@@ -1347,7 +1349,7 @@ void GameplayUpdateAndRender()
              DrawTileMap(gameState->camera, map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
         }
         
-        EntityLayer orderedDrawLayers[] = { LAYER_PORTAL, LAYER_BLOCK, LAYER_WALL, LAYER_CABLE, LAYER_PIT,  LAYER_DOOR, LAYER_SLIME, LAYER_GLASS };
+        EntityLayer orderedDrawLayers[] = { LAYER_PORTAL, LAYER_WALL, LAYER_CABLE, LAYER_PIT,  LAYER_DOOR, LAYER_SLIME, LAYER_BLOCK, LAYER_GLASS, };
         
         int count = ArrayCount(orderedDrawLayers);
         DrawSpriteLayers(orderedDrawLayers, count);
