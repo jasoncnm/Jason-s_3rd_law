@@ -1475,7 +1475,11 @@ void InitializeGame()
         auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
         
         Entity * slimeA = GetEntity(slimeEntityIndices[0]);
-        Entity * slimeB = GetEntity(slimeEntityIndices[1]);
+        Entity * slimeB = nullptr;
+        if (slimeEntityIndices.count == 2)
+        {
+        slimeB = GetEntity(slimeEntityIndices[1]);
+        }
         
         if (slimeA)
         {

@@ -261,11 +261,11 @@
             }
         },
         "TileMap/Room_22.tmj": {
-            "scale": 2,
+            "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 148.75,
-                "y": 258.75
+                "x": 50,
+                "y": -532.6666666666667
             }
         },
         "TileMap/Room_23.tmj": {
@@ -333,11 +333,11 @@
             }
         },
         "TileMap/Room_3.tmj": {
-            "scale": 0.33,
+            "scale": 0.75,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -86.36363636363603,
-                "y": 774.2424242424245
+                "x": -34,
+                "y": 823.3333333333333
             }
         },
         "TileMap/Room_30.tmj": {
@@ -549,11 +549,11 @@
             }
         },
         "TileMap/Room_6.tmj": {
-            "scale": 0.5,
+            "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 175,
-                "y": 176
+                "x": 733.9999999999998,
+                "y": 158
             }
         },
         "TileMap/Room_7.tmj": {
@@ -573,11 +573,11 @@
             }
         },
         "TileMap/Room_9.tmj": {
-            "scale": 0.5,
+            "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 175,
-                "y": 176
+                "x": -526,
+                "y": 619.3333333333333
             }
         },
         "TileMap/Test.tmj": {
@@ -709,11 +709,11 @@
             }
         },
         "TileMap/Tutorial_5.tmj": {
-            "scale": 3,
+            "scale": 0.75,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 277.8333333333333,
-                "y": 184.16666666666666
+                "x": 1160.6666666666665,
+                "y": 964.6666666666666
             }
         },
         "TileMap/Tutorial_6.tmj": {
@@ -755,7 +755,8 @@
         "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/Room_22_Tutorial.world",
         "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/Tutorial_3_Tutorial.world",
         "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/Room_2_Tutorial.world",
-        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/Room_59_Tutorial.world"
+        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/Room_59_Tutorial.world",
+        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/Room_9_Tutorial.world"
     ],
     "map.height": 11,
     "map.lastUsedFormat": "json",
