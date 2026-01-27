@@ -257,7 +257,8 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         MoveEntity(projectedEnt, target, nullptr, pos - pushDir,  BLOCK_MOVE_FUNC); 
                         return;
                     }
-                    
+                    else if (!target->broken)
+                    {
                     MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir, BLOCK_MOVE_FUNC);
                     
                     int channel = projectedEnt->tweenController.FindMovingChannel();
@@ -271,6 +272,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     // SetGlassBeBroken(target);
                     Entity * attachSlime = FindAttachSlime(target);
                     if (attachSlime) attachSlime->attach = false;
+                    }
                     
                     break;
                 }
