@@ -989,7 +989,7 @@ inline bool8 SlimeSelection(Entity * player)
     
     bool8 stateChanged = false;
     
-    if (JustPressed(POSSES_KEY)) //  && gameState->lv2Map && gameState->lv2Map->firstEnter)
+    if (JustPressed(POSSES_KEY) && gameState->lv2Map && gameState->lv2Map->firstEnter)
     {
         
         Entity * nextPlayerEntity = nullptr;
@@ -1473,22 +1473,46 @@ void InitializeGame()
     // NOTE: Initiaize slimes
     {
         auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
-        for (uint32 i = 0; i < slimeEntityIndices.count; i++)
+        
+        Entity * slimeA = GetEntity(slimeEntityIndices[0]);
+        Entity * slimeB = GetEntity(slimeEntityIndices[1]);
+        
+        if (slimeA)
         {
-            int index = slimeEntityIndices[i];
-            Entity * entity = GetEntity(index);
-            if (!entity || entity->attach) continue; 
-            
             IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} }; 
             
             for (int j = 0; j < 4; j++)
             {
-                if (AttachSlime(entity, directions[j])) break;
+                if (AttachSlime(slimeA, directions[j])) break;
             }
             
-            entity->pivot = GetTilePivot(entity);
-            
+            slimeA->pivot = GetTilePivot(slimeA);
         }
+        
+        if (slimeB)
+        {
+            IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} }; 
+            
+            for (int j = 0; j < 4; j++)
+            {
+                if (AttachSlime(slimeB, directions[j])) break;
+            }
+            
+            slimeB->pivot = GetTilePivot(slimeB);
+        }
+        
+        if (slimeA && slimeB && slimeA->tilePos == slimeB->tilePos) 
+        {
+            slimeA->type = ENTITY_TYPE_PLAYER;
+            slimeA->color = WHITE;
+            slimeA->mass++;
+            slimeA->tileSize = GetSlimeSize(slimeA);
+            slimeA->pivot = GetTilePivot(slimeA);
+            gameState->playerEntityIndex = slimeA->entityIndex;
+            DeleteEntity(slimeB);
+            }
+        
+        
     }
     
     // NOTE: SetUp Electric Door
