@@ -69,11 +69,11 @@
             }
         },
         "TileMap/Broom_5.tmj": {
-            "scale": 2,
+            "scale": 0.125,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -673.25,
-                "y": -5408.25
+                "x": 2556,
+                "y": -356
             }
         },
         "TileMap/Broom_6.tmj": {
@@ -669,11 +669,11 @@
             }
         },
         "TileMap/Test.tmj": {
-            "scale": 0.5,
-            "selectedLayer": 2,
+            "scale": 0.33,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 1951,
-                "y": 5585
+                "x": 2625.757575757576,
+                "y": 4525.757575757576
             }
         },
         "TileMap/TestRoom_2.tmj": {

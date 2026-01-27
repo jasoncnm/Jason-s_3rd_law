@@ -397,12 +397,12 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
         gameState->playerEntityIndex = mergeSlime->entityIndex;
         mergeSlime->color = WHITE;
     }
-
+    
     // mergeSlime->tileSize = endSize;
     // mergeSlime->pivot = GetTilePivot(mergeSlime);
     {
         // Merge Slime Tween
-
+        
         float startSize = GetSlimeSize(mergeSlime);
         Vector2 startPivot = GetTilePivot(mergeSlime);
         mergeSlime->mass++;
@@ -426,8 +426,21 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
 
     {
         // Merged Slime Tween
-        
         mergedSlime->tweenController.Reset();
+        
+        Entity * attach = nullptr;
+        if (mergeSlime->attach)
+        {
+            attach = GetEntity(mergeSlime->attachedEntityIndex);
+        }
+        
+        TweenEvent & endEvent = mergedSlime->tweenController.endEvent;
+        endEvent.controller = &mergeSlime->tweenController;
+        endEvent.deleteEntity = mergedSlime;
+        
+        MoveEntity(mergedSlime, attach, nullptr, mergeSlime->tilePos, BLOCK_MOVE_FUNC);
+        
+        #if 0
         TweenParams params = {};
         params.paramType = PARAM_TYPE_VECTOR2;
         params.startVec2 = mergedSlime->pivot;
@@ -437,12 +450,8 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
         float dist = Vector2Distance(params.startVec2, params.endVec2);
         float iDist = dist / MAP_TILE_SIZE;
         AddTweenUnique(mergedSlime->tweenController, CreateTween(params, nullptr, BOUNCE_SPEED, iDist));
-
-        TweenEvent & endEvent = mergedSlime->tweenController.endEvent;
-        endEvent.controller = &mergeSlime->tweenController;
-        endEvent.deleteEntity = mergedSlime;
-        
         OnPlayEvent(&mergedSlime->tweenController);
+        #endif
         
     }
     // DeleteEntity(mergedSlime);

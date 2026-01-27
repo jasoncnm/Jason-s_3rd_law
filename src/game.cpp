@@ -1149,7 +1149,7 @@ void GameplayUpdateAndRender()
                         actionDir = {0, 1};
                         isPressed = true;
                     }
-                    
+
                     if (isPressed)
                     {
                         stateChanged = stateChanged || MoveAction(actionDir);

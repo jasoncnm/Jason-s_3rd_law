@@ -102,7 +102,10 @@ inline bool8 JustPressed(GameInputType type)
     KeyMapping & mapping = gameState->keyMappings[type];
     for (uint32 idx = 0; idx < mapping.keys.count; idx++)
     {
-        if (IsKeyPressed(mapping.keys[idx]) || IsMouseButtonPressed(mapping.keys[idx])) return true;
+        if (IsKeyPressed(mapping.keys[idx])) 
+        {
+            return true;
+        }
     }
 
     for (int gamepad = 0; gamepad < MAX_GAMEPAD; gamepad++)
@@ -147,7 +150,10 @@ inline bool8 IsDown(GameInputType type)
     KeyMapping mapping = gameState->keyMappings[type];
     for (uint32 idx = 0; idx < mapping.keys.count; idx++)
     {
-        if (IsKeyDown(mapping.keys[idx]) || IsMouseButtonDown(mapping.keys[idx])) return true;
+        if (IsKeyDown(mapping.keys[idx])) 
+        {
+            return true;
+        }
     }
     
     for (int gamepad = 0; gamepad < MAX_GAMEPAD; gamepad++)
