@@ -37,7 +37,7 @@
 #define CAMERA_MOVE_FUNC EaseOutCubic
 #define CAMERA_ZOOM_FUNC EaseInOutCubic
 
-#define MAX_UNDO 30
+#define MAX_UNDO 100
 
 constexpr float zoom_per_tile = 19.0f / 600.0f;
 constexpr float press_freq = 0.2f;
