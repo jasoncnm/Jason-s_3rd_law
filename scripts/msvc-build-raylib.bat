@@ -1,6 +1,5 @@
 @echo off
 
-
 set LIBRARIES=kernel32.lib user32.lib shell32.lib winmm.lib gdi32.lib opengl32.lib
 set RAYLIB=rcore.c rmodels.c raudio.c rglfw.c rshapes.c rtext.c rtextures.c -I.\external\glfw\include
 set RAYLIB_DEFINES=/DBUILD_LIBTYPE_SHARED /DPLATFORM_DESKTOP
@@ -22,8 +21,11 @@ popd
 copy %LIBPATH%\raylib.h   src
 copy %LIBPATH%\raymath.h  src
 
-copy %LIBPATH%\raylib.dll bin
-copy %LIBPATH%\raylib.lib bin
+move %LIBPATH%\raylib.dll bin
+move %LIBPATH%\raylib.lib bin
+
+del  %LIBPATH%\*.obj
+del  %LIBPATH%\*.exp
 
 
 :end
