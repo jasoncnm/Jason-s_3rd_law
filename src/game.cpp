@@ -30,6 +30,15 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
   - Viewport scaling IMPORTANT: DO we really need this ? 
   - Bit masking with tile rules
 
+ TODO: PostProcessing
+
+1. Bloom
+2. Crt emulator
+3. chromatic aberration
+4. Vignette
+5. Color Grading (with LUT?)
+6. shake
+
   NOTE: done
         - Batch all sprite into a single draw call (raylib handled that internally, see https://www.raylib.com/examples/textures/loader.html?name=textures_bunnymark)
 
