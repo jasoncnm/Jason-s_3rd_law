@@ -459,7 +459,7 @@ else if (IsSlime(ent) && GetEntity(ent->attachedEntityIndex) == target)
                             {
                                 if (current.pushEnt->type == ENTITY_TYPE_BLOCK)
                                 {
-                                    continue;
+                                    // continue;
                                 }
                                 // TODO: very weird edge case behavior
                             }
@@ -765,8 +765,7 @@ bool8 MoveAction(IVec2 actionDir)
         return false;
     }
     
-    {
-        EntityLayer layers[] = { LAYER_DOOR };
+    EntityLayer layers[] = { LAYER_DOOR };
         Entity * door = FindEntityByLocationAndLayers(currentPos, layers, ArrayCount(layers));
         if (door && DoorBlocked(door, -actionDir))
         {
@@ -810,8 +809,7 @@ bool8 MoveAction(IVec2 actionDir)
             OnPlayEvent(&player->tweenController);
             return true;
         }
-    }
-    
+        
     {
         EntityLayer layers[] = { LAYER_PIT };
         Entity * pit = FindEntityByLocationAndLayers(currentPos + player->attachDir, layers, ArrayCount(layers));
@@ -837,7 +835,7 @@ bool8 MoveAction(IVec2 actionDir)
             {
                 if (pushResult.pushing)
                 {
-                ActionCheck(player, player->attachDir, CHECK_MOVE);
+                    if (!door) ActionCheck(player, player->attachDir, CHECK_MOVE);
                 return true;
                 }
                 return false;
@@ -861,14 +859,18 @@ bool8 MoveAction(IVec2 actionDir)
                 }
             else
             {
-                EntityLayer layers[] = { LAYER_SLIME };
-                Entity * slime = FindEntityByLocationAndLayers(standingPlatformPos, layers, ArrayCount(layers));
-                if (slime)
+                EntityLayer layers[] = { LAYER_DOOR, LAYER_SLIME  };
+                Entity * ent = FindEntityByLocationAndLayers(standingPlatformPos, layers, ArrayCount(layers));
+                
+                if (ent)
                 {
-                    player = MergeSlimes(slime, player);
+                    if (!IsSlime(ent))
+                    {
+                        return false;
+                    }
+                    player = MergeSlimes(ent, player);
                 }
-                else if ((!findResult.has || !findResult.entity || findResult.entity->type != ENTITY_TYPE_PIT) &&
-                         Abs(player->attachDir) != Abs(actionDir))
+                else if (!ent && Abs(player->attachDir) != Abs(actionDir))
                 {
                     IVec2 newTile = standingPlatformPos;
                     IVec2 newAttach = - actionDir;
@@ -903,7 +905,7 @@ bool8 MoveAction(IVec2 actionDir)
                 return false;
             }
             
-            if (player->attachDir == -actionDir)
+            if (!door && player->attachDir == -actionDir)
             {
                 PushResult rResult = ActionCheck(player, player->attachDir, CHECK_MOVE);
                 if (rResult.state == PUSH_BLOCKED)
@@ -917,7 +919,9 @@ bool8 MoveAction(IVec2 actionDir)
             }
         case PUSH_MERGED:
         {
-            MergeSlimes(pushResult.mergeEntity, player);
+            IVec2 standingPlatformPos = actionTilePos + player->attachDir;
+            FindAttachableResult findResult = FindAttachable(standingPlatformPos, player->attachDir);
+            if (findResult.has) MergeSlimes(pushResult.mergeEntity, player);
             return true;
         }
         
@@ -1098,7 +1102,12 @@ void GameplayUpdateAndRender()
         if (gameState->camera.zoom < 0.1f) gameState->camera.zoom = 0.1f;
         
             UpdateCamera();
-        }
+    }
+    
+    if (IsKeyPressed(KEY_GRAVE))
+    {
+        gameState->enableFX = !gameState->enableFX;
+    }
     
     // NOTE: Recored if State Changes
     bool8 stateChanged = false;
@@ -1345,9 +1354,7 @@ void GameplayUpdateAndRender()
     // NOTE: Render
     {
         
-        // NOTE: Draw
-        BeginDrawing();
-        
+        BeginTextureMode(gameState->renderTarget);
         ClearBackground(gameState->bgColor);
         
          UpdateAndDrawStarFieldBG(&gameState->starFields);
@@ -1369,29 +1376,51 @@ void GameplayUpdateAndRender()
         // Rectangle cameraRect = GetCameraRect(gameState->camera);
         // DrawRectangleLinesEx(cameraRect, 1, RED);
         
-        // Left
-        if (gameState->leftArrow.show)
-        {
-            DrawSprite(gameState->camera, gameState->texture, gameState->leftArrow.sprite, gameState->leftArrow.topLeftPos, (float)gameState->leftArrow.tileSize);
-        }
-        // Right
-        if (gameState->rightArrow.show)
-        {
-            DrawSprite(gameState->camera, gameState->texture, gameState->rightArrow.sprite, gameState->rightArrow.topLeftPos, (float)gameState->rightArrow.tileSize);
-        }
-        
-        // Up
-        if (gameState->upArrow.show)
-        {
-            DrawSprite(gameState->camera, gameState->texture, gameState->upArrow.sprite, gameState->upArrow.topLeftPos, (float)gameState->upArrow.tileSize);
-        }
-        // Down
-        if (gameState->downArrow.show)
-        {
-            DrawSprite(gameState->camera, gameState->texture, gameState->downArrow.sprite, gameState->downArrow.topLeftPos, (float)gameState->downArrow.tileSize);
-        }
-        
         EndMode2D();
+        EndTextureMode();
+        
+        // NOTE: Draw
+        BeginDrawing();
+        ClearBackground(gameState->bgColor);
+        
+        float size[2] =
+        { 
+            (float)gameState->screenWidth, (float)gameState->screenHeight
+        };
+        
+        if (gameState->enableFX)
+        {
+        SetShaderValue(gameState->postFX[FX_BLOOM].shader, 
+                       gameState->postFX[FX_BLOOM].frameBufferSizeLoc, 
+                       size, SHADER_UNIFORM_VEC2);
+        
+        BeginShaderMode(gameState->postFX[FX_BLOOM].shader);
+        DrawTextureRec(gameState->renderTarget.texture, 
+                       {
+                           0,
+                           0, 
+                           (float)gameState->renderTarget.texture.width, (float)-gameState->renderTarget.texture.height
+                       }, 
+                       {
+                           0,
+                           0
+                       }, WHITE);
+        
+            EndShaderMode();
+        }
+        else
+            {
+DrawTextureRec(gameState->renderTarget.texture, 
+                       {
+                           0,
+                           0, 
+                           (float)gameState->renderTarget.texture.width, (float)-gameState->renderTarget.texture.height
+                       }, 
+                       {
+                           0,
+                           0
+                       }, WHITE);
+        }
         
 #if  GAME_INTERNAL
         // NOTE: UI Draw Game Informations
@@ -1570,6 +1599,12 @@ UPDATE_AND_RENDER(UpdateAndRender)
     if (gameState != gameStateIn) gameState = gameStateIn;
     if (gameMemory != gameMemoryIn) gameMemory = gameMemoryIn;
     
+    if (IsWindowResized())
+    {
+        UnloadRenderTexture(gameState->renderTarget);    // Unload render texture
+        gameState->renderTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+    }
+    
     // TODO: Temp code
     static bool8 init = false;
     if (!init)
@@ -1579,7 +1614,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
     }
     
     Color colorA = IntToRGBA(0x222f);
-    
+     
     gameState->bgColor = colorA;
     
     switch(gameState->currentScreen)

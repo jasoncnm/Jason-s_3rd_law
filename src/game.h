@@ -197,10 +197,14 @@ struct GameState
     TweenController cameraTweenController;
     
     Texture2D texture;
+    RenderTexture2D renderTarget;
     
     ElectricDoorSystem electricDoorSystem;
     
     StarFields starFields;
+    
+    bool8 enableFX = true;
+    PostFX postFX[FX_COUNT];
     
     Array<int, MAX_ENTITIES> entityTable[LAYER_COUNT];
     Array<Entity, MAX_ENTITIES> entities;

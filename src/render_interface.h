@@ -17,6 +17,30 @@
 //              NOTE: Render Structs
 //  ========================================================================
 
+enum PostShaderType
+{
+    FX_GRAYSCALE = 0,
+    FX_POSTERIZATION,
+    FX_DREAM_VISION,
+    FX_PIXELIZER,
+    FX_CROSS_HATCHING,
+    FX_CROSS_STITCHING,
+    FX_PREDATOR_VIEW,
+    FX_SCANLINES,
+    FX_FISHEYE,
+    FX_SOBEL,
+    FX_BLOOM,
+    FX_BLUR,
+    FX_COUNT,
+    //FX_FXAA
+};
+
+struct PostFX
+{
+    Shader shader;
+    int frameBufferSizeLoc;
+};
+
 struct StarFields
 {
     RenderTexture starTexture;
@@ -24,6 +48,13 @@ struct StarFields
     Vector3 stars[STAR_COUNT];
     float flySpeed = 0.1f;    
 };
+
+struct BloomFX
+{
+    const char * shaderPath = "Assets/Shaders/bloom.fs";
+    Shader shader;
+    Vector2 frameBufferSize;
+    };
 
 //  ========================================================================
 //              NOTE: Render Globals

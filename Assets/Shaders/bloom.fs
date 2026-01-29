@@ -12,10 +12,10 @@ uniform vec4 colDiffuse;
 out vec4 finalColor;
 
 // NOTE: Add your custom variables here
-
 const vec2 size = vec2(800, 450);   // Framebuffer size
-const float samples = 5.0;          // Pixels per axis; higher = bigger glow, worse performance
-const float quality = 2.5;          // Defines size factor: Lower = smaller glow, better quality
+
+const float samples = 10.0;          // Pixels per axis; higher = bigger glow, worse performance
+const float quality = 1.5;          // Defines size factor: Lower = smaller glow, better quality
 
 void main()
 {
@@ -25,7 +25,7 @@ void main()
     // Texel color fetching from texture sampler
     vec4 source = texture(texture0, fragTexCoord);
 
-    const int range = 2;            // should be = (samples - 1)/2;
+    const int range = int(samples - 1) / 2;
 
     for (int x = -range; x <= range; x++)
     {

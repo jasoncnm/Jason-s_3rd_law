@@ -149,7 +149,31 @@ int main(int argumentCount, char *argumentArray[])
             return -1;
         }
         
+        if (FileExists("Assets/Shaders/bloom.fs"))
+        {
+        // NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default vertex shader
+            gameState->postFX[FX_BLOOM].shader =
+                LoadShader(0,"Assets/Shaders/bloom.fs");
+            gameState->postFX[FX_BLOOM].frameBufferSizeLoc = 
+                GetShaderLocation(gameState->postFX[FX_BLOOM].shader, "size");
+            if (!IsShaderValid(gameState->postFX[FX_BLOOM].shader))
+            {
+                SM_ERROR("Unable to load shader file (%s)", 
+                         "Assets/Shaders/bloom.fs");
+                }
+        }
+        
+        gameState->renderTarget = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
+        if (!IsRenderTextureValid(gameState->renderTarget))
+        {
+            SM_ERROR("Unable to Load Render Target");
+            }
+        
         gameState->starFields.starTexture = LoadRenderTexture(24,24);
+        if (!IsRenderTextureValid(gameState->starFields.starTexture))
+        {
+            SM_ERROR("Unable to Load star texture");
+        }
         BeginTextureMode(gameState->starFields.starTexture);
         DrawCircle(12, 12, 10, WHITE);
         EndTextureMode();

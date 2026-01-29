@@ -80,8 +80,8 @@
             "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -513,
-                "y": -5017
+                "x": 175,
+                "y": 463
             }
         },
         "TileMap/Broom_5.tmj": {
@@ -710,7 +710,7 @@
         },
         "TileMap/Room_50.tmj": {
             "scale": 0.75,
-            "selectedLayer": -1,
+            "selectedLayer": 0,
             "viewCenter": {
                 "x": 175.33333333333331,
                 "y": 175.33333333333337
@@ -824,8 +824,8 @@
             "scale": 2,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 298.75,
-                "y": 270.75
+                "x": 320.25,
+                "y": 320.25
             }
         },
         "TileMap/TestRoom_2.tmj": {
