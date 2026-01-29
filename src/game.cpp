@@ -1383,14 +1383,29 @@ void GameplayUpdateAndRender()
         BeginDrawing();
         ClearBackground(gameState->bgColor);
         
-        float size[2] =
-        { 
-            (float)gameState->screenWidth, (float)gameState->screenHeight
-        };
-        
         if (gameState->enableFX)
         {
-        SetShaderValue(gameState->postFX[FX_BLOOM].shader, 
+            if (GetFileModTime(gameState->postFX[FX_BLOOM].shaderPath) != 
+                gameState->postFX[FX_BLOOM].fileWriteTime)
+            {
+                UnloadShader(gameState->postFX[FX_BLOOM].shader);
+                gameState->postFX[FX_BLOOM].shader =
+                    LoadShader(0,gameState->postFX[FX_BLOOM].shaderPath);
+                gameState->postFX[FX_BLOOM].frameBufferSizeLoc = 
+                    GetShaderLocation(gameState->postFX[FX_BLOOM].shader, "size");
+                if (!IsShaderValid(gameState->postFX[FX_BLOOM].shader))
+                {
+                    SM_ASSERT(false, "Unable to load shader file (%s)", 
+                             "Assets/Shaders/bloom.fs");
+                }
+                gameState->postFX[FX_BLOOM].fileWriteTime = GetFileModTime(gameState->postFX[FX_BLOOM].shaderPath);
+                }
+            
+            float size[2] =
+            { 
+                (float)gameState->screenWidth, (float)gameState->screenHeight
+            };
+            SetShaderValue(gameState->postFX[FX_BLOOM].shader, 
                        gameState->postFX[FX_BLOOM].frameBufferSizeLoc, 
                        size, SHADER_UNIFORM_VEC2);
         

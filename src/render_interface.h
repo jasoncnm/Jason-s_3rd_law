@@ -37,8 +37,10 @@ enum PostShaderType
 
 struct PostFX
 {
+    char shaderPath[260];
     Shader shader;
     int frameBufferSizeLoc;
+    long fileWriteTime;
 };
 
 struct StarFields

@@ -151,16 +151,18 @@ int main(int argumentCount, char *argumentArray[])
         
         if (FileExists("Assets/Shaders/bloom.fs"))
         {
-        // NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default vertex shader
+            // NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default vertex shader
+            strcpy(gameState->postFX[FX_BLOOM].shaderPath, "Assets/Shaders/bloom.fs");
             gameState->postFX[FX_BLOOM].shader =
-                LoadShader(0,"Assets/Shaders/bloom.fs");
+                LoadShader(0,gameState->postFX[FX_BLOOM].shaderPath);
             gameState->postFX[FX_BLOOM].frameBufferSizeLoc = 
                 GetShaderLocation(gameState->postFX[FX_BLOOM].shader, "size");
             if (!IsShaderValid(gameState->postFX[FX_BLOOM].shader))
             {
                 SM_ERROR("Unable to load shader file (%s)", 
                          "Assets/Shaders/bloom.fs");
-                }
+            }
+            gameState->postFX[FX_BLOOM].fileWriteTime = GetFileModTime(gameState->postFX[FX_BLOOM].shaderPath);
         }
         
         gameState->renderTarget = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -218,5 +220,6 @@ int main(int argumentCount, char *argumentArray[])
         CloseWindow();
         UnloadTexture(gameState->texture);
         UnloadRenderTexture(gameState->starFields.starTexture);
+        UnloadShader(gameState->postFX[FX_BLOOM].shader);
     } 
 }

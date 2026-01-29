@@ -12,10 +12,10 @@ uniform vec4 colDiffuse;
 out vec4 finalColor;
 
 // NOTE: Add your custom variables here
-const vec2 size = vec2(800, 450);   // Framebuffer size
+uniform vec2 size = vec2(800, 450);   // Framebuffer size
 
-const float samples = 10.0;          // Pixels per axis; higher = bigger glow, worse performance
-const float quality = 1.5;          // Defines size factor: Lower = smaller glow, better quality
+const float samples = 4.0;          // Pixels per axis; higher = bigger glow, worse performance
+const float quality = 1.0;          // Defines size factor: Lower = smaller glow, better quality
 
 void main()
 {
