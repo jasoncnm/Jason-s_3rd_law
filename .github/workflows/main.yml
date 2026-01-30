@@ -26,13 +26,20 @@ jobs:
       - name: Build The Game
         run: |
           .\build.bat release
+		  del /Q bin\*.obj
 
       - name: Prepare Release Files
         shell: bash
         run: |
           mkdir release
-          cp -R bin/ release/
-          cp -R Assets/ release/
+		  mkdir release/bin
+		  mkdir release/Assets
+          cp bin/game.exe release/bin
+          cp -R Assets/ICON release/Assets
+		  cp -R Assets/Level_Editor release/Assets
+          cp -R Assets/Shaders release/Assets
+          cp -R Assets/Texture release/Assets
+          cp -R Assets/UI release/Assets
           cp hotrun.bat release/ 
 
       - name: Upload to Release Artifact
