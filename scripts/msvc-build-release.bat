@@ -5,6 +5,8 @@ set COMMON_FLAGS=/std:c++17 /DGAME_INTERNAL=0 -Ox -O2 -Os -Ot -GL -Oi -FC /MT
 set EXE_NAME=game.exe
 set DEFINES=/DPLATFORM_DESKTOP
 
+
+IF NOT EXIST "bin" mkdir bin
 cd bin
 
 set INCLUDES=-I..\src\vendor\raylib\ -I..\src\vendor\raygui\src\ -I..\src\vendor\raylib\src\external\glfw\include
