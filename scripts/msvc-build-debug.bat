@@ -8,14 +8,12 @@ set EXE_NAME=game.exe
 set DLL_NAME=game_code.dll
 set INCLUDES=-I..\src\vendor\raylib\ -I..\src\vendor\raygui\src\
 
-REM call msvc_upgrade_cmd_64.bat
-
 cd bin
 
 echo LOCKFILE IN AID OF HOTLOADING > lock.file
 cl %INCLUDES% ..\src\game.cpp /LD /Fe:%DLL_NAME% %COMMON_FLAGS% %LINKER_FLAGS% %EXPORTED_FUNCTIONS% %WARNINGS% 
 del lock.file
-cl %INCLUDES% ..\src\main.cpp /D_AMD64_ /Fe:%EXE_NAME% %COMMON_FLAGS% %LINKER_FLAGS% %WARNINGS% %DEFINES%
+cl %INCLUDES% ..\src\main.cpp /D_AMD64_ /Fe:%EXE_NAME% %COMMON_FLAGS% %LINKER_FLAGS% %WARNINGS% 
 
 cd ..
 
@@ -23,5 +21,4 @@ REM Comments
 REM /LD   - create a dll file, dynamic library
 REM /Zi   - generate debugger files
 REM /Fe   - change file name
-REM -incremental:no -opt:ref - https://docs.microsoft.com/en-us/cpp/build/reference/incremental-link-incrementally?view=vs-2019
 REM -D_AMD64_ - define a _AMD64_ macro, wouldnt work without this
