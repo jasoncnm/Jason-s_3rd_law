@@ -14,8 +14,7 @@ out vec4 finalColor;
 // NOTE: Add your custom variables here
 
 // NOTE: Render size values must be passed from code
-const float renderWidth = 800.0;
-const float renderHeight = 450.0;
+uniform vec2 u_frameSize;
 
 float stitchingSize = 6.0;
 
@@ -23,6 +22,9 @@ uniform int invert = 0;
 
 vec4 PostFX(sampler2D tex, vec2 uv)
 {
+	float renderWidth = u_frameSize.x;
+	float renderHeight = u_frameSize.y;
+
     vec4 c = vec4(0.0);
     float size = stitchingSize;
     vec2 cPos = uv*vec2(renderWidth, renderHeight);

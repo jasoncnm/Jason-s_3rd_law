@@ -28,7 +28,7 @@ void main()
     color += texture(texture0, fragTexCoord - 0.011);
 
     color.rgb = vec3((color.r + color.g + color.b)/3.0);
-    color = color/9.5;
+    color = color/9.9;
 
     fragColor = color;
 }            

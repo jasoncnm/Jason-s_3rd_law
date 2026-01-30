@@ -14,15 +14,15 @@ out vec4 finalColor;
 // NOTE: Add your custom variables here
 
 // NOTE: Render size values must be passed from code
-const float renderWidth = 800;
-const float renderHeight = 450;
 float offset = 0.0;
 
+uniform vec2 u_frameSize;
 uniform float time;
 
 void main()
 {
-    float frequency = renderHeight/3.0;
+	
+    float frequency = u_frameSize.y/3.0;
 /*
     // Scanlines method 1
     float tval = 0; //time

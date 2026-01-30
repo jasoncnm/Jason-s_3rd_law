@@ -37,7 +37,6 @@ enum PostShaderType
 
 struct PostFX
 {
-    char shaderPath[260];
     Shader shader;
     int frameBufferSizeLoc;
     long fileWriteTime;
@@ -51,16 +50,25 @@ struct StarFields
     float flySpeed = 0.1f;    
 };
 
-struct BloomFX
-{
-    const char * shaderPath = "Assets/Shaders/bloom.fs";
-    Shader shader;
-    Vector2 frameBufferSize;
-    };
-
 //  ========================================================================
 //              NOTE: Render Globals
 //  ========================================================================
+
+static const char * shaderPaths[FX_COUNT] = 
+{
+        "Assets/Shaders/grayscale.fs",
+        "Assets/Shaders/posterization.fs",
+        "Assets/Shaders/dream_vision.fs",
+        "Assets/Shaders/pixelizer.fs",
+        "Assets/Shaders/cross_hatching.fs",
+        "Assets/Shaders/cross_stitching.fs",
+        "Assets/Shaders/predator.fs",
+        "Assets/Shaders/scanlines.fs",
+        "Assets/Shaders/fisheye.fs",
+        "Assets/Shaders/sobel.fs",
+    "Assets/Shaders/bloom.fs",
+        "Assets/Shaders/blur.fs",
+};
 
 //  ========================================================================
 //              NOTE: Render Functions

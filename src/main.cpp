@@ -118,7 +118,7 @@ int main(int argumentCount, char *argumentArray[])
         
         // if (IsWindowState(FLAG_VSYNC_HINT)) ClearWindowState(FLAG_VSYNC_HINT);
         // else SetWindowState(FLAG_VSYNC_HINT);
-// SetWindowState(FLAG_WINDOW_TOPMOST);
+SetWindowState(FLAG_WINDOW_TOPMOST);
         
         // SetTargetFPS(30);
 #endif
@@ -126,7 +126,7 @@ int main(int argumentCount, char *argumentArray[])
         SetWindowState(FLAG_WINDOW_RESIZABLE);
         SetWindowMonitor(0);
         SetExitKey(KEY_Q);  // IMPORTANT: DEBUG ONLY !!
-         MaximizeWindow();
+         // MaximizeWindow();
 
         Image icon = LoadImage("Assets/ICON/ICON.png");
         if (IsImageValid(icon))
@@ -149,20 +149,22 @@ int main(int argumentCount, char *argumentArray[])
             return -1;
         }
         
-        if (FileExists("Assets/Shaders/bloom.fs"))
+        for (uint32 shaderType = 0; shaderType < FX_COUNT; shaderType++)
         {
-            // NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default vertex shader
-            strcpy(gameState->postFX[FX_BLOOM].shaderPath, "Assets/Shaders/bloom.fs");
-            gameState->postFX[FX_BLOOM].shader =
-                LoadShader(0,gameState->postFX[FX_BLOOM].shaderPath);
-            gameState->postFX[FX_BLOOM].frameBufferSizeLoc = 
-                GetShaderLocation(gameState->postFX[FX_BLOOM].shader, "size");
-            if (!IsShaderValid(gameState->postFX[FX_BLOOM].shader))
+            if (FileExists(shaderPaths[shaderType]))
             {
-                SM_ERROR("Unable to load shader file (%s)", 
-                         "Assets/Shaders/bloom.fs");
-            }
-            gameState->postFX[FX_BLOOM].fileWriteTime = GetFileModTime(gameState->postFX[FX_BLOOM].shaderPath);
+                // NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default vertex shader
+                gameState->postFX[shaderType].shader =
+                    LoadShader(0, shaderPaths[shaderType]);
+                gameState->postFX[shaderType].frameBufferSizeLoc = 
+                    GetShaderLocation(gameState->postFX[shaderType].shader, "u_frameSize");
+                if (!IsShaderValid(gameState->postFX[shaderType].shader))
+                {
+                    SM_ERROR("Unable to load shader file (%s)", 
+                             shaderPaths[shaderType]);
+                }
+                gameState->postFX[FX_BLOOM].fileWriteTime = GetFileModTime(shaderPaths[shaderType]);
+                }
         }
         
         gameState->renderTarget = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);

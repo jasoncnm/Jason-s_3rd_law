@@ -1385,45 +1385,60 @@ void GameplayUpdateAndRender()
         
         if (gameState->enableFX)
         {
-            if (GetFileModTime(gameState->postFX[FX_BLOOM].shaderPath) != 
-                gameState->postFX[FX_BLOOM].fileWriteTime)
-            {
-                UnloadShader(gameState->postFX[FX_BLOOM].shader);
-                gameState->postFX[FX_BLOOM].shader =
-                    LoadShader(0,gameState->postFX[FX_BLOOM].shaderPath);
-                gameState->postFX[FX_BLOOM].frameBufferSizeLoc = 
-                    GetShaderLocation(gameState->postFX[FX_BLOOM].shader, "size");
-                if (!IsShaderValid(gameState->postFX[FX_BLOOM].shader))
-                {
-                    SM_ASSERT(false, "Unable to load shader file (%s)", 
-                             "Assets/Shaders/bloom.fs");
-                }
-                gameState->postFX[FX_BLOOM].fileWriteTime = GetFileModTime(gameState->postFX[FX_BLOOM].shaderPath);
-                }
+            static int32 shaderType = 0;
             
-            float size[2] =
-            { 
-                (float)gameState->screenWidth, (float)gameState->screenHeight
-            };
-            SetShaderValue(gameState->postFX[FX_BLOOM].shader, 
-                       gameState->postFX[FX_BLOOM].frameBufferSizeLoc, 
-                       size, SHADER_UNIFORM_VEC2);
-        
-        BeginShaderMode(gameState->postFX[FX_BLOOM].shader);
-        DrawTextureRec(gameState->renderTarget.texture, 
-                       {
-                           0,
-                           0, 
-                           (float)gameState->renderTarget.texture.width, (float)-gameState->renderTarget.texture.height
-                       }, 
-                       {
-                           0,
-                           0
-                       }, WHITE);
-        
-            EndShaderMode();
-        }
-        else
+            if (IsKeyPressed(KEY_KP_4))
+            {
+                shaderType--;
+            }
+            else if (IsKeyPressed(KEY_KP_6))
+            {
+                shaderType++;
+            }
+            
+            if (shaderType < 0) shaderType = (int32)(FX_COUNT) - 1;
+            if (shaderType >= FX_COUNT) shaderType = 0;
+            
+                if (GetFileModTime(shaderPaths[shaderType]) != 
+                    gameState->postFX[shaderType].fileWriteTime)
+                {
+                    UnloadShader(gameState->postFX[shaderType].shader);
+                    gameState->postFX[shaderType].shader =
+                        LoadShader(0, shaderPaths[shaderType]);
+                    gameState->postFX[shaderType].frameBufferSizeLoc = 
+                        GetShaderLocation(gameState->postFX[shaderType].shader, "u_frameSize");
+                    if (!IsShaderValid(gameState->postFX[shaderType].shader))
+                    {
+                        SM_ASSERT(false, "Unable to load shader file (%s)", 
+                                  "Assets/Shaders/bloom.fs");
+                    }
+                    gameState->postFX[shaderType].fileWriteTime = GetFileModTime(shaderPaths[shaderType]);
+                }
+                
+                float size[2] =
+                { 
+                    (float)gameState->screenWidth, (float)gameState->screenHeight
+                };
+                SetShaderValue(gameState->postFX[shaderType].shader, 
+                               gameState->postFX[shaderType].frameBufferSizeLoc, 
+                               size, SHADER_UNIFORM_VEC2);
+                
+                BeginShaderMode(gameState->postFX[shaderType].shader);
+                DrawTextureRec(gameState->renderTarget.texture, 
+                               {
+                                   0,
+                                   0, 
+                                   (float)gameState->renderTarget.texture.width, (float)-gameState->renderTarget.texture.height
+                               }, 
+                               {
+                                   0,
+                                   0
+                               }, WHITE);
+                
+                EndShaderMode();
+                
+            }
+            else
             {
 DrawTextureRec(gameState->renderTarget.texture, 
                        {
