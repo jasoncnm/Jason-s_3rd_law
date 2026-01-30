@@ -25,7 +25,7 @@ jobs:
 
       - name: Build The Game
         run: |
-          .\build.bat
+          .\build.bat release
 
       - name: Prepare Release Files
         shell: bash
