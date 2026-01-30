@@ -9,29 +9,5 @@
 
 #define RAYLIB_GUI_STYLE_PATH  "Assets/UI/style_cyber.rgs"
 
-struct Arrow
-{
-    Sprite sprite;
-    SpriteID id;
-
-    int tileSize;
-    
-    Vector2 topLeftPos;
-    bool show = true;
-};
-
-struct GameButton
-{
-    Sprite background;
-    SpriteID id;
-    
-    int textLen;
-    bool hover = false;
-    
-    char * buttonText;
-
-    Rectangle bounds;
-};
-
 #define GAME_UI_H
 #endif

@@ -41,6 +41,7 @@
 
 constexpr float zoom_per_tile = 19.0f / 600.0f;
 constexpr float press_freq = 0.2f;
+constexpr float cameraSwitchTargetDelay = 1.0f;
 
 
 #include "raylib.h"
@@ -209,8 +210,6 @@ struct GameState
     Array<int, MAX_ENTITIES> entityTable[LAYER_COUNT];
     Array<Entity, MAX_ENTITIES> entities;
     
-    Arrow upArrow, downArrow, leftArrow, rightArrow;
-    
     int tileMapCount;
     Map tileMaps[500];
     Map * lv2Map;
@@ -222,7 +221,10 @@ struct GameState
     IVec2 tileMin, tileMax;
     
     int playerEntityIndex;
+    int cameraFollowEntityIndex;
     int currentMapIndex;
+    int playerMapIndex;
+    
     int screenWidth = SCREEN_WIDTH;
     int screenHeight = SCREEN_HEIGHT;
     GameScreen currentScreen = TITLE_SCREEN;

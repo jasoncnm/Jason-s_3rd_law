@@ -21,7 +21,9 @@ void main()
     vec2 xy = 2.0*fragTexCoord.xy - 1.0;
     float d = length(xy);
 
-    if (d < (2.0 - maxFactor))
+
+//    if (d < (2.0 - maxFactor))
+    if (d > 0)
     {
         d = length(xy*maxFactor);
         float z = sqrt(1.0 - d*d);
@@ -34,7 +36,9 @@ void main()
     else
     {
         uv = fragTexCoord.xy;
+        // fragColor = vec4(vec3(0), 1);
     }
 
     fragColor = texture(texture0, uv);
+
 }

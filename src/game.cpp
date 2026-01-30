@@ -628,17 +628,58 @@ inline void UpdateCameraToTileMapSmooth(Map & map, Vector2 pos, uint32 mapIndex)
 inline bool8 UpdateCamera()
 {
     bool8 updated = false;
-    Entity * player = GetPlayer();
-    SM_ASSERT(player, "Player is not active");
     
-    Vector2 playerTile = player->pivot;
+    Entity * followEnt = GetEntity(gameState->cameraFollowEntityIndex);
     
+    SM_ASSERT(followEnt, "followEnt is not active");
+    
+    Vector2 followPos = followEnt->pivot;
+    
+    Vector2 finalPos = GetTilePivot(followEnt);
+    Rectangle finalRect = { finalPos.x, finalPos.y, followEnt->tileSize, followEnt->tileSize };
+    Map & current = gameState->tileMaps[gameState->currentMapIndex];
+    Vector2 mapMin = GetTilePivot(current.tilePos, MAP_TILE_SIZE);
+    Rectangle tileMapRec =
+    {
+        mapMin.x + MAP_TILE_SIZE,
+        mapMin.y + MAP_TILE_SIZE,
+        (float)current.width  * (float)MAP_TILE_SIZE,
+        (float)current.height * (float)MAP_TILE_SIZE
+    };
+    
+    if (followEnt->tweenController.playing && 
+        (followEnt->entityIndex != gameState->playerEntityIndex) &&
+        !CheckCollisionRecs(finalRect, tileMapRec))
+    {
+        gameState->cameraTweenController.Reset();
+        
+        Vector2 moveDir = GetTilePivot(followEnt) - followEnt->pivot;
+        Vector2 center = Vector2Add(followEnt->pivot, 
+                                    Vector2 
+                                    {
+                                        followEnt->tileSize * 0.5f,
+                                        followEnt->tileSize * 0.5f 
+                                    });
+        Vector2 camPos = gameState->camera.target;
+        
+        
+        if (!FloatEquals(moveDir.x, 0))
+        {
+            gameState->camera.target.x = Lerp(camPos.x, center.x, 10 * GetFrameTime());
+        }
+        
+        if (!FloatEquals(moveDir.y, 0))
+        {
+            gameState->camera.target.y = Lerp(camPos.y, center.y, 10 * GetFrameTime());
+        }
+        return true;
+}
     for (int i = 0; i < gameState->tileMapCount; i++)
     {
         Map & map = gameState->tileMaps[i];
         Vector2 mapMin = GetTilePivot(map.tilePos, MAP_TILE_SIZE);
         
-        Rectangle playerRec = GetEntityRect(player);
+        Rectangle followRec = GetEntityRect(followEnt);
         Rectangle tileMapRec =
         {
             mapMin.x + MAP_TILE_SIZE,
@@ -647,10 +688,15 @@ inline bool8 UpdateCamera()
             (float)map.height * (float)MAP_TILE_SIZE
         };
         
-        if( CheckCollisionRecs(playerRec, tileMapRec) )
+        if( CheckCollisionRecs(followRec, tileMapRec) )
         {
             
             Vector2 pos = TilePositionToPixelPosition(map.width * 0.5f + map.tilePos.x + 0.5f, map.height * 0.5f + map.tilePos.y + 0.5f);
+            
+            if (gameState->cameraFollowEntityIndex == gameState->playerEntityIndex)
+            {
+                gameState->playerMapIndex = i;
+            }
             
             if (IsKeyPressed(KEY_TAB))
             {
@@ -671,6 +717,7 @@ inline bool8 UpdateCamera()
                     gameState->screenHeight = GetScreenHeight();
                     
                     gameState->currentMapIndex = i;
+                    
                     gameState->camera.rotation = 0.0f;
                     gameState->camera.target = pos;
                     gameState->camera.zoom = GetCameraZoom(map);
@@ -731,6 +778,7 @@ inline void Undo()
 {
     UndoState & undoState = gameState->undoStack.back();
     gameState->playerEntityIndex = undoState.playerIndex;
+    gameState->cameraFollowEntityIndex = gameState->playerEntityIndex;
     
     std::vector<Entity> & undoEntities = undoState.undoEntities;
     SetUndoEntities(undoEntities);        
@@ -919,10 +967,21 @@ bool8 MoveAction(IVec2 actionDir)
             }
         case PUSH_MERGED:
         {
-            IVec2 standingPlatformPos = actionTilePos + player->attachDir;
-            FindAttachableResult findResult = FindAttachable(standingPlatformPos, player->attachDir);
-            if (findResult.has) MergeSlimes(pushResult.mergeEntity, player);
+            if (player->attach)
+            {
+                Entity * attach = GetEntity(player->attachedEntityIndex);
+                
+                if (attach && attach->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+                    attach->cableType == CABLE_TYPE_DOOR)
+                {
+                    return false;
+                }
+                else
+                {
+                    MergeSlimes(pushResult.mergeEntity, player);
             return true;
+                    }
+                }
         }
         
     }
@@ -1028,9 +1087,11 @@ inline bool8 SlimeSelection(Entity * player)
         {
             player->color = GRAY;
             gameState->playerEntityIndex = nextPlayerEntity->entityIndex;
+            gameState->cameraFollowEntityIndex = gameState->playerEntityIndex;
             player = GetEntity(gameState->playerEntityIndex);
             player->color = WHITE;
             stateChanged = true;
+            
         } 
     }
     
@@ -1128,7 +1189,6 @@ void GameplayUpdateAndRender()
             {
                 case MOVE_STATE:
                 {
-                    gameState->upArrow.show = gameState->downArrow.show = gameState->leftArrow.show = gameState->rightArrow.show = false;
                     
                     // NOTE: read input
                     if (JustPressed(SPLIT_KEY))
@@ -1242,8 +1302,11 @@ void GameplayUpdateAndRender()
                     {
                         if (entity->actionState == MOVE_STATE) SetActionState(entity, ANIMATE_STATE);
                     }
-                    entity->tweenController.Update();
-                    // entity->pivot = entity->tweenController.currentPosition;
+                        entity->tweenController.Update();
+                        if (entity->tweenController.playing)
+                        {
+                            gameState->cameraFollowEntityIndex = entity->entityIndex;
+                        }
                 }
                 else
                 {
@@ -1253,9 +1316,8 @@ void GameplayUpdateAndRender()
                 }
             } 
         }
-        
-    } 
-    }
+        }
+        }
     
     Entity * player = GetPlayer();
     if (player->tweenController.NoTweens())
@@ -1308,6 +1370,34 @@ void GameplayUpdateAndRender()
     }
     else if (gameState->currentScreen == GAME_TUT_SCREEN)
     {
+        auto goalTable = gameState->entityTable[LAYER_PORTAL];
+        bool8 end = true;
+        for (uint32 i = 0; i < goalTable.count; i++)
+        {
+            Entity * goal = GetEntity(goalTable[i]);
+            
+            EntityLayer layers[] = { LAYER_BLOCK };
+            Entity * block = FindEntityByLocationAndLayers(goal->tilePos, layers, 1);
+            if (!block || !block->tweenController.NoTweens())
+            {
+                end = false;
+            }
+        }
+        
+        if (end)
+        {
+            // TODO: temp
+            CleanUpGame();
+            LoadTileMapsAndEntities(*gameState, MAIN_PATH);
+            gameState->playerEntityIndex = gameState->lastState.playerIndex;
+            SetUndoEntities(gameState->lastState.undoEntities);
+            gameState->currentScreen = GAME_MAIN_SCREEN;
+            for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
+            return;
+            
+        }
+        
+        #if 0
         for (uint32 i = 0; i < gameState->entityTable[LAYER_BLOCK].count; i++)
         {
             Entity * block = GetEntity(gameState->entityTable[LAYER_BLOCK][i]);
@@ -1330,25 +1420,8 @@ void GameplayUpdateAndRender()
             }
             
         }
+        #endif
         
-    }
-    
-    // NOTE: Arrow Setup
-    {
-        IVec2 centerPos = GetPlayer()->tilePos;
-        
-        IVec2 upPos    = { centerPos.x, (centerPos.y-1) };
-        IVec2 downPos  = { centerPos.x, (centerPos.y+1) };
-        IVec2 leftPos  = { (centerPos.x-1), (centerPos.y) };
-        IVec2 rightPos = { (centerPos.x+1), (centerPos.y) };
-        
-        IVec2 dir[4] = { upPos, downPos, leftPos, rightPos };
-        Arrow * arrows[4] = { &gameState->upArrow, &gameState->downArrow, &gameState->leftArrow, &gameState->rightArrow };
-        for (int i = 0; i < 4; i++)
-        {
-            Arrow * arrow = arrows[i];
-            arrow->topLeftPos = GetTilePivot(dir[i], (float)arrow->tileSize);
-        }
     }
     
     // NOTE: Render
@@ -1375,6 +1448,18 @@ void GameplayUpdateAndRender()
         // Draw rectangle outline with extended parameters
         // Rectangle cameraRect = GetCameraRect(gameState->camera);
         // DrawRectangleLinesEx(cameraRect, 1, RED);
+        
+        Entity * followEnt = GetEntity(gameState->cameraFollowEntityIndex);
+        
+        Vector2 center = Vector2Add(followEnt->pivot, 
+                                    Vector2 
+                                    {
+                                        followEnt->tileSize * 0.5f,
+                                        followEnt->tileSize * 0.5f 
+                                    });
+        
+        //DrawCircleV(center, 5,  RED);
+        //DrawCircleV(gameState->camera.target, 5, YELLOW);
         
         EndMode2D();
         EndTextureMode();
@@ -1409,7 +1494,7 @@ void GameplayUpdateAndRender()
                         GetShaderLocation(gameState->postFX[shaderType].shader, "u_frameSize");
                     if (!IsShaderValid(gameState->postFX[shaderType].shader))
                     {
-                        SM_ASSERT(false, "Unable to load shader file (%s)", 
+                        SM_ERROR(false, "Unable to load shader file (%s)", 
                                   "Assets/Shaders/bloom.fs");
                     }
                     gameState->postFX[shaderType].fileWriteTime = GetFileModTime(shaderPaths[shaderType]);
@@ -1488,9 +1573,7 @@ DrawTextureRec(gameState->renderTarget.texture,
         DrawText(TextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f",
                             gameState->camera.target.x, gameState->camera.target.y,
                             gameState->camera.offset.x, gameState->camera.offset.y, gameState->camera.zoom), 10, 50, 20, RAYWHITE);
-        DrawText("Arrow Direction to Shoot, R KEY to Restart, Z KEY to undo", 10, 10, 20, RAYWHITE);
         
-        #endif
         DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
                             centerPos.x, centerPos.y,
                             player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
@@ -1507,7 +1590,9 @@ DrawTextureRec(gameState->renderTarget.texture,
             DrawText("Game Simulating", gameState->screenWidth / 4, gameState->screenHeight / 4, 20, RED);
             }
         
+        #endif
 #endif
+        
         DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
         
         EndDrawing();
@@ -1518,27 +1603,6 @@ void InitializeGame()
 {
     // NOTE: Initialization
     gameState->initialized = true;
-    
-    // NOTE: Initilize Arrows
-    // UP
-    gameState->upArrow.sprite = GetSprite(SPRITE_ARROW_UP);
-    gameState->upArrow.id = SPRITE_ARROW_UP;
-    gameState->upArrow.tileSize = 16;
-    
-    // DOWN
-    gameState->downArrow.sprite = GetSprite(SPRITE_ARROW_DOWN);
-    gameState->downArrow.id = SPRITE_ARROW_DOWN;
-    gameState->downArrow.tileSize = 16;
-    
-    // LEFT
-    gameState->leftArrow.sprite = GetSprite(SPRITE_ARROW_LEFT);
-    gameState->leftArrow.id = SPRITE_ARROW_LEFT;
-    gameState->leftArrow.tileSize = 16;
-    
-    // RIGHT
-    gameState->rightArrow.sprite = GetSprite(SPRITE_ARROW_RIGHT);
-    gameState->rightArrow.id = SPRITE_ARROW_RIGHT;
-    gameState->rightArrow.tileSize = 16;
     
     InitKeyMapping();
     
@@ -1599,6 +1663,8 @@ void InitializeGame()
     
     gameState->currentMapIndex = -1;
     gameState->simulating = false;
+    
+    gameState->cameraFollowEntityIndex = gameState->playerEntityIndex;
     
 }
 
