@@ -907,18 +907,14 @@ bool8 MoveAction(IVec2 actionDir)
                 }
             else
             {
-                EntityLayer layers[] = { LAYER_DOOR, LAYER_SLIME  };
+                EntityLayer layers[] = {LAYER_SLIME  };
                 Entity * ent = FindEntityByLocationAndLayers(standingPlatformPos, layers, ArrayCount(layers));
                 
                 if (ent)
                 {
-                    if (!IsSlime(ent))
-                    {
-                        return false;
-                    }
                     player = MergeSlimes(ent, player);
                 }
-                else if (!ent && Abs(player->attachDir) != Abs(actionDir))
+                else if (Abs(player->attachDir) != Abs(actionDir))
                 {
                     IVec2 newTile = standingPlatformPos;
                     IVec2 newAttach = - actionDir;
@@ -967,22 +963,21 @@ bool8 MoveAction(IVec2 actionDir)
             }
         case PUSH_MERGED:
         {
-            if (player->attach)
+            #if 0
+            IVec2 standingPlatformPos = actionTilePos + player->attachDir;
+            FindAttachableResult findResult = FindAttachable(standingPlatformPos, player->attachDir);
+            if (findResult.has)
             {
-                Entity * attach = GetEntity(player->attachedEntityIndex);
                 
-                if (attach && attach->type == ENTITY_TYPE_ELECTRIC_DOOR &&
-                    attach->cableType == CABLE_TYPE_DOOR)
-                {
-                    return false;
-                }
-                else
-                {
-                    MergeSlimes(pushResult.mergeEntity, player);
-            return true;
-                    }
-                }
-        }
+            }
+#endif
+            if (!door)
+            {
+                MergeSlimes(pushResult.mergeEntity, player);
+                return true;
+            }
+            return false;
+            }
         
     }
     
