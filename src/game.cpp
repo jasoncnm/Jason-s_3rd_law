@@ -1317,7 +1317,12 @@ void GameplayUpdateAndRender()
             } 
         }
         }
-        }
+    }
+    
+    if (!GetEntity(gameState->cameraFollowEntityIndex))
+    {
+        gameState->cameraFollowEntityIndex = gameState->playerEntityIndex;
+    }
     
     Entity * player = GetPlayer();
     if (player->tweenController.NoTweens())

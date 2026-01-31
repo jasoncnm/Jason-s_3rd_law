@@ -31,6 +31,7 @@ enum PostShaderType
     FX_SOBEL,
     FX_BLOOM,
     FX_BLUR,
+    FX_VIGNETTE,
     FX_COUNT,
     //FX_FXAA
 };
@@ -67,7 +68,8 @@ static const char * shaderPaths[FX_COUNT] =
         "Assets/Shaders/fisheye.fs",
         "Assets/Shaders/sobel.fs",
     "Assets/Shaders/bloom.fs",
-        "Assets/Shaders/blur.fs",
+    "Assets/Shaders/blur.fs",
+    "Assets/Shaders/vignette.fs",
 };
 
 //  ========================================================================

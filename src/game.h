@@ -32,7 +32,7 @@
 
 #define GAME_SAVE_PATH "data/save_data/"
 
-#define BLOCK_MOVE_FUNC nullptr
+#define BLOCK_MOVE_FUNC  EaseOutBounce// nullptr
 #define PLAYER_MOVE_FUNC EaseOutCubic
 #define CAMERA_MOVE_FUNC EaseOutCubic
 #define CAMERA_ZOOM_FUNC EaseInOutCubic
