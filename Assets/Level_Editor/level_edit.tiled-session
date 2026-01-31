@@ -1237,11 +1237,11 @@
             }
         },
         "TileMap/Room_9.tmj": {
-            "scale": 0.5,
+            "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -16,
-                "y": 889
+                "x": -437.3333333333333,
+                "y": 1087.6666666666665
             }
         },
         "TileMap/Test.tmj": {
@@ -1405,11 +1405,11 @@
             }
         },
         "TileMap/Tutorial_9.tmj": {
-            "scale": 1.5,
+            "scale": 3,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 116.66666666666669,
-                "y": 146.33333333333331
+                "x": 177.66666666666663,
+                "y": 160.5
             }
         },
         "TileMap/Tutorial_Path_3_Room_1.tmj": {
