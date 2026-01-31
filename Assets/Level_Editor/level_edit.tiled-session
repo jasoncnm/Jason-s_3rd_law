@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TlieSet/tileSet.tsx",
+    "activeFile": "TileMap/Room_40.tmj",
     "expandedProjectPaths": [
         "TlieSet",
         ".",
@@ -1030,7 +1030,7 @@
         },
         "TileMap/Room_40.tmj": {
             "scale": 0.33,
-            "selectedLayer": 0,
+            "selectedLayer": 1,
             "viewCenter": {
                 "x": 195.4545454545455,
                 "y": -550
@@ -1402,7 +1402,7 @@
         },
         "TlieSet/tileSet.tsx": {
             "scaleInDock": 1.5,
-            "scaleInEditor": 1
+            "scaleInEditor": 0.75
         }
     },
     "last.worldFilePath": "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor",
@@ -1448,7 +1448,11 @@
         "TileMap/Path_79.tmj",
         "TileMap/Path_28.tmj",
         "TileMap/Toturial_2.tmj",
-        "TlieSet/tileSet.tsx"
+        "TlieSet/tileSet.tsx",
+        "TileMap/BRoom_1.tmj",
+        "TileMap/Room_58.tmj",
+        "TileMap/Room_40.tmj",
+        "TileMap/Room_60.tmj"
     ],
     "project": "level_edit.tiled-project",
     "recentFiles": [
