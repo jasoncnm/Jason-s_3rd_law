@@ -1,10 +1,10 @@
 {
     "maps": [
         {
-            "fileName": "TileMap/Tutorial_2.tmj",
+            "fileName": "TileMap/Tutorial_6.tmj",
             "height": 352,
             "width": 352,
-            "x": 1056,
+            "x": 0,
             "y": 0
         }
     ],
