@@ -1000,13 +1000,6 @@
             "width": 352,
             "x": -1184,
             "y": 2944
-        },
-        {
-            "fileName": "TileMap/Path_81.tmj",
-            "height": 352,
-            "width": 96,
-            "x": 512,
-            "y": 2496
         }
     ],
     "onlyShowAdjacentMaps": false,
