@@ -191,6 +191,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         return;
     }
     
+    
                 float speed = (MoveFunc == PLAYER_MOVE_FUNC) ? SLIME_MOVE_SPEED : BOUNCE_SPEED;
     if (IsSlime(entity))
     {
