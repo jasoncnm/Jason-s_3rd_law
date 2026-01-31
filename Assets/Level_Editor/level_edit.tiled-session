@@ -613,11 +613,11 @@
             }
         },
         "TileMap/Path_66.tmj": {
-            "scale": 1,
+            "scale": 0.25,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 110,
-                "y": 203.5
+                "x": 12,
+                "y": 902
             }
         },
         "TileMap/Path_67.tmj": {
