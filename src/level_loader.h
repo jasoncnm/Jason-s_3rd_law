@@ -36,6 +36,7 @@ enum TileID
     TUT_1    = 13,
     TUT_2    = 14,
     MAIN_PORTAL = 15,
+    SLIME_PORTAL = 11,
     
     DOOR_LEFT  = 82,
     DOOR_RIGHT = 83,

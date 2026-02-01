@@ -223,6 +223,10 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
     {
         entityResult = AddEntity(ENTITY_TYPE_MAIN_PORTAL, tilePos, SPRITE_MAIN_PORTAL);
     }
+    else if (id == SLIME_PORTAL)
+    {
+        entityResult = AddEntity(ENTITY_TYPE_SLIME_PORTAL, tilePos, SPRITE_SLIME_PORTAL);
+    }
     else
     {
         SM_ASSERT(false, "Unable to register ID (%d)", id);
@@ -352,6 +356,10 @@ void SetupEntityTable(GameState & state)
                     break;
                 }
                 case ENTITY_TYPE_MAIN_PORTAL:
+                {
+                    state.entityTable[LAYER_PORTAL].Add(entity->entityIndex);
+                }
+                case ENTITY_TYPE_SLIME_PORTAL:
                 {
                     state.entityTable[LAYER_PORTAL].Add(entity->entityIndex);
                 }

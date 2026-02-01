@@ -42,6 +42,7 @@ enum SpriteID
     SPRITE_TUT_1,
     SPRITE_TUT_2,
     SPRITE_MAIN_PORTAL,
+    SPRITE_SLIME_PORTAL,
 
     SPRITE_CABLE_CONNECTION,
 
@@ -151,6 +152,12 @@ Sprite GetSprite(SpriteID spriteID)
             sprite.altasOffset = { 128, 32 };
             sprite.spriteSize = { 32, 32 };
             
+            break;
+        }
+        case SPRITE_SLIME_PORTAL:
+        {
+            sprite.altasOffset = { 0, 32 };
+            sprite.spriteSize = { 32, 32 };
             break;
         }
         case SPRITE_TUT_1:

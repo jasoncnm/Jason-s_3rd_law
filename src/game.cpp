@@ -1300,6 +1300,9 @@ void GameplayUpdateAndRender()
         gameState->cameraFollowEntityIndex = gameState->playerEntityIndex;
     }
     
+    // NOTE: tutorials
+    if (gameState->currentScreen == GAME_MAIN_SCREEN)
+    {
     Entity * player = GetPlayer();
     if (player && player->tweenController.NoTweens())
     {
@@ -1307,7 +1310,6 @@ void GameplayUpdateAndRender()
         Entity * portal = FindEntityByLocationAndLayers(player->tilePos, layer, 1);
         if (portal && portal->type == ENTITY_TYPE_TUT_PORTAL)
         {
-            // TODO: temp
             gameState->lastState = gameState->undoStack.back();
             
             for (uint32 idx = 0; idx < gameState->lastState.undoEntities.size(); idx ++)
@@ -1348,6 +1350,7 @@ void GameplayUpdateAndRender()
             for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
             return;
         }
+        }
     }
     else if (gameState->currentScreen == GAME_TUT_SCREEN)
     {
@@ -1357,51 +1360,46 @@ void GameplayUpdateAndRender()
         {
             Entity * goal = GetEntity(goalTable[i]);
             
+            if (goal->type == ENTITY_TYPE_MAIN_PORTAL)
+            {
             EntityLayer layers[] = { LAYER_BLOCK };
             Entity * block = FindEntityByLocationAndLayers(goal->tilePos, layers, 1);
-            if (!block || !block->tweenController.NoTweens())
+                if (!block || !block->tweenController.NoTweens())
+                {
+                    end = false;
+                }
+            }
+            else if (goal->type == ENTITY_TYPE_SLIME_PORTAL)
             {
-                end = false;
+                EntityLayer layers[] = { LAYER_SLIME };
+                Entity * slime = FindEntityByLocationAndLayers(goal->tilePos, layers, 1);
+                if (!slime || !slime->tweenController.NoTweens())
+                {
+                    end = false;
+                }
+            }
+            else
+            {
+                SM_ASSERT(false, "unknown type");
             }
         }
         
         if (end)
         {
-            // TODO: temp
+            Entity player = *GetPlayer();
             CleanUpGame();
             LoadTileMapsAndEntities(*gameState, MAIN_PATH);
             gameState->playerEntityIndex = gameState->lastState.playerIndex;
             SetUndoEntities(gameState->lastState.undoEntities);
             gameState->currentScreen = GAME_MAIN_SCREEN;
             for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
+            
+            // Setup Play attach
+            AttachSlime(GetPlayer(), player.attachDir);
+            
             return;
             
         }
-        
-        #if 0
-        for (uint32 i = 0; i < gameState->entityTable[LAYER_BLOCK].count; i++)
-        {
-            Entity * block = GetEntity(gameState->entityTable[LAYER_BLOCK][i]);
-            if (block && block->tweenController.NoTweens())
-            {
-            EntityLayer layer[] = { LAYER_PORTAL };
-                Entity * portal = FindEntityByLocationAndLayers(block->tilePos, layer, 1);
-                if (portal && portal->type == ENTITY_TYPE_MAIN_PORTAL)
-                {
-                    // TODO: temp
-                    CleanUpGame();
-                     LoadTileMapsAndEntities(*gameState, MAIN_PATH);
-                    gameState->playerEntityIndex = gameState->lastState.playerIndex;
-                    SetUndoEntities(gameState->lastState.undoEntities);
-                    gameState->currentScreen = GAME_MAIN_SCREEN;
-                    for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
-                    return;
-                }
-                    
-            }
-            
-        }
-        #endif
         
     }
     
@@ -1609,7 +1607,7 @@ void InitializeGame()
             
             for (int j = 0; j < 4; j++)
             {
-                if (AttachSlime(slimeA, directions[j])) break;
+                if (!slimeA->attach && AttachSlime(slimeA, directions[j])) break;
             }
             
             slimeA->pivot = GetTilePivot(slimeA);
@@ -1621,7 +1619,7 @@ void InitializeGame()
             
             for (int j = 0; j < 4; j++)
             {
-                if (AttachSlime(slimeB, directions[j])) break;
+                if (!slimeB->attach && AttachSlime(slimeB, directions[j])) break;
             }
             
             slimeB->pivot = GetTilePivot(slimeB);
