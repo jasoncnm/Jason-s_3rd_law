@@ -14,44 +14,26 @@
 #include "tween_controller.cpp"
 
 /*
-
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Fix weird animation bugs 
 
   TODO: Things that I can do beside arts and design I guess
-- Make The Save File Less buggy! (Serialize It, so that game won't break when level/code change)
-- Try use particle systems to render Startfield background to impore performence
-- Draw Tile Grid with texture to reduce draw call
-- Create a load menu to choose save file
-  - Drag and drop save file could be fun
-  - top down lights / spotlight rendering
-  - add particles
-  - Texture filtering when zooming out (is mipmapping come handy here?)
-  - Viewport scaling IMPORTANT: DO we really need this ? 
-  - Bit masking with tile rules
+1. tutorial logic: this week
+2.saves and loads
+3.collectable: show in ui, 1wk
+4. key and door: pick up key unlock door when touch + movable background: disappeared when outside 2wk
+5. Sound effect background 2wk
+6. bug fixes, improve post effect 1wk
 
  TODO: PostProcessing
-
 1. Bloom
 2. Crt emulator
 3. chromatic aberration
 4. Vignette
 5. Color Grading (with LUT?)
 6. shake
-
-  NOTE: done
-        - Batch all sprite into a single draw call (raylib handled that internally, see https://www.raylib.com/examples/textures/loader.html?name=textures_bunnymark)
-
-     - background effects (try this: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_starfield_effect.c)
-  - Implement save points (Since the state of our game is entirely based oneach state of the entity,
-                           we can just read/write raw bytes of entities to a file)
-  - Gamepad supports
-  - (MoveActionCheck) When Door and block are in the same tile, we should check if the door is blocked first, then check if we can push the block
-  - Change animation controller into a tweening controller that is able to tween arbitarty types of values using easing functions
-  - Basic Scene Manager
-  - (UpdateElectricDoor) Connection point Logic needs to be refine. Check comments in the function 
-  - Need to refactor level_loader, we should have separate function to load entities, load tilemaps, and setup entity table.
 */
+
 //  ========================================================================
 //              NOTE: Game Structs (internal)
 //  ========================================================================
@@ -429,7 +411,8 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                     {
                         // NOTE: slime dose not block the block if it is attach to the block...
                         if ((ent->type == ENTITY_TYPE_ELECTRIC_DOOR) &&
-                            (ent->cableType != CABLE_TYPE_DOOR || !SameSide(ent, ent->tilePos, dirs[i])) ||
+                                (ent->cableType != CABLE_TYPE_DOOR || !SameSide(ent, ent->tilePos, dirs[i]) ||
+                                 !DoorBlocked(ent, dirs[i])) ||
                             (ent->type == ENTITY_TYPE_GLASS && ent->broken) ||
                             (IsSlime(ent) && (!ent->attach || dirs[i] != current.pushDir)))
                         {
@@ -630,8 +613,7 @@ inline bool8 UpdateCamera()
     bool8 updated = false;
     
     Entity * followEnt = GetEntity(gameState->cameraFollowEntityIndex);
-    
-    SM_ASSERT(followEnt, "followEnt is not active");
+    if (!followEnt) return false;
     
     Vector2 followPos = followEnt->pivot;
     
@@ -1116,7 +1098,6 @@ void UpdateSprite(EntityLayer layer)
 
 void GameplayUpdateAndRender()
 {
-    
     // NOTE: Debug Switch Monitor
     if (GetMonitorCount() > 1)
     {
@@ -1169,7 +1150,7 @@ void GameplayUpdateAndRender()
     bool8 stateChanged = false;
     
     // NOTE: Actions
-    if (!gameState->simulating) {
+    if (GetPlayer() && !gameState->simulating) {
         
         Entity * player = GetEntity(gameState->playerEntityIndex);
         
@@ -1320,7 +1301,7 @@ void GameplayUpdateAndRender()
     }
     
     Entity * player = GetPlayer();
-    if (player->tweenController.NoTweens())
+    if (player && player->tweenController.NoTweens())
     {
         EntityLayer layer[] = { LAYER_BLOCK };
         Entity * portal = FindEntityByLocationAndLayers(player->tilePos, layer, 1);
@@ -1440,7 +1421,7 @@ void GameplayUpdateAndRender()
              DrawTileMap(gameState->camera, map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
         }
         
-        EntityLayer orderedDrawLayers[] = { LAYER_PORTAL, LAYER_WALL, LAYER_CABLE, LAYER_PIT,  LAYER_DOOR, LAYER_SLIME, LAYER_BLOCK, LAYER_GLASS, };
+        EntityLayer orderedDrawLayers[] = { LAYER_PORTAL, LAYER_WALL, LAYER_CABLE, LAYER_PIT,  LAYER_SLIME, LAYER_BLOCK, LAYER_GLASS,  LAYER_DOOR,};
         
         int count = ArrayCount(orderedDrawLayers);
         DrawSpriteLayers(orderedDrawLayers, count);
@@ -1451,6 +1432,8 @@ void GameplayUpdateAndRender()
         
         Entity * followEnt = GetEntity(gameState->cameraFollowEntityIndex);
         
+        if (followEnt)
+        {
         Vector2 center = Vector2Add(followEnt->pivot, 
                                     Vector2 
                                     {
@@ -1460,6 +1443,7 @@ void GameplayUpdateAndRender()
         
         //DrawCircleV(center, 5,  RED);
         //DrawCircleV(gameState->camera.target, 5, YELLOW);
+        }
         
         EndMode2D();
         EndTextureMode();
@@ -1540,11 +1524,13 @@ DrawTextureRec(gameState->renderTarget.texture,
 #if  GAME_INTERNAL
         // NOTE: UI Draw Game Informations
         
+        
         Entity * player = GetEntity(gameState->playerEntityIndex);
+        if (player)
+        {
         IVec2 centerPos = player->tilePos;
-        
         Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
-        
+        }
         #if 0
         DrawText(TextFormat("TotalLine: %d, Connection: %d, Door: %d, TotalSource: %d",
                                      Cable_Indices.count,
