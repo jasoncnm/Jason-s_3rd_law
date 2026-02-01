@@ -448,6 +448,27 @@ void SetUpElectricDoor()
             }
         }
     }
+    
+    for (uint32 i = 0; i < Source_Indices.count; i++)
+    {
+        Entity * source = GetSource(i);
+        SM_ASSERT(source, "Entity is not active");
+        bool8 has = false;
+        int sourceCableIndex = Source_Indices[i];
+        
+        EntityLayer layers[] = { LAYER_BLOCK };
+        Entity * block = FindEntityByLocationAndLayers(source->tilePos, layers, ArrayCount(layers));
+        if (block && block->tweenController.NoTweens())
+        {
+            block->actionState = FREEZE_STATE;
+            OnSourcePowerOn(sourceCableIndex);
+        }
+        else
+        {
+            ShutDownPower(sourceCableIndex);
+        }
+        }
+    
 }
 
 

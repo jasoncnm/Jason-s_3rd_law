@@ -18,12 +18,12 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Fix weird animation bugs 
 
   TODO: Things that I can do beside arts and design I guess
-1. tutorial logic: this week
-2.saves and loads
-3.collectable: show in ui, 1wk
-4. key and door: pick up key unlock door when touch + movable background: disappeared when outside 2wk
-5. Sound effect background 2wk
+1. background 1wk
+3. collectable: show in ui, 4d
+4. key and door: pick up key unlock door when touch 1wk
+5. Sound effect, 1wk
 6. bug fixes, improve post effect 1wk
+2. saves and loads 3d
 
  TODO: PostProcessing
 1. Bloom
@@ -32,6 +32,9 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 4. Vignette
 5. Color Grading (with LUT?)
 6. shake
+
+// NOTE: done but need testing
+1. tutorial logic: this week
 */
 
 //  ========================================================================
@@ -752,6 +755,8 @@ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
         }
         
     }
+    
+    SetupEntityTable(*gameState);
 }
 
 
@@ -1635,9 +1640,7 @@ void InitializeGame()
             gameState->playerEntityIndex = slimeA->entityIndex;
             DeleteEntity(slimeB);
             }
-        
-        
-    }
+        }
     
     // NOTE: SetUp Electric Door
     SetUpElectricDoor();
