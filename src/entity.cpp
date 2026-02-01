@@ -199,7 +199,33 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         
         if ((Abs(offset).x == 0 || Abs(offset).y == 0))
         {
-            if (Abs(old.attachDir) == Abs(entity->attachDir))
+            if ((offset == IVec2 {0, 0}) && (Abs(old.attachDir) != Abs(entity->attachDir)))
+            {
+                Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({(float)offset.x, (float)offset.y}, MAP_TILE_SIZE));
+                
+                IVec2 dir = entity->attachDir;
+                middlePivot = Vector2Add(middlePivot, Vector2Scale({ (float)dir.x, (float)dir.y },
+                                                                   0.5f * (MAP_TILE_SIZE - entity->tileSize)));
+                
+                TweenParams params1 = {};
+                params1.paramType = PARAM_TYPE_VECTOR2;
+                params1.startVec2 = startPivot;
+                params1.endVec2 = middlePivot;
+                params1.realVec2  = &entity->pivot;
+                
+                TweenParams params2 = {};
+                params2.paramType = PARAM_TYPE_VECTOR2;
+                params2.startVec2 = middlePivot;
+                params2.endVec2 = endPivot;
+                params2.realVec2  = &entity->pivot;
+                
+                float dist = Vector2Distance(startPivot, middlePivot);
+                float tileDist = dist / MAP_TILE_SIZE;
+                
+                uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed, tileDist));
+                AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed * 2), channel);
+                }
+            else
             {
                 float dist = Vector2Distance(startPivot, endPivot);
                 float tileDist = dist / MAP_TILE_SIZE;
@@ -220,39 +246,19 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 else
                 {
                     AddTween(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist), channel);
-                    
-                }
-                }
-            else
-            {
-                Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({(float)offset.x, (float)offset.y}, MAP_TILE_SIZE));
-                 
-                IVec2 dir = entity->attachDir;
-                 middlePivot = Vector2Add(middlePivot, Vector2Scale({ (float)dir.x, (float)dir.y },
-                                                                          0.5f * (MAP_TILE_SIZE - entity->tileSize)));
+                    }
                 
-                TweenParams params1 = {};
-                params1.paramType = PARAM_TYPE_VECTOR2;
-                params1.startVec2 = startPivot;
-                params1.endVec2 = middlePivot;
-                params1.realVec2  = &entity->pivot;
-                
-                TweenParams params2 = {};
-                params2.paramType = PARAM_TYPE_VECTOR2;
-                params2.startVec2 = middlePivot;
-                params2.endVec2 = endPivot;
-                params2.realVec2  = &entity->pivot;
-                
-                float dist = Vector2Distance(startPivot, middlePivot);
-                float tileDist = dist / MAP_TILE_SIZE;
-                
-                uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed, tileDist));
-                AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed * 2), channel);
                 }
         }
         else
         {
+            Entity * oldAttach = old.attach ? GetEntity(old.attachedEntityIndex) : nullptr;
+            
             IVec2 dir = -entity->attachDir;
+            if (oldAttach && (oldAttach != attachedEntity))
+            {
+                dir = -dir;
+            }
             Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({ (float)dir.x, (float)dir.y },
                                                                       0.5f * (MAP_TILE_SIZE + entity->tileSize)));
             TweenParams params1 = {};
@@ -376,7 +382,7 @@ inline void SetGlassBeBroken(Entity * glass)
 
 inline float GetSlimeSize(int mass)
 {
-    return mass == 1 ? 0.5f * MAP_TILE_SIZE : 0.8f * MAP_TILE_SIZE;
+    return mass == 1 ? 0.5f * MAP_TILE_SIZE : 0.75f * MAP_TILE_SIZE;
 }
 
 inline float GetSlimeSize(Entity * slime)
