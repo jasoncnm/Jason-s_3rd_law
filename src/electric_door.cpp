@@ -534,9 +534,12 @@ inline void UpdateElectricDoor()
                                 Vector2 endPivot = {};
 
                                 FindAttachableResult result = FindAttachable(freezePos + slime->attachDir, slime->attachDir);
-
+                                
+                                slime->tweenController.Reset();
+                                
                                 if (result.has)
                                 {
+                                    MoveEntity(slime, result.entity, nullptr, freezePos, BLOCK_MOVE_FUNC);
                                     // NOTE: This is the yes logic
                                     SetEntityPosition(slime, result.entity, freezePos);
                                     endPivot = GetTilePivot(slime);
@@ -547,8 +550,6 @@ inline void UpdateElectricDoor()
                                     SetEntityPosition(slime, nullptr, freezePos);
                                     endPivot = GetTilePivot(freezePos, slime->tileSize);
                                 }
-
-                                slime->tweenController.Reset();
 
                                 TweenParams params = {};
                                 params.paramType = PARAM_TYPE_VECTOR2;

@@ -648,17 +648,20 @@ inline bool8 UpdateCamera()
         Vector2 camPos = gameState->camera.target;
         
         
-        if (!FloatEquals(moveDir.x, 0))
+        if (!FloatEquals(moveDir.x, 0) && 
+            (Sign(center.x - gameState->camera.target.x) == Sign(moveDir.x)))
         {
             gameState->camera.target.x = Lerp(camPos.x, center.x, 10 * GetFrameTime());
         }
         
-        if (!FloatEquals(moveDir.y, 0))
+        if (!FloatEquals(moveDir.y, 0) &&
+            (Sign(center.y - gameState->camera.target.y) == Sign(moveDir.y)))
         {
             gameState->camera.target.y = Lerp(camPos.y, center.y, 10 * GetFrameTime());
         }
         return true;
-}
+    }
+    
     for (int i = 0; i < gameState->tileMapCount; i++)
     {
         Map & map = gameState->tileMaps[i];
@@ -1292,17 +1295,19 @@ void GameplayUpdateAndRender()
                 else
                 {
                     if (entity->actionState == ANIMATE_STATE) SetActionState(entity, MOVE_STATE);
-                    //entity->pivot = GetTilePivot(entity);
-                    // entity->tweenController.HandleAnimationNotPlaying();
                 }
             } 
         }
         }
-    }
-    
-    if (!GetEntity(gameState->cameraFollowEntityIndex))
-    {
-        gameState->cameraFollowEntityIndex = gameState->playerEntityIndex;
+        
+        // TODO: change tab key to RECOVER_KEY
+        Entity * followEnt = GetEntity(gameState->cameraFollowEntityIndex);
+        if (!followEnt ||
+            (followEnt->tweenController.NoTweens() && JustPressed(RECOVER_KEY)))
+        {
+            gameState->cameraFollowEntityIndex = gameState->playerEntityIndex;
+        }
+        
     }
     
     // NOTE: tutorials

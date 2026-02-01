@@ -10,7 +10,6 @@
 
 
 struct TweenController;
-// TODO: improve control, need start/end event per channel
 struct TweenEvent
 {
     TweenController * controller = nullptr;

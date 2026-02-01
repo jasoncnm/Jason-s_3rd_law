@@ -14,7 +14,6 @@ constexpr float rightStickDeadzoneY = 0.1f;
 constexpr float leftTriggerDeadzone = -0.9f;
 constexpr float rightTriggerDeadzone = -0.9f;
 
-
 inline void CleanUpKeyMapping()
 {
     for (int i = 0; i < GAME_INPUT_COUNT; i++)
@@ -56,6 +55,9 @@ inline void InitKeyMapping()
         
     gameState->keyMappings[RESET_KEY].keys.Add(KEY_R);
     gameState->keyMappings[RESET_KEY].gamepadButton = GAMEPAD_BUTTON_RIGHT_FACE_UP;
+    
+    gameState->keyMappings[RECOVER_KEY].keys.Add(KEY_TAB);
+    
     
 }
 

@@ -268,6 +268,11 @@ float Distance(IVec2 a, IVec2 b)
     return Distance(IVec2ToVec2(a), IVec2ToVec2(b));
 }
 
+int Sign(float x)
+{
+    return x < 0 ? -1 : 1;
+}
+
 int Sign(int x)
 {
     return x >= 0 ? 1 : -1;
@@ -404,6 +409,7 @@ float EaseInQuint(float x)
 {
     return x * x * x * x * x;
 }
+
 
 bool8 SameSign(int x, int y)
 {

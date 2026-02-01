@@ -3,10 +3,10 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TileMap/Test.tmj",
+    "activeFile": "TileMap/Room_17.tmj",
     "expandedProjectPaths": [
         ".",
-        "TlieSet"
+        "TileMap"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -772,11 +772,11 @@
             }
         },
         "TileMap/Room_1.tmj": {
-            "scale": 1,
+            "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -56.5,
-                "y": 45.5
+                "x": 2003.6666666666665,
+                "y": -1146.3333333333333
             }
         },
         "TileMap/Room_10.tmj": {
@@ -836,11 +836,11 @@
             }
         },
         "TileMap/Room_17.tmj": {
-            "scale": 0.75,
+            "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 175.33333333333331,
-                "y": 175.33333333333337
+                "x": 65.5,
+                "y": 153.5
             }
         },
         "TileMap/Room_18.tmj": {
@@ -1447,7 +1447,8 @@
     "last.worldFilePath": "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor",
     "loadedWorlds": [
         "W:/RayLib_Games/Jason-s_3rd_law/Assets/Level_Editor/main.world",
-        "W:/RayLib_Games/Jason-s_3rd_law/Assets/Level_Editor/Path_3_Tutorial.world"
+        "W:/RayLib_Games/Jason-s_3rd_law/Assets/Level_Editor/Path_3_Tutorial.world",
+        "W:/RayLib_Games/Jason-s_3rd_law/Assets/Level_Editor/Room_17_Tutorial.world"
     ],
     "map.height": 11,
     "map.lastUsedFormat": "json",
@@ -1490,21 +1491,26 @@
         "TileMap/Room_58.tmj",
         "TileMap/Room_59.tmj",
         "TileMap/Path_0.tmj",
-        "TileMap/Path_40.tmj"
+        "TileMap/Path_40.tmj",
+        "TileMap/Blocks.tmj",
+        "TileMap/Hard_1.tmj",
+        "TileMap/Room_1.tmj",
+        "TileMap/Tutorial_1.tmj",
+        "TileMap/Tutorial_8.tmj"
     ],
     "project": "level_edit.tiled-project",
     "recentFiles": [
         "TileMap/Room_3.tmj",
-        "TileMap/Path_40.tmj",
-        "TileMap/Path_0.tmj",
-        "TileMap/Room_59.tmj",
-        "TileMap/Room_58.tmj",
-        "TileMap/Room_40_Tut.tmj",
-        "TileMap/Path_3.tmj",
-        "TileMap/Path_44.tmj",
-        "TileMap/Path_46.tmj",
-        "TileMap/Path_45.tmj",
-        "TileMap/Path_41.tmj",
-        "TileMap/Room_41.tmj"
+        "TileMap/Test.tmj",
+        "TileMap/Room_9.tmj",
+        "TileMap/Room_27.tmj",
+        "TileMap/Room_34.tmj",
+        "TileMap/Room_44.tmj",
+        "TileMap/Room_50.tmj",
+        "TileMap/Room_51.tmj",
+        "TileMap/Tutorial_8.tmj",
+        "TileMap/Tutorial_1.tmj",
+        "TileMap/Room_1.tmj",
+        "TileMap/Hard_1.tmj"
     ]
 }

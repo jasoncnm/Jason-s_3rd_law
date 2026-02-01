@@ -55,7 +55,7 @@ constexpr float cameraSwitchTargetDelay = 1.0f;
 #include "entity.h"
 #include "tween_controller.h"
 #include "game_ui.h"
-
+//#include "action_input.h"
 
 // ----------------------------------------------------
 // NOTE: Game Structs
@@ -76,6 +76,8 @@ enum GameInputType
     
     UNDO_KEY,
     RESET_KEY,
+    
+    RECOVER_KEY,
     
     ANY_KEY,
     GAME_INPUT_COUNT,
