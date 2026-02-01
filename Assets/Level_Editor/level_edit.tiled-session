@@ -1332,11 +1332,11 @@
             }
         },
         "TileMap/Tutorial_1.tmj": {
-            "scale": 1.5,
+            "scale": 2,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 165.66666666666663,
-                "y": 233.66666666666669
+                "x": 233.75,
+                "y": 168.25
             }
         },
         "TileMap/Tutorial_2.5.tmj": {

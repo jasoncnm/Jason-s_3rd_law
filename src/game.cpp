@@ -756,7 +756,7 @@ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
         
     }
     
-    SetupEntityTable(*gameState);
+    // SetupEntityTable(*gameState);
 }
 
 
