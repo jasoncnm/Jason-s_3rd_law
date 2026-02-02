@@ -32,6 +32,7 @@ enum PostShaderType
     FX_BLOOM,
     FX_BLUR,
     FX_VIGNETTE,
+    FX_JASON,
     FX_COUNT,
     //FX_FXAA
 };
@@ -70,6 +71,7 @@ static const char * shaderPaths[FX_COUNT] =
     "Assets/Shaders/bloom.fs",
     "Assets/Shaders/blur.fs",
     "Assets/Shaders/vignette.fs",
+    "Assets/Shaders/jason.fs",
 };
 
 //  ========================================================================
