@@ -14,8 +14,8 @@ out vec4 finalColor;
 
 // NOTE: Add your custom variables here
 const float samples = 2;          // Pixels per axis; higher = bigger glow, worse performance
-const float quality = 10;          // Defines size factor: Lower = smaller glow, better quality
-float stitchingSize = 10.0;
+const float quality = 5;          // Defines size factor: Lower = smaller glow, better quality
+float stitchingSize = 5.0;
 float gamma = 0.8;
 float numColors = 10.0;
 
@@ -95,9 +95,9 @@ vec4 applyScanline(vec4 color, vec2 uv)
     float frequency = u_frameSize.y/3.0;
     // Scanlines method 2
     float globalPos = (uv.y + offset) * frequency;
-    float wavePos = cos((fract(globalPos) - 0.5)*3.14);
+    float wavePos = cos((fract(globalPos) - 0.5)* 2.5);
 
-    return mix(vec4(0.3, 0.3, 0.3, 0.0), color, wavePos);
+    return mix(vec4(0.2, 0.0, 0.5, 1), color, wavePos);
 
 }
 
@@ -115,8 +115,8 @@ vec4 applyPosterization(vec4 color)
 
 vec2 fisheyeUV()
 {
-    const float PI = 3.1415926535;
-    float aperture = 178.0;
+    const float PI = 2;
+    float aperture = 95.0;
     float apertureHalf = 0.5*aperture*(PI/180.0);
     float maxFactor = sin(apertureHalf);
 
@@ -145,18 +145,36 @@ vec2 fisheyeUV()
     return uv;
 }
 
+vec4 applyPixelizer(vec2 uv)
+{
+    float pixelWidth = 10.0;
+    float pixelHeight = 5.0;
+    float renderWidth = u_frameSize.x;
+	float renderHeight = u_frameSize.y;
+
+    float dx = pixelWidth*(1.0/renderWidth);
+    float dy = pixelHeight*(1.0/renderHeight);
+
+    vec2 coord = vec2(dx*floor(uv.x/dx), dy*floor(uv.y/dy));
+
+    vec3 tc = texture(texture0, coord).rgb;
+
+    return vec4(tc, 1.0);
+}
+
 void main()
 {
-    vec2 uv = fragTexCoord;
-    // vec2 uv = fisheyeUV();
+    // vec2 uv = fragTexCoord;
+    vec2 uv = fisheyeUV();
     vec4 vfx = PostFX(texture0, uv);
     // Texel color fetching from texture sampler
     vec4 color = texture(texture0, uv);
     // color = vfx;
+    // color = applyPixelizer(uv);
     color = applyPosterization(color);
     color = applyVignette(color);
     color = applyBloom(color, uv);
-    // color = applyScanline(color);
+    color = applyScanline(color, uv);
     // color = mix(color, vfx, 1);
 
     // NOTE: Implement here your fragment shader code

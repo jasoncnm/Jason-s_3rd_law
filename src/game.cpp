@@ -1498,7 +1498,14 @@ void GameplayUpdateAndRender()
                 };
                 SetShaderValue(gameState->postFX[shaderType].shader, 
                                gameState->postFX[shaderType].frameBufferSizeLoc, 
-                               size, SHADER_UNIFORM_VEC2);
+                           size, SHADER_UNIFORM_VEC2);
+            int offsetLoc = GetShaderLocation(gameState->postFX[shaderType].shader, "offset");
+            
+            static float val = 0; 
+            
+            val -= GetFrameTime() * 0.0015f;
+            
+            SetShaderValue(gameState->postFX[shaderType].shader, offsetLoc, &val, SHADER_UNIFORM_FLOAT);
                 
                 BeginShaderMode(gameState->postFX[shaderType].shader);
                 DrawTextureRec(gameState->renderTarget.texture, 
@@ -1701,7 +1708,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
         GuiLoadStyle(RAYLIB_GUI_STYLE_PATH);
     }
     
-    Color colorA = IntToRGBA(0x222f);
+    Color colorA = IntToRGBA(0x62345);
      
     gameState->bgColor = colorA;
     
