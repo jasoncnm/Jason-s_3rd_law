@@ -7,7 +7,7 @@
    $Notice: $
    ======================================================================== */
 
-
+#define MAX_EVENT 5
 
 struct TweenController;
 struct TweenEvent
@@ -64,8 +64,8 @@ struct Tween
     float target_t = 1;
     float dt;
     
-    TweenEvent startEvent;
-    TweenEvent endEvent;
+    Array<TweenEvent, MAX_EVENT> startEvents;
+    Array<TweenEvent, MAX_EVENT> endEvents;
 
     bool8 End()
     {
@@ -76,13 +76,15 @@ struct Tween
 
     float (*Easing)(float);
     
+    void Reset();
+    
 };
 
 Tween CreateTween(TweenParams params, float (*Easing)(float) = nullptr, float animateSpeed = 5.0f, float target_t = 1.0f);
 
 
 // NOTE: Handle event
-void HandleEvent(TweenEvent & event);
+void HandleEvents(Array<TweenEvent, MAX_EVENT> & events);
 // NOTE: Get a play event to play    
 void OnPlayEvent(TweenController * controller);
 

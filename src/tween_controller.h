@@ -20,8 +20,8 @@ struct TweenController
     
     TweeningQueue channels[MAX_CHANNEL];
 
-    TweenEvent startEvent;
-    TweenEvent endEvent;
+    Array<TweenEvent, MAX_EVENT> startEvents;
+    Array<TweenEvent, MAX_EVENT> endEvents;
 
     void Reset();
     

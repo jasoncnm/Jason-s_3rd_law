@@ -110,7 +110,9 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
             {
                 int channel = c.FindMovingChannel();
                 Tween & ani = c.channels[channel].last();
-                playEvent = &ani.endEvent;
+                
+                int index = ani.endEvents.Add(TweenEvent{0});
+                playEvent = &ani.endEvents[index];
                 }
             if (IsSlime(current.parent->pushEnt) && current.parent->pushEnt->attachedEntityIndex == ent->entityIndex)
             {
@@ -156,7 +158,9 @@ inline void ProjectAndCheck(Entity * projectedEnt,
         {
             int channel = ent->tweenController.FindMovingChannel();
             Tween & current = ent->tweenController.channels[channel].last();
-            playEvent = &current.endEvent;
+            
+            int index = current.endEvents.Add(TweenEvent{ 0 });
+            playEvent = &current.endEvents[index];
             
             // playEvent = &ent->tweenController.endEvent;
             break;
@@ -259,7 +263,8 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     
                     Tween & current = projectedEnt->tweenController.channels[channel].last();
                     
-                    current.endEvent.breakEntity = target;
+                        int index = current.endEvents.Add(TweenEvent{0});
+                        current.endEvents[index].breakEntity = target;
                     
                     
                     target->broken = true;
@@ -543,7 +548,8 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
                     TweenEvent * playEvent = nullptr;
                     if (!parent->parent->pushEnt->tweenController.NoTweens())
                     {
-                        playEvent = &parent->parent->pushEnt->tweenController.endEvent;
+                        int index = parent->parent->pushEnt->tweenController.endEvents.Add(TweenEvent{0});
+                        playEvent = &parent->parent->pushEnt->tweenController.endEvents[index];
                     }
                     MoveEntity(parent->pushEnt, nullptr, playEvent, 
                                current.pushEnt->tilePos - current.pushDir,  BLOCK_MOVE_FUNC);

@@ -441,9 +441,10 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
             attach = GetEntity(mergeSlime->attachedEntityIndex);
         }
         
-        TweenEvent & endEvent = mergedSlime->tweenController.endEvent;
+        TweenEvent endEvent = { 0 };
         endEvent.controller = &mergeSlime->tweenController;
         endEvent.deleteEntity = mergedSlime;
+        mergedSlime->tweenController.endEvents.Add(endEvent);
         
         MoveEntity(mergedSlime, attach, nullptr, mergeSlime->tilePos, BLOCK_MOVE_FUNC);
         
@@ -652,13 +653,18 @@ inline void UpdateSlimes()
                     TweenEvent * playEvent = nullptr;
                     if (!(attach->tweenController.start || attach->tweenController.playing) && !attach->tweenController.NoTweens())
                     {
-                        playEvent = &attach->tweenController.startEvent;
+                        int index = attach->tweenController.startEvents.Add(TweenEvent{ 0 });
+                        playEvent = &attach->tweenController.startEvents[index];
                     }
                     
                     IVec2 dir = newPos - oldPos;
                     SM_ASSERT(((dir.x != 0 && dir.y == 0) || (dir.y != 0 && dir.x == 0 )), "invalid direction");
                     dir.x = dir.x != 0 ? Sign(dir.x) : 0;
                     dir.y = dir.y != 0 ? Sign(dir.y) : 0;
+                    if (slime->tweenController.playing) 
+                    {
+                        slime->tweenController.Reset();
+                    }
                     
                     Entity * blockedEnt = FindBlockEntityFromTo(oldPos + dir, newPos, dir);
                     if (blockedEnt)
@@ -683,7 +689,6 @@ inline void UpdateSlimes()
                     }
                     else 
                     {
-                        if (slime->tweenController.playing) slime->tweenController.Reset();
                         
                         MoveEntity(slime, attach, playEvent, newPos, BLOCK_MOVE_FUNC);
                     }
