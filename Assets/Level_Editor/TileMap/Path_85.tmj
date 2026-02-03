@@ -3,12 +3,12 @@
  "infinite":false,
  "layers":[
         {
-         "data":[0, 0, 0, 0, 34, 0, 34, 34, 0, 0, 0,
-            0, 0, 0, 0, 34, 0, 34, 34, 0, 0, 0,
-            0, 0, 0, 0, 34, 0, 34, 34, 0, 0, 0],
+         "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":3,
          "id":1,
-         "name":"Blocks",
+         "name":"Tile Layer 1",
          "opacity":1,
          "type":"tilelayer",
          "visible":true,
@@ -22,11 +22,7 @@
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
  "tileheight":32,
- "tilesets":[
-        {
-         "firstgid":1,
-         "source":"..\/TlieSet\/tileSet.tsx"
-        }],
+ "tilesets":[],
  "tilewidth":32,
  "type":"map",
  "version":"1.10",
