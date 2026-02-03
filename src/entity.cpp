@@ -199,7 +199,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         
         if ((Abs(offset).x == 0 || Abs(offset).y == 0))
         {
-            if ((offset == IVec2 {0, 0}) && (Abs(old.attachDir) != Abs(entity->attachDir)))
+            if ((Abs(old.attachDir) != Abs(entity->attachDir)))
             {
                 Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({(float)offset.x, (float)offset.y}, MAP_TILE_SIZE));
                 
@@ -255,10 +255,17 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
             Entity * oldAttach = old.attach ? GetEntity(old.attachedEntityIndex) : nullptr;
             
             IVec2 dir = -entity->attachDir;
-            if (oldAttach && (oldAttach != attachedEntity))
+            if (oldAttach)
             {
-                dir = -dir;
-            }
+                if (old.attachDir.x != 0)
+                {
+                    dir = IVec2 { 0, Sign(offset.y) };
+                }
+                else
+                {
+                    dir = IVec2 { Sign(offset.x), 0 };
+                }
+                }
             Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({ (float)dir.x, (float)dir.y },
                                                                       0.5f * (MAP_TILE_SIZE + entity->tileSize)));
             TweenParams params1 = {};
