@@ -94,8 +94,8 @@ int main(int argumentCount, char *argumentArray[])
         MakeBumpAllocator((uint8 *)persistentStorage.memory + persistentStorage.capacity, transientStorageSize);
     #else
     
-    BumpAllocator persistentStorage = MakeBumpAllocator(MB(128));
-    BumpAllocator transientStorage = MakeBumpAllocator(MB(128));
+    BumpAllocator persistentStorage = MakeBumpAllocator(MB(500));
+    BumpAllocator transientStorage = MakeBumpAllocator(MB(500));
     
 #endif
     

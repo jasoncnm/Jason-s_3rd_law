@@ -1,7 +1,7 @@
 @echo off
 
 set LINKER_FLAGS=/link -incremental:no -opt:ref kernel32.lib user32.lib shell32.lib winmm.lib gdi32.lib opengl32.lib
-set COMMON_FLAGS=/std:c++17 /DGAME_INTERNAL=0 -Ox -O2 -Os -Ot -GL -Oi -FC /MT
+set COMMON_FLAGS=/std:c++17 /DGAME_INTERNAL=0 -Ox -O2 -Os -Ot -GL -Oi -FC /MT /EHsc
 set EXE_NAME=game.exe
 set DEFINES=/DPLATFORM_DESKTOP
 
