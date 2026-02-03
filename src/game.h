@@ -39,7 +39,7 @@
 
 #define MAX_UNDO 100
 
-constexpr float zoom_per_tile = 10.0f / 600.0f;
+constexpr float zoom_per_tile = 9.0f / 600.0f;
 constexpr float press_freq = 0.2f;
 constexpr float cameraSwitchTargetDelay = 1.0f;
 

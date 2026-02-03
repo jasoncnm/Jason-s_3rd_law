@@ -268,6 +268,16 @@ float Distance(IVec2 a, IVec2 b)
     return Distance(IVec2ToVec2(a), IVec2ToVec2(b));
 }
 
+int Min(int a, int b)
+{
+    return a < b ? a : b;
+}
+
+float Min(float a, float b)
+{
+    return a < b ? a : b;
+}
+
 int Sign(float x)
 {
     return x < 0 ? -1 : 1;

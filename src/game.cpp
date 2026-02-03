@@ -1305,7 +1305,6 @@ void GameplayUpdateAndRender()
         }
         }
         
-        // TODO: change tab key to RECOVER_KEY
         Entity * followEnt = GetEntity(gameState->cameraFollowEntityIndex);
         if (!followEnt ||
             (followEnt->tweenController.NoTweens() && JustPressed(RECOVER_KEY)))

@@ -14,7 +14,7 @@ out vec4 finalColor;
 
 // NOTE: Add your custom variables here
 const float samples = 2;          // Pixels per axis; higher = bigger glow, worse performance
-const float quality = 5;          // Defines size factor: Lower = smaller glow, better quality
+const float quality = 6;          // Defines size factor: Lower = smaller glow, better quality
 float stitchingSize = 5.0;
 float gamma = 0.8;
 float numColors = 10.0;
@@ -23,6 +23,7 @@ float numColors = 10.0;
 uniform int invert = 0;
 uniform vec2 u_frameSize;
 uniform float offset = 0.0;
+uniform float brightness = 1.2;
 
 vec4 PostFX(sampler2D tex, vec2 uv)
 {
@@ -95,7 +96,7 @@ vec4 applyScanline(vec4 color, vec2 uv)
     float frequency = u_frameSize.y/3.0;
     // Scanlines method 2
     float globalPos = (uv.y + offset) * frequency;
-    float wavePos = cos((fract(globalPos) - 0.5)* 2.5);
+    float wavePos = cos((fract(globalPos) - 0.5)*1.5);
 
     return mix(vec4(0.2, 0.0, 0.5, 1), color, wavePos);
 
@@ -147,13 +148,13 @@ vec2 fisheyeUV()
 
 vec4 applyPixelizer(vec2 uv)
 {
-    float pixelWidth = 10.0;
-    float pixelHeight = 5.0;
+    float pixelWidth = 2;
+    float pixelHeight = 2;
     float renderWidth = u_frameSize.x;
 	float renderHeight = u_frameSize.y;
 
-    float dx = pixelWidth*(1.0/renderWidth);
-    float dy = pixelHeight*(1.0/renderHeight);
+    float dx = pixelWidth*(1.0/(1 * renderWidth));
+    float dy = pixelHeight*(1.0/(1 * renderHeight));
 
     vec2 coord = vec2(dx*floor(uv.x/dx), dy*floor(uv.y/dy));
 
@@ -166,17 +167,18 @@ void main()
 {
     // vec2 uv = fragTexCoord;
     vec2 uv = fisheyeUV();
-    vec4 vfx = PostFX(texture0, uv);
+    // vec4 vfx = PostFX(texture0, uv);
     // Texel color fetching from texture sampler
     vec4 color = texture(texture0, uv);
     // color = vfx;
-    // color = applyPixelizer(uv);
+    color = applyPixelizer(uv);
     color = applyPosterization(color);
     color = applyVignette(color);
     color = applyBloom(color, uv);
     color = applyScanline(color, uv);
     // color = mix(color, vfx, 1);
-
+    
+    color.rgb = pow(color.rgb, vec3(1.0/brightness));
     // NOTE: Implement here your fragment shader code
-    finalColor = color;
+    finalColor = color; 
 }

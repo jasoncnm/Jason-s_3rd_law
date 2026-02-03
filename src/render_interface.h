@@ -269,8 +269,19 @@ void UpdateAndRenderPostShader(RenderTexture2D & renderTarget, PostFX * postFX,
     val -= GetFrameTime() * 0.0015f;
     
     SetShaderValue(postFX[shaderType].shader, offsetLoc, &val, SHADER_UNIFORM_FLOAT);
-    
     BeginShaderMode(postFX[shaderType].shader);
+    
+    
+    #if 0
+    int mn = Min(screenWidth, screenHeight);
+    DrawTextureRec(renderTarget.texture, 
+                   {
+                       0.5f * (screenWidth - mn), 0.5f * (screenHeight - mn), (float)mn, (float)-mn
+                   }, 
+                   {
+                       0.5f * (screenWidth - mn), 0.5f * (screenHeight - mn)
+                   }, WHITE);
+#else
     DrawTextureRec(renderTarget.texture, 
                    {
                        0,
@@ -282,6 +293,7 @@ void UpdateAndRenderPostShader(RenderTexture2D & renderTarget, PostFX * postFX,
                        0
                    }, WHITE);
     
+    #endif
     EndShaderMode();
     
 }
