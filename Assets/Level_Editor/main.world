@@ -976,8 +976,8 @@
         {
             "fileName": "TileMap/Broom_7.tmj",
             "height": 352,
-            "width": 800,
-            "x": -288,
+            "width": 640,
+            "x": -128,
             "y": 1600
         },
         {
