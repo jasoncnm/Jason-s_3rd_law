@@ -639,7 +639,7 @@ inline bool8 UpdateCamera()
     };
     
     if (followEnt->tweenController.playing && 
-        (followEnt->entityIndex != gameState->playerEntityIndex) &&
+        (followEnt->tweenController.channels[followEnt->tweenController.FindMovingChannel()].last().Easing == nullptr) && 
         !CheckCollisionRecs(finalRect, tileMapRec))
     {
         gameState->cameraTweenController.Reset();
@@ -652,7 +652,6 @@ inline bool8 UpdateCamera()
                                         followEnt->tileSize * 0.5f 
                                     });
         Vector2 camPos = gameState->camera.target;
-        
         
         if (!FloatEquals(moveDir.x, 0) && 
             (Sign(center.x - gameState->camera.target.x) == Sign(moveDir.x)))
@@ -1473,74 +1472,23 @@ void GameplayUpdateAndRender()
             if (IsKeyPressed(KEY_KP_4))
             {
                 shaderType--;
-            }
+            if (shaderType < 0) shaderType = (int32)(FX_COUNT) - 1;
+                }
             else if (IsKeyPressed(KEY_KP_6))
             {
                 shaderType++;
-            }
-            
-            if (shaderType < 0) shaderType = (int32)(FX_COUNT) - 1;
             if (shaderType >= FX_COUNT) shaderType = 0;
-            
-                if (GetFileModTime(shaderPaths[shaderType]) != 
-                    gameState->postFX[shaderType].fileWriteTime)
-                {
-                    UnloadShader(gameState->postFX[shaderType].shader);
-                    gameState->postFX[shaderType].shader =
-                        LoadShader(0, shaderPaths[shaderType]);
-                    gameState->postFX[shaderType].frameBufferSizeLoc = 
-                        GetShaderLocation(gameState->postFX[shaderType].shader, "u_frameSize");
-                    if (!IsShaderValid(gameState->postFX[shaderType].shader))
-                    {
-                        SM_ERROR(false, "Unable to load shader file (%s)", 
-                                  "Assets/Shaders/bloom.fs");
-                    }
-                    gameState->postFX[shaderType].fileWriteTime = GetFileModTime(shaderPaths[shaderType]);
                 }
-                
-                float size[2] =
-                { 
-                    (float)gameState->screenWidth, (float)gameState->screenHeight
-                };
-                SetShaderValue(gameState->postFX[shaderType].shader, 
-                               gameState->postFX[shaderType].frameBufferSizeLoc, 
-                           size, SHADER_UNIFORM_VEC2);
-            int offsetLoc = GetShaderLocation(gameState->postFX[shaderType].shader, "offset");
             
-            static float val = 0; 
             
-            val -= GetFrameTime() * 0.0015f;
-            
-            SetShaderValue(gameState->postFX[shaderType].shader, offsetLoc, &val, SHADER_UNIFORM_FLOAT);
-                
-                BeginShaderMode(gameState->postFX[shaderType].shader);
-                DrawTextureRec(gameState->renderTarget.texture, 
-                               {
-                                   0,
-                                   0, 
-                                   (float)gameState->renderTarget.texture.width, (float)-gameState->renderTarget.texture.height
-                               }, 
-                               {
-                                   0,
-                                   0
-                               }, WHITE);
-                
-                EndShaderMode();
-                
+            UpdateAndRenderPostShader(gameState->renderTarget, gameState->postFX, 
+                                      shaderType, gameState->screenWidth, gameState->screenHeight);
             }
             else
             {
-DrawTextureRec(gameState->renderTarget.texture, 
-                       {
-                           0,
-                           0, 
-                           (float)gameState->renderTarget.texture.width, (float)-gameState->renderTarget.texture.height
-                       }, 
-                       {
-                           0,
-                           0
-                       }, WHITE);
-        }
+            UpdateAndRenderPostShader(gameState->renderTarget, gameState->postFX, 
+                                      FX_JASON, gameState->screenWidth, gameState->screenHeight);
+            }
         
 #if  GAME_INTERNAL
         // NOTE: UI Draw Game Informations

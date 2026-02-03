@@ -233,7 +233,58 @@ for (uint32 i = 0; i < STAR_COUNT; i++)
         DrawCircleV(starsScreenPos[i], radius, color);
     }
     
+}
+
+void UpdateAndRenderPostShader(RenderTexture2D & renderTarget, PostFX * postFX, 
+                               int32 shaderType, int32 screenWidth, int32 screenHeight)
+{
+    
+    if (GetFileModTime(shaderPaths[shaderType]) != 
+        postFX[shaderType].fileWriteTime)
+    {
+        UnloadShader(postFX[shaderType].shader);
+        postFX[shaderType].shader =
+            LoadShader(0, shaderPaths[shaderType]);
+        postFX[shaderType].frameBufferSizeLoc = 
+            GetShaderLocation(postFX[shaderType].shader, "u_frameSize");
+        if (!IsShaderValid(postFX[shaderType].shader))
+        {
+            SM_ERROR(false, "Unable to load shader file (%s)", 
+                     "Assets/Shaders/bloom.fs");
+        }
+        postFX[shaderType].fileWriteTime = GetFileModTime(shaderPaths[shaderType]);
     }
+    
+    float size[2] =
+    { 
+        (float)screenWidth, (float)screenHeight
+    };
+    SetShaderValue(postFX[shaderType].shader, 
+                   postFX[shaderType].frameBufferSizeLoc, 
+                   size, SHADER_UNIFORM_VEC2);
+    int offsetLoc = GetShaderLocation(postFX[shaderType].shader, "offset");
+    
+    static float val = 0; 
+    
+    val -= GetFrameTime() * 0.0015f;
+    
+    SetShaderValue(postFX[shaderType].shader, offsetLoc, &val, SHADER_UNIFORM_FLOAT);
+    
+    BeginShaderMode(postFX[shaderType].shader);
+    DrawTextureRec(renderTarget.texture, 
+                   {
+                       0,
+                       0, 
+                       (float)renderTarget.texture.width, (float)-renderTarget.texture.height
+                   }, 
+                   {
+                       0,
+                       0
+                   }, WHITE);
+    
+    EndShaderMode();
+    
+}
 
 #define RENDER_INTERFACE_H
 #endif

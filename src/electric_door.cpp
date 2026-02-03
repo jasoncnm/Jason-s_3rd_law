@@ -512,7 +512,6 @@ inline void UpdateElectricDoor()
                 Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
                 if (slime)
                 {
-                    // TODO: need to avoid multiple collisions
                     if (PivotToTilePos(slime->pivot, slime->tileSize) == connection->tilePos)
                     {
                         if (connection->hasPower)
