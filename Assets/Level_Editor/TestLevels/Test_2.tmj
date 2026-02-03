@@ -1,0 +1,64 @@
+{ "compressionlevel":-1,
+ "height":11,
+ "infinite":false,
+ "layers":[
+        {
+         "data":[34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34,
+            34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 31,
+            34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34,
+            34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34],
+         "height":11,
+         "id":1,
+         "name":"Blocks",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":11,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":4,
+         "name":"Keys\/Locks",
+         "objects":[
+                {
+                 "height":32,
+                 "id":2,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":319.96875,
+                 "y":160.03125
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }],
+ "nextlayerid":5,
+ "nextobjectid":3,
+ "orientation":"orthogonal",
+ "renderorder":"right-down",
+ "tiledversion":"1.11.2",
+ "tileheight":32,
+ "tilesets":[
+        {
+         "firstgid":1,
+         "source":"..\/TlieSet\/tileSet.tsx"
+        }],
+ "tilewidth":32,
+ "type":"map",
+ "version":"1.10",
+ "width":11
+}

@@ -85,13 +85,6 @@
             "y": 2048
         },
         {
-            "fileName": "TileMap/Test.tmj",
-            "height": 640,
-            "width": 640,
-            "x": -1792,
-            "y": -1312
-        },
-        {
             "fileName": "TileMap/Room_14.tmj",
             "height": 352,
             "width": 352,
