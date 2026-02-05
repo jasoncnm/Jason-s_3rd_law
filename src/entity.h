@@ -20,6 +20,7 @@ enum EntityLayer
     LAYER_BLOCK,
     LAYER_PIT,
     LAYER_PORTAL,
+    LAYER_KEY_LOCK,
     
     LAYER_COUNT,
 };
@@ -38,6 +39,8 @@ enum EntityType
     ENTITY_TYPE_TUT_PORTAL,
     ENTITY_TYPE_MAIN_PORTAL,
     ENTITY_TYPE_SLIME_PORTAL,
+    ENTITY_TYPE_KEY,
+    ENTITY_TYPE_LOCK,
     
     ENTITY_TYPE_COUNT,
 };
@@ -74,6 +77,8 @@ struct Entity
     
     int entityIndex;
     int attachedEntityIndex;
+    
+    int unlockEntityIndex;
     
     int sourceIndex = -1;
     int rightIndex = -1, leftIndex = -1, upIndex = -1, downIndex = -1;

@@ -17,9 +17,9 @@ using json = nlohmann::json;
 
 // TODO: separate world into test levels and main levels
 #define MAIN_PATH "Assets/Level_Editor/main.world"
-#define LEVELS_PATH "Assets/Level_Editor/"
+#define TEST_PATH "Assets/Level_Editor/TestLevels/test.world"
+
 #define LEVEL_2_ROOM_NAME "TileMap/Room_59.tmj"
-#define TEST_LEVEL_ONE_NAME "TileMap/Test.tmj"
 
 
 //  ========================================================================
@@ -37,6 +37,8 @@ enum TileID
     TUT_2    = 14,
     MAIN_PORTAL = 15,
     SLIME_PORTAL = 11,
+    KEY = 21,
+    LOCK = 31,
     
     DOOR_LEFT  = 82,
     DOOR_RIGHT = 83,

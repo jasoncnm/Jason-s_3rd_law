@@ -227,75 +227,19 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
     {
         entityResult = AddEntity(ENTITY_TYPE_SLIME_PORTAL, tilePos, SPRITE_SLIME_PORTAL);
     }
+    else if (id == KEY)
+    {
+        
+    }
+    else if (id == LOCK)
+    {
+        
+    }
     else
     {
         SM_ASSERT(false, "Unable to register ID (%d)", id);
     }
     return entityResult;
-}
-
-inline void GenerateTileMap(GameState & state, json & map, IVec2 startPos, int width, int height)
-{
-        
-    // NOTE: Offsets start position
-    startPos = startPos;
-    
-    // NOTE: Generate tile map    
-    {
-        json array = map["layers"];
-
-        for (json::iterator it = array.begin(); it != array.end(); ++it)
-        {
-            json & layer = *it;
-
-            if (!layer["visible"]) continue;
-            
-            std::string name = layer["name"];
-
-            // tileCountX = width;
-            // tileCountY = height;
-
-            std::vector<int> a = layer["data"];
-
-            SM_TRACE("Loading Layer: %s", name.data());
-
-            for (int row = 0; row < height; row++)
-            {
-                for (int col = 0; col < width; col++)
-                {
-                    int tileId = a[col + row * width];
-
-                    if (tileId > 0)
-                    {
-                        AddEntityResult result;
-                        IVec2 offset = { col, row };
-                        IVec2 tilePos = startPos + offset;
-
-                        if (name == "Player")
-                        {
-                            result = AddEntity(ENTITY_TYPE_PLAYER, tilePos, SPRITE_SLIME_1);
-                            result.entity->mass = 1;
-                            result.entity->tileSize = GetSlimeSize(result.entity); 
-                            result.entity->movable = true;
-
-                            state.playerEntityIndex = result.entityIndex;
-
-                                                            
-                            SM_TRACE("Player generated (tile location: %i, %i)", result.entity->tilePos.x, result.entity->tilePos.y);
-                        }
-                        else
-                        {
-                            result = LoadGameObject(state, tileId, tilePos);
-                            
-                        }
-                    }
-                }
-            }
-            SM_TRACE("%s layer loading done", name.data());
-        }
-
-        SM_TRACE("Level width: %i, Level height: %i", width, height);
-    }
 }
 
 void SetupEntityTable(GameState & state)
@@ -358,10 +302,18 @@ void SetupEntityTable(GameState & state)
                 case ENTITY_TYPE_MAIN_PORTAL:
                 {
                     state.entityTable[LAYER_PORTAL].Add(entity->entityIndex);
+                    break;
                 }
                 case ENTITY_TYPE_SLIME_PORTAL:
                 {
                     state.entityTable[LAYER_PORTAL].Add(entity->entityIndex);
+                    break;
+                }
+                case ENTITY_TYPE_KEY:
+                case ENTITY_TYPE_LOCK:
+                {
+                    state.entityTable[LAYER_KEY_LOCK].Add(entity->entityIndex);
+                    break;
                 }
             }
         }
@@ -379,8 +331,7 @@ void LoadTileMapsAndEntities(GameState & state, char * worldPath)
 
     // NOTE: Retrive TileMaps from world
     {
-
-        state.currentMapIndex = -1;
+state.currentMapIndex = -1;
         
         std::ifstream f(worldPath);
         json worldData = json::parse(f);
@@ -392,19 +343,21 @@ void LoadTileMapsAndEntities(GameState & state, char * worldPath)
         int index = 0;
         for (int i = 0; i < state.tileMapCount; i++)
         {
-            json map = tileMaps[i];
-            std::string fileName = map["fileName"];
-            if (fileName == TEST_LEVEL_ONE_NAME) continue;            
             
-            std::string path = LEVELS_PATH + fileName;
+            json mapMeta = tileMaps[i];
+            std::string fileName = mapMeta["fileName"];
+            const char * levelPath = GetDirectoryPath(worldPath);
+            std::string path = "/" + fileName;
+            path = levelPath + path;
+            
             std::ifstream file(path);
-            json data = json::parse(file);
-            int tileWidth = (int)data["tilewidth"];
+            json map = json::parse(file);
+            int tileWidth = (int)map["tilewidth"];
             
-            int mapWidth =  (int)map["width"] / tileWidth;
-            int mapHeight = (int)map["height"] / tileWidth;
-            int startPosX = (int)map["x"] / tileWidth + 1;
-            int startPosY = (int)map["y"] / tileWidth + 1;
+            int mapWidth =  (int)mapMeta["width"] / tileWidth;
+            int mapHeight = (int)mapMeta["height"] / tileWidth;
+            int startPosX = (int)mapMeta["x"] / tileWidth + 2;
+            int startPosY = (int)mapMeta["y"] / tileWidth + 2;
             
             std::string ID = FindFileNameFromPath(fileName).c_str();
             // Source - https://stackoverflow.com/a
@@ -426,10 +379,132 @@ void LoadTileMapsAndEntities(GameState & state, char * worldPath)
             }
             
             
-            IVec2 startPos = { startPosX + 1, startPosY + 1 };
-
-            GenerateTileMap(state, data, startPos, mapWidth, mapHeight);
-
+             IVec2 startPos = { startPosX, startPosY };
+            
+            // NOTE: Generate tile map    
+            {
+                json array = map["layers"];
+                for (json::iterator it = array.begin(); it != array.end(); ++it)
+                {
+                    json & layer = *it;
+                    if (!layer["visible"]) continue;
+                    
+                    std::string name = layer["name"];
+                    if (layer["type"] == "tilelayer")
+                    {
+                        // tileCountX = width;
+                        // tileCountY = height;
+                        
+                        std::vector<int> a = layer["data"];
+                        
+                        SM_TRACE("Loading Layer: %s", name.data());
+                        
+                        for (int row = 0; row < mapHeight; row++)
+                        {
+                            for (int col = 0; col < mapWidth; col++)
+                            {
+                                int tileId = a[col + row * mapWidth];
+                                
+                                if (tileId > 0)
+                                {
+                                    AddEntityResult result;
+                                    IVec2 offset = { col, row };
+                                    IVec2 tilePos = startPos + offset;
+                                    
+                                    if (name == "Player")
+                                    {
+                                        
+                                        result = AddEntity(ENTITY_TYPE_PLAYER, tilePos, SPRITE_SLIME_1);
+                                        result.entity->mass = 1;
+                                        result.entity->tileSize = GetSlimeSize(result.entity); 
+                                        result.entity->movable = true;
+                                        
+                                        state.playerEntityIndex = result.entityIndex;
+                                        
+                                        SM_TRACE("Player generated (tile location: %i, %i)", result.entity->tilePos.x, result.entity->tilePos.y);
+                                    }
+                                    else if (name == "Key")
+                                    {
+                                        result = AddEntity(ENTITY_TYPE_KEY, tilePos, SPRITE_KEY);
+                                        
+                                        Entity * key = result.entity;
+                                        
+                                        json properties = layer["properties"];
+                                        for (auto & prop : properties)
+                                        {
+                                            if (prop["name"] == "Lock_Map")
+                                            {
+                                                std::string fname = FindFileNameFromPath(prop["value"]);
+                                                
+                                                std::string lockMapPath = "/" + fname;
+                                                lockMapPath = levelPath + lockMapPath;
+                                                std::ifstream file(lockMapPath);
+                                                json lockMap = json::parse(file);
+                                                
+                                                json lockMapMeta;
+                                                for (uint32 mapIdx = 0; mapIdx < tileMaps.size(); mapIdx++)
+                                                {
+                                                    std::string p = tileMaps[mapIdx]["fileName"];
+                                                    if (fname == FindFileNameFromPath(p))
+                                                    {
+                                                        lockMapMeta = tileMaps[mapIdx];
+                                                        break;
+                                                    }
+                                                }
+                                                int lockMapWidth =  (int)lockMapMeta["width"] / tileWidth;
+                                                int lockMapHeight = (int)lockMapMeta["height"] / tileWidth;
+                                                int lockStartPosX = (int)lockMapMeta["x"] / tileWidth + 2;
+                                                int lockStartPosY = (int)lockMapMeta["y"] / tileWidth + 2;
+                                                IVec2 lockMapStartPos = { lockStartPosX, lockStartPosY };
+                                                for (auto & layer : lockMap["layers"])
+                                                {
+                                                    if (layer["name"] == "Lock")
+                                                    {
+                                                        std::vector<int> lData = layer["data"];
+                                                        for (int lrow = 0; lrow < lockMapWidth; lrow++)
+                                                        {
+                                                            for (int lcol = 0; lcol < lockMapHeight; lcol++)
+                                                            {
+                                                                int ltileId = lData[lcol + lrow * lockMapWidth];
+                                                                if (ltileId == LOCK)
+                                                                {
+                                                                    IVec2 lOffset = { lcol, lrow };
+                                                                    IVec2 lTilePos = lockMapStartPos + lOffset;
+                                                                    
+                                                                    AddEntityResult lResult = AddEntity(ENTITY_TYPE_LOCK, lTilePos, SPRITE_LOCK);
+                                                                    
+                                                                    lResult.entity->open = false;
+                                                                    
+                                                                    key->unlockEntityIndex = lResult.entity->entityIndex;
+                                                                    
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        break;
+                                                    }
+                                                    }
+                                                
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    else if (name != "Lock")
+                                    {
+                                        result = LoadGameObject(state, tileId, tilePos);
+                                    }
+                                }
+                            }
+                        }
+                        
+                    }
+                    SM_TRACE("%s layer loading done", name.data());
+                    
+                }
+                
+                SM_TRACE("Level width: %i, Level height: %i", mapWidth, mapHeight);
+            }
+            
             if (min.x > startPos.x) min.x = startPos.x;
             if (min.y > startPos.y) min.y = startPos.y;
 
@@ -456,67 +531,3 @@ void LoadTileMapsAndEntities(GameState & state, char * worldPath)
     SetupEntityTable(state);
 }
  
-
-
-void LoadTestLevel(GameState & state)
-{
-
-    unsigned int tileCountX = 0, tileCountY = 0;
-    IVec2 offset = { 50 - 12, 50 - 6 };
-
-    IVec2 min = { INT_MAX, INT_MAX };
-    IVec2 max = { INT_MIN, INT_MIN };
-
-    // NOTE: Retrive TileMaps from world
-    {
-
-        state.currentMapIndex = -1;
-
-        state.tileMapCount = 1;
-
-        std::string fileName = "Assets/Level_Editor/TileMap/Test.tmj";
-
-        std::ifstream f(fileName);
-        json map = json::parse(f);
-                    
-        int mapWidth = (int)map["width"];
-        int mapHeight = (int)map["height"];
-        int startPosX = 0;
-        int startPosY = 0;
-
-        Map tileMap = {};
-        tileMap.tilePos = { startPosX, startPosY };
-        tileMap.width = mapWidth, tileMap.height =  mapHeight;
-        state.tileMaps[0] = tileMap;
-        
-        IVec2 startPos = { startPosX + 1, startPosY + 1 };
-
-        auto & layers = map["layers"];
-        for (int index = 0; index < layers.size(); index++)
-        {
-            auto & layer = layers[index];
-            layer["visible"] = true;
-        }
-        
-        GenerateTileMap(state, map, startPos, mapWidth, mapHeight);
-
-        if (min.x > startPos.x) min.x = startPos.x;
-        if (min.y > startPos.y) min.y = startPos.y;
-
-        IVec2 dim = { mapWidth, mapHeight };
-
-        IVec2 endPos = startPos + dim;
-            
-        if (max.x < endPos.x) max.x = endPos.x;
-        if (max.y < endPos.y) max.y = endPos.y;
-
-    }
-
-    {
-        state.tileMin = min;
-        state.tileMax = max;
-    } 
-
-    SetupEntityTable(state);
-     
-}

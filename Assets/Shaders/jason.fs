@@ -171,7 +171,7 @@ void main()
     // Texel color fetching from texture sampler
     vec4 color = texture(texture0, uv);
     // color = vfx;
-    color = applyPixelizer(uv);
+    // color = applyPixelizer(uv);
     color = applyPosterization(color);
     color = applyVignette(color);
     color = applyBloom(color, uv);

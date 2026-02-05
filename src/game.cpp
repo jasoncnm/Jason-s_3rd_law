@@ -1314,6 +1314,30 @@ void GameplayUpdateAndRender()
         
     }
     
+    {
+    auto & slimeIndexTable = gameState->entityTable[LAYER_SLIME];
+    for (uint32 slimeIndex = 0; slimeIndex < slimeIndexTable.count; slimeIndex++)
+    {
+        Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
+        if (slime)
+            {
+                auto & keyTable = gameState->entityTable[LAYER_KEY_LOCK];
+                for (uint32 keyLockIndex = 0; keyLockIndex < keyTable.count; keyLockIndex++)
+                {
+                    Entity * key = GetEntity(keyTable[keyLockIndex]);
+                    if (key && key->type == ENTITY_TYPE_KEY && 
+                        PivotToTilePos(slime->pivot, slime->tileSize) == key->tilePos)
+                    {
+                        Entity * lock = GetEntity(key->unlockEntityIndex);
+                        DeleteEntity(lock);
+                        DeleteEntity(key);
+                        break;
+                        }
+            }
+        }
+    }
+    }
+    
     // NOTE: tutorials
     if (gameState->currentScreen == GAME_MAIN_SCREEN)
     {
@@ -1355,9 +1379,10 @@ void GameplayUpdateAndRender()
             CleanUpGame();
             
              char * currentMapID = gameState->tileMaps[gameState->currentMapIndex].mapID;
-            
+                const char * levelPath = GetDirectoryPath(MAIN_PATH);
+                
             char worldPath[100];
-            sprintf(worldPath, "%s%s_Tutorial.world", LEVELS_PATH, currentMapID);
+            sprintf(worldPath, "%s/%s_Tutorial.world", levelPath, currentMapID);
             
             LoadTileMapsAndEntities(*gameState, worldPath);
             gameState->currentScreen = GAME_TUT_SCREEN;
@@ -1422,18 +1447,9 @@ void GameplayUpdateAndRender()
         
         BeginTextureMode(gameState->renderTarget);
         ClearBackground(gameState->bgColor);
-        
-         UpdateAndDrawStarFieldBG(&gameState->starFields);
-        
+        UpdateAndDrawStarFieldBG(&gameState->starFields);
         BeginMode2D(gameState->camera);
-        
-        for (int i = 0; i < gameState->tileMapCount; i++)
-        {
-            Map & map = gameState->tileMaps[i];
-             DrawTileMap(gameState->camera, map.tilePos, { map.width, map.height }, SKYBLUE, Fade(DARKGRAY, 0.2f));
-        }
-        
-        EntityLayer orderedDrawLayers[] = { LAYER_PORTAL, LAYER_WALL, LAYER_CABLE, LAYER_PIT,  LAYER_SLIME, LAYER_BLOCK, LAYER_GLASS,  LAYER_DOOR,};
+        EntityLayer orderedDrawLayers[] = { LAYER_PORTAL, LAYER_WALL, LAYER_CABLE, LAYER_PIT,  LAYER_SLIME, LAYER_BLOCK, LAYER_GLASS,  LAYER_DOOR, LAYER_KEY_LOCK};
         
         int count = ArrayCount(orderedDrawLayers);
         DrawSpriteLayers(orderedDrawLayers, count);
@@ -1499,7 +1515,8 @@ void GameplayUpdateAndRender()
         IVec2 centerPos = player->tilePos;
         Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
         }
-        #if 0
+#if 0
+        
         DrawText(TextFormat("TotalLine: %d, Connection: %d, Door: %d, TotalSource: %d",
                                      Cable_Indices.count,
                                      CP_Indices.count,
@@ -1544,7 +1561,8 @@ void GameplayUpdateAndRender()
             DrawText("Game Simulating", gameState->screenWidth / 4, gameState->screenHeight / 4, 20, RED);
             }
         
-        #endif
+#endif
+        
 #endif
         
         DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
@@ -1767,7 +1785,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             bounds.y += 200;
             if (GuiButton(bounds, TestLevel))
             {
-                LoadTestLevel(*gameState);
+                LoadTileMapsAndEntities(*gameState, TEST_PATH);
                 gameState->currentScreen = GAME_MAIN_SCREEN;
                 
             }
