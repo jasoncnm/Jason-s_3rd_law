@@ -670,14 +670,12 @@ inline bool8 UpdateCamera(bool refocus = false)
                                     });
         Vector2 camPos = gameState->camera.target;
         
-        if (!FloatEquals(moveDir.x, 0) && 
-            (Sign(center.x - gameState->camera.target.x) == Sign(moveDir.x)))
+        if ((Sign(center.x - gameState->camera.target.x) == Sign(moveDir.x)))
         {
             gameState->camera.target.x = Lerp(camPos.x, center.x, 10 * GetFrameTime());
         }
         
-        if (!FloatEquals(moveDir.y, 0) &&
-            (Sign(center.y - gameState->camera.target.y) == Sign(moveDir.y)))
+        if ((Sign(center.y - gameState->camera.target.y) == Sign(moveDir.y)))
         {
             gameState->camera.target.y = Lerp(camPos.y, center.y, 10 * GetFrameTime());
         }
@@ -1241,7 +1239,7 @@ void GameplayUpdateAndRender()
         if (stateChanged)
         {
             gameState->undoStack.push_back(prevPlayerIndex, prevState);
-        }
+            }
         
         UpdateElectricDoor();
         UpdateSlimes();
@@ -1284,7 +1282,7 @@ void GameplayUpdateAndRender()
     {
         gameState->simulating = false;
         // NOTE: Update: Entity
-        EntityLayer simulateLayers[] = { LAYER_BLOCK, LAYER_SLIME, LAYER_KEY_LOCK };
+        EntityLayer simulateLayers[] = { LAYER_SLIME, LAYER_BLOCK, LAYER_KEY_LOCK };
         for (uint32 idx = 0; idx < ArrayCount(simulateLayers); idx++)
         {
             uint32 layer = simulateLayers[idx];
@@ -1406,7 +1404,7 @@ void GameplayUpdateAndRender()
             portal->type = ENTITY_TYPE_BLOCK;
             portal->sprite = GetSprite(portal->spriteID);
             portal->color = WHITE;
-            
+                gameState->lastTutBlockIndex = portal->entityIndex;
             
             CleanUpGame();
             
@@ -1438,16 +1436,35 @@ void GameplayUpdateAndRender()
                 if (!block || !block->tweenController.NoTweens())
                 {
                     end = false;
+                    break;
                 }
             }
             else if (goal->type == ENTITY_TYPE_SLIME_PORTAL)
             {
                 EntityLayer layers[] = { LAYER_SLIME };
                 Entity * slime = FindEntityByLocationAndLayers(goal->tilePos, layers, 1);
+                
                 if (!slime || !slime->tweenController.NoTweens())
                 {
                     end = false;
+                    break;
                 }
+                
+                Entity * attach = slime->attach ? GetEntity(slime->attachedEntityIndex) : nullptr;
+                if (!attach || attach->type != ENTITY_TYPE_BLOCK)
+                {
+                    end = false;
+                    break;
+                }
+                
+                EntityLayer checkLayers[] = { LAYER_PORTAL };
+                Entity * portal = FindEntityByLocationAndLayers(attach->tilePos, checkLayers, 1);
+                if (!portal)
+                {
+                    end = false;
+                    break;
+                }
+                
             }
             else
             {
@@ -1466,7 +1483,10 @@ void GameplayUpdateAndRender()
             for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
             
             // Setup Play attach
-            AttachSlime(GetPlayer(), player.attachDir);
+            Entity * attachBlock = GetEntity(gameState->lastTutBlockIndex);
+            SM_ASSERT(attachBlock, "attach block gone");
+            
+            SetEntityPosition(GetPlayer(), attachBlock, attachBlock->tilePos - player.attachDir);
             
             return;
             

@@ -226,6 +226,7 @@ struct GameState
     int cameraFollowEntityIndex;
     int currentMapIndex;
     int playerMapIndex;
+    int lastTutBlockIndex;
     
     int screenWidth = SCREEN_WIDTH;
     int screenHeight = SCREEN_HEIGHT;

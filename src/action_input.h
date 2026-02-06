@@ -94,11 +94,16 @@ inline bool8 JustPressed(GameInputType type)
 
     if (type == ANY_KEY)
     {
-        return !IsKeyDown(KEY_LEFT_ALT)  &&
-               !IsKeyDown(KEY_RIGHT_ALT) &&
-               !IsKeyDown(KEY_LEFT_SUPER) &&
-               !IsKeyDown(KEY_RIGHT_SUPER) &&
-               (GetKeyPressed() > 0 || GetGamepadButtonPressed() > 0);
+        if (!IsKeyDown(KEY_LEFT_ALT)  &&
+            !IsKeyDown(KEY_RIGHT_ALT) &&
+            !IsKeyDown(KEY_LEFT_SUPER) &&
+            !IsKeyDown(KEY_RIGHT_SUPER) &&
+            (GetKeyPressed() > 0 || GetGamepadButtonPressed() > 0))
+        {
+            return true;
+        }
+        
+        return false;
     }
     
     KeyMapping & mapping = gameState->keyMappings[type];
