@@ -9,6 +9,7 @@
 
 #define MAX_EVENT 5
 
+struct Entity;
 struct TweenController;
 struct TweenEvent
 {

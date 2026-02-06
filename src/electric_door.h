@@ -14,8 +14,6 @@
 
 #define CABLE_MAX_CALL_STACK 50
 
-struct Entity;
-
 enum CableType
 {
     CABLE_TYPE_NULL,

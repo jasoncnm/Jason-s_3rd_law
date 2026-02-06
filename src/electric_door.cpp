@@ -7,7 +7,6 @@
    ======================================================================== */
 
 #include "electric_door.h"
-#include "tween_controller.h"
 
 inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir)
 {
