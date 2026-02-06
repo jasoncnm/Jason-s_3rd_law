@@ -15,6 +15,8 @@ enum EntityLayer
     LAYER_WALL,
     LAYER_DOOR,
     LAYER_CABLE,
+    LAYER_SOURCE,
+    LAYER_CONNECTION,
     LAYER_GLASS,
     LAYER_SLIME,
     LAYER_BLOCK,
@@ -75,7 +77,7 @@ struct Entity
     
     float tileSize = 32.0f;
     
-    int entityIndex;
+     uint16 entityIndex;
     int attachedEntityIndex;
     
     int unlockEntityIndex;
@@ -105,7 +107,7 @@ struct Entity
 struct AddEntityResult
 {
     Entity *entity;
-    int entityIndex;
+     uint16 entityIndex;
 };
 
 struct FindAttachableResult

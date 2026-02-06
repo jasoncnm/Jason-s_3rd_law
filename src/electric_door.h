@@ -7,10 +7,10 @@
    $Notice: $
    ======================================================================== */
 
-#define Cable_Indices gameState->electricDoorSystem.entityIndices
-#define Source_Indices gameState->electricDoorSystem.sourceIndices
-#define CP_Indices gameState->electricDoorSystem.connectionPointIndices
-#define Door_Indices gameState->electricDoorSystem.doorIndices
+#define Cable_Indices gameState->entityTable[LAYER_CABLE]
+#define Source_Indices gameState->entityTable[LAYER_SOURCE]
+#define Connection_Indices gameState->entityTable[LAYER_CONNECTION]
+#define Door_Indices gameState->entityTable[LAYER_DOOR]
 
 #define CABLE_MAX_CALL_STACK 50
 
@@ -26,24 +26,6 @@ enum CableType
     CABLE_TYPE_DOOR,
 
     CABLE_TYPE_COUNT,
-};
-
-
-struct ElectricDoorSystem
-{
-    Array<int, 50> sourceIndices;
-    Array<int, 50> doorIndices;
-    Array<int, 50> connectionPointIndices;
-    Array<int, 800> entityIndices;
-
-    void CleanUp()
-    {
-        sourceIndices.Clear();
-        doorIndices.Clear();
-        connectionPointIndices.Clear();
-        entityIndices.Clear();
-    }
-    
 };
 
 #define ELECTRIC_DOOR_H

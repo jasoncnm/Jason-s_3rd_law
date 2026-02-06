@@ -244,12 +244,13 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
 
 void SetupEntityTable(GameState & state)
 {
+    
     for (int layer = 0; layer < LAYER_COUNT; layer++)
     {
         state.entityTable[layer].Clear();
     }
     
-    for (uint32 i = 0; i < gameState->entities.count; i++)
+    for (uint16 i = 0; i < gameState->entities.count; i++)
     {
         Entity * entity = GetEntity(i);
         if (entity)
@@ -260,6 +261,7 @@ void SetupEntityTable(GameState & state)
                 case ENTITY_TYPE_CLONE:
                 {
                     state.entityTable[LAYER_SLIME].Add(entity->entityIndex);
+                    
                     break;
                 }
                 case ENTITY_TYPE_WALL:
@@ -283,9 +285,17 @@ void SetupEntityTable(GameState & state)
                     {
                         state.entityTable[LAYER_DOOR].Add(entity->entityIndex);
                     }
-                    else
+                    else if (entity->cableType == CABLE_TYPE_CONNECT)
                     {
                         state.entityTable[LAYER_CABLE].Add(entity->entityIndex);
+                    }
+                    else if (entity->cableType == CABLE_TYPE_CONNECTION_POINT)
+                    {
+                        state.entityTable[LAYER_CONNECTION].Add(entity->entityIndex);
+                    }
+                    else
+                    {
+                        state.entityTable[LAYER_SOURCE].Add(entity->entityIndex);
                     }
                     break;
                 }
@@ -318,6 +328,9 @@ void SetupEntityTable(GameState & state)
             }
         }
     }
+    
+    
+    
 }
 
 void LoadTileMapsAndEntities(GameState & state, char * worldPath)
@@ -328,7 +341,7 @@ void LoadTileMapsAndEntities(GameState & state, char * worldPath)
 
     IVec2 min = { INT_MAX, INT_MAX };
     IVec2 max = { INT_MIN, INT_MIN };
-
+    
     // NOTE: Retrive TileMaps from world
     {
 state.currentMapIndex = -1;

@@ -45,7 +45,9 @@ inline EntityArray GetCurrentStateEntities()
 {
     EntityLayer pushLayers[] = {
         LAYER_DOOR,
-         LAYER_CABLE,
+         // LAYER_CABLE,
+        LAYER_SOURCE,
+        LAYER_CONNECTION,
         LAYER_GLASS,
         LAYER_SLIME,
         LAYER_BLOCK,
@@ -1497,7 +1499,19 @@ void GameplayUpdateAndRender()
         ClearBackground(gameState->bgColor);
         UpdateAndDrawStarFieldBG(&gameState->starFields);
         BeginMode2D(gameState->camera);
-        EntityLayer orderedDrawLayers[] = { LAYER_PORTAL, LAYER_WALL, LAYER_CABLE, LAYER_PIT,  LAYER_SLIME, LAYER_BLOCK, LAYER_GLASS,  LAYER_DOOR, LAYER_KEY_LOCK};
+        EntityLayer orderedDrawLayers[] = 
+        { 
+            LAYER_PORTAL,
+            LAYER_WALL, 
+            LAYER_CABLE,
+            LAYER_SOURCE,
+            LAYER_CONNECTION,
+            LAYER_PIT,
+            LAYER_SLIME,
+            LAYER_BLOCK,
+            LAYER_GLASS,  
+            LAYER_DOOR,
+            LAYER_KEY_LOCK};
         
         int count = ArrayCount(orderedDrawLayers);
         DrawSpriteLayers(orderedDrawLayers, count);
@@ -1697,7 +1711,6 @@ void CleanUpGame()
     {
         gameState->entityTable[i].Clear();
     }
-    gameState->electricDoorSystem.CleanUp();
     gameState->entities.Clear();
     
 }
@@ -1879,7 +1892,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             bounds.y += 200;
             if (GuiButton(bounds, SaveGameText))
             {
-                EntityLayer saveLayers[] = { LAYER_DOOR, LAYER_CABLE, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK };
+                EntityLayer saveLayers[] = { LAYER_DOOR, LAYER_CABLE, LAYER_SOURCE, LAYER_CONNECTION, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK };
                 int saveEntityCount = 0;
                 for (int i = 0; i < ArrayCount(saveLayers); i++)
                 {

@@ -51,7 +51,7 @@ AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE
     entity.tileSize = (float)tileSize;
     entity.pivot = GetTilePivot(tilePos, (float)tileSize);    
         
-    result.entityIndex = gameState->entities.Add(entity);
+    result.entityIndex = (uint16)gameState->entities.Add(entity);
     result.entity = &gameState->entities[result.entityIndex];
 
     result.entity->entityIndex = result.entityIndex;
@@ -95,8 +95,6 @@ AddDoor(IVec2 tilePos, SpriteID spriteID, bool8 left, bool8 right, bool8 up, boo
     entityResult.entity->up = up;
     entityResult.entity->down = down;
 
-    Door_Indices.Add(Cable_Indices.Add(entityResult.entityIndex));
-
     return entityResult;
 }
 
@@ -112,8 +110,6 @@ AddSource(IVec2 tilePos, SpriteID spriteID, bool8 left, bool8 right, bool8 up, b
     entityResult.entity->up = up;
     entityResult.entity->down = down;
 
-    Source_Indices.Add(Cable_Indices.Add(entityResult.entityIndex));
-    
     return entityResult;
 }
 
@@ -128,8 +124,6 @@ AddConnection(IVec2 tilePos, SpriteID spriteID)
     entityResult.entity->right = true;
     entityResult.entity->up = true;
     entityResult.entity->down = true;
-
-    CP_Indices.Add(Cable_Indices.Add(entityResult.entityIndex));
 
     return entityResult;
 }
