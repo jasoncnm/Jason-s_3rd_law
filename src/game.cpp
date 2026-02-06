@@ -251,7 +251,13 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                 {
                     if (!target->broken && IsSlime(projectedEnt))
                     {
-                        MoveEntity(projectedEnt, target, nullptr, pos - pushDir,  BLOCK_MOVE_FUNC); 
+                        Entity * attach = target;
+                        if (defered)
+                        {
+                            attach = pushEnt;
+                        }
+                        
+                        MoveEntity(projectedEnt, attach, nullptr, pos - pushDir,  BLOCK_MOVE_FUNC); 
                         return;
                     }
                     else if (!target->broken)

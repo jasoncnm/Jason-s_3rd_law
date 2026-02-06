@@ -54,11 +54,11 @@
             }
         },
         "TestLevels/Test_2.tmj": {
-            "scale": 0.0625,
+            "scale": 2,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 984,
-                "y": 3944
+                "x": -1801.75,
+                "y": -3153.25
             }
         },
         "TestLevels/Test_3.tmj": {
