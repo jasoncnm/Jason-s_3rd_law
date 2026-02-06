@@ -20,21 +20,17 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
   TODO: Things that I can do beside arts and design I guess
 1. background 1wk
 3. collectable: show in ui, 4d
-4. key and door: pick up key unlock door when touch 1wk
 5. Sound effect, 1wk
 6. bug fixes, improve post effect 1wk
 2. saves and loads 3d
 
  TODO: PostProcessing
-1. Bloom
-2. Crt emulator
 3. chromatic aberration
-4. Vignette
-5. Color Grading (with LUT?)
 6. shake
 
 // NOTE: done but need testing
 1. tutorial logic: this week
+2. key and door
 */
 
 //  ========================================================================
