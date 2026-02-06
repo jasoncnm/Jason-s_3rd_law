@@ -30,6 +30,7 @@ enum ParamType
     PARAM_TYPE_NONE,
     PARAM_TYPE_FLOAT,
     PARAM_TYPE_VECTOR2,
+    PARAM_TYPE_COLOR,
 };
 
 struct TweenParams
@@ -44,15 +45,20 @@ struct TweenParams
             float endF;
             float * realF;
         };
-
-        struct
+struct
         {
             Vector2 startVec2;
             Vector2 endVec2;
             Vector2 * realVec2;
         };
-        
+        struct 
+        {
+            Color startColor;
+            Color endColor;
+             Color * realColor;
+        };
     };
+    
 };
 
 struct Tween

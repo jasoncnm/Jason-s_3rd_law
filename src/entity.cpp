@@ -523,6 +523,7 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
         {
             switch(entity->type)
             {
+                case ENTITY_TYPE_LOCK:
                 case ENTITY_TYPE_BLOCK:
                 case ENTITY_TYPE_WALL:
                 {

@@ -72,6 +72,13 @@ void Tween::Reset()
             *params.realVec2 = value;
             break;
         }
+        case PARAM_TYPE_COLOR:
+        {
+            SM_ASSERT(params.realColor, "want to change realColor but is null");
+            Color color = ColorLerp(params.startColor, params.endColor, current_t);
+            *params.realColor = color;
+            break;
+        }
     }
     
 }

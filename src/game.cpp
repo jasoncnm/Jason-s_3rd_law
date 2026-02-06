@@ -53,6 +53,7 @@ inline EntityArray GetCurrentStateEntities()
         LAYER_GLASS,
         LAYER_SLIME,
         LAYER_BLOCK,
+        LAYER_KEY_LOCK,
     };
     uint32 layerCount = ArrayCount(pushLayers);
     
@@ -283,6 +284,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                 }
                 case ENTITY_TYPE_WALL:
                 case ENTITY_TYPE_PIT:
+                case ENTITY_TYPE_LOCK:
                 {
                     Entity * blockedEntity = target;
                     IVec2 targetPos = blockedEntity->tilePos - pushDir;
@@ -385,6 +387,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                     
                 }
                 }
+            case ENTITY_TYPE_LOCK:
             case ENTITY_TYPE_PIT:
             case ENTITY_TYPE_WALL:
             {
@@ -509,7 +512,7 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
     SM_ASSERT(startEnt->movable, "Static entity cannot be pushing blocks!");
     
     // IMPORTANT: the order of the layers are important, for example, we don't want to check blocks before checking doors in the same tile
-    EntityLayer checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_PIT };
+    EntityLayer checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_KEY_LOCK };
     uint32 layerCount = ArrayCount(checkLayers);
     
     Array<CheckThings, 100> checkList;
@@ -617,7 +620,7 @@ inline void UpdateCameraToTileMapSmooth(Map & map, Vector2 pos, uint32 mapIndex)
     gameState->currentMapIndex = mapIndex;
 }
 
-inline bool8 UpdateCamera()
+inline bool8 UpdateCamera(bool refocus = false)
 {
     bool8 updated = false;
     
@@ -625,6 +628,20 @@ inline bool8 UpdateCamera()
     if (!followEnt) return false;
     
     Vector2 followPos = followEnt->pivot;
+    
+    if (followEnt->type == ENTITY_TYPE_LOCK)
+    {
+        Vector2 center = Vector2Add(followEnt->pivot, 
+                                    Vector2 
+                                    {
+                                        followEnt->tileSize * 0.5f,
+                                        followEnt->tileSize * 0.5f 
+                                    });
+        
+        gameState->camera.target = Vector2Lerp(gameState->camera.target, center, 10 * GetFrameTime());
+        
+        return true;
+    }
     
     Vector2 finalPos = GetTilePivot(followEnt);
     Rectangle finalRect = { finalPos.x, finalPos.y, followEnt->tileSize, followEnt->tileSize };
@@ -691,11 +708,6 @@ inline bool8 UpdateCamera()
                 gameState->playerMapIndex = i;
             }
             
-            if (IsKeyPressed(KEY_TAB))
-            {
-                UpdateCameraToTileMapSmooth(map, pos, i);
-            }
-            
             if (!Vector2Equals(pos, gameState->camera.target))
             {
                 if (!map.firstEnter)
@@ -718,6 +730,10 @@ inline bool8 UpdateCamera()
                 }
                 
                 if (gameState->currentMapIndex != i)
+                {
+                    UpdateCameraToTileMapSmooth(map, pos, i);
+                }
+                else if (JustPressed(RECOVER_KEY) || refocus)
                 {
                     UpdateCameraToTileMapSmooth(map, pos, i);
                 }
@@ -778,6 +794,7 @@ inline void Undo()
     std::vector<Entity> & undoEntities = undoState.undoEntities;
     SetUndoEntities(undoEntities);        
     gameState->undoStack.pop_back();
+    UpdateCamera(true);
 }
 
 
@@ -928,12 +945,13 @@ bool8 MoveAction(IVec2 actionDir)
                 {
                     return false;
                 }
-                }
+            }
             return true;
         }
         case PUSH_BLOCKED:
         {
-            bool8 blockedByPit = pushResult.blockedEntity->type == ENTITY_TYPE_PIT;
+            bool8 blockedByPit = (pushResult.blockedEntity->type == ENTITY_TYPE_LOCK)
+                || (pushResult.blockedEntity->type == ENTITY_TYPE_PIT);
             bool8 blockedByDoor = 
                 pushResult.blockedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
                 pushResult.blockedEntity->cableType == CABLE_TYPE_DOOR &&
@@ -958,14 +976,6 @@ bool8 MoveAction(IVec2 actionDir)
             }
         case PUSH_MERGED:
         {
-            #if 0
-            IVec2 standingPlatformPos = actionTilePos + player->attachDir;
-            FindAttachableResult findResult = FindAttachable(standingPlatformPos, player->attachDir);
-            if (findResult.has)
-            {
-                
-            }
-#endif
             if (!door)
             {
                 MergeSlimes(pushResult.mergeEntity, player);
@@ -1274,7 +1284,7 @@ void GameplayUpdateAndRender()
     {
         gameState->simulating = false;
         // NOTE: Update: Entity
-        EntityLayer simulateLayers[] = { LAYER_BLOCK, LAYER_SLIME };
+        EntityLayer simulateLayers[] = { LAYER_BLOCK, LAYER_SLIME, LAYER_KEY_LOCK };
         for (uint32 idx = 0; idx < ArrayCount(simulateLayers); idx++)
         {
             uint32 layer = simulateLayers[idx];
@@ -1292,7 +1302,8 @@ void GameplayUpdateAndRender()
                         if (entity->actionState == MOVE_STATE) SetActionState(entity, ANIMATE_STATE);
                     }
                         entity->tweenController.Update();
-                        if (entity->tweenController.playing)
+                        Entity * followEnt = GetEntity(gameState->cameraFollowEntityIndex);
+                        if ((!followEnt || followEnt->tweenController.NoTweens()) && layer != LAYER_KEY_LOCK && entity->tweenController.playing)
                         {
                             gameState->cameraFollowEntityIndex = entity->entityIndex;
                         }
@@ -1314,8 +1325,9 @@ void GameplayUpdateAndRender()
         
     }
     
+    // NOTE: Keys and Locks
     {
-    auto & slimeIndexTable = gameState->entityTable[LAYER_SLIME];
+        auto & slimeIndexTable = gameState->entityTable[LAYER_SLIME];
     for (uint32 slimeIndex = 0; slimeIndex < slimeIndexTable.count; slimeIndex++)
     {
         Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
@@ -1329,13 +1341,33 @@ void GameplayUpdateAndRender()
                         PivotToTilePos(slime->pivot, slime->tileSize) == key->tilePos)
                     {
                         Entity * lock = GetEntity(key->unlockEntityIndex);
-                        DeleteEntity(lock);
-                        DeleteEntity(key);
-                        break;
+                        if (!lock->open)
+                        {
+                        lock->open = true;
+                        float delayTime = 1.0f;
+                        TweenParams params = { 0 };
+                        params.paramType = PARAM_TYPE_COLOR;
+                        params.startColor = WHITE;
+                        params.endColor = ColorAlpha(WHITE, 0.0f);
+                            params.realColor = &lock->color;
+                            AddTweenUnique(lock->tweenController, CreateTween(params, nullptr, 1.0f, delayTime));
+                            TweenEvent deleteEvent;
+                            deleteEvent.deleteEntity = key;
+                            lock->tweenController.endEvents.Add(deleteEvent);
+                            TweenEvent deleteEvent2;
+                            deleteEvent2.deleteEntity = lock;
+                            lock->tweenController.endEvents.Add(deleteEvent2);
+                            OnPlayEvent(&lock->tweenController);
+                            
+                            gameState->cameraFollowEntityIndex = lock->entityIndex;
+                            
+                        }
+                            break;
                         }
             }
         }
-    }
+        }
+        
     }
     
     // NOTE: tutorials

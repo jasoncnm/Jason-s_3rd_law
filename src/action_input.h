@@ -113,8 +113,13 @@ inline bool8 JustPressed(GameInputType type)
     for (int gamepad = 0; gamepad < MAX_GAMEPAD; gamepad++)
     {
         if (!IsGamepadAvailable(gamepad)) continue;
-        if (IsGamepadButtonPressed(gamepad, mapping.gamepadButton) || ProccessJoysticks(type, gamepad)) return true;
+        if (IsGamepadButtonPressed(gamepad, mapping.gamepadButton) || ProccessJoysticks(type, gamepad)) 
+        {
+            return true;
+        }
     }
+    
+    while(GetKeyPressed() > 0);
     
     return false;
 }
@@ -161,7 +166,10 @@ inline bool8 IsDown(GameInputType type)
     for (int gamepad = 0; gamepad < MAX_GAMEPAD; gamepad++)
     {
         if (!IsGamepadAvailable(gamepad)) continue;
-        if (IsGamepadButtonDown(gamepad, mapping.gamepadButton) || ProccessJoysticks(type, gamepad)) return true;
+        if (IsGamepadButtonDown(gamepad, mapping.gamepadButton) || ProccessJoysticks(type, gamepad)) 
+        {
+            return true;
+        }
     }
 
     return false;
