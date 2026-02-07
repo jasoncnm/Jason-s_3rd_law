@@ -370,6 +370,7 @@ void SetUpElectricDoor()
     };
     
     EntityLayer findLayers[] = { 
+        LAYER_SOURCE,
         LAYER_DOOR,
         LAYER_CABLE,
         LAYER_CONNECTION,
@@ -396,6 +397,8 @@ void SetUpElectricDoor()
             
             if (current->cableType == CABLE_TYPE_DOOR) continue;
             
+            bool connected = false;
+            
             // NOTE: up
             if (current->up) 
             {
@@ -404,6 +407,7 @@ void SetUpElectricDoor()
                 {
                     current->upIndex = cable->entityIndex;
                     callStack.Add(cable->entityIndex);
+                    connected = true;
                 }
             }
             // NOTE: down
@@ -414,6 +418,7 @@ void SetUpElectricDoor()
                 {
                     current->downIndex = cable->entityIndex;
                     callStack.Add(cable->entityIndex);
+                    connected = true;
                 }
                 
             }
@@ -425,6 +430,7 @@ void SetUpElectricDoor()
                 {
                     current->leftIndex = cable->entityIndex;
                     callStack.Add(cable->entityIndex);
+                    connected = true;
                 }
                 
             }
@@ -436,8 +442,12 @@ void SetUpElectricDoor()
                 {
                     current->rightIndex = cable->entityIndex;
                     callStack.Add(cable->entityIndex);
+                    connected = true;
                 }
-                }
+            }
+            
+            SM_ASSERT(connected, "cable are not connected");
+            
             }
     }
     
@@ -510,7 +520,7 @@ inline void UpdateElectricDoor()
                         {
                             connection->conductive = true;
 
-                            int sourceCableIndex = Source_Indices[connection->sourceIndex];
+                            int sourceCableIndex = connection->sourceIndex;
                             bool8 doorOpened = OnSourcePowerOn(sourceCableIndex);
 
                             if (!doorOpened)
@@ -571,8 +581,7 @@ inline void UpdateElectricDoor()
                     if (connection->hasPower)
                     {
                         connection->conductive = true;
-                        int sourceCableIndex = Source_Indices[connection->sourceIndex];
-                        if (OnSourcePowerOn(sourceCableIndex))
+                        if (OnSourcePowerOn(connection->sourceIndex))
                         {
                             Entity * source = GetEntity(connection->sourceIndex);
                             source->sourceLit = true;

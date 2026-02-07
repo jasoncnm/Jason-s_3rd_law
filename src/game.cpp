@@ -703,11 +703,17 @@ inline bool8 UpdateCamera(bool refocus = false)
         if( CheckCollisionRecs(followRec, tileMapRec) )
         {
             
-            Vector2 pos = TilePositionToPixelPosition(map.width * 0.5f + map.tilePos.x + 0.5f, map.height * 0.5f + map.tilePos.y + 0.5f);
+            Vector2 pos = TilePositionToPixelPosition(map.width * 0.5f + map.tilePos.x + 0.5f, 
+                                                      map.height * 0.5f + map.tilePos.y + 0.5f);
             
             if (gameState->cameraFollowEntityIndex == gameState->playerEntityIndex)
             {
                 gameState->playerMapIndex = i;
+            }
+            
+            if (JustPressed(RECOVER_KEY) || refocus)
+            {
+                UpdateCameraToTileMapSmooth(map, pos, i);
             }
             
             if (!Vector2Equals(pos, gameState->camera.target))
@@ -732,10 +738,6 @@ inline bool8 UpdateCamera(bool refocus = false)
                 }
                 
                 if (gameState->currentMapIndex != i)
-                {
-                    UpdateCameraToTileMapSmooth(map, pos, i);
-                }
-                else if (JustPressed(RECOVER_KEY) || refocus)
                 {
                     UpdateCameraToTileMapSmooth(map, pos, i);
                 }
@@ -1280,8 +1282,8 @@ void GameplayUpdateAndRender()
                 Restart();
             }
         }
-        
-        
+    
+    
     // NOTE: Simulate
     {
         gameState->simulating = false;
@@ -1486,15 +1488,19 @@ void GameplayUpdateAndRender()
             gameState->currentScreen = GAME_MAIN_SCREEN;
             for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
             
+            for (uint32 i = 0; i < Source_Indices.count; i++)
+            {
+                Entity * source = GetEntity(Source_Indices[i]);
+                source->sourceLit = source->conductive = false;
+            }
+            UpdateElectricDoor();
+            
             // Setup Play attach
             Entity * attachBlock = GetEntity(gameState->lastTutBlockIndex);
             SM_ASSERT(attachBlock, "attach block gone");
-            
             SetEntityPosition(GetPlayer(), attachBlock, attachBlock->tilePos - player.attachDir);
-            
             return;
-            
-        }
+            }
         
     }
     
@@ -1583,6 +1589,11 @@ void GameplayUpdateAndRender()
         IVec2 centerPos = player->tilePos;
         Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
         }
+        
+        DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
+                            player->tilePos.x, player->tilePos.y,
+                            player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
+        
 #if 0
         
         DrawText(TextFormat("TotalLine: %d, Connection: %d, Door: %d, TotalSource: %d",
@@ -1605,9 +1616,6 @@ void GameplayUpdateAndRender()
         
         DrawText(TextFormat("Player pivot (%.2f, %.2f), mouse world (%.2f, %.2f)",
                             player->pivot.x, player->pivot.y, mousePos.x, mousePos.y ), 10, 200, 20, GREEN);
-        DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
-                            centerPos.x, centerPos.y,
-                                     player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
         
         DrawText(TextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f",
                             gameState->camera.target.x, gameState->camera.target.y,
@@ -1692,9 +1700,6 @@ void InitializeGame()
             DeleteEntity(slimeB);
             }
         }
-    
-    // NOTE: SetUp Electric Door
-    SetUpElectricDoor();
     
     // NOTE: Initalize gameState->undoStack record
     gameState->undoStack.reset();
@@ -1807,7 +1812,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 gameState->currentScreen = GAME_MAIN_SCREEN;
             }
             
-            #if 0
+            #if 1
             // TODO: Experimental features, Very breakable!!!
             const char * LoadGameText = "load game";
             bounds.y += 200;
@@ -1892,7 +1897,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 gameState->currentScreen = GAME_MAIN_SCREEN;
             }
             
-            #if 0
+            #if 1
             // TODO: Experimental features, Very breakable!!!
             const char * SaveGameText = "save game";
             bounds.y += 200;

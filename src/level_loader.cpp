@@ -542,5 +542,6 @@ state.currentMapIndex = -1;
     }
     
     SetupEntityTable(state);
+    SetUpElectricDoor();
 }
  

@@ -1,0 +1,13 @@
+{
+    "maps": [
+        {
+            "fileName": "TileMap/Tutorial_10.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 0,
+            "y": 0
+        }
+    ],
+    "onlyShowAdjacentMaps": false,
+    "type": "world"
+}
