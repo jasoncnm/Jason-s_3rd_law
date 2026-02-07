@@ -369,8 +369,8 @@ state.currentMapIndex = -1;
             
             int mapWidth =  (int)mapMeta["width"] / tileWidth;
             int mapHeight = (int)mapMeta["height"] / tileWidth;
-            int startPosX = (int)mapMeta["x"] / tileWidth + 2;
-            int startPosY = (int)mapMeta["y"] / tileWidth + 2;
+            int startPosX = (int)mapMeta["x"] / tileWidth;
+            int startPosY = (int)mapMeta["y"] / tileWidth;
             
             std::string ID = FindFileNameFromPath(fileName).c_str();
             // Source - https://stackoverflow.com/a
@@ -381,7 +381,7 @@ state.currentMapIndex = -1;
             
             Map tileMap = {};
             strcpy(tileMap.mapID, mapName.c_str());
-            tileMap.tilePos = { startPosX, startPosY };
+            tileMap.tilePos = { startPosX - 1, startPosY - 1 };
             tileMap.width = mapWidth, tileMap.height =  mapHeight;
             
             state.tileMaps[index] = tileMap;
@@ -466,8 +466,8 @@ state.currentMapIndex = -1;
                                                 }
                                                 int lockMapWidth =  (int)lockMapMeta["width"] / tileWidth;
                                                 int lockMapHeight = (int)lockMapMeta["height"] / tileWidth;
-                                                int lockStartPosX = (int)lockMapMeta["x"] / tileWidth + 2;
-                                                int lockStartPosY = (int)lockMapMeta["y"] / tileWidth + 2;
+                                                int lockStartPosX = (int)lockMapMeta["x"] / tileWidth;
+                                                int lockStartPosY = (int)lockMapMeta["y"] / tileWidth;
                                                 IVec2 lockMapStartPos = { lockStartPosX, lockStartPosY };
                                                 for (auto & layer : lockMap["layers"])
                                                 {

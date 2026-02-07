@@ -16,6 +16,7 @@
 /*
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Fix weird animation bugs 
+- No restart good idea ??
 
   TODO: Things that I can do beside arts and design I guess
 1. background 1wk
@@ -41,7 +42,7 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 //              NOTE: Game Functions (internal)
 //  ========================================================================
 
-inline EntityArray GetCurrentStateEntities()
+inline UndoState::EntityArray GetCurrentStateEntities()
 {
     EntityLayer pushLayers[] = {
         LAYER_DOOR,
@@ -313,8 +314,11 @@ inline void ProjectAndCheck(Entity * projectedEnt,
         
         if (CheckOutOfBound(pos))
         {
-            projectedEnt->tilePos = pos;
-            DeleteEntity(projectedEnt);
+            MoveEntity(projectedEnt, nullptr, playEvent, pos, BLOCK_MOVE_FUNC);
+            TweenEvent deleteEvent = { 0 };
+            deleteEvent.deleteEntity = projectedEnt;
+            projectedEnt->tweenController.endEvents.Add(deleteEvent);
+            // DeleteEntity(projectedEnt);
             return;
         }
         
@@ -718,9 +722,16 @@ inline bool8 UpdateCamera(bool refocus = false)
             
             if (!Vector2Equals(pos, gameState->camera.target))
             {
-                if (!map.firstEnter)
+                if (IsSlime(followEnt) && 
+                    followEnt->tweenController.NoTweens() && 
+                    !map.firstEnter)
                 {
-                    map.initUndoState = { gameState->playerEntityIndex, gameState->entities.GetVectorSTD() };
+                    UndoState::EntityArray ea = GetCurrentStateEntities();
+                    map.initUndoState.playerIndex = gameState->playerEntityIndex;
+                    map.initUndoState.undoEntities.clear();
+                    map.initUndoState.undoEntities.insert(map.initUndoState.undoEntities.begin(),
+                                             &ea.entities[0], 
+                                             &ea.entities[ea.entityCount]);
                     map.firstEnter = true;
                 }
                 
@@ -804,7 +815,7 @@ inline void Undo()
 
 inline void Restart()
 {
-     EntityArray ea = GetCurrentStateEntities();
+    UndoState::EntityArray ea = GetCurrentStateEntities();
     gameState->undoStack.push_back(gameState->playerEntityIndex, ea);
     Map & currentMap = gameState->tileMaps[gameState->currentMapIndex];
     
@@ -1051,7 +1062,7 @@ inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount)
                 }
                 DrawSprite(gameState->camera, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, color);
                 
-                #if 0
+                #if 1
                 if (IsSlime(entity))
                 {
                     DrawCircleV(Vector2Add(entity->pivot, {entity->tileSize/2, entity->tileSize/2}), 3, ColorAlpha(YELLOW, 0.8f));
@@ -1063,41 +1074,45 @@ inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount)
     } 
 }
 
-inline bool8 SlimeSelection(Entity * player)
+inline bool8 SelectNextAsPlayer(Entity * player = nullptr)
 {
     auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
+    bool8 result = false;
+    Entity * nextPlayerEntity = nullptr;
+    for (uint32 i = 0; i < slimeEntityIndices.count; i++)
+    {
+        Entity * slime = GetEntity(slimeEntityIndices[i]);
+        if (slime && (slime != player))
+        {
+            nextPlayerEntity = slime;
+            break;
+        }
+    }
+    
+    if (nextPlayerEntity)
+    {
+        gameState->playerEntityIndex = nextPlayerEntity->entityIndex;
+        gameState->cameraFollowEntityIndex = gameState->playerEntityIndex;
+        
+        if (player) player->color = GRAY;
+        
+        player = GetEntity(gameState->playerEntityIndex);
+        player->color = WHITE;
+         result = true;
+    } 
+    
+    return result;
+}
+
+inline bool8 SlimeSelection(Entity * player)
+{
     
     bool8 stateChanged = false;
     
     if (JustPressed(POSSES_KEY))// && gameState->lv2Map && gameState->lv2Map->firstEnter)
     {
-        
-        Entity * nextPlayerEntity = nullptr;
-        for (uint32 i = 0; i < slimeEntityIndices.count; i++)
-        {
-            Entity * slime = GetEntity(slimeEntityIndices[i]);
-            if (slime == player)
-            {
-                int nextPlayerIndex = (i + 1) % slimeEntityIndices.count;
-                Entity * e = GetEntity(slimeEntityIndices[nextPlayerIndex]);
-                if (e)
-                {
-                    nextPlayerEntity = e;
-                }
-                break;
-            }
+        stateChanged = SelectNextAsPlayer(player);
         }
-        if (nextPlayerEntity)
-        {
-            player->color = GRAY;
-            gameState->playerEntityIndex = nextPlayerEntity->entityIndex;
-            gameState->cameraFollowEntityIndex = gameState->playerEntityIndex;
-            player = GetEntity(gameState->playerEntityIndex);
-            player->color = WHITE;
-            stateChanged = true;
-            
-        } 
-    }
     
     return stateChanged;
 }
@@ -1181,11 +1196,13 @@ void GameplayUpdateAndRender()
         
         Entity * player = GetEntity(gameState->playerEntityIndex);
         
-        EntityArray prevState = GetCurrentStateEntities();
+        UndoState::EntityArray prevState = GetCurrentStateEntities();
         uint32 prevPlayerIndex = gameState->playerEntityIndex;
         
         // NOTE SlimeSelection
         stateChanged = SlimeSelection(player);
+        
+        UpdateElectricDoor();
         
         {
             switch(player->actionState)
@@ -1247,10 +1264,8 @@ void GameplayUpdateAndRender()
             gameState->undoStack.push_back(prevPlayerIndex, prevState);
             }
         
-        UpdateElectricDoor();
-        UpdateSlimes();
-        
     }
+    #if 0
     else
     {
         
@@ -1258,6 +1273,8 @@ void GameplayUpdateAndRender()
         UpdateSlimes();
         
     }
+#endif 
+    UpdateSlimes();
     
         // NOTE: Undo and Restart
         {
@@ -1273,16 +1290,17 @@ void GameplayUpdateAndRender()
                 timeSinceLastPress = press_freq;
                 repeat = false;
             }
-            
+        
+        #if 0
             // NOTE: Restart States
             repeat = repeat && !stateChanged;
             if (JustPressed(RESET_KEY) && !repeat)
             {
                 repeat = true;
                 Restart();
-            }
         }
-    
+        #endif
+        }
     
     // NOTE: Simulate
     {
@@ -1328,6 +1346,13 @@ void GameplayUpdateAndRender()
         }
         
     }
+    
+    
+    if (!GetPlayer())
+    {
+        SelectNextAsPlayer();
+    }
+    
     
     // NOTE: Keys and Locks
     {
@@ -1511,6 +1536,35 @@ void GameplayUpdateAndRender()
         ClearBackground(gameState->bgColor);
         UpdateAndDrawStarFieldBG(&gameState->starFields);
         BeginMode2D(gameState->camera);
+        
+        
+        Color colors[] = {LIGHTGRAY, GRAY, DARKGRAY, YELLOW, GOLD, ORANGE, PINK, RED, MAROON, GREEN, LIME, DARKGREEN, SKYBLUE, BLUE, DARKBLUE, PURPLE, VIOLET, DARKPURPLE, BEIGE, BROWN, DARKBROWN, WHITE, BLACK, BLANK, MAGENTA, RAYWHITE,};
+        
+        int colorCount = ArrayCount(colors);
+        
+        static Color * mColors = (Color *)BumpAllocArray(gameMemory->persistentStorage,
+                                                   gameState->tileMapCount,
+                                                   sizeof(Color));
+        
+        static bool * set = (bool *)BumpAllocArray(gameMemory->persistentStorage,
+                                                        gameState->tileMapCount,
+                                                        sizeof(bool));
+        
+        for (int32 mapIndex = 0; mapIndex < gameState->tileMapCount; mapIndex++)
+        {
+            if (!set[mapIndex])
+            {
+                set[mapIndex] = true;
+                int colorIndex = GetRandomValue(0, colorCount-1);
+                mColors[mapIndex] = colors[colorIndex];
+            }
+            
+            Map & tileMap = gameState->tileMaps[mapIndex];
+            DrawTileMap(gameState->camera, tileMap.tilePos, 
+                        IVec2{ tileMap.width, tileMap.height },
+                        mColors[mapIndex], mColors[mapIndex]);
+        }
+        
         EntityLayer orderedDrawLayers[] = 
         { 
             LAYER_PORTAL,

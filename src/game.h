@@ -109,20 +109,24 @@ struct Memory
 };
 
 
-
 struct UndoState
 {
+    struct EntityArray
+    {
+        uint32 entityCount;
+        Entity * entities;
+    };
+    
     int playerIndex;
-    std::vector<Entity> undoEntities;    
+    // TODO: optimize this by allocate entities 
+    //       into our own allocator aka EntityArray
+    std::vector<Entity> undoEntities;
 };
-
 
 struct Map
 {
     char mapID[100];
     UndoState initUndoState;
-    
-    Entity playerEnter;
     
     IVec2 tilePos;            // Top left tile position of the map
     int   width;              // Number of tiles in X axis
@@ -131,15 +135,9 @@ struct Map
     bool8 firstEnter = false;
 };
 
-struct EntityArray
-{
-    uint32 entityCount;
-    Entity * entities;
-};
-
-
 struct UndoStack
 {
+    
     UndoState undoStack[MAX_UNDO];
     int last = 1;
     uint32 count = 0;
@@ -162,7 +160,7 @@ struct UndoStack
         }
     }
     
-    void push_back(uint32 playerIndex, EntityArray & ea)
+    void push_back(uint32 playerIndex, UndoState::EntityArray & ea)
     {
         last++;
         count++;
