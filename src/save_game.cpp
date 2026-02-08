@@ -7,40 +7,56 @@
    ======================================================================== */
 
 #include "save_game.h"
+#include "vendor/Json/json.hpp"
 
-void SaveGame(GameState & state)
+using json = nlohmann::json;
+
+void SaveGame(GameState & state, const char * savePath)
 {
-    SaveData saveData = {};
-    saveData.worldMin = state.tileMin;
-    saveData.worldMax = state.tileMax;
-
-    uint32 entityTableCount[LAYER_COUNT];
-    for (uint32 layer = 0; layer < LAYER_COUNT; layer++)
-    {
-        entityTableCount[layer] = state.entityTable[layer].count;
-    }
-    
-    EntityLayer saveLayers[] = { LAYER_DOOR, LAYER_CABLE, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK };
-    uint32 saveEntityCount = 0;
-    for (uint32 i = 0; i < ArrayCount(saveLayers); i++)
+    EntityLayer saveLayers[] = { LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK };
+    int saveEntityCount = 0;
+    for (int i = 0; i < ArrayCount(saveLayers); i++)
     {
         saveEntityCount += state.entityTable[saveLayers[i]].count;
     }
-
-    saveData.saveEntities = (Entity *)BumpAllocArray(gameMemory->transientStorage, saveEntityCount, sizeof(Entity));
-
-    uint32 index = 0;
-    for (uint32 layerIndex = 0; layerIndex < ArrayCount(saveLayers); layerIndex++)
+    
+    Entity * saveEntities = (Entity *)BumpAllocArray(gameMemory->transientStorage, saveEntityCount, sizeof(Entity));
+    
+    int index = 0;
+    for (int layerIndex = 0; layerIndex < ArrayCount(saveLayers); layerIndex++)
     {
         auto & layer = state.entityTable[saveLayers[layerIndex]];
         for (uint32 i = 0; i < layer.count; i++)
         {
             SM_ASSERT(index < saveEntityCount, "Trying to write outside of allocated memory");
             Entity entity = state.entities[layer[i]];
-            saveData.saveEntities[index++] = entity;
+            saveEntities[index++] = entity;
         }
     }
+    
+    for (uint32 saveIndex = 0; ; saveIndex++)
+    {
+        char saveName[10];
+        sprintf(saveName, "Save_%d", saveIndex);
+        
+        char fileName[100];                
+        CatStrings(GAME_SAVE_PATH, StringLength(GAME_SAVE_PATH),
+                   saveName, StringLength(saveName),
+                   fileName, 100);
+        
+        if (!FileExists(fileName))
+        {
+            // Save data to file from byte array (write), returns true on success
+            if (!SaveFileData(fileName, (void *) saveEntities, sizeof(Entity) * saveEntityCount))
+            {
+                SM_ASSERT(false, "fail to save game state");
+            }
+            break;
+        }
+    } 
+}
 
+void LoadGame(SaveData & data)
+{
     
-    
-};
+}

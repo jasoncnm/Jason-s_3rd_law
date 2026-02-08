@@ -12,6 +12,7 @@
 #include "level_loader.cpp"
 #include "tween.cpp"
 #include "tween_controller.cpp"
+#include "game_save.pb.cc"
 
 /*
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
@@ -1957,47 +1958,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             bounds.y += 200;
             if (GuiButton(bounds, SaveGameText))
             {
-                EntityLayer saveLayers[] = { LAYER_DOOR, LAYER_CABLE, LAYER_SOURCE, LAYER_CONNECTION, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK };
-                int saveEntityCount = 0;
-                for (int i = 0; i < ArrayCount(saveLayers); i++)
-                {
-                    saveEntityCount += gameState->entityTable[saveLayers[i]].count;
-                }
-                
-                Entity * saveEntities = (Entity *)BumpAllocArray(gameMemory->transientStorage, saveEntityCount, sizeof(Entity));
-                int index = 0;
-                for (int layerIndex = 0; layerIndex < ArrayCount(saveLayers); layerIndex++)
-                {
-                    auto & layer = gameState->entityTable[saveLayers[layerIndex]];
-                    for (uint32 i = 0; i < layer.count; i++)
-                    {
-                        SM_ASSERT(index < saveEntityCount, "Trying to write outside of allocated memory");
-                        Entity entity = gameState->entities[layer[i]];
-                        saveEntities[index++] = entity;
-                    }
-                }
-                
-                for (uint32 saveIndex = 0; ; saveIndex++)
-                {
-                    
-                    char saveName[10];
-                    sprintf(saveName, "Save_%d", saveIndex);
-                    
-                    char fileName[100];                
-                    CatStrings(GAME_SAVE_PATH, StringLength(GAME_SAVE_PATH),
-                               saveName, StringLength(saveName),
-                               fileName, 100);
-                    
-                    if (!FileExists(fileName))
-                    {
-                        // Save data to file from byte array (write), returns true on success
-                        if (!SaveFileData(fileName, (void *) saveEntities, sizeof(Entity) * saveEntityCount))
-                        {
-                            SM_ASSERT(false, "fail to save game state");
-                        }
-                        break;
-                    }
-                } 
+                SaveGame(*gameState, GAME_SAVE_PATH);
             }
 #endif
             

@@ -9,15 +9,23 @@
 
 struct SaveData
 {
-    IVec2 worldMin, worldMax;
-    Entity * saveEntities;
-    uint32 * saveEntityTable[LAYER_COUNT];
-    Map * saveTileMap;
-    uint32 * saveSourceIndices;
-    uint32 * saveDoorIndices;
-    uint32 * saveConnectionPointIndices;
-    uint32 * saveEntityIndices;
-};
+    enum SaveLoc
+    {
+        SAVE_MAIN,
+        SAVE_TUT,
+    };
+    
+    Entity * mainEntities;
+    Entity * tutEntities;
+    
+    SaveLoc saveLoc;
+    
+    int mainEntCount;
+    int tutEntCount;
+    
+    int playerIndex;
+    int lastTutBlockIndex;
+    };
 
 
 #define SAVE_GAME_H
