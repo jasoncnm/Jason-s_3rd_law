@@ -275,7 +275,7 @@
         },
         {
             "fileName": "TileMap/Room_42.tmj",
-            "height": 352,
+            "height": 704,
             "width": 352,
             "x": -544,
             "y": 3392
@@ -291,8 +291,8 @@
             "fileName": "TileMap/Room_44.tmj",
             "height": 352,
             "width": 352,
-            "x": -544,
-            "y": 3744
+            "x": 2944,
+            "y": 2496
         },
         {
             "fileName": "TileMap/Room_0.tmj",
@@ -331,10 +331,10 @@
         },
         {
             "fileName": "TileMap/Room_52.tmj",
-            "height": 160,
-            "width": 160,
+            "height": 352,
+            "width": 352,
             "x": 2016,
-            "y": 2400
+            "y": 2336
         },
         {
             "fileName": "TileMap/Room_53.tmj",
@@ -468,6 +468,41 @@
             "width": 352,
             "x": 2016,
             "y": 3744
+        },
+        {
+            "fileName": "TileMap/Room_64.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 2016,
+            "y": 4096
+        },
+        {
+            "fileName": "TileMap/Room_65.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 2368,
+            "y": 3744
+        },
+        {
+            "fileName": "TileMap/Room_66.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 2368,
+            "y": 4096
+        },
+        {
+            "fileName": "TileMap/Path_88.tmj",
+            "height": 352,
+            "width": 96,
+            "x": 160,
+            "y": 2336
+        },
+        {
+            "fileName": "TileMap/Path_89.tmj",
+            "height": 352,
+            "width": 96,
+            "x": 160,
+            "y": 4800
         }
     ],
     "onlyShowAdjacentMaps": false,
