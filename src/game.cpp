@@ -12,7 +12,7 @@
 #include "level_loader.cpp"
 #include "tween.cpp"
 #include "tween_controller.cpp"
-#include "game_save.pb.cc"
+#include "save_game.cpp"
 
 /*
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED

@@ -447,10 +447,12 @@ state.currentMapIndex = -1;
                                         {
                                             if (prop["name"] == "Lock_Map")
                                             {
-                                                std::string fname = FindFileNameFromPath(prop["value"]);
+                                                std::string fname = prop["value"];
+                                                
+                                                // const char * npath = GetDirectoryPath(path.c_str());
                                                 
                                                 std::string lockMapPath = "/" + fname;
-                                                lockMapPath = levelPath + lockMapPath;
+                                                lockMapPath = GetDirectoryPath(path.c_str()) + lockMapPath;
                                                 std::ifstream file(lockMapPath);
                                                 json lockMap = json::parse(file);
                                                 
