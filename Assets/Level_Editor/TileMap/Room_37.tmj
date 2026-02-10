@@ -42,7 +42,7 @@
          "opacity":1,
          "properties":[
                 {
-                 "name":"Key1",
+                 "name":"Lock_Map",
                  "type":"file",
                  "value":"Room_41.tmj"
                 }],

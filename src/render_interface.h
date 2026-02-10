@@ -12,6 +12,7 @@
 #include "entity.h"
 
 #define TEXTURE_PATH "Assets/Texture/SpriteAtlas.png"
+#define VS_PATH "Assets/Shaders/jason.vs"
 
 //  ========================================================================
 //              NOTE: Render Structs
@@ -40,8 +41,8 @@ enum PostShaderType
 struct PostFX
 {
     Shader shader;
-    int frameBufferSizeLoc;
-    long fileWriteTime;
+    long fsWriteTime;
+    long vsWriteTime;
 };
 
 struct StarFields
@@ -88,7 +89,7 @@ Rectangle GetCameraRect(Camera2D camera)
     return result;
 }
 
-void DebugDrawPlayerActionState(ActionState state, int x, int y, int fontSize, Color color)
+void DebugDrawPlayerActionState(ActionState state, int32 x, int32 y, int32 fontSize, Color color)
 {
     char * stateTable[] = { 
         "NULL_STATE",
@@ -104,14 +105,14 @@ void DebugDrawPlayerActionState(ActionState state, int x, int y, int fontSize, C
 
 void DrawTileMap(Camera2D camera, IVec2 startPos, IVec2 dim, Color tileColor, Color gridColor)
 {
-    int tileSize = MAP_TILE_SIZE;
+    int32 tileSize = MAP_TILE_SIZE;
 
     IVec2 endPos = startPos + dim;    
     
     // NOTE: Draw Tile Maps
-    for (int y = startPos.y; y < endPos.y; y++)
+    for (int32 y = startPos.y; y < endPos.y; y++)
     {
-        for (int x = startPos.x; x < endPos.x; x++)
+        for (int32 x = startPos.x; x < endPos.x; x++)
         {
             Rectangle source = { (float)x * tileSize, (float)y * tileSize, (float)tileSize, (float)tileSize };
 
@@ -160,7 +161,7 @@ void DrawError()
 }
 
 void UpdateStarField(Vector3 * stars, Vector2 * starsScreenPos, float flySpeed, float dt,
-                              int screenWidth, int screenHeight, uint32 start, uint32 end)
+                              int32 screenWidth, int32 screenHeight, uint32 start, uint32 end)
 {
     for (uint32 i = start; i < end; i++)
     {
@@ -193,7 +194,7 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields)
         // Speed at which we fly forward
         starFields->flySpeed = 0.1f;
         // Setup the stars with a random position
-        for (int i = 0; i < STAR_COUNT; i++)
+        for (int32 i = 0; i < STAR_COUNT; i++)
         {
             starFields->stars[i].x = (float)GetRandomValue(-GetScreenWidth() / 2, GetScreenWidth() / 2);
             starFields->stars[i].y = (float)GetRandomValue(-GetScreenHeight() / 2, GetScreenHeight() / 2);
@@ -206,8 +207,8 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields)
     Vector3 * stars = starFields->stars;
     float flySpeed = starFields->flySpeed;
     
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
+    int32 screenWidth = GetScreenWidth();
+    int32 screenHeight = GetScreenHeight();
     static float time = 0;    
     float dt = GetFrameTime();
     time += dt;
@@ -219,8 +220,8 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields)
     
     for (uint32 tid = 0; tid < 4; tid++)
     {
-        int start = tid * chunck;
-        int end = (tid + 1) * chunck;
+        int32 start = tid * chunck;
+        int32 end = (tid + 1) * chunck;
         if (end > STAR_COUNT) end = STAR_COUNT;
         
         UpdateStarField(stars, starsScreenPos, flySpeed,  dt, screenWidth, screenHeight,
@@ -237,65 +238,59 @@ for (uint32 i = 0; i < STAR_COUNT; i++)
     
 }
 
-void UpdateAndRenderPostShader(RenderTexture2D & renderTarget, PostFX * postFX, 
-                               int32 shaderType, int32 screenWidth, int32 screenHeight)
+void UpdateAndRenderWithShader(RenderTexture2D & renderTarget, PostFX * postFX, 
+                               int32 shaderType, int32 screenWidth, int32 screenHeight,
+                                 int32 shake, float time)
 {
     
     if (GetFileModTime(shaderPaths[shaderType]) != 
-        postFX[shaderType].fileWriteTime)
+        postFX[shaderType].fsWriteTime ||
+        GetFileModTime(VS_PATH) != postFX[shaderType].vsWriteTime)
     {
         UnloadShader(postFX[shaderType].shader);
         postFX[shaderType].shader =
-            LoadShader(0, shaderPaths[shaderType]);
-        postFX[shaderType].frameBufferSizeLoc = 
-            GetShaderLocation(postFX[shaderType].shader, "u_frameSize");
+            LoadShader(VS_PATH, shaderPaths[shaderType]);
         if (!IsShaderValid(postFX[shaderType].shader))
         {
             SM_ERROR(false, "Unable to load shader file (%s)", 
                      "Assets/Shaders/bloom.fs");
         }
-        postFX[shaderType].fileWriteTime = GetFileModTime(shaderPaths[shaderType]);
+        postFX[shaderType].fsWriteTime = GetFileModTime(shaderPaths[shaderType]);
+        postFX[shaderType].vsWriteTime = GetFileModTime(VS_PATH);
+        
     }
+    
+    float mn = (float)Min(screenWidth, screenHeight);
     
     float size[2] =
     { 
         (float)screenWidth, (float)screenHeight
     };
-    SetShaderValue(postFX[shaderType].shader, 
-                   postFX[shaderType].frameBufferSizeLoc, 
-                   size, SHADER_UNIFORM_VEC2);
-    int offsetLoc = GetShaderLocation(postFX[shaderType].shader, "offset");
     
+    int32 shakeLoc = GetShaderLocation(postFX[shaderType].shader, "shake");
+    int32 timeLoc = GetShaderLocation(postFX[shaderType].shader, "time");
+    int32 frameBufferSizeLoc = GetShaderLocation(postFX[shaderType].shader, "u_frameSize");
+    int32 offsetLoc = GetShaderLocation(postFX[shaderType].shader, "offset");
     static float val = 0; 
-    
     val -= GetFrameTime() * 0.0015f;
     
+    
+    SetShaderValue(postFX[shaderType].shader, frameBufferSizeLoc, size, SHADER_UNIFORM_VEC2);
     SetShaderValue(postFX[shaderType].shader, offsetLoc, &val, SHADER_UNIFORM_FLOAT);
+    SetShaderValue(postFX[FX_JASON].shader, shakeLoc, &shake, SHADER_UNIFORM_INT);
+    SetShaderValue(postFX[FX_JASON].shader, timeLoc, &time, SHADER_UNIFORM_FLOAT);
+    
+    
     BeginShaderMode(postFX[shaderType].shader);
     
-    
-    #if 0
-    int mn = Min(screenWidth, screenHeight);
     DrawTextureRec(renderTarget.texture, 
                    {
-                       0.5f * (screenWidth - mn), 0.5f * (screenHeight - mn), (float)mn, (float)-mn
+                       (screenWidth - mn) / 2, (screenHeight - mn) / 2, (float)mn, (float)-mn
                    }, 
                    {
                        0.5f * (screenWidth - mn), 0.5f * (screenHeight - mn)
                    }, WHITE);
-#else
-    DrawTextureRec(renderTarget.texture, 
-                   {
-                       0,
-                       0, 
-                       (float)renderTarget.texture.width, (float)-renderTarget.texture.height
-                   }, 
-                   {
-                       0,
-                       0
-                   }, WHITE);
     
-    #endif
     EndShaderMode();
     
 }

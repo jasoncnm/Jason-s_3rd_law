@@ -1,0 +1,39 @@
+#version 330
+
+// Input vertex attributes
+in vec3 vertexPosition;
+in vec2 vertexTexCoord;
+in vec3 vertexNormal;
+in vec4 vertexColor;
+
+// Input uniform values
+uniform mat4 mvp;
+
+// Output vertex attributes (to fragment shader)
+out vec2 fragTexCoord;
+out vec4 fragColor;
+
+// NOTE: Add your custom variables here
+
+// Custom uniforms
+uniform bool shake;
+uniform float time;
+
+void main()
+{
+    // Send vertex attributes to fragment shader
+    fragTexCoord = vertexTexCoord;
+    fragColor = vertexColor;
+
+    // Calculate final vertex position
+    gl_Position = mvp*vec4(vertexPosition, 1.0);
+
+    if (shake)
+    {
+        float strength = 0.01;
+        gl_Position.x += cos(time * 10) * strength;        
+        gl_Position.y += cos(time * 15) * strength;      
+        //gl_Position.x += -1 * strength;        
+        //gl_Position.y += 0 * strength;    
+    }
+}

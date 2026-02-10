@@ -18,7 +18,7 @@ inline bool8 IsSlime(Entity * entity);
 //  ========================================================================
 //              NOTE: Game Util Functions
 //  ========================================================================
-inline bool8 CheckOutOfBound(int tileX, int tileY)
+inline bool8 CheckOutOfBound(int32 tileX, int32 tileY)
 {
     bool8 result =
     (tileX < gameState->tileMin.x)
@@ -108,7 +108,7 @@ IVec2 PivotToTilePos(Vector2 pivot, float tileSize)
 }
 
 
-Color IntToRGBA(unsigned int val)
+Color IntToRGBA(uint32 val)
 {
     
     unsigned char red   = (val >> 16) & 0xFF;

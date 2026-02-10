@@ -12,7 +12,7 @@
 //              NOTE: Level Functions
 //  ========================================================================
 
-inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
+inline AddEntityResult LoadGameObject(GameState & state, int32 id, IVec2 tilePos)
 {
     AddEntityResult entityResult = { 0 };
     if (id == PIT)
@@ -234,14 +234,6 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
     {
         entityResult = AddEntity(ENTITY_TYPE_SLIME_PORTAL, tilePos, SPRITE_SLIME_PORTAL);
     }
-    else if (id == KEY)
-    {
-        
-    }
-    else if (id == LOCK)
-    {
-        
-    }
     else
     {
         SM_ASSERT(false, "Unable to register ID (%d)", id);
@@ -252,7 +244,7 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
 void SetupEntityTable(GameState & state)
 {
     
-    for (int layer = 0; layer < LAYER_COUNT; layer++)
+    for (int32 layer = 0; layer < LAYER_COUNT; layer++)
     {
         state.entityTable[layer].Clear();
     }
@@ -343,7 +335,7 @@ void SetupEntityTable(GameState & state)
 void LoadTileMapsAndEntities(GameState & state, char * worldPath)
 {
     SM_TRACE("worldPath: %s", worldPath);
-    unsigned int tileCountX = 0, tileCountY = 0;
+    uint32 tileCountX = 0, tileCountY = 0;
     IVec2 offset = { 50 - 12, 50 - 6 };
 
     IVec2 min = { INT_MAX, INT_MAX };
@@ -358,10 +350,10 @@ state.currentMapIndex = -1;
 
         auto tileMaps = worldData["maps"];
         
-        state.tileMapCount = (int)tileMaps.size();
+        state.tileMapCount = (int32)tileMaps.size();
 
-        int index = 0;
-        for (int i = 0; i < state.tileMapCount; i++)
+        int32 index = 0;
+        for (int32 i = 0; i < state.tileMapCount; i++)
         {
             
             json mapMeta = tileMaps[i];
@@ -372,12 +364,12 @@ state.currentMapIndex = -1;
             
             std::ifstream file(path);
             json map = json::parse(file);
-            int tileWidth = (int)map["tilewidth"];
+            int32 tileWidth = (int32)map["tilewidth"];
             
-            int mapWidth =  (int)mapMeta["width"] / tileWidth;
-            int mapHeight = (int)mapMeta["height"] / tileWidth;
-            int startPosX = (int)mapMeta["x"] / tileWidth;
-            int startPosY = (int)mapMeta["y"] / tileWidth;
+            int32 mapWidth =  (int32)mapMeta["width"] / tileWidth;
+            int32 mapHeight = (int32)mapMeta["height"] / tileWidth;
+            int32 startPosX = (int32)mapMeta["x"] / tileWidth;
+            int32 startPosY = (int32)mapMeta["y"] / tileWidth;
             
             std::string ID = FindFileNameFromPath(fileName).c_str();
             // Source - https://stackoverflow.com/a
@@ -415,15 +407,15 @@ state.currentMapIndex = -1;
                         // tileCountX = width;
                         // tileCountY = height;
                         
-                        std::vector<int> a = layer["data"];
+                        std::vector<int32> a = layer["data"];
                         
                         SM_TRACE("Loading Layer: %s", name.data());
                         
-                        for (int row = 0; row < mapHeight; row++)
+                        for (int32 row = 0; row < mapHeight; row++)
                         {
-                            for (int col = 0; col < mapWidth; col++)
+                            for (int32 col = 0; col < mapWidth; col++)
                             {
-                                int tileId = a[col + row * mapWidth];
+                                int32 tileId = a[col + row * mapWidth];
                                 
                                 if (tileId > 0)
                                 {
@@ -452,7 +444,7 @@ state.currentMapIndex = -1;
                                         json properties = layer["properties"];
                                         for (auto & prop : properties)
                                         {
-                                            if (prop["name"] == "Lock_Map")
+                                            if (prop["type"] == "file")
                                             {
                                                 std::string fname = prop["value"];
                                                 
@@ -473,21 +465,21 @@ state.currentMapIndex = -1;
                                                         break;
                                                     }
                                                 }
-                                                int lockMapWidth =  (int)lockMapMeta["width"] / tileWidth;
-                                                int lockMapHeight = (int)lockMapMeta["height"] / tileWidth;
-                                                int lockStartPosX = (int)lockMapMeta["x"] / tileWidth;
-                                                int lockStartPosY = (int)lockMapMeta["y"] / tileWidth;
+                                                int32 lockMapWidth =  (int32)lockMapMeta["width"] / tileWidth;
+                                                int32 lockMapHeight = (int32)lockMapMeta["height"] / tileWidth;
+                                                int32 lockStartPosX = (int32)lockMapMeta["x"] / tileWidth;
+                                                int32 lockStartPosY = (int32)lockMapMeta["y"] / tileWidth;
                                                 IVec2 lockMapStartPos = { lockStartPosX, lockStartPosY };
                                                 for (auto & layer : lockMap["layers"])
                                                 {
                                                     if (layer["name"] == "Lock")
                                                     {
-                                                        std::vector<int> lData = layer["data"];
-                                                        for (int lrow = 0; lrow < lockMapWidth; lrow++)
+                                                        std::vector<int32> lData = layer["data"];
+                                                        for (int32 lrow = 0; lrow < lockMapWidth; lrow++)
                                                         {
-                                                            for (int lcol = 0; lcol < lockMapHeight; lcol++)
+                                                            for (int32 lcol = 0; lcol < lockMapHeight; lcol++)
                                                             {
-                                                                int ltileId = lData[lcol + lrow * lockMapWidth];
+                                                                int32 ltileId = lData[lcol + lrow * lockMapWidth];
                                                                 if (ltileId == LOCK)
                                                                 {
                                                                     IVec2 lOffset = { lcol, lrow };

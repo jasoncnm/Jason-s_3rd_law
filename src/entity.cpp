@@ -12,7 +12,7 @@ inline bool8 DoorBlocked(Entity * door, IVec2 reachDir);
 inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir);
 inline bool8 IsDoor(Entity * door);
 
-inline Entity * GetEntity(int i)
+inline Entity * GetEntity(int32 i)
 {
     Entity * entity = &gameState->entities[i];
     if (!entity->active) entity = nullptr;
@@ -37,7 +37,7 @@ inline bool8 IsSlime(Entity * entity)
 
 
 inline AddEntityResult
-AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE, int tileSize = MAP_TILE_SIZE)
+AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE, int32 tileSize = MAP_TILE_SIZE)
 {
     AddEntityResult result;
 
@@ -231,7 +231,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 param.realVec2  = &entity->pivot;
                 
                 
-                int channel = entity->tweenController.FindMovingChannel();
+                int32 channel = entity->tweenController.FindMovingChannel();
                 
                 if (channel < 0)
                 {
@@ -290,7 +290,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         param.endVec2 = endPivot;
         param.realVec2  = &entity->pivot;
         
-        int channel = entity->tweenController.FindMovingChannel();
+        int32 channel = entity->tweenController.FindMovingChannel();
         
         if (channel < 0)
         {
@@ -381,7 +381,7 @@ inline void SetGlassBeBroken(Entity * glass)
     glass->sprite = GetSprite(SPRITE_GLASS_BROKEN);
 }
 
-inline float GetSlimeSize(int mass)
+inline float GetSlimeSize(int32 mass)
 {
     return mass == 1 ? 0.5f * MAP_TILE_SIZE : 0.75f * MAP_TILE_SIZE;
 }
@@ -558,7 +558,7 @@ inline Array<Entity *, LAYER_COUNT> FindAllEntitiesFromLocationAndLayers(IVec2 p
     Array<Entity *, LAYER_COUNT> result;
     for (uint32 layerIndex = 0; layerIndex < layerCount; layerIndex++)
     {
-        int layer = layers[layerIndex];
+        int32 layer = layers[layerIndex];
         for (uint32 i = 0; i < gameState->entityTable[layer].count; i++)
         {
             Entity * ent = GetEntity(gameState->entityTable[layer][i]);
@@ -576,7 +576,7 @@ inline Entity * FindEntityByLocationAndLayers(IVec2 pos, EntityLayer * layers, u
 {
     for (uint32 layerIndex = 0; layerIndex < arrayCount; layerIndex++)
     {
-        int layer = layers[layerIndex];
+        int32 layer = layers[layerIndex];
         auto & entityIndeices = gameState->entityTable[layer];
         for (uint32 i = 0; i < entityIndeices.count; i++)
         {
@@ -655,7 +655,7 @@ inline void UpdateSlimes()
                     TweenEvent * playEvent = nullptr;
                     if (!(attach->tweenController.start || attach->tweenController.playing) && !attach->tweenController.NoTweens())
                     {
-                        int index = attach->tweenController.startEvents.Add(TweenEvent{ 0 });
+                        int32 index = attach->tweenController.startEvents.Add(TweenEvent{ 0 });
                         playEvent = &attach->tweenController.startEvents[index];
                     }
                     

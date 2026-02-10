@@ -14,16 +14,16 @@ using json = nlohmann::json;
 void SaveGame(GameState & state, const char * savePath)
 {
     EntityLayer saveLayers[] = { LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK };
-    int saveEntityCount = 0;
-    for (int i = 0; i < ArrayCount(saveLayers); i++)
+    int32 saveEntityCount = 0;
+    for (int32 i = 0; i < ArrayCount(saveLayers); i++)
     {
         saveEntityCount += state.entityTable[saveLayers[i]].count;
     }
     
     Entity * saveEntities = (Entity *)BumpAllocArray(gameMemory->transientStorage, saveEntityCount, sizeof(Entity));
     
-    int index = 0;
-    for (int layerIndex = 0; layerIndex < ArrayCount(saveLayers); layerIndex++)
+    int32 index = 0;
+    for (int32 layerIndex = 0; layerIndex < ArrayCount(saveLayers); layerIndex++)
     {
         auto & layer = state.entityTable[saveLayers[layerIndex]];
         for (uint32 i = 0; i < layer.count; i++)

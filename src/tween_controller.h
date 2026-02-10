@@ -28,14 +28,14 @@ struct TweenController
     // NOTE: Update Every frame
     void Update();
     
-    int FindMovingChannel();
+    int32 FindMovingChannel();
     
     
     bool8 NoTweens()
     {
         bool8 result = true;
 
-        for (int channel = 0; channel < MAX_CHANNEL; channel++)
+        for (int32 channel = 0; channel < MAX_CHANNEL; channel++)
         {
             TweeningQueue & queue = channels[channel];
             if (!queue.IsEmpty())
@@ -49,7 +49,7 @@ struct TweenController
     
 };
 
-void AddTween(TweenController & controller, Tween tween, int channel = 0);
+void AddTween(TweenController & controller, Tween tween, int32 channel = 0);
 uint32 AddTweenUnique(TweenController & controller, Tween tween);
 
 

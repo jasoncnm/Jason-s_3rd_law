@@ -277,16 +277,16 @@ end = true;
     return doorOpened;
 }
 
-bool8 OnSourcePowerOn(int sourceIndex)
+bool8 OnSourcePowerOn(int32 sourceIndex)
 {
 
-    Array<int, CABLE_MAX_CALL_STACK> callStack  = {};
+    Array<int32, CABLE_MAX_CALL_STACK> callStack  = {};
     callStack.Add(sourceIndex);
     bool8 doorOpened = false;
 
     while (!callStack.IsEmpty())
     {
-        int entityIndex = callStack.last();
+        int32 entityIndex = callStack.last();
         callStack.RemoveLast();
         
         Entity * cable = GetEntity(entityIndex);
@@ -300,7 +300,7 @@ bool8 OnSourcePowerOn(int sourceIndex)
         if (!end)
         {
             // return doorOpened;
-            int indexes[4] =
+            int32 indexes[4] =
                 {
                     cable->leftIndex,
                     cable->rightIndex,
@@ -308,9 +308,9 @@ bool8 OnSourcePowerOn(int sourceIndex)
                     cable->downIndex
                 };
     
-            for (int i = 0; i < 4; i++)
+            for (int32 i = 0; i < 4; i++)
             {
-                int id = indexes[i];
+                int32 id = indexes[i];
                 if (id >= 0)
                 {
                     callStack.Add(id);
@@ -323,14 +323,14 @@ bool8 OnSourcePowerOn(int sourceIndex)
     return doorOpened;
 }
 
-void ShutDownPower(int sourceIndex)
+void ShutDownPower(int32 sourceIndex)
 {
-    Array<int, CABLE_MAX_CALL_STACK> callStack = {};
+    Array<int32, CABLE_MAX_CALL_STACK> callStack = {};
     callStack.Add(sourceIndex);
 
     while(!callStack.IsEmpty())
     {
-        int currentIndex = callStack.last();
+        int32 currentIndex = callStack.last();
         callStack.RemoveLast();
         
         Entity * cable = GetEntity(currentIndex);
@@ -354,7 +354,7 @@ void ShutDownPower(int sourceIndex)
             cable->sprite = GetSprite(cable->spriteID);        
         }
     
-        int indexes[4] =
+        int32 indexes[4] =
             {
                 cable->leftIndex,
                 cable->rightIndex,
@@ -362,9 +362,9 @@ void ShutDownPower(int sourceIndex)
                 cable->downIndex
             };
     
-        for (int i = 0; i < 4; i++)
+        for (int32 i = 0; i < 4; i++)
         {
-            int id = indexes[i];
+            int32 id = indexes[i];
             if (id >= 0)
             {
                 callStack.Add(id);
@@ -441,15 +441,15 @@ void SetUpElectricDoor()
     
     for (uint32 ind = 0; ind < Source_Indices.count; ind++)
     {
-        Array<int, CABLE_MAX_CALL_STACK> callStack = {};
+        Array<int32, CABLE_MAX_CALL_STACK> callStack = {};
 
-        int sourceIndex = Source_Indices[ind];
+        int32 sourceIndex = Source_Indices[ind];
             callStack.Add( sourceIndex );
         
             
         while(!callStack.IsEmpty())
         {
-            int currentIndex = callStack.last();
+            int32 currentIndex = callStack.last();
             callStack.RemoveLast();
             
             Entity * current = GetEntity(currentIndex);
@@ -516,7 +516,7 @@ void SetUpElectricDoor()
         Entity * source = GetEntity(Source_Indices[i]);
         SM_ASSERT(source, "Entity is not active");
         bool8 has = false;
-        int sourceCableIndex = Source_Indices[i];
+        int32 sourceCableIndex = Source_Indices[i];
         
         EntityLayer layers[] = { LAYER_BLOCK };
         Entity * block = FindEntityByLocationAndLayers(source->tilePos, layers, ArrayCount(layers));
@@ -539,7 +539,7 @@ inline void UpdateElectricDoor()
     
     for (uint32 i = 0; i < Source_Indices.count; i++)
     {
-        int sourceCableIndex = Source_Indices[i];
+        int32 sourceCableIndex = Source_Indices[i];
         Entity * source = GetEntity(sourceCableIndex);
         SM_ASSERT(source, "Entity is not active");
         if (source->sourceLit) continue;
@@ -592,16 +592,16 @@ inline void UpdateElectricDoor()
                 {
                     connection->conductive = false;
                         
-                    int indexes[4] =
+                    int32 indexes[4] =
                         {
                             connection->leftIndex,
                             connection->rightIndex,
                             connection->upIndex,
                             connection->downIndex
                         };
-                    for (int i = 0; i < 4; i++)
+                    for (int32 i = 0; i < 4; i++)
                     {
-                        int id = indexes[i];
+                        int32 id = indexes[i];
                         if (id >= 0)
                         {
                             ShutDownPower(id);                    

@@ -20,11 +20,11 @@ struct SaveData
     
     SaveLoc saveLoc;
     
-    int mainEntCount;
-    int tutEntCount;
+    int32 mainEntCount;
+    int32 tutEntCount;
     
-    int playerIndex;
-    int lastTutBlockIndex;
+    int32 playerIndex;
+    int32 lastTutBlockIndex;
     };
 
 

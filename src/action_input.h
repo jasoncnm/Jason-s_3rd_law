@@ -16,7 +16,7 @@ constexpr float rightTriggerDeadzone = -0.9f;
 
 inline void CleanUpKeyMapping()
 {
-    for (int i = 0; i < GAME_INPUT_COUNT; i++)
+    for (int32 i = 0; i < GAME_INPUT_COUNT; i++)
     {
         gameState->keyMappings[i].keys.Clear();
     }
@@ -61,7 +61,7 @@ inline void InitKeyMapping()
     
 }
 
-inline bool8 ProccessJoysticks(GameInputType type, int gamepad)
+inline bool8 ProccessJoysticks(GameInputType type, int32 gamepad)
 {
     float leftStickX =  GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_X);
     float leftStickY =  GetGamepadAxisMovement(gamepad, GAMEPAD_AXIS_LEFT_Y);
@@ -115,7 +115,7 @@ inline bool8 JustPressed(GameInputType type)
         }
     }
 
-    for (int gamepad = 0; gamepad < MAX_GAMEPAD; gamepad++)
+    for (int32 gamepad = 0; gamepad < MAX_GAMEPAD; gamepad++)
     {
         if (!IsGamepadAvailable(gamepad)) continue;
         if (IsGamepadButtonPressed(gamepad, mapping.gamepadButton) || ProccessJoysticks(type, gamepad)) 
@@ -135,9 +135,9 @@ inline bool8 JustPressedMoveKey()
     return result;
 }
 
-inline bool8 IsAnyGamepadButtonDown(int button)
+inline bool8 IsAnyGamepadButtonDown(int32 button)
 {
-    for (int gamepad = 0; gamepad < MAX_GAMEPAD; gamepad++)
+    for (int32 gamepad = 0; gamepad < MAX_GAMEPAD; gamepad++)
     {
         if (IsGamepadButtonDown(gamepad, button)) return true;        
     }
@@ -150,8 +150,8 @@ inline bool8 IsDown(GameInputType type)
     
     if (type == ANY_KEY)
     {
-        int keycode = GetKeyPressed();
-        int gamepadButton = GetGamepadButtonPressed();
+        int32 keycode = GetKeyPressed();
+        int32 gamepadButton = GetGamepadButtonPressed();
         return !IsKeyDown(KEY_LEFT_ALT)  &&
                !IsKeyDown(KEY_RIGHT_ALT) &&
                !IsKeyDown(KEY_LEFT_SUPER) &&
@@ -168,7 +168,7 @@ inline bool8 IsDown(GameInputType type)
         }
     }
     
-    for (int gamepad = 0; gamepad < MAX_GAMEPAD; gamepad++)
+    for (int32 gamepad = 0; gamepad < MAX_GAMEPAD; gamepad++)
     {
         if (!IsGamepadAvailable(gamepad)) continue;
         if (IsGamepadButtonDown(gamepad, mapping.gamepadButton) || ProccessJoysticks(type, gamepad)) 

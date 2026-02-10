@@ -155,15 +155,14 @@ int main(int argumentCount, char *argumentArray[])
             {
                 // NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default vertex shader
                 gameState->postFX[shaderType].shader =
-                    LoadShader(0, shaderPaths[shaderType]);
-                gameState->postFX[shaderType].frameBufferSizeLoc = 
-                    GetShaderLocation(gameState->postFX[shaderType].shader, "u_frameSize");
+                    LoadShader(VS_PATH, shaderPaths[shaderType]);
                 if (!IsShaderValid(gameState->postFX[shaderType].shader))
                 {
                     SM_ERROR("Unable to load shader file (%s)", 
                              shaderPaths[shaderType]);
                 }
-                gameState->postFX[FX_BLOOM].fileWriteTime = GetFileModTime(shaderPaths[shaderType]);
+                gameState->postFX[shaderType].fsWriteTime = GetFileModTime(shaderPaths[shaderType]);
+                gameState->postFX[shaderType].vsWriteTime = GetFileModTime(VS_PATH);
                 }
         }
         
@@ -184,9 +183,9 @@ int main(int argumentCount, char *argumentArray[])
         
          GenTextureMipmaps(&gameState->texture);
         SetTextureFilter(gameState->texture, TEXTURE_FILTER_POINT);
+        
         gameState->currentScreen = TITLE_SCREEN;
-        gameState->bgColor = ColorLerp(DARKBLUE, BLACK, 0.69f);
-
+        
     }
 
     bool8 running = true;

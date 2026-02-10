@@ -7,6 +7,7 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
+
 #include "entity.cpp"
 #include "electric_door.cpp"
 #include "level_loader.cpp"
@@ -109,10 +110,10 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
             TweenController & c = current.parent->pushEnt->tweenController;
             if (!c.NoTweens()) 
             {
-                int channel = c.FindMovingChannel();
+                int32 channel = c.FindMovingChannel();
                 Tween & ani = c.channels[channel].last();
                 
-                int index = ani.endEvents.Add(TweenEvent{0});
+                int32 index = ani.endEvents.Add(TweenEvent{0});
                 playEvent = &ani.endEvents[index];
                 }
             if (IsSlime(current.parent->pushEnt) && current.parent->pushEnt->attachedEntityIndex == ent->entityIndex)
@@ -157,10 +158,10 @@ inline void ProjectAndCheck(Entity * projectedEnt,
         
         if (!ent->tweenController.NoTweens())
         {
-            int channel = ent->tweenController.FindMovingChannel();
+            int32 channel = ent->tweenController.FindMovingChannel();
             Tween & current = ent->tweenController.channels[channel].last();
             
-            int index = current.endEvents.Add(TweenEvent{ 0 });
+            int32 index = current.endEvents.Add(TweenEvent{ 0 });
             playEvent = &current.endEvents[index];
             
             // playEvent = &ent->tweenController.endEvent;
@@ -266,11 +267,11 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     {
                     MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir, BLOCK_MOVE_FUNC);
                     
-                    int channel = projectedEnt->tweenController.FindMovingChannel();
+                    int32 channel = projectedEnt->tweenController.FindMovingChannel();
                     
                     Tween & current = projectedEnt->tweenController.channels[channel].last();
                     
-                        int index = current.endEvents.Add(TweenEvent{0});
+                        int32 index = current.endEvents.Add(TweenEvent{0});
                         current.endEvents[index].breakEntity = target;
                     
                     
@@ -560,7 +561,7 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
                     TweenEvent * playEvent = nullptr;
                     if (!parent->parent->pushEnt->tweenController.NoTweens())
                     {
-                        int index = parent->parent->pushEnt->tweenController.endEvents.Add(TweenEvent{0});
+                        int32 index = parent->parent->pushEnt->tweenController.endEvents.Add(TweenEvent{0});
                         playEvent = &parent->parent->pushEnt->tweenController.endEvents[index];
                     }
                     MoveEntity(parent->pushEnt, nullptr, playEvent, 
@@ -589,9 +590,9 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
 
 inline float GetCameraZoom(Map & currentMap)
 {
-    int newWidth = GetScreenWidth();
-    int newHeight = GetScreenHeight();
-    int mapMax = (currentMap.width > currentMap.height) ? currentMap.width : currentMap.height;
+    int32 newWidth = GetScreenWidth();
+    int32 newHeight = GetScreenHeight();
+    int32 mapMax = (currentMap.width > currentMap.height) ? currentMap.width : currentMap.height;
     
     float zoom = (zoom_per_tile / mapMax);
     (newWidth < newHeight) ? zoom *= newWidth : zoom *= newHeight;
@@ -691,7 +692,7 @@ inline bool8 UpdateCamera(bool refocus = false)
         return true;
     }
     
-    for (int i = 0; i < gameState->tileMapCount; i++)
+    for (int32 i = 0; i < gameState->tileMapCount; i++)
     {
         Map & map = gameState->tileMaps[i];
         Vector2 mapMin = GetTilePivot(map.tilePos, MAP_TILE_SIZE);
@@ -782,7 +783,7 @@ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
     if (gameState->entities.count < (uint32)undoEntities.size())
         gameState->entities.count = (uint32)undoEntities.size();
     
-    for (int i = 0; i < undoEntities.size(); i++)
+    for (int32 i = 0; i < undoEntities.size(); i++)
     {
         Entity & e = undoEntities[i];
         gameState->entities[e.entityIndex] = e;
@@ -966,8 +967,7 @@ bool8 MoveAction(IVec2 actionDir)
         }
         case PUSH_BLOCKED:
         {
-            bool8 blockedByPit = (pushResult.blockedEntity->type == ENTITY_TYPE_LOCK)
-                || (pushResult.blockedEntity->type == ENTITY_TYPE_PIT);
+            bool8 blockedByPit = (pushResult.blockedEntity->type == ENTITY_TYPE_PIT);
             bool8 blockedByDoor = 
                 pushResult.blockedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
                 pushResult.blockedEntity->cableType == CABLE_TYPE_DOOR &&
@@ -1043,11 +1043,11 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
 }
 
 
-inline void DrawSpriteLayers(EntityLayer * layers, int arrayCount)
+inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
 {
-    for (int layerIndex = 0; layerIndex < arrayCount; layerIndex++)
+    for (int32 layerIndex = 0; layerIndex < arrayCount; layerIndex++)
     {
-        int layer = layers[layerIndex];
+        int32 layer = layers[layerIndex];
         
         auto & entityIndexArray = gameState->entityTable[layer];
         
@@ -1129,8 +1129,8 @@ void UpdateSprite(EntityLayer layer)
         if (entity)
         {
             IVec2 offset = { 0 };
-            int spriteSizeX = entity->sprite.spriteSize.x;
-            int spriteSizeY = entity->sprite.spriteSize.y;
+            int32 spriteSizeX = entity->sprite.spriteSize.x;
+            int32 spriteSizeY = entity->sprite.spriteSize.y;
             entity->sprite = GetSprite(entity->spriteID);
             if (layer == LAYER_WALL) offset = { spriteSizeX, spriteSizeY };
             if (layer == LAYER_GLASS) offset = { spriteSizeX, 7 * spriteSizeY };   
@@ -1141,27 +1141,6 @@ void UpdateSprite(EntityLayer layer)
 
 void GameplayUpdateAndRender()
 {
-    // NOTE: Debug Switch Monitor
-    if (GetMonitorCount() > 1)
-    {
-        if (IsKeyPressed(KEY_ONE))
-        {
-            SetWindowMonitor(1);
-        }
-        
-        if (IsKeyPressed(KEY_TWO))
-        {
-            SetWindowMonitor(0);
-        }
-        
-        if (GetMonitorCount() > 2)
-        {
-            if (IsKeyPressed(KEY_THREE))
-            {
-                SetWindowMonitor(2);
-            }
-        }
-    }
     
     // NOTE: Debug Camera Control
     {
@@ -1182,11 +1161,6 @@ void GameplayUpdateAndRender()
         if (gameState->camera.zoom < 0.1f) gameState->camera.zoom = 0.1f;
         
             UpdateCamera();
-    }
-    
-    if (IsKeyPressed(KEY_GRAVE))
-    {
-        gameState->enableFX = !gameState->enableFX;
     }
     
     // NOTE: Recored if State Changes
@@ -1295,6 +1269,49 @@ void GameplayUpdateAndRender()
         #endif
         }
     
+    // NOTE: Keys and Locks
+    {
+        auto & slimeIndexTable = gameState->entityTable[LAYER_SLIME];
+        for (uint32 slimeIndex = 0; slimeIndex < slimeIndexTable.count; slimeIndex++)
+        {
+            Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
+            if (slime)
+            {
+                auto & keyTable = gameState->entityTable[LAYER_KEY_LOCK];
+                for (uint32 keyLockIndex = 0; keyLockIndex < keyTable.count; keyLockIndex++)
+                {
+                    Entity * key = GetEntity(keyTable[keyLockIndex]);
+                    if (key && key->type == ENTITY_TYPE_KEY && 
+                        PivotToTilePos(slime->pivot, slime->tileSize) == key->tilePos)
+                    {
+                        Entity * lock = GetEntity(key->unlockEntityIndex);
+                        if (!lock->open)
+                        {
+                            lock->open = true;
+                            float delayTime = 1.0f;
+                            TweenParams params = { 0 };
+                            params.paramType = PARAM_TYPE_COLOR;
+                            params.startColor = WHITE;
+                            params.endColor = ColorAlpha(WHITE, 0.0f);
+                            params.realColor = &lock->color;
+                            AddTweenUnique(lock->tweenController, CreateTween(params, nullptr, 1.0f, delayTime));
+                            TweenEvent deleteEvent;
+                            deleteEvent.deleteEntity = key;
+                            lock->tweenController.endEvents.Add(deleteEvent);
+                            TweenEvent deleteEvent2;
+                            deleteEvent2.deleteEntity = lock;
+                            lock->tweenController.endEvents.Add(deleteEvent2);
+                            OnPlayEvent(&lock->tweenController);
+                            
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        
+    }
+    
     // NOTE: Simulate
     {
         gameState->simulating = false;
@@ -1318,7 +1335,9 @@ void GameplayUpdateAndRender()
                     }
                         entity->tweenController.Update();
                         Entity * followEnt = GetEntity(gameState->cameraFollowEntityIndex);
-                        if ((!followEnt || followEnt->tweenController.NoTweens()) && layer != LAYER_KEY_LOCK && entity->tweenController.playing)
+                        
+                        if (//(!followEnt || followEnt->tweenController.NoTweens()) && 
+                            (!followEnt || (entity->tilePos - followEnt->tilePos).SqrMagnitude() > 1)&& entity->tweenController.playing)
                         {
                             gameState->cameraFollowEntityIndex = entity->entityIndex;
                         }
@@ -1346,51 +1365,6 @@ void GameplayUpdateAndRender()
         SelectNextAsPlayer();
     }
     
-    
-    // NOTE: Keys and Locks
-    {
-        auto & slimeIndexTable = gameState->entityTable[LAYER_SLIME];
-    for (uint32 slimeIndex = 0; slimeIndex < slimeIndexTable.count; slimeIndex++)
-    {
-        Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
-        if (slime)
-            {
-                auto & keyTable = gameState->entityTable[LAYER_KEY_LOCK];
-                for (uint32 keyLockIndex = 0; keyLockIndex < keyTable.count; keyLockIndex++)
-                {
-                    Entity * key = GetEntity(keyTable[keyLockIndex]);
-                    if (key && key->type == ENTITY_TYPE_KEY && 
-                        PivotToTilePos(slime->pivot, slime->tileSize) == key->tilePos)
-                    {
-                        Entity * lock = GetEntity(key->unlockEntityIndex);
-                        if (!lock->open)
-                        {
-                        lock->open = true;
-                        float delayTime = 1.0f;
-                        TweenParams params = { 0 };
-                        params.paramType = PARAM_TYPE_COLOR;
-                        params.startColor = WHITE;
-                        params.endColor = ColorAlpha(WHITE, 0.0f);
-                            params.realColor = &lock->color;
-                            AddTweenUnique(lock->tweenController, CreateTween(params, nullptr, 1.0f, delayTime));
-                            TweenEvent deleteEvent;
-                            deleteEvent.deleteEntity = key;
-                            lock->tweenController.endEvents.Add(deleteEvent);
-                            TweenEvent deleteEvent2;
-                            deleteEvent2.deleteEntity = lock;
-                            lock->tweenController.endEvents.Add(deleteEvent2);
-                            OnPlayEvent(&lock->tweenController);
-                            
-                            gameState->cameraFollowEntityIndex = lock->entityIndex;
-                            
-                        }
-                            break;
-                        }
-            }
-        }
-        }
-        
-    }
     
     // NOTE: tutorials
     if (gameState->currentScreen == GAME_MAIN_SCREEN)
@@ -1525,15 +1499,25 @@ void GameplayUpdateAndRender()
     // NOTE: Render
     {
         
+        if (IsWindowResized())
+        {
+            UnloadRenderTexture(gameState->renderTarget);    // Unload render texture
+            
+            // gameState->renderTarget = LoadRenderTexture(mn, mn);
+              gameState->renderTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+        }
+        
         BeginTextureMode(gameState->renderTarget);
         ClearBackground(gameState->bgColor);
         UpdateAndDrawStarFieldBG(&gameState->starFields);
         BeginMode2D(gameState->camera);
         
         
-        Color colors[] = {LIGHTGRAY, GRAY, DARKGRAY, YELLOW, GOLD, ORANGE, PINK, RED, MAROON, GREEN, LIME, DARKGREEN, SKYBLUE, BLUE, DARKBLUE, PURPLE, VIOLET, DARKPURPLE, BEIGE, BROWN, DARKBROWN, WHITE, BLACK, BLANK, MAGENTA, RAYWHITE,};
+        Color colors[] = {
+            LIGHTGRAY, GRAY, DARKGRAY, YELLOW, GOLD, ORANGE, PINK, RED, MAROON, GREEN, LIME, DARKGREEN, SKYBLUE, BLUE, DARKBLUE, PURPLE, VIOLET, DARKPURPLE, BEIGE, BROWN, DARKBROWN, WHITE, BLACK, BLANK, MAGENTA, RAYWHITE,
+        };
         
-        int colorCount = ArrayCount(colors);
+        int32 colorCount = ArrayCount(colors);
         
         static Color * mColors = (Color *)BumpAllocArray(gameMemory->persistentStorage,
                                                    gameState->tileMapCount,
@@ -1549,7 +1533,7 @@ void GameplayUpdateAndRender()
             if (!set[mapIndex])
             {
                 set[mapIndex] = true;
-                int colorIndex = GetRandomValue(0, colorCount-1);
+                int32 colorIndex = GetRandomValue(0, colorCount-1);
                 mColors[mapIndex] = colors[colorIndex];
             }
             
@@ -1575,7 +1559,7 @@ void GameplayUpdateAndRender()
             LAYER_DOOR,
             LAYER_KEY_LOCK};
         
-        int count = ArrayCount(orderedDrawLayers);
+        int32 count = ArrayCount(orderedDrawLayers);
         DrawSpriteLayers(orderedDrawLayers, count);
         
         // Draw rectangle outline with extended parameters
@@ -1606,11 +1590,28 @@ void GameplayUpdateAndRender()
         
         ClearBackground(gameState->bgColor);
         
+        static float shakeTime = 0.0f;
+        
         if (IsKeyPressed(KEY_R))
         {
             UnloadTexture(gameState->texture);    // Unload render texture
             gameState->texture = LoadTexture(TEXTURE_PATH);
+            
+            gameState->shake = true;
+            gameState->time = (float)GetTime();
+            shakeTime = 0.05f;
+        }
+        shakeTime -= GetFrameTime();
+        if (shakeTime < 0)
+        {
+            gameState->shake = false;
+            gameState->time = 0;
             }
+        
+        if (IsKeyPressed(KEY_GRAVE))
+        {
+            gameState->enableFX = !gameState->enableFX;
+        }
         
         
         if (gameState->enableFX)
@@ -1628,14 +1629,15 @@ void GameplayUpdateAndRender()
             if (shaderType >= FX_COUNT) shaderType = 0;
                 }
             
-            
-            UpdateAndRenderPostShader(gameState->renderTarget, gameState->postFX, 
-                                      shaderType, gameState->screenWidth, gameState->screenHeight);
+            UpdateAndRenderWithShader(gameState->renderTarget, gameState->postFX, 
+                                      shaderType, gameState->screenWidth, gameState->screenHeight,
+                                      gameState->shake, gameState->time);
             }
             else
             {
-            UpdateAndRenderPostShader(gameState->renderTarget, gameState->postFX, 
-                                      FX_JASON, gameState->screenWidth, gameState->screenHeight);
+            UpdateAndRenderWithShader(gameState->renderTarget, gameState->postFX, 
+                                      FX_JASON, gameState->screenWidth, gameState->screenHeight,
+                                      gameState->shake, gameState->time);
             }
         
 #if  GAME_INTERNAL
@@ -1688,7 +1690,7 @@ void GameplayUpdateAndRender()
                             gameState->undoStack.count, gameState->undoStack.last - 1), 10, 170, 20, GREEN);
         
         
-        int posX = GetScreenWidth() - MeasureText("Entity Action State: FFFFFFFFFFFFFFFFFFFF", 20);
+        int32 posX = GetScreenWidth() - MeasureText("Entity Action State: FFFFFFFFFFFFFFFFFFFF", 20);
         DebugDrawPlayerActionState(player->actionState, posX, 50, 20, IntToRGBA(0x923eed));
         
         if (gameState->simulating)
@@ -1728,7 +1730,7 @@ void InitializeGame()
         {
             IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} }; 
             
-            for (int j = 0; j < 4; j++)
+            for (int32 j = 0; j < 4; j++)
             {
                 if (!slimeA->attach && AttachSlime(slimeA, directions[j])) break;
             }
@@ -1740,7 +1742,7 @@ void InitializeGame()
         {
             IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} }; 
             
-            for (int j = 0; j < 4; j++)
+            for (int32 j = 0; j < 4; j++)
             {
                 if (!slimeB->attach && AttachSlime(slimeB, directions[j])) break;
             }
@@ -1777,7 +1779,7 @@ void CleanUpGame()
     
     gameState->initialized = false;    
     gameState->cameraTweenController.Reset();
-    for (int i = 0; i < LAYER_COUNT; i++)
+    for (int32 i = 0; i < LAYER_COUNT; i++)
     {
         gameState->entityTable[i].Clear();
     }
@@ -1795,12 +1797,6 @@ UPDATE_AND_RENDER(UpdateAndRender)
     
     if (gameState != gameStateIn) gameState = gameStateIn;
     if (gameMemory != gameMemoryIn) gameMemory = gameMemoryIn;
-    
-    if (IsWindowResized())
-    {
-        UnloadRenderTexture(gameState->renderTarget);    // Unload render texture
-        gameState->renderTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
-    }
     
     // TODO: Temp code
     static bool8 init = false;
@@ -1831,13 +1827,13 @@ UPDATE_AND_RENDER(UpdateAndRender)
             UpdateAndDrawStarFieldBG(&gameState->starFields);
             
             const char * Title = "TITLE SCREEN";
-            int TitleTextX = (GetScreenWidth() - MeasureText(Title, 40)) / 2;
-            int TitleTextY = (GetScreenHeight() - 40) / 2 - 100;
+            int32 TitleTextX = (GetScreenWidth() - MeasureText(Title, 40)) / 2;
+            int32 TitleTextY = (GetScreenHeight() - 40) / 2 - 100;
             DrawText(Title, TitleTextX, TitleTextY, 40, DARKGREEN);
             
             const char * Instructions = "PRESS Any Key to JUMP to GAMEPLAY SCREEN";
-            int instX = (GetScreenWidth() - MeasureText(Instructions, 20)) / 2;
-            int instY = (GetScreenHeight()) / 2;
+            int32 instX = (GetScreenWidth() - MeasureText(Instructions, 20)) / 2;
+            int32 instY = (GetScreenHeight()) / 2;
             DrawText(Instructions, instX, instY, 20, DARKGREEN);
             
             EndDrawing();
@@ -1888,11 +1884,11 @@ UPDATE_AND_RENDER(UpdateAndRender)
                     
                     // IMPORTANT: Assumming game has only one level, where entities are not add/delete from staring the new game and saving the game
                     //            and the mapping array in gameState and electricDoorSystem are correct
-                    int dataSize;
+                    int32 dataSize;
                     Entity * loadedEntities = (Entity *)LoadFileData(fileName, &dataSize);
-                    int loadedEntityCount = dataSize / sizeof(gameState->entities[0]);
+                    int32 loadedEntityCount = dataSize / sizeof(gameState->entities[0]);
                     
-                    for (int i = 0; i < loadedEntityCount; i++)
+                    for (int32 i = 0; i < loadedEntityCount; i++)
                     {
                         Entity & loadedEntity = loadedEntities[i];
                         
@@ -2007,13 +2003,13 @@ UPDATE_AND_RENDER(UpdateAndRender)
             DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLUE);
             
             const char * endText = "ENDING SCREEN";
-            int endTextX = (GetScreenWidth() - MeasureText(endText, 40)) / 2;
-            int endTextY = (GetScreenHeight() - 40) / 2 - 100;
+            int32 endTextX = (GetScreenWidth() - MeasureText(endText, 40)) / 2;
+            int32 endTextY = (GetScreenHeight() - 40) / 2 - 100;
             DrawText(endText, endTextX, endTextY, 40, DARKBLUE);
             
             const char * endInstructions = "PRESS Any Key to RETURN to TITLE SCREEN";
-            int endInstX = (GetScreenWidth() - MeasureText(endInstructions, 20)) / 2;
-            int endInstY = (GetScreenHeight()) / 2;
+            int32 endInstX = (GetScreenWidth() - MeasureText(endInstructions, 20)) / 2;
+            int32 endInstY = (GetScreenHeight()) / 2;
             DrawText(endInstructions, endInstX, endInstY, 20, DARKBLUE);
             
             EndDrawing();

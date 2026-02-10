@@ -37,7 +37,7 @@
 #define CAMERA_MOVE_FUNC EaseOutCubic
 #define CAMERA_ZOOM_FUNC EaseInOutCubic
 
-#define MAX_UNDO 100
+#define MAX_UNDO 500
 
 constexpr float zoom_per_tile = 9.0f / 600.0f;
 constexpr float press_freq = 0.2f;
@@ -48,8 +48,11 @@ constexpr float cameraSwitchTargetDelay = 1.0f;
 #include "raymath.h"
 
 #include "engine_lib.h"
+
+
 #include "assets.h"
 #include "render_interface.h"
+
 
 #include "electric_door.h"
 #include "entity.h"
@@ -96,9 +99,9 @@ enum GameScreen
 
 struct KeyMapping
 {
-    Array<int, 3> keys;
-    int gamepadButton;
-    int gamepadAxis;
+    Array<int32, 3> keys;
+    int32 gamepadButton;
+    int32 gamepadAxis;
 };
 
 
@@ -117,7 +120,7 @@ struct UndoState
         Entity * entities;
     };
     
-    int playerIndex;
+    int32 playerIndex;
     // TODO: optimize this by allocate entities 
     //       into our own allocator aka EntityArray
     std::vector<Entity> undoEntities;
@@ -129,8 +132,8 @@ struct Map
     UndoState initUndoState;
     
     IVec2 tilePos;            // Top left tile position of the map
-    int   width;              // Number of tiles in X axis
-    int   height;             // Number of tiles in Y axis
+    int32   width;              // Number of tiles in X axis
+    int32   height;             // Number of tiles in Y axis
     
     bool8 firstEnter = false;
 };
@@ -139,7 +142,7 @@ struct UndoStack
 {
     
     UndoState undoStack[MAX_UNDO];
-    int last = 1;
+    int32 last = 1;
     uint32 count = 0;
     
     UndoState & back()
@@ -203,12 +206,14 @@ struct GameState
     StarFields starFields;
     
     bool8 enableFX = true;
+    bool8 shake = false;
+    real32 time = 0.0f;
     PostFX postFX[FX_COUNT];
     
     Array<uint16, MAX_ENTITIES> entityTable[LAYER_COUNT];
     Array<Entity, MAX_ENTITIES> entities;
     
-    int tileMapCount;
+    int32 tileMapCount;
     Map tileMaps[500];
     Map * lv2Map;
     
@@ -218,14 +223,14 @@ struct GameState
     
     IVec2 tileMin, tileMax;
     
-    int playerEntityIndex;
-    int cameraFollowEntityIndex;
-    int currentMapIndex;
-    int playerMapIndex;
-    int lastTutBlockIndex;
+    int32 playerEntityIndex;
+    int32 cameraFollowEntityIndex;
+    int32 currentMapIndex;
+    int32 playerMapIndex;
+    int32 lastTutBlockIndex;
     
-    int screenWidth = SCREEN_WIDTH;
-    int screenHeight = SCREEN_HEIGHT;
+    int32 screenWidth = SCREEN_WIDTH;
+    int32 screenHeight = SCREEN_HEIGHT;
     GameScreen currentScreen = TITLE_SCREEN;
     UndoState lastState;
     
@@ -285,7 +290,7 @@ static Memory * gameMemory;
 //  ========================================================================
 //              NOTE: Game Functions 
 //  ========================================================================
-MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int accumulatedMass);
+MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int32 accumulatedMass);
 PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState);
 void CleanUpGame();
 

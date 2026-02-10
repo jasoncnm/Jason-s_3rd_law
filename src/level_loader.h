@@ -84,14 +84,14 @@ enum LoadOption
 
 struct TileMapSrc
 {
-    int mapID;
+    int32 mapID;
 
-    int width, height;
+    int32 width, height;
 
     char * fileName;
     long long timestamp;
 
-    Array<int, 500> mapEntitiesIndex;
+    Array<int32, 500> mapEntitiesIndex;
 };
 
 //  ========================================================================

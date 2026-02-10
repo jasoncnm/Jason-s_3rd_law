@@ -8,11 +8,10 @@
 
 #include "tween_controller.h"
 
-
-int TweenController::FindMovingChannel()
+int32 TweenController::FindMovingChannel()
 {
-    int result = -1;
-    for (int i = 0; i < MAX_CHANNEL; i++)
+    int32 result = -1;
+    for (int32 i = 0; i < MAX_CHANNEL; i++)
     {
         if (!channels[i].IsEmpty() && channels[i].last().params.paramType == PARAM_TYPE_VECTOR2)
         {
@@ -26,7 +25,7 @@ int TweenController::FindMovingChannel()
 void TweenController::Reset()
 {
     start = playing = false;
-    for (int i = 0; i < MAX_CHANNEL; i++)
+    for (int32 i = 0; i < MAX_CHANNEL; i++)
     {
         auto & queue = channels[i];
         
@@ -54,7 +53,7 @@ void TweenController::Update()
         
         if (playing)
         {
-            for (int channel = 0; channel < MAX_CHANNEL; channel++)
+            for (int32 channel = 0; channel < MAX_CHANNEL; channel++)
             {
             TweeningQueue & queue = channels[channel];
             
@@ -87,7 +86,7 @@ void TweenController::Update()
     }
 
 
-void AddTween(TweenController & controller, Tween tween, int channel)
+void AddTween(TweenController & controller, Tween tween, int32 channel)
 {
     controller.channels[channel].Add(tween);
 }
@@ -95,7 +94,7 @@ void AddTween(TweenController & controller, Tween tween, int channel)
  uint32 AddTweenUnique(TweenController & controller, Tween tween)
 {
     bool added = false;
-    for (int channel = 0; channel < MAX_CHANNEL; channel++)
+    for (int32 channel = 0; channel < MAX_CHANNEL; channel++)
     {
          auto & queue = controller.channels[channel];
         if (queue.IsEmpty())

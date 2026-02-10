@@ -78,15 +78,15 @@ struct Entity
     float tileSize = 32.0f;
     
      uint16 entityIndex;
-    int attachedEntityIndex;
+    int32 attachedEntityIndex;
     
-    int unlockEntityIndex;
+    int32 unlockEntityIndex;
     
-    int sourceIndex = -1;
-    int rightIndex = -1, leftIndex = -1, upIndex = -1, downIndex = -1;
+    int32 sourceIndex = -1;
+    int32 rightIndex = -1, leftIndex = -1, upIndex = -1, downIndex = -1;
     
-    int mass = 1;
-    int maxMass = 2;
+    int32 mass = 1;
+    int32 maxMass = 2;
     
     bool8 movable = false;
     
