@@ -28,7 +28,7 @@
 
 #define MAX_ENTITIES 9000
 
-#define STAR_COUNT 250
+#define STAR_COUNT 100
 
 #define GAME_SAVE_PATH "data/save_data/"
 

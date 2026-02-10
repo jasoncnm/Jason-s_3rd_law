@@ -8,6 +8,66 @@
 
 #include "electric_door.h"
 
+void SetFreeze()
+{
+    for (uint32 i = 0; i < Connection_Indices.count; i++)
+    {
+        Entity * connection = GetEntity(Connection_Indices[i]);
+        SM_ASSERT(connection, "Entity is not active");
+        
+        if (connection->hasPower && !GetEntity(connection->sourceIndex)->sourceLit)
+        {
+            auto & slimeIndexTable = gameState->entityTable[LAYER_SLIME];
+            for (uint32 slimeIndex = 0; slimeIndex < slimeIndexTable.count; slimeIndex++)
+            {
+                Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
+                if (slime && slime->actionState != FREEZE_STATE &&
+                    (PivotToTilePos(slime->pivot, slime->tileSize) == connection->tilePos))
+                {
+                    //      1.force slime stay at the connection point location
+                    //      2. find if the slime can attach to any objects at that location
+                    //         - If yes, attach slime to that object and set actionState FREEZE_STATE
+                    //         - If no,  move slime to the center of the grid and set actionState to FREEZE_STATE
+                    SetActionState(slime, FREEZE_STATE);
+                    IVec2 freezePos = connection->tilePos;
+                    Vector2 startPivot = slime->pivot;
+                    Vector2 endPivot = {};
+                    
+                    FindAttachableResult result = FindAttachable(freezePos + slime->attachDir, slime->attachDir);
+                    
+                    if (result.has)
+                    {
+                        MoveEntity(slime, result.entity, nullptr, freezePos, BLOCK_MOVE_FUNC);
+                        // NOTE: This is the yes logic
+                        SetEntityPosition(slime, result.entity, freezePos);
+                        endPivot = GetTilePivot(slime);
+                    }
+                    else
+                    {
+                        // NOTE: This is the no logic
+                        SetEntityPosition(slime, nullptr, freezePos);
+                        endPivot = GetTilePivot(freezePos, slime->tileSize);
+                    }
+                    
+                    if (!Vector2Equals(startPivot, endPivot))
+                    {
+                    slime->tweenController.Reset();
+                    
+                    TweenParams params = {};
+                    params.paramType = PARAM_TYPE_VECTOR2;
+                    params.startVec2 = startPivot;
+                    params.endVec2   = endPivot;
+                    params.realVec2  = &slime->pivot;
+                    
+                    AddTween(slime->tweenController, CreateTween(params));
+                    OnPlayEvent(&slime->tweenController);
+                    }
+                }
+            }
+        }
+    }
+    }
+
 inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir)
 {
     SM_ASSERT(door->type == ENTITY_TYPE_ELECTRIC_DOOR && door->cableType == CABLE_TYPE_DOOR,
@@ -506,75 +566,9 @@ inline void UpdateElectricDoor()
         Entity * connection = GetEntity(Connection_Indices[i]);
         SM_ASSERT(connection, "Entity is not active");
         
-        if (!connection->conductive)
-        {
-            auto & slimeIndexTable = gameState->entityTable[LAYER_SLIME];
-            for (uint32 slimeIndex = 0; slimeIndex < slimeIndexTable.count; slimeIndex++)
-            {
-                Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
-                if (slime)
-                {
-                    if (PivotToTilePos(slime->pivot, slime->tileSize) == connection->tilePos)
-                    {
-                        if (connection->hasPower)
-                        {
-                            connection->conductive = true;
-
-                            int sourceCableIndex = connection->sourceIndex;
-                            bool8 doorOpened = OnSourcePowerOn(sourceCableIndex);
-
-                            if (!doorOpened)
-                            {                                
-                                //      1.force slime stay at the connection point location
-                                //      2. find if the slime can attach to any objects at that location
-                                //         - If yes, attach slime to that object and set actionState FREEZE_STATE
-                                //         - If no,  move slime to the center of the grid and set actionState to FREEZE_STATE
-                                SetActionState(slime, FREEZE_STATE);
-                                IVec2 freezePos = connection->tilePos;
-                                Vector2 startPivot = slime->pivot;
-                                Vector2 endPivot = {};
-
-                                FindAttachableResult result = FindAttachable(freezePos + slime->attachDir, slime->attachDir);
-                                
-                                slime->tweenController.Reset();
-                                
-                                if (result.has)
-                                {
-                                    MoveEntity(slime, result.entity, nullptr, freezePos, BLOCK_MOVE_FUNC);
-                                    // NOTE: This is the yes logic
-                                    SetEntityPosition(slime, result.entity, freezePos);
-                                    endPivot = GetTilePivot(slime);
-                                }
-                                else
-                                {
-                                    // NOTE: This is the no logic
-                                    SetEntityPosition(slime, nullptr, freezePos);
-                                    endPivot = GetTilePivot(freezePos, slime->tileSize);
-                                }
-
-                                TweenParams params = {};
-                                params.paramType = PARAM_TYPE_VECTOR2;
-                                params.startVec2 = startPivot;
-                                params.endVec2   = endPivot;
-                                params.realVec2  = &slime->pivot;
-
-                                AddTween(slime->tweenController, CreateTween(params));
-                                OnPlayEvent(&slime->tweenController);
-                            }
-                            else
-                            {
-                                Entity * source = GetEntity(connection->sourceIndex);
-                                source->sourceLit = true;
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-            
             if (!connection->conductive)
             {
-                EntityLayer layers[] = { LAYER_BLOCK };
+                EntityLayer layers[] = { LAYER_BLOCK, LAYER_SLIME };
                 Entity * entity = FindEntityByLocationAndLayers(connection->tilePos, layers, ArrayCount(layers));
                 if (entity && entity->tweenController.NoTweens())
                 {
@@ -591,14 +585,9 @@ inline void UpdateElectricDoor()
                 }
             }
 
-        }
-        else
+        if (!GetEntity(connection->sourceIndex)->sourceLit) 
         {
-            // Check if the circuit of the connection point are lit (i.e. power source connected to the door)
-            // If not, set conductive to false if no block or slime on top
-            if (!GetEntity(connection->sourceIndex)->sourceLit)
-            {
-                EntityLayer layers[] = { LAYER_BLOCK, LAYER_SLIME };
+            EntityLayer layers[] = { LAYER_BLOCK, LAYER_SLIME };
                 if (!FindEntityByLocationAndLayers(connection->tilePos, layers, ArrayCount(layers)))
                 {
                     connection->conductive = false;
@@ -620,7 +609,6 @@ inline void UpdateElectricDoor()
                     }
                 }
             }
-        }
-
+        
     }
 }

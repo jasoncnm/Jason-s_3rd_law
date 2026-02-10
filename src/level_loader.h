@@ -28,11 +28,13 @@ using json = nlohmann::json;
 enum TileID
 {
     PLAYER_1 = 32,
-    WALL     = 34,
+    WALL_1     = 34,
+    WALL_2   = 35,
+    
     BLOCK    = 33,
     BLOCK_2  = 12,
     GLASS    = 46,
-    PIT      = 35,
+    PIT      = 41,
     TUT_1    = 13,
     TUT_2    = 14,
     MAIN_PORTAL = 15,

@@ -21,10 +21,17 @@ inline AddEntityResult LoadGameObject(GameState & state, int id, IVec2 tilePos)
 
         SM_TRACE("Pit generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
-    else if (id == WALL)
+    else if (id == WALL_1)
     {
-        entityResult = AddEntity(ENTITY_TYPE_WALL, tilePos, SPRITE_WALL);
+        entityResult = AddEntity(ENTITY_TYPE_WALL, tilePos, SPRITE_WALL_1);
 
+        
+        SM_TRACE("Wall generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+    }
+    else if (id == WALL_2)
+    {
+        entityResult = AddEntity(ENTITY_TYPE_WALL, tilePos, SPRITE_WALL_2);
+        
         
         SM_TRACE("Wall generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }

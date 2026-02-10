@@ -222,6 +222,5 @@ int main(int argumentCount, char *argumentArray[])
         CloseWindow();
         UnloadTexture(gameState->texture);
         UnloadRenderTexture(gameState->starFields.starTexture);
-        UnloadShader(gameState->postFX[FX_BLOOM].shader);
-    } 
+        } 
 }

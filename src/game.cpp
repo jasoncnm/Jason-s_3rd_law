@@ -1202,7 +1202,6 @@ void GameplayUpdateAndRender()
         
         // NOTE SlimeSelection
         stateChanged = SlimeSelection(player);
-        
         UpdateElectricDoor();
         
         {
@@ -1266,16 +1265,9 @@ void GameplayUpdateAndRender()
             }
         
     }
-    #if 0
-    else
-    {
-        
-        UpdateElectricDoor();
+    
+    SetFreeze();
         UpdateSlimes();
-        
-    }
-#endif 
-    UpdateSlimes();
     
         // NOTE: Undo and Restart
         {
@@ -1551,6 +1543,7 @@ void GameplayUpdateAndRender()
                                                         gameState->tileMapCount,
                                                         sizeof(bool));
         
+        #if 0
         for (int32 mapIndex = 0; mapIndex < gameState->tileMapCount; mapIndex++)
         {
             if (!set[mapIndex])
@@ -1561,10 +1554,12 @@ void GameplayUpdateAndRender()
             }
             
             Map & tileMap = gameState->tileMaps[mapIndex];
+            
             DrawTileMap(gameState->camera, tileMap.tilePos, 
                         IVec2{ tileMap.width, tileMap.height },
                         mColors[mapIndex], mColors[mapIndex]);
         }
+#endif
         
         EntityLayer orderedDrawLayers[] = 
         { 
@@ -1607,7 +1602,16 @@ void GameplayUpdateAndRender()
         
         // NOTE: Draw
         BeginDrawing();
+        
+        
         ClearBackground(gameState->bgColor);
+        
+        if (IsKeyPressed(KEY_R))
+        {
+            UnloadTexture(gameState->texture);    // Unload render texture
+            gameState->texture = LoadTexture(TEXTURE_PATH);
+            }
+        
         
         if (gameState->enableFX)
         {
@@ -1806,7 +1810,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
         GuiLoadStyle(RAYLIB_GUI_STYLE_PATH);
     }
     
-    Color colorA = IntToRGBA(0x62345);
+    Color colorA = IntToRGBA(0x62345); // 0x163355 0x4545 0x62345
      
     gameState->bgColor = colorA;
     

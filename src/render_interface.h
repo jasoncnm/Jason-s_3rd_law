@@ -201,6 +201,8 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields)
         }
     }
     
+    starFields->flySpeed = 0.2f;
+    
     Vector3 * stars = starFields->stars;
     float flySpeed = starFields->flySpeed;
     
