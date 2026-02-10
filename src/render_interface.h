@@ -161,7 +161,8 @@ void DrawError()
 }
 
 void UpdateStarField(Vector3 * stars, Vector2 * starsScreenPos, float flySpeed, float dt,
-                              int32 screenWidth, int32 screenHeight, uint32 start, uint32 end)
+                     int32 screenWidth, int32 screenHeight, int32 offsetX, int32 offsetY,
+                     uint32 start, uint32 end)
 {
     for (uint32 i = start; i < end; i++)
     {
@@ -178,15 +179,17 @@ void UpdateStarField(Vector3 * stars, Vector2 * starsScreenPos, float flySpeed, 
         if ((stars[i].z < 0.0f) || (starsScreenPos[i].x < 0) || (starsScreenPos[i].y < 0.0f) ||
             (starsScreenPos[i].x > screenWidth) || (starsScreenPos[i].y > screenHeight))
         {
-            stars[i].x = (float)GetRandomValue(-screenWidth / 2, screenWidth / 2);
-            stars[i].y = (float)GetRandomValue(-screenHeight / 2, screenHeight / 2);
+            stars[i].x = (float)GetRandomValue(-screenWidth / 2 + offsetX,
+                                               screenWidth / 2 - offsetX);
+            stars[i].y = (float)GetRandomValue(-screenHeight / 2 + offsetY,
+                                               screenHeight / 2 - offsetY);
             stars[i].z = 1.0f;
         }
         
     }
     }
 
-void UpdateAndDrawStarFieldBG(StarFields * starFields)
+void UpdateAndDrawStarFieldBG(StarFields * starFields, int32 offsetX = 0, int32 offsetY = 0)
 {
     if (!starFields->initialized)
     {
@@ -196,8 +199,10 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields)
         // Setup the stars with a random position
         for (int32 i = 0; i < STAR_COUNT; i++)
         {
-            starFields->stars[i].x = (float)GetRandomValue(-GetScreenWidth() / 2, GetScreenWidth() / 2);
-            starFields->stars[i].y = (float)GetRandomValue(-GetScreenHeight() / 2, GetScreenHeight() / 2);
+            starFields->stars[i].x = (float)GetRandomValue(-GetScreenWidth() / 2 + offsetX,
+                                                           GetScreenWidth() / 2 - offsetX);
+            starFields->stars[i].y = (float)GetRandomValue(-GetScreenHeight() / 2 + offsetY,
+                                                           GetScreenHeight() / 2  - offsetY);
             starFields->stars[i].z = (float)GetRandomValue(0, INT_MAX) / INT_MAX;
         }
     }
@@ -224,7 +229,7 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields)
         int32 end = (tid + 1) * chunck;
         if (end > STAR_COUNT) end = STAR_COUNT;
         
-        UpdateStarField(stars, starsScreenPos, flySpeed,  dt, screenWidth, screenHeight,
+        UpdateStarField(stars, starsScreenPos, flySpeed,  dt, screenWidth, screenHeight, offsetX, offsetY,
                         start, end);
 
     }

@@ -1499,17 +1499,14 @@ void GameplayUpdateAndRender()
     // NOTE: Render
     {
         
-        if (IsWindowResized())
-        {
-            UnloadRenderTexture(gameState->renderTarget);    // Unload render texture
-            
-            // gameState->renderTarget = LoadRenderTexture(mn, mn);
-              gameState->renderTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
-        }
-        
         BeginTextureMode(gameState->renderTarget);
         ClearBackground(gameState->bgColor);
-        UpdateAndDrawStarFieldBG(&gameState->starFields);
+        
+        int mn = Min(GetScreenWidth(), GetScreenHeight());
+        
+        UpdateAndDrawStarFieldBG(&gameState->starFields, 
+                                 GetScreenWidth() - mn,
+                                 GetScreenHeight() - mn);
         BeginMode2D(gameState->camera);
         
         
@@ -1797,6 +1794,13 @@ UPDATE_AND_RENDER(UpdateAndRender)
     
     if (gameState != gameStateIn) gameState = gameStateIn;
     if (gameMemory != gameMemoryIn) gameMemory = gameMemoryIn;
+    
+    if (IsWindowResized())
+    {
+        UnloadRenderTexture(gameState->renderTarget);    // Unload render texture
+        // gameState->renderTarget = LoadRenderTexture(mn, mn);
+        gameState->renderTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+    }
     
     // TODO: Temp code
     static bool8 init = false;
