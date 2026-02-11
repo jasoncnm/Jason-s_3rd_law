@@ -207,6 +207,7 @@ struct GameState
     
     bool8 enableFX = true;
     bool8 shake = false;
+    real32 shakeTime = 0;
     real32 time = 0.0f;
     PostFX postFX[FX_COUNT];
     
@@ -293,6 +294,7 @@ static Memory * gameMemory;
 MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int32 accumulatedMass);
 PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState);
 void CleanUpGame();
+void SetShake(float duration);
 
 
 

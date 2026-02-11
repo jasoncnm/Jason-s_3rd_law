@@ -30,7 +30,7 @@ void main()
 
     if (shake)
     {
-        float strength = 0.01;
+        float strength = 0.001;
         gl_Position.x += cos(time * 10) * strength;        
         gl_Position.y += cos(time * 15) * strength;      
         //gl_Position.x += -1 * strength;        

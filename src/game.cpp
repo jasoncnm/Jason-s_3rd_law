@@ -43,6 +43,12 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 //  ========================================================================
 //              NOTE: Game Functions (internal)
 //  ========================================================================
+void SetShake(float duration)
+{
+    gameState->shake = true;
+    gameState->time = (real32)GetTime();
+    gameState->shakeTime = duration;
+    }
 
 inline UndoState::EntityArray GetCurrentStateEntities()
 {
@@ -1602,19 +1608,14 @@ void GameplayUpdateAndRender()
         
         ClearBackground(gameState->bgColor);
         
-        static float shakeTime = 0.0f;
-        
         if (IsKeyPressed(KEY_R))
         {
             UnloadTexture(gameState->texture);    // Unload render texture
             gameState->texture = LoadTexture(TEXTURE_PATH);
-            
-            gameState->shake = true;
-            gameState->time = (float)GetTime();
-            shakeTime = 0.05f;
-        }
-        shakeTime -= GetFrameTime();
-        if (shakeTime < 0)
+            SetShake(0.05f);
+            }
+        gameState->shakeTime -= GetFrameTime();
+        if (gameState->shakeTime < 0)
         {
             gameState->shake = false;
             gameState->time = 0;
@@ -1781,6 +1782,8 @@ void InitializeGame()
     gameState->simulating = false;
     
     gameState->cameraFollowEntityIndex = gameState->playerEntityIndex;
+    
+    gameState->shakeTime = 0.0f;
     
 }
 

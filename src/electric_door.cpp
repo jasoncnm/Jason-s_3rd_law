@@ -244,6 +244,8 @@ inline bool8 PowerOnCable(Entity * cable, bool8 & end)
             cable->pivot = GetTilePivot(cable);
         }
         
+        SetShake(0.05f);
+        
         GetEntity(cable->sourceIndex)->sourceLit = true;
         end = true;
     }
