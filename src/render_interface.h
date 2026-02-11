@@ -290,12 +290,14 @@ void UpdateAndRenderWithShader(RenderTexture2D & renderTarget, PostFX * postFX,
     
     Rectangle source =
     {
-        (screenWidth - mn) / 2, (screenHeight - mn) / 2, (float)mn, (float)-mn
+        0, 0, (real32)screenWidth, -(real32)screenHeight
+        //(screenWidth - mn) / 2, (screenHeight - mn) / 2, (float)mn, (float)-mn
     };
     
     Vector2 position = 
     {
-        0.5f * (screenWidth - mn), 0.5f * (screenHeight - mn)
+        0, 0,
+        //0.5f * (screenWidth - mn), 0.5f * (screenHeight - mn)
     };
     
     DrawTextureRec(renderTarget.texture, source, position, WHITE);

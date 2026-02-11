@@ -1511,8 +1511,8 @@ void GameplayUpdateAndRender()
         int mn = Min(GetScreenWidth(), GetScreenHeight());
         
         UpdateAndDrawStarFieldBG(&gameState->starFields, 
-                                 GetScreenWidth() - mn,
-                                 GetScreenHeight() - mn);
+                                 (GetScreenWidth() - mn) / 2,
+                                 (GetScreenHeight() - mn) / 2);
         BeginMode2D(gameState->camera);
         
         

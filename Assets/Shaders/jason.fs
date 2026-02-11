@@ -22,7 +22,7 @@ float numColors = 10.0;
 // Custom uniforms
 uniform vec2 u_frameSize;
 uniform float offset = 0.0;
-uniform float brightness = 1.2;
+uniform float brightness = 1.3;
 uniform bool shake;
 
 vec4 applyBloom(vec4 color, vec2 uv)
@@ -185,6 +185,7 @@ void main()
     color.rgb = pow(color.rgb, vec3(1.0/brightness));
     // NOTE: Implement here your fragment shader code
 
+    // clipped unwanted uvs only render square
 	if (uv.y < 0.0 || uv.y > 1.0)
 		color *= 0.0;
     
