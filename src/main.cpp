@@ -181,8 +181,7 @@ int main(int argumentCount, char *argumentArray[])
         DrawCircle(12, 12, 10, WHITE);
         EndTextureMode();
         
-         GenTextureMipmaps(&gameState->texture);
-        SetTextureFilter(gameState->texture, TEXTURE_FILTER_POINT);
+         SetTextureFilter(gameState->texture, TEXTURE_FILTER_POINT);
         
         gameState->currentScreen = TITLE_SCREEN;
         

@@ -1063,7 +1063,7 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                 }
                 DrawSprite(gameState->camera, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, color);
                 
-                #if 1
+                #if 0
                 if (IsSlime(entity))
                 {
                     DrawCircleV(Vector2Add(entity->pivot, {entity->tileSize/2, entity->tileSize/2}), 3, ColorAlpha(YELLOW, 0.8f));
@@ -1577,6 +1577,21 @@ void GameplayUpdateAndRender()
         //DrawCircleV(center, 5,  RED);
         //DrawCircleV(gameState->camera.target, 5, YELLOW);
         }
+        
+        Rectangle source = GetCameraRect(gameState->camera);
+        if (source.width > source.height) 
+        {
+            source.x += (source.width - source.height) * 0.5f;
+            source.width = source.height;
+            }
+        if (source.height > source.width) 
+        {
+            source.y += (source.height - source.width) * 0.5f;
+            source.height = source.width;
+        }
+        
+        DrawRectangleLinesEx(source, 5, RAYWHITE);
+        
         
         EndMode2D();
         EndTextureMode();

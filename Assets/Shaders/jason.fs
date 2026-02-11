@@ -60,12 +60,12 @@ vec4 applyVignette(vec4 color)
 
 vec4 applyScanline(vec4 color, vec2 uv)
 {
-    float frequency = u_frameSize.y/3.0;
+    float frequency = u_frameSize.y/10.0;
     // Scanlines method 2
     float globalPos = (uv.y + offset) * frequency;
-    float wavePos = cos((fract(globalPos) - 0.5)*1.5);
+    float wavePos = cos((fract(globalPos) - 0.5)* 1.1);
 
-    return mix(vec4(0.2, 0.0, 0.5, 1), color, wavePos);
+    return mix(vec4(0.1, 0.0, 0.4, 1), color, wavePos);
 
 }
 
@@ -81,10 +81,22 @@ vec4 applyPosterization(vec4 color)
     return vec4(result, 1.0);
 }
 
+vec2 curve(vec2 uv)
+{
+	uv = (uv - 0.5) * 2.0;
+	uv *= 1.1;
+	uv.x *= 1.0 + pow((abs(uv.y) / 5.0), 2.0);
+	uv.y *= 1.0 + pow((abs(uv.x) / 4.0), 2.0);
+	uv = (uv / 2.0) + 0.5;
+	uv =  uv *0.92 + 0.04;
+
+	return uv;
+}
+
 vec2 fisheyeUV()
 {
-    const float PI = 2;
-    float aperture = 95.0;
+    const float PI = 3.1415926535897932384626433832795;
+    float aperture = 180.0;
     float apertureHalf = 0.5*aperture*(PI/180.0);
     float maxFactor = sin(apertureHalf);
 
@@ -150,7 +162,10 @@ vec4 applyBlur(vec4 color, vec2 uv)
 void main()
 {
     // vec2 uv = fragTexCoord;
-    vec2 uv = fisheyeUV();
+    float dim = min(u_frameSize.x, u_frameSize.y);
+
+
+    vec2 uv = curve(fragTexCoord);
     vec4 color = texture(texture0, uv);
     if (shake)
     {
@@ -169,5 +184,28 @@ void main()
     
     color.rgb = pow(color.rgb, vec3(1.0/brightness));
     // NOTE: Implement here your fragment shader code
+
+	if (uv.y < 0.0 || uv.y > 1.0)
+		color *= 0.0;
+    
+    if (uv.x < 0.0 || uv.x > 1.0)
+		color *= 0.0;
+    
+    if (u_frameSize.x > u_frameSize.y)
+    {
+        float minx = (u_frameSize.x - u_frameSize.y) / (2.0 * u_frameSize.x);
+        float maxx = (u_frameSize.x + u_frameSize.y) / (2.0 * u_frameSize.x);
+        if (uv.x < minx || uv.x > maxx)
+            color *= 0.0;
+    }
+    else
+    {
+        float miny = (u_frameSize.y - u_frameSize.x) / (2.0 * u_frameSize.y);
+        float maxy = (u_frameSize.y + u_frameSize.x) / (2.0 * u_frameSize.y);
+        if (uv.y < miny || uv.y > maxy)
+            color *= 0.0;
+    }
+
+
     finalColor = color; 
 }
