@@ -292,7 +292,7 @@
             "height": 352,
             "width": 352,
             "x": 2368,
-            "y": 2688
+            "y": 3040
         },
         {
             "fileName": "TileMap/Room_0.tmj",
@@ -367,7 +367,7 @@
         {
             "fileName": "TileMap/Broom_3.tmj",
             "height": 352,
-            "width": 800,
+            "width": 576,
             "x": -192,
             "y": 3744
         },
@@ -507,9 +507,9 @@
         {
             "fileName": "TileMap/Room_67.tmj",
             "height": 352,
-            "width": 352,
-            "x": -896,
-            "y": 3392
+            "width": 224,
+            "x": 384,
+            "y": 3744
         },
         {
             "fileName": "TileMap/Room_68.tmj",
@@ -517,6 +517,13 @@
             "width": 352,
             "x": 2016,
             "y": 3040
+        },
+        {
+            "fileName": "TileMap/Room_69.tmj",
+            "height": 352,
+            "width": 352,
+            "x": 2368,
+            "y": 2688
         }
     ],
     "onlyShowAdjacentMaps": false,
