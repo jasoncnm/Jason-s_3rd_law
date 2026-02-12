@@ -32,13 +32,19 @@ enum SpriteID
     SPRITE_ARROW_LEFT_HOVER,
     SPRITE_ARROW_RIGHT_HOVER,
 
+    SPRITE_SLIME_IDLE,
+    SPRITE_SLIME_LEFT,
+    SPRITE_SLIME_RIGHT,
+    SPRITE_SLIME_UP,
+    SPRITE_SLIME_DOWN,
+    
+    
     SPRITE_WALL_1,
     SPRITE_WALL_2,
     SPRITE_BLOCK,
     SPRITE_BLOCK_2,
     SPRITE_GLASS,
     SPRITE_GLASS_BROKEN,
-    SPRITE_SLIME_1,
     SPRITE_PIT,
     SPRITE_TUT_1,
     SPRITE_TUT_2,
@@ -277,9 +283,33 @@ Sprite GetSprite(SpriteID spriteID)
 
             break;
         }
-        case SPRITE_SLIME_1:
+        case SPRITE_SLIME_IDLE:
         {
-            sprite.altasOffset = { 32, 96 };
+            sprite.altasOffset = { 32, 320 };
+            sprite.spriteSize  = { 32, 32 };
+            break;
+        }
+        case SPRITE_SLIME_LEFT:
+        {
+            sprite.altasOffset = { 128, 320 };
+            sprite.spriteSize  = { 32, 32 };
+            break;
+        }
+        case SPRITE_SLIME_RIGHT:
+        {
+            sprite.altasOffset = { 160, 320 };
+            sprite.spriteSize  = { 32, 32 };
+            break;
+        }
+        case SPRITE_SLIME_UP:
+        {
+            sprite.altasOffset = { 64, 320 };
+            sprite.spriteSize  = { 32, 32 };
+            break;
+        }
+        case SPRITE_SLIME_DOWN:
+        {
+            sprite.altasOffset = { 96, 320 };
             sprite.spriteSize  = { 32, 32 };
             break;
         }

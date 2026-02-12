@@ -503,6 +503,13 @@
             "width": 96,
             "x": 160,
             "y": 4800
+        },
+        {
+            "fileName": "TileMap/Room_67.tmj",
+            "height": 352,
+            "width": 352,
+            "x": -896,
+            "y": 3392
         }
     ],
     "onlyShowAdjacentMaps": false,

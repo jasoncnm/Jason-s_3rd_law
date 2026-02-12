@@ -280,11 +280,14 @@ float Min(float a, float b)
 
 int Sign(float x)
 {
+    if (FloatEquals(x, 0)) return 0;
+    
     return x < 0 ? -1 : 1;
 }
 
 int Sign(int x)
 {
+    if (x == 0) return 0;
     return x >= 0 ? 1 : -1;
 }
 

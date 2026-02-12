@@ -63,7 +63,7 @@ inline AddEntityResult LoadGameObject(GameState & state, int32 id, IVec2 tilePos
     }
     else if (id == PLAYER_1)
     {
-        entityResult = AddEntity(ENTITY_TYPE_CLONE, tilePos, SPRITE_SLIME_1);
+        entityResult = AddEntity(ENTITY_TYPE_CLONE, tilePos, SPRITE_SLIME_IDLE);
         entityResult.entity->mass = 1;
         entityResult.entity->tileSize = GetSlimeSize(entityResult.entity);
         entityResult.entity->color = GRAY;
@@ -426,7 +426,7 @@ state.currentMapIndex = -1;
                                     if (name == "Player")
                                     {
                                         
-                                        result = AddEntity(ENTITY_TYPE_PLAYER, tilePos, SPRITE_SLIME_1);
+                                        result = AddEntity(ENTITY_TYPE_PLAYER, tilePos, SPRITE_SLIME_IDLE);
                                         result.entity->mass = 1;
                                         result.entity->tileSize = GetSlimeSize(result.entity); 
                                         result.entity->movable = true;

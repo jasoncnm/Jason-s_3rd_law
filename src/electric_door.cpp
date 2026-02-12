@@ -37,7 +37,7 @@ void SetFreeze()
                     
                     if (result.has)
                     {
-                        MoveEntity(slime, result.entity, nullptr, freezePos, BLOCK_MOVE_FUNC);
+                        MoveEntity(slime, result.entity, nullptr, freezePos, BLOCK_MOVE_FUNC, MOVE_SPEED);
                         // NOTE: This is the yes logic
                         SetEntityPosition(slime, result.entity, freezePos);
                         endPivot = GetTilePivot(slime);

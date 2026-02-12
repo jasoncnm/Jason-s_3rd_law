@@ -124,16 +124,19 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
                 }
             if (IsSlime(current.parent->pushEnt) && current.parent->pushEnt->attachedEntityIndex == ent->entityIndex)
             {
-                MoveEntity(ent, current.parent->pushEnt, playEvent, ent->tilePos + current.pushDir, BLOCK_MOVE_FUNC);
+                MoveEntity(ent, current.parent->pushEnt, playEvent, ent->tilePos + current.pushDir, 
+                           BLOCK_MOVE_FUNC, MOVE_SPEED);
             }
             else if (IsSlime(ent) && ent->attach)
             {
                 Entity * attachEntity = GetEntity(ent->attachedEntityIndex);
-                MoveEntity(ent, attachEntity, playEvent, ent->tilePos + current.pushDir,  BLOCK_MOVE_FUNC);
+                MoveEntity(ent, attachEntity, playEvent, ent->tilePos + current.pushDir,  
+                           BLOCK_MOVE_FUNC, MOVE_SPEED);
             }
             else
             {
-                MoveEntity(ent, nullptr, playEvent, ent->tilePos + current.pushDir,  BLOCK_MOVE_FUNC);
+                MoveEntity(ent, nullptr, playEvent, ent->tilePos + current.pushDir,  
+                           BLOCK_MOVE_FUNC, MOVE_SPEED);
             }
             
             break;
@@ -197,7 +200,8 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                 
                 Entity * attach = defered ? pushEnt : blockedEntity;
                 
-                MoveEntity(projectedEnt, attach, playEvent, targetPos,  BLOCK_MOVE_FUNC);
+                MoveEntity(projectedEnt, attach, playEvent, targetPos,  
+                           BLOCK_MOVE_FUNC, BOUNCE_SPEED);
                 return;
             }
             
@@ -231,7 +235,8 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         
                     }
                     
-                    MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,  BLOCK_MOVE_FUNC);
+                    MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,
+                               BLOCK_MOVE_FUNC, BOUNCE_SPEED);
                         
                         return;
                     }
@@ -253,7 +258,8 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         attach = pushEnt;
                         }
                     
-                    MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,  BLOCK_MOVE_FUNC);
+                    MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,  
+                               BLOCK_MOVE_FUNC, BOUNCE_SPEED);
                         return;
                 }
                 case ENTITY_TYPE_GLASS:
@@ -266,12 +272,14 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                             attach = pushEnt;
                         }
                         
-                        MoveEntity(projectedEnt, attach, nullptr, pos - pushDir,  BLOCK_MOVE_FUNC); 
+                        MoveEntity(projectedEnt, attach, nullptr, pos - pushDir,  
+                                   BLOCK_MOVE_FUNC, BOUNCE_SPEED); 
                         return;
                     }
                     else if (!target->broken)
                     {
-                    MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir, BLOCK_MOVE_FUNC);
+                        MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir,
+                                   BLOCK_MOVE_FUNC, BOUNCE_SPEED);
                     
                     int32 channel = projectedEnt->tweenController.FindMovingChannel();
                     
@@ -314,7 +322,8 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         attach = pushEnt;
                         }
                     
-                    MoveEntity(projectedEnt, attach, playEvent, targetPos,  BLOCK_MOVE_FUNC);
+                    MoveEntity(projectedEnt, attach, playEvent, targetPos,  
+                               BLOCK_MOVE_FUNC, BOUNCE_SPEED);
                     return;
                 }
             }
@@ -322,7 +331,8 @@ inline void ProjectAndCheck(Entity * projectedEnt,
         
         if (CheckOutOfBound(pos))
         {
-            MoveEntity(projectedEnt, nullptr, playEvent, pos, BLOCK_MOVE_FUNC);
+            MoveEntity(projectedEnt, nullptr, playEvent, pos, 
+                       BLOCK_MOVE_FUNC, BOUNCE_SPEED);
             TweenEvent deleteEvent = { 0 };
             deleteEvent.deleteEntity = projectedEnt;
             projectedEnt->tweenController.endEvents.Add(deleteEvent);
@@ -571,7 +581,7 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
                         playEvent = &parent->parent->pushEnt->tweenController.endEvents[index];
                     }
                     MoveEntity(parent->pushEnt, nullptr, playEvent, 
-                               current.pushEnt->tilePos - current.pushDir,  BLOCK_MOVE_FUNC);
+                               current.pushEnt->tilePos - current.pushDir,  BLOCK_MOVE_FUNC, BOUNCE_SPEED);
                 }
             }
             }
@@ -608,16 +618,18 @@ inline float GetCameraZoom(Map & currentMap)
 
 inline void UpdateCameraToTileMapSmooth(Map & map, Vector2 pos, uint32 mapIndex)
 {
-    gameState->cameraTweenController.Reset();
+    Vector2 endPos = gameState->camera.target;
+     gameState->cameraTweenController.Reset();
+    gameState->camera.target = endPos;
     
     // TODO adjust move and zoom speed based on move and zoom distance
     
     TweenParams params = {};
     params.paramType = PARAM_TYPE_VECTOR2;
-    params.startVec2 = gameState->camera.target;
+    params.startVec2 = endPos;
     params.endVec2 = pos;
     params.realVec2  = &gameState->camera.target;
-    AddTweenUnique(gameState->cameraTweenController, CreateTween(params, CAMERA_MOVE_FUNC, 1.7f));
+    AddTweenUnique(gameState->cameraTweenController, CreateTween(params, CAMERA_MOVE_FUNC, CAMERA_MOVE_SPEED));
     
     Map & lastMap = gameState->tileMaps[gameState->currentMapIndex];
     float oldZoom = gameState->camera.zoom;
@@ -629,7 +641,7 @@ inline void UpdateCameraToTileMapSmooth(Map & map, Vector2 pos, uint32 mapIndex)
         params.startF = oldZoom;
         params.endF = newZoom;
         params.realF  = &gameState->camera.zoom;
-        AddTweenUnique(gameState->cameraTweenController, CreateTween(params, CAMERA_ZOOM_FUNC, 1.7f));
+        AddTweenUnique(gameState->cameraTweenController, CreateTween(params, CAMERA_ZOOM_FUNC, CAMERA_ZOOM_SPEED));
     }
     
     OnPlayEvent(&gameState->cameraTweenController);
@@ -647,6 +659,9 @@ inline bool8 UpdateCamera(bool refocus = false)
     
     if (followEnt->type == ENTITY_TYPE_LOCK)
     {
+        if (gameState->cameraTweenController.NoTweens())
+        {
+            
         Vector2 center = Vector2Add(followEnt->pivot, 
                                     Vector2 
                                     {
@@ -654,11 +669,20 @@ inline bool8 UpdateCamera(bool refocus = false)
                                         followEnt->tileSize * 0.5f 
                                     });
         
-        gameState->camera.target = Vector2Lerp(gameState->camera.target, center, 10 * GetFrameTime());
+        // TODO adjust move and zoom speed based on move and zoom distance
         
-        return true;
+        TweenParams params = {};
+        params.paramType = PARAM_TYPE_VECTOR2;
+        params.startVec2 = gameState->camera.target;
+        params.endVec2 = center;
+        params.realVec2  = &gameState->camera.target;
+        AddTweenUnique(gameState->cameraTweenController, CreateTween(params, CAMERA_MOVE_FUNC, CAMERA_MOVE_SPEED));
+            OnPlayEvent(&gameState->cameraTweenController);
+            // gameState->camera.target = Vector2Lerp(gameState->camera.target, center, 5 * GetFrameTime());
+        }
     }
-    
+    else
+    {
     Vector2 finalPos = GetTilePivot(followEnt);
     Rectangle finalRect = { finalPos.x, finalPos.y, followEnt->tileSize, followEnt->tileSize };
     Map & current = gameState->tileMaps[gameState->currentMapIndex];
@@ -672,11 +696,10 @@ inline bool8 UpdateCamera(bool refocus = false)
     };
     
     if (followEnt->tweenController.playing && 
-        (followEnt->tweenController.channels[followEnt->tweenController.FindMovingChannel()].last().Easing == nullptr) && 
-        !CheckCollisionRecs(finalRect, tileMapRec))
+        (followEnt->tweenController.channels[followEnt->tweenController.FindMovingChannel()].last().dt == BOUNCE_SPEED)
+        && !CheckCollisionRecs(finalRect, tileMapRec))
     {
-        gameState->cameraTweenController.Reset();
-        
+            
         Vector2 moveDir = GetTilePivot(followEnt) - followEnt->pivot;
         Vector2 center = Vector2Add(followEnt->pivot, 
                                     Vector2 
@@ -695,9 +718,9 @@ inline bool8 UpdateCamera(bool refocus = false)
         {
             gameState->camera.target.y = Lerp(camPos.y, center.y, 10 * GetFrameTime());
         }
-        return true;
     }
-    
+        else
+        {
     for (int32 i = 0; i < gameState->tileMapCount; i++)
     {
         Map & map = gameState->tileMaps[i];
@@ -764,6 +787,8 @@ inline bool8 UpdateCamera(bool refocus = false)
                 updated = true;
             }
             break;
+        }
+            }
         }
     }
     
@@ -884,11 +909,13 @@ bool8 MoveAction(IVec2 actionDir)
             params2.realVec2  = &player->pivot;
             
             float dist = Vector2Distance(startPivot, middlePivot);
-            float tileDist = dist / MAP_TILE_SIZE;
+        float tileDist = dist / MAP_TILE_SIZE;
+        
+        float speed = (tileDist > 1) ?  BOUNCE_SPEED : MOVE_SPEED;
             
-            uint32 channel = AddTweenUnique(player->tweenController, CreateTween(params1, PLAYER_MOVE_FUNC, SLIME_MOVE_SPEED, tileDist));
+            uint32 channel = AddTweenUnique(player->tweenController, CreateTween(params1, PLAYER_MOVE_FUNC, speed, tileDist));
             
-            AddTween(player->tweenController, CreateTween(params2, PLAYER_MOVE_FUNC, SLIME_MOVE_SPEED * 2), channel);
+            AddTween(player->tweenController, CreateTween(params2, PLAYER_MOVE_FUNC, speed  * 2), channel);
             OnPlayEvent(&player->tweenController);
             return true;
         }
@@ -919,6 +946,9 @@ bool8 MoveAction(IVec2 actionDir)
                 if (pushResult.pushing)
                 {
                     if (!door) ActionCheck(player, player->attachDir, CHECK_MOVE);
+                    
+                    SetSlimeSprite(player, actionDir);
+                    
                 return true;
                 }
                 return false;
@@ -937,12 +967,12 @@ bool8 MoveAction(IVec2 actionDir)
                 {
                     return false;
                 }
-                
-                MoveEntity(player, findResult.entity, nullptr, actionTilePos, PLAYER_MOVE_FUNC);
+                SetSlimeSprite(player, actionDir);
+                MoveEntity(player, findResult.entity, nullptr, actionTilePos, PLAYER_MOVE_FUNC, MOVE_SPEED);
                 }
             else
             {
-                EntityLayer layers[] = {LAYER_SLIME  };
+                EntityLayer layers[] = { LAYER_SLIME  };
                 Entity * ent = FindEntityByLocationAndLayers(standingPlatformPos, layers, ArrayCount(layers));
                 
                 if (ent)
@@ -962,7 +992,10 @@ bool8 MoveAction(IVec2 actionDir)
                     {
                         return false;
                     }
-                    MoveEntity(player, attachedEntity, nullptr, newTile, PLAYER_MOVE_FUNC);
+                    
+                    SetSlimeSprite(player, player->attachDir);
+                    
+                    MoveEntity(player, attachedEntity, nullptr, newTile, PLAYER_MOVE_FUNC, MOVE_SPEED);
                 }
                 else 
                 {
@@ -989,11 +1022,16 @@ bool8 MoveAction(IVec2 actionDir)
                 PushResult rResult = ActionCheck(player, player->attachDir, CHECK_MOVE);
                 if (rResult.state == PUSH_BLOCKED)
                 {
-                    MoveEntity(player, pushResult.blockedEntity, nullptr, player->tilePos, PLAYER_MOVE_FUNC);
+                    MoveEntity(player, pushResult.blockedEntity, nullptr, player->tilePos, PLAYER_MOVE_FUNC, MOVE_SPEED);
                 }
+                
+                SetSlimeSprite(player, actionDir);
+                
                 return true;
-                }
-            MoveEntity(player, pushResult.blockedEntity, nullptr, player->tilePos, PLAYER_MOVE_FUNC);
+            }
+            
+            SetSlimeSprite(player, -player->attachDir);
+            MoveEntity(player, pushResult.blockedEntity, nullptr, player->tilePos, PLAYER_MOVE_FUNC, MOVE_SPEED);
             return true;
             }
         case PUSH_MERGED:
@@ -1067,6 +1105,12 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                 {
                     color = LIME;
                 }
+                
+                if (!IsSlime(entity) && FindAttachSlime(entity))
+                {
+                     color = BLUE;
+                }
+                
                 DrawSprite(gameState->camera, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, color);
                 
                 #if 0
@@ -1075,7 +1119,23 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                     DrawCircleV(Vector2Add(entity->pivot, {entity->tileSize/2, entity->tileSize/2}), 3, ColorAlpha(YELLOW, 0.8f));
                     DrawTile(PivotToTilePos(entity->pivot, entity->tileSize), ColorAlpha(RED, 0.5f));
                     }
-                #endif
+
+                if (IsSlime(entity))
+                {
+                    real32 halfSize = entity->tileSize/2;
+                    Vector2 center = Vector2Add(entity->pivot, {halfSize, halfSize});
+                    Vector2 attachPos = Vector2Add(center, { halfSize * entity->attachDir.x, halfSize * entity->attachDir.y });
+                    
+                    IVec2 parallel = { entity->attachDir.y, entity->attachDir.x };
+                    
+                    Vector2 A = Vector2Add(attachPos, { parallel.x * halfSize, parallel.y * halfSize });
+                    Vector2 B = Vector2Subtract(attachPos, { parallel.x * halfSize, parallel.y * halfSize });
+                    DrawLineEx(A, B, 5, BLUE);
+                    
+                }
+#endif
+                
+                
                 }
         }
     } 
@@ -1190,17 +1250,16 @@ void GameplayUpdateAndRender()
                 case MOVE_STATE:
                 {
                     
+                    IVec2 actionDir = { 0 };
                     // NOTE: read input
                     if (JustPressed(SPLIT_KEY))
                     {
-                        IVec2 splitDir = -player->attachDir;
+                         actionDir= -player->attachDir;
                         
-                        stateChanged = stateChanged || SplitAction(player, splitDir);
-                        
-                        break;
-                    }
-                    
-                    IVec2 actionDir = { 0 };
+                        stateChanged = stateChanged || SplitAction(player, actionDir);
+                        }
+                    else
+                    {
                     
                     bool8 isPressed = false;
                     
@@ -1231,7 +1290,12 @@ void GameplayUpdateAndRender()
                     if (isPressed)
                     {
                         stateChanged = stateChanged || MoveAction(actionDir);
-}
+                        }
+                    }
+                    if (stateChanged) 
+                    {
+                        SetSlimeSprite(player, actionDir);
+                    }
                     
                     break;
                 }
@@ -1347,6 +1411,10 @@ void GameplayUpdateAndRender()
                         {
                             gameState->cameraFollowEntityIndex = entity->entityIndex;
                         }
+                        else if (layer == LAYER_KEY_LOCK)
+                        {
+                            gameState->cameraFollowEntityIndex = entity->entityIndex;
+                        }
                 }
                 else
                 {
@@ -1357,14 +1425,13 @@ void GameplayUpdateAndRender()
         }
         
         Entity * followEnt = GetEntity(gameState->cameraFollowEntityIndex);
-        if (!followEnt ||
+        if (!followEnt || stateChanged || 
             (followEnt->tweenController.NoTweens() && JustPressed(RECOVER_KEY)))
         {
             gameState->cameraFollowEntityIndex = gameState->playerEntityIndex;
         }
         
     }
-    
     
     if (!GetPlayer())
     {

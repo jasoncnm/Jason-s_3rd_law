@@ -36,6 +36,37 @@ inline bool8 IsSlime(Entity * entity)
 }
 
 
+inline void SetEntitySprite(Entity * entity, SpriteID spriteID)
+{
+    entity->spriteID = spriteID;
+    entity->sprite = GetSprite(spriteID);
+}
+
+inline void SetSlimeSprite(Entity * slime, IVec2 dir)
+{
+    if (dir == IVec2 { -1, 0 })
+    {
+        SetEntitySprite(slime, SPRITE_SLIME_LEFT);
+    }
+    else if (dir == IVec2 { 1, 0 })
+    {
+        SetEntitySprite(slime, SPRITE_SLIME_RIGHT);
+    }
+    else if (dir == IVec2 { 0, -1 })
+    {
+        SetEntitySprite(slime, SPRITE_SLIME_UP);
+    }
+    else if (dir == IVec2 { 0, 1 })
+    {
+        SetEntitySprite(slime, SPRITE_SLIME_DOWN);
+    }
+    else
+    {
+        SetEntitySprite(slime, SPRITE_SLIME_IDLE);
+    }
+    
+}
+
 inline AddEntityResult
 AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE, int32 tileSize = MAP_TILE_SIZE)
 {
@@ -136,7 +167,7 @@ inline void DeleteEntity(Entity * entity)
 }
 
 inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * playEvent,
-                       IVec2 targetPos, float (*MoveFunc)(float))
+                       IVec2 targetPos, float (*MoveFunc)(float), float speed)
 {
     SM_ASSERT(entity->active, "entity does not exist");
     SM_ASSERT(entity->movable, "entity cannot be moved");
@@ -186,15 +217,15 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
     }
     
     
-                float speed = (MoveFunc == PLAYER_MOVE_FUNC) ? SLIME_MOVE_SPEED : BOUNCE_SPEED;
-    if (IsSlime(entity))
+                if (IsSlime(entity))
     {
-         IVec2 offset = targetPos - old.tilePos;
+        IVec2 offset = targetPos - old.tilePos;
         
         if ((Abs(offset).x == 0 || Abs(offset).y == 0))
         {
             if ((Abs(old.attachDir) != Abs(entity->attachDir)))
             {
+                
                 Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({(float)offset.x, (float)offset.y}, MAP_TILE_SIZE));
                 
                 IVec2 dir = entity->attachDir;
@@ -221,6 +252,10 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 }
             else
             {
+                
+                Vector2 dir = Vector2Subtract(endPivot, startPivot);
+                IVec2 idir = IVec2 { Sign(dir.x), Sign(dir.y) };
+                
                 float dist = Vector2Distance(startPivot, endPivot);
                 float tileDist = dist / MAP_TILE_SIZE;
                 
@@ -246,6 +281,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         }
         else
         {
+            
             Entity * oldAttach = old.attach ? GetEntity(old.attachedEntityIndex) : nullptr;
             
             IVec2 dir = -entity->attachDir;
@@ -383,7 +419,7 @@ inline void SetGlassBeBroken(Entity * glass)
 
 inline float GetSlimeSize(int32 mass)
 {
-    return mass == 1 ? 0.5f * MAP_TILE_SIZE : 0.75f * MAP_TILE_SIZE;
+    return mass == 1 ? 0.55f * MAP_TILE_SIZE :  0.7f * MAP_TILE_SIZE;
 }
 
 inline float GetSlimeSize(Entity * slime)
@@ -447,7 +483,7 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
         endEvent.deleteEntity = mergedSlime;
         mergedSlime->tweenController.endEvents.Add(endEvent);
         
-        MoveEntity(mergedSlime, attach, nullptr, mergeSlime->tilePos, BLOCK_MOVE_FUNC);
+        MoveEntity(mergedSlime, attach, nullptr, mergeSlime->tilePos, BLOCK_MOVE_FUNC, BOUNCE_SPEED);
         
     }
     
@@ -669,6 +705,13 @@ inline void UpdateSlimes()
                     }
                     
                     Entity * blockedEnt = FindBlockEntityFromTo(oldPos + dir, newPos, dir);
+                    
+                    float aniSpeed = BOUNCE_SPEED;
+                    if (!attach->tweenController.NoTweens())
+                    {
+                        aniSpeed = attach->tweenController.channels[attach->tweenController.FindMovingChannel()].last().dt;
+                    }
+                    
                     if (blockedEnt)
                     {
                         
@@ -687,12 +730,12 @@ inline void UpdateSlimes()
                             MergeSlimes(blockedEnt, slime);
                         return;
                         }
-                        MoveEntity(slime, blockedEnt, playEvent, blockedEnt->tilePos - dir, BLOCK_MOVE_FUNC);
+                        MoveEntity(slime, blockedEnt, playEvent, blockedEnt->tilePos - dir, BLOCK_MOVE_FUNC, aniSpeed);
                     }
                     else 
                     {
                         
-                        MoveEntity(slime, attach, playEvent, newPos, BLOCK_MOVE_FUNC);
+                        MoveEntity(slime, attach, playEvent, newPos, BLOCK_MOVE_FUNC, aniSpeed);
                     }
                     }
                 }
@@ -754,7 +797,7 @@ void ShiftEntities(IVec2 startPos, IVec2 bounceDir)
                     }
                 }
                 
-                MoveEntity(entity, attach, nullptr, targetPos, BLOCK_MOVE_FUNC);
+                MoveEntity(entity, attach, nullptr, targetPos, BLOCK_MOVE_FUNC, BOUNCE_SPEED);
                 empty = false;
                 break;
             }

@@ -20,9 +20,12 @@
 #define MAP_TILE_SIZE 32       // Tiles size
 #define MAX_ANIMATION 50
 #define DIST_ONE_TILE MAP_TILE_SIZE
-#define BLOCK_ANI_SPEED 20.0f
-#define BOUNCE_SPEED 15.0f
-#define SLIME_MOVE_SPEED 4.0f
+
+#define BOUNCE_SPEED 10.0f
+#define MOVE_SPEED 5.0f
+
+#define CAMERA_MOVE_SPEED 2.1f
+#define CAMERA_ZOOM_SPEED 1.7f
 
 #define MAX_GAMEPAD 5
 
@@ -33,8 +36,8 @@
 #define GAME_SAVE_PATH "data/save_data/"
 
 #define BLOCK_MOVE_FUNC  nullptr
-#define PLAYER_MOVE_FUNC EaseOutCubic
-#define CAMERA_MOVE_FUNC EaseOutCubic
+#define PLAYER_MOVE_FUNC nullptr
+#define CAMERA_MOVE_FUNC EaseInOutCubic
 #define CAMERA_ZOOM_FUNC EaseInOutCubic
 
 #define MAX_UNDO 500

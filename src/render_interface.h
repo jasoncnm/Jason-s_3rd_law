@@ -11,7 +11,7 @@
 #include "engine_lib.h"
 #include "entity.h"
 
-#define TEXTURE_PATH "Assets/Texture/SpriteAtlas.png"
+#define TEXTURE_PATH "Assets/Texture/SpriteAtlas-10x.png"
 #define VS_PATH "Assets/Shaders/jason.vs"
 
 //  ========================================================================
@@ -137,8 +137,8 @@ void DrawSprite(Camera2D camera, Texture2D texture, Sprite & sprite, Vector2 top
         {
             // (float)sprite.altasOffset.x + 1, (float)sprite.altasOffset.y + 1,
             // (float)sprite.spriteSize.x - 2, (float)sprite.spriteSize.y -2
-            (float)sprite.altasOffset.x + offset, (float)sprite.altasOffset.y + offset,
-            (float)sprite.spriteSize.x - 2 * offset, (float)sprite.spriteSize.y - 2 * offset
+        10.0f * ((float)sprite.altasOffset.x + offset), 10.0f * ((float)sprite.altasOffset.y + offset),
+        10.0f * ((float)sprite.spriteSize.x - 2 * offset), 10.0f * ((float)sprite.spriteSize.y - 2 * offset)
         };
 
     Rectangle dest =
