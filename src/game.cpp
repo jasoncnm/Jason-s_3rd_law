@@ -746,7 +746,7 @@ inline bool8 UpdateCamera(bool refocus = false)
                 gameState->playerMapIndex = i;
             }
             
-            if (JustPressed(RECOVER_KEY) || refocus)
+                    if (gameState->cameraTweenController.NoTweens() && (JustPressed(RECOVER_KEY) || refocus))
             {
                 UpdateCameraToTileMapSmooth(map, pos, i);
             }
