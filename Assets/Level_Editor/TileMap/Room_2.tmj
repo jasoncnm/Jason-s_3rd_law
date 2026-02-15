@@ -78,6 +78,10 @@
         {
          "firstgid":1,
          "source":"..\/TlieSet\/tileSet.tsx"
+        }, 
+        {
+         "firstgid":15001,
+         "source":":\/automap-tiles.tsx"
         }],
  "tilewidth":32,
  "type":"map",

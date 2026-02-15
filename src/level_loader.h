@@ -21,59 +21,9 @@ using json = nlohmann::json;
 
 #define LEVEL_2_ROOM_NAME "TileMap/Room_59.tmj"
 
-
 //  ========================================================================
 //              NOTE: Level structs
 //  ========================================================================
-enum TileID
-{
-    PLAYER_1 = 32,
-    WALL_1     = 34,
-    WALL_2   = 35,
-    
-    BLOCK    = 33,
-    BLOCK_2  = 12,
-    GLASS    = 46,
-    PIT      = 41,
-    TUT_1    = 13,
-    TUT_2    = 14,
-    MAIN_PORTAL = 15,
-    SLIME_PORTAL = 11,
-    KEY = 21,
-    LOCK = 31,
-    
-    DOOR_LEFT  = 82,
-    DOOR_RIGHT = 83,
-    DOOR_UP    = 84,
-    DOOR_DOWN  = 85,
-    
-    DOOR_LEFT_R  = 92,
-    DOOR_RIGHT_R = 93,
-    DOOR_UP_R    = 94,
-    DOOR_DOWN_R  = 95,
-
-    CABLE_DOWN_RIGHT = 6,
-    CABLE_H          = 7,
-    CABLE_DOWN_LEFT  = 8,
-    CABLE_V          = 16,
-    CABLE_UP_RIGHT   = 26,
-    CABLE_UP_LEFT    = 28,
-
-    SOURCE_RIGHT = 36,
-    SOURCE_LEFT  = 37,
-    SOURCE_DOWN  = 38,
-    SOURCE_UP    = 48,
-    
-    SOURCE_H          = 30,
-    SOURCE_V          = 29,
-    SOURCE_UP_RIGHT   = 19,
-    SOURCE_UP_LEFT     = 20,
-    SOURCE_DOWN_RIGHT = 9,
-    SOURCE_DOWN_LEFT  = 10,
-    
-    
-    CABLE_CONNECTION = 72,
-};
 
 enum LoadOption
 {

@@ -128,91 +128,83 @@ inline bool8 PowerOnCable(Entity * cable, bool8 & end)
             IVec2 offset = { 0 };
             IVec2 bounceDir = { 0 };
             
-            switch(cable->spriteID)
+            switch(cable->tileID)
             {
 
-                case SPRITE_DOOR_LEFT_CLOSE:
+                case DOOR_LEFT:
                 {
                     offset = { 1, -1 };
                     bounceDir = { 1, 0 };
                     cable->left = cable->right = false;
                     cable->up = cable->down = true;
-                    cable->spriteID = SPRITE_DOOR_LEFT_OPEN;
-                    cable->sprite = GetSprite(SPRITE_DOOR_LEFT_OPEN);
+                    SetEntitySprite(cable, DOOR_UP);
                     break;
                 }
-                case SPRITE_DOOR_RIGHT_CLOSE:
+                case DOOR_RIGHT:
                 {
                     offset = { -1, 1 };
                     bounceDir = { -1, 0 };
-                    cable->spriteID = SPRITE_DOOR_RIGHT_OPEN;
-                    cable->sprite = GetSprite(SPRITE_DOOR_RIGHT_OPEN);
+                    SetEntitySprite(cable, DOOR_DOWN);
                     cable->left = cable->right = false;
                     cable->up = cable->down = true;
                     
                     break;
                 }
-                case SPRITE_DOOR_TOP_CLOSE:
+                case DOOR_UP:
                 {
                     offset = { -1, 1 };
                     bounceDir = { 0, 1 };
-                    cable->spriteID = SPRITE_DOOR_TOP_OPEN;
-                    cable->sprite = GetSprite(SPRITE_DOOR_TOP_OPEN);
+                    SetEntitySprite(cable, DOOR_LEFT);
                     cable->left = cable->right = true;
                     cable->up = cable->down = false;
                     
                     break;
                 }
-                case SPRITE_DOOR_DOWN_CLOSE:
+                case DOOR_DOWN:
                 {
                     offset = { 1, -1 };
                     bounceDir = { 0, -1 };
-                    cable->spriteID = SPRITE_DOOR_DOWN_OPEN;
-                    cable->sprite = GetSprite(SPRITE_DOOR_DOWN_OPEN);
+                    SetEntitySprite(cable, DOOR_RIGHT);
                     cable->left = cable->right = true;
                     cable->up = cable->down = false;
                     
                     break;
                 }
 
-                case SPRITE_DOOR_LEFT_R_CLOSE:
+                case DOOR_LEFT_R:
                 {
                     offset = { 1, 1 };
                     bounceDir = { 1, 0 };
+                    SetEntitySprite(cable, DOOR_DOWN_R);
                     cable->left = cable->right = false;
                     cable->up = cable->down = true;
-                    cable->spriteID = SPRITE_DOOR_LEFT_R_OPEN;
-                    cable->sprite = GetSprite(SPRITE_DOOR_LEFT_R_OPEN);
                     break;
                 }
-                case SPRITE_DOOR_RIGHT_R_CLOSE:
+                case DOOR_RIGHT_R:
                 {
                     offset = { -1, -1 };
                     bounceDir = { -1, 0 };
-                    cable->spriteID = SPRITE_DOOR_RIGHT_R_OPEN;
-                    cable->sprite = GetSprite(SPRITE_DOOR_RIGHT_R_OPEN);
+                    SetEntitySprite(cable, DOOR_UP_R);
                     cable->left = cable->right = false;
                     cable->up = cable->down = true;
                     
                     break;
                 }
-                case SPRITE_DOOR_TOP_R_CLOSE:
+                case DOOR_UP_R:
                 {
                     offset = { 1, 1 };
                     bounceDir = { 0, 1 };
-                    cable->spriteID = SPRITE_DOOR_TOP_R_OPEN;
-                    cable->sprite = GetSprite(SPRITE_DOOR_TOP_R_OPEN);
+                    SetEntitySprite(cable, DOOR_RIGHT_R);
                     cable->left = cable->right = true;
                     cable->up = cable->down = false;
                     
                     break;
                 }
-                case SPRITE_DOOR_DOWN_R_CLOSE:
+                case DOOR_DOWN_R:
                 {
                     offset = { -1, -1 };
                     bounceDir = { 0, -1 };
-                    cable->spriteID = SPRITE_DOOR_DOWN_R_OPEN;
-                    cable->sprite = GetSprite(SPRITE_DOOR_DOWN_R_OPEN);
+                    SetEntitySprite(cable, DOOR_LEFT_R);
                     cable->left = cable->right = true;
                     cable->up = cable->down = false;
                     
@@ -272,7 +264,8 @@ end = true;
     else
     {
         cable->conductive = true;
-        cable->sprite = GetSprite(GetCablePowerOnID(cable->spriteID));
+        SetEntitySprite(cable, GetCablePowerOnID(cable->tileID));
+        
         end = false;
     }
 
@@ -353,7 +346,7 @@ void ShutDownPower(int32 sourceIndex)
         }
         else
         {
-            cable->sprite = GetSprite(cable->spriteID);        
+            cable->sprite = GetSprite(cable->tileID);        
         }
     
         int32 indexes[4] =
@@ -384,20 +377,20 @@ inline bool8 DoorBlocked(Entity * door, IVec2 reachDir)
 
     if (reachDir.x == 1)
     {
-        result = (door->spriteID == SPRITE_DOOR_RIGHT_CLOSE || door->spriteID == SPRITE_DOOR_RIGHT_R_CLOSE);
+        result = (door->tileID == DOOR_RIGHT || door->tileID == DOOR_RIGHT_R);
     }
     else if (reachDir.x == -1)
     {
-        result = (door->spriteID == SPRITE_DOOR_LEFT_CLOSE || door->spriteID == SPRITE_DOOR_LEFT_R_CLOSE);
+        result = (door->tileID == DOOR_LEFT || door->tileID == DOOR_LEFT_R);
     }
     else if (reachDir.y == 1)
     {
-        result = (door->spriteID == SPRITE_DOOR_DOWN_CLOSE || door->spriteID == SPRITE_DOOR_DOWN_R_CLOSE);
+        result = (door->tileID == DOOR_DOWN || door->tileID == DOOR_DOWN_R);
         
     }
     else if (reachDir.y == -1)
     {
-        result = (door->spriteID == SPRITE_DOOR_TOP_CLOSE || door->spriteID == SPRITE_DOOR_TOP_R_CLOSE);
+        result = (door->tileID == DOOR_UP || door->tileID == DOOR_UP_R);
     }
     
     return result;

@@ -821,15 +821,13 @@ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
         gameState->entities[e.entityIndex].tweenController.Reset();
         gameState->entities[e.entityIndex].pivot = GetTilePivot(&e);
         
-        if (IsSlime(&e) && (e.actionState == ANIMATE_STATE || e.actionState == SPLIT_STATE))
+        if (IsSlime(&e) && (e.actionState == ANIMATE_STATE))
         {
             gameState->entities[e.entityIndex].actionState = MOVE_STATE;
         }
         
     }
-    
-    // SetupEntityTable(*gameState);
-}
+    }
 
 
 
@@ -1184,6 +1182,7 @@ inline bool8 SlimeSelection(Entity * player)
     return stateChanged;
 }
 
+#if 0
 void UpdateSprite(EntityLayer layer)
 {
     auto & entityIndexArray = gameState->entityTable[layer];
@@ -1204,6 +1203,7 @@ void UpdateSprite(EntityLayer layer)
         }
     }
 }
+#endif
 
 void GameplayUpdateAndRender()
 {
@@ -1460,20 +1460,19 @@ void GameplayUpdateAndRender()
                 }
                 }
             
-            if (portal->spriteID == SPRITE_TUT_1)
+            if (portal->tileID == TUT_1)
             {
-                portal->mass = 1;
-                portal->spriteID = SPRITE_BLOCK;
+                    portal->mass = 1;
+                    SetEntitySprite(portal, BLOCK);
                 }
-            else if (portal->spriteID == SPRITE_TUT_2)
+            else if (portal->tileID == TUT_2)
             {
                 portal->mass = 2;
-                portal->spriteID = SPRITE_BLOCK_2;
+                    SetEntitySprite(portal, BLOCK_2);
             }
             
             portal->movable = true;
             portal->type = ENTITY_TYPE_BLOCK;
-            portal->sprite = GetSprite(portal->spriteID);
             portal->color = WHITE;
                 gameState->lastTutBlockIndex = portal->entityIndex;
             
@@ -1616,18 +1615,19 @@ void GameplayUpdateAndRender()
 #endif
         
         EntityLayer orderedDrawLayers[] = 
-        { 
+        {
             LAYER_PORTAL,
             LAYER_WALL, 
             LAYER_CABLE,
             LAYER_SOURCE,
             LAYER_CONNECTION,
             LAYER_PIT,
-            LAYER_SLIME,
             LAYER_BLOCK,
-            LAYER_GLASS,  
             LAYER_DOOR,
-            LAYER_KEY_LOCK};
+            LAYER_KEY_LOCK,
+            LAYER_SLIME,
+            LAYER_GLASS,  
+            };
         
         int32 count = ArrayCount(orderedDrawLayers);
         DrawSpriteLayers(orderedDrawLayers, count);

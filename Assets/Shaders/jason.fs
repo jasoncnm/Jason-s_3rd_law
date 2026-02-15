@@ -22,7 +22,7 @@ float numColors = 10.0;
 // Custom uniforms
 uniform vec2 u_frameSize;
 uniform float offset = 0.0;
-uniform float brightness = 1.3;
+uniform float brightness = 1;
 uniform bool shake;
 
 vec4 applyBloom(vec4 color, vec2 uv)

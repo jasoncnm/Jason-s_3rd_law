@@ -23,14 +23,12 @@ enum EntityLayer
     LAYER_PIT,
     LAYER_PORTAL,
     LAYER_KEY_LOCK,
-    
     LAYER_COUNT,
 };
 
 enum EntityType
 {
     ENTITY_TYPE_NULL,
-    
     ENTITY_TYPE_PLAYER,
     ENTITY_TYPE_CLONE,
     ENTITY_TYPE_WALL,
@@ -43,7 +41,6 @@ enum EntityType
     ENTITY_TYPE_SLIME_PORTAL,
     ENTITY_TYPE_KEY,
     ENTITY_TYPE_LOCK,
-    
     ENTITY_TYPE_COUNT,
 };
 
@@ -51,7 +48,6 @@ enum ActionState
 {
     NULL_STATE,
     MOVE_STATE,
-    SPLIT_STATE,
     ANIMATE_STATE,
     FREEZE_STATE,
 };
@@ -67,7 +63,7 @@ struct Entity
     TweenController tweenController;
     
     Sprite sprite;
-    SpriteID spriteID;
+       TileID tileID;
     Color color;
     
     IVec2 tilePos;

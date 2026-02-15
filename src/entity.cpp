@@ -36,47 +36,46 @@ inline bool8 IsSlime(Entity * entity)
 }
 
 
-inline void SetEntitySprite(Entity * entity, SpriteID spriteID)
+inline void SetEntitySprite(Entity * entity, TileID tileID)
 {
-    entity->spriteID = spriteID;
-    entity->sprite = GetSprite(spriteID);
+    entity->tileID = tileID;
+    entity->sprite = GetSprite(tileID);
 }
 
 inline void SetSlimeSprite(Entity * slime, IVec2 dir)
 {
     if (dir == IVec2 { -1, 0 })
     {
-        SetEntitySprite(slime, SPRITE_SLIME_LEFT);
+        SetEntitySprite(slime, PLAYER_LEFT);
     }
     else if (dir == IVec2 { 1, 0 })
     {
-        SetEntitySprite(slime, SPRITE_SLIME_RIGHT);
+        SetEntitySprite(slime, PLAYER_RIGHT);
     }
     else if (dir == IVec2 { 0, -1 })
     {
-        SetEntitySprite(slime, SPRITE_SLIME_UP);
+        SetEntitySprite(slime, PLAYER_UP);
     }
     else if (dir == IVec2 { 0, 1 })
     {
-        SetEntitySprite(slime, SPRITE_SLIME_DOWN);
+        SetEntitySprite(slime, PLAYER_DOWN);
     }
     else
     {
-        SetEntitySprite(slime, SPRITE_SLIME_IDLE);
+        SetEntitySprite(slime, PLAYER_IDLE);
     }
-    
 }
 
 inline AddEntityResult
-AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE, int32 tileSize = MAP_TILE_SIZE)
+AddEntity(EntityType type, IVec2 tilePos, TileID tileID, Color color = WHITE, int32 tileSize = MAP_TILE_SIZE)
 {
     AddEntityResult result;
 
     Entity entity = {};
     entity.type = type;
     entity.tilePos = tilePos;
-    entity.spriteID = spriteID;
-    entity.sprite = GetSprite(spriteID);
+    entity.tileID = tileID;
+    entity.sprite = GetSprite(tileID);
     entity.color = color;
     entity.active = true;
     entity.tileSize = (float)tileSize;
@@ -92,9 +91,9 @@ AddEntity(EntityType type, IVec2 tilePos, SpriteID spriteID, Color color = WHITE
 
 
 inline AddEntityResult
-AddCable(IVec2 tilePos, SpriteID spriteID, bool8 left, bool8 right, bool8 up, bool8 down)
+AddCable(IVec2 tilePos, TileID tileID, bool8 left, bool8 right, bool8 up, bool8 down)
 {
-    AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, spriteID);
+    AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, tileID);
     
     entityResult.entity->conductive = false;
     entityResult.entity->cableType = CABLE_TYPE_CONNECT;
@@ -110,9 +109,9 @@ AddCable(IVec2 tilePos, SpriteID spriteID, bool8 left, bool8 right, bool8 up, bo
 
 
 inline AddEntityResult
-AddDoor(IVec2 tilePos, SpriteID spriteID, bool8 left, bool8 right, bool8 up, bool8 down)
+AddDoor(IVec2 tilePos, TileID tileID, bool8 left, bool8 right, bool8 up, bool8 down)
 {
-    AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, spriteID);
+    AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, tileID);
 
     entityResult.entity->movable = true;
     entityResult.entity->mass = 100;
@@ -130,9 +129,9 @@ AddDoor(IVec2 tilePos, SpriteID spriteID, bool8 left, bool8 right, bool8 up, boo
 }
 
 inline AddEntityResult
-AddSource(IVec2 tilePos, SpriteID spriteID, bool8 left, bool8 right, bool8 up, bool8 down)
+AddSource(IVec2 tilePos, TileID tileID, bool8 left, bool8 right, bool8 up, bool8 down)
 {
-    AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, spriteID);
+    AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, tileID);
     
     entityResult.entity->conductive = false;
     entityResult.entity->cableType = CABLE_TYPE_SOURCE;
@@ -145,9 +144,9 @@ AddSource(IVec2 tilePos, SpriteID spriteID, bool8 left, bool8 right, bool8 up, b
 }
 
 inline AddEntityResult
-AddConnection(IVec2 tilePos, SpriteID spriteID)
+AddConnection(IVec2 tilePos, TileID tileID)
 {
-    AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, spriteID);
+    AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, tileID);
     
     entityResult.entity->conductive = false;
     entityResult.entity->cableType = CABLE_TYPE_CONNECTION_POINT;
@@ -414,7 +413,7 @@ inline void SetGlassBeBroken(Entity * glass)
 {
     SM_ASSERT(glass && glass->active, "entity does not exist");
     
-    glass->sprite = GetSprite(SPRITE_GLASS_BROKEN);
+    glass->sprite = GetSprite(GLASS_BROKEN);
 }
 
 inline float GetSlimeSize(int32 mass)
