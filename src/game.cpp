@@ -608,9 +608,12 @@ inline float GetCameraZoom(Map & currentMap)
 {
     int32 newWidth = GetScreenWidth();
     int32 newHeight = GetScreenHeight();
-    int32 mapMax = (currentMap.width > currentMap.height) ? currentMap.width : currentMap.height;
     
-    float zoom = (zoom_per_tile / mapMax);
+     int32 camMax = (currentMap.width > currentMap.height) ? currentMap.width : currentMap.height;
+    
+    // int32 camMax = 11; 
+    
+    float zoom = (zoom_per_tile / camMax);
     (newWidth < newHeight) ? zoom *= newWidth : zoom *= newHeight;
     
     return zoom;
@@ -618,9 +621,9 @@ inline float GetCameraZoom(Map & currentMap)
 
 inline void UpdateCameraToTileMapSmooth(Map & map, Vector2 pos, uint32 mapIndex)
 {
-    Vector2 endPos = gameState->camera.target;
-     gameState->cameraTweenController.Reset();
-    gameState->camera.target = endPos;
+    Vector2 endPos = gameState->camera.base.target;
+     gameState->camera.tweenController.Reset();
+    gameState->camera.base.target = endPos;
     
     // TODO adjust move and zoom speed based on move and zoom distance
     
@@ -628,11 +631,11 @@ inline void UpdateCameraToTileMapSmooth(Map & map, Vector2 pos, uint32 mapIndex)
     params.paramType = PARAM_TYPE_VECTOR2;
     params.startVec2 = endPos;
     params.endVec2 = pos;
-    params.realVec2  = &gameState->camera.target;
-    AddTweenUnique(gameState->cameraTweenController, CreateTween(params, CAMERA_MOVE_FUNC, CAMERA_MOVE_SPEED));
+    params.realVec2  = &gameState->camera.base.target;
+    AddTweenUnique(gameState->camera.tweenController, CreateTween(params, CAMERA_MOVE_FUNC, CAMERA_MOVE_SPEED));
     
     Map & lastMap = gameState->tileMaps[gameState->currentMapIndex];
-    float oldZoom = gameState->camera.zoom;
+    float oldZoom = gameState->camera.base.zoom;
     float newZoom = GetCameraZoom(map);
     if (!FloatEquals(oldZoom, newZoom))
     {
@@ -640,169 +643,205 @@ inline void UpdateCameraToTileMapSmooth(Map & map, Vector2 pos, uint32 mapIndex)
         params.paramType = PARAM_TYPE_FLOAT;
         params.startF = oldZoom;
         params.endF = newZoom;
-        params.realF  = &gameState->camera.zoom;
-        AddTweenUnique(gameState->cameraTweenController, CreateTween(params, CAMERA_ZOOM_FUNC, CAMERA_ZOOM_SPEED));
+        params.realF  = &gameState->camera.base.zoom;
+        AddTweenUnique(gameState->camera.tweenController, CreateTween(params, CAMERA_ZOOM_FUNC, CAMERA_ZOOM_SPEED));
     }
     
-    OnPlayEvent(&gameState->cameraTweenController);
+    OnPlayEvent(&gameState->camera.tweenController);
     gameState->currentMapIndex = mapIndex;
 }
 
-inline bool8 UpdateCamera(bool refocus = false)
+ FindTileMapResult FindTileMap(IVec2 tilePos)
 {
-    bool8 updated = false;
-    
-    Entity * followEnt = GetEntity(gameState->cameraFollowEntityIndex);
-    if (!followEnt) return false;
-    
-    Vector2 followPos = followEnt->pivot;
-    
-    if (followEnt->type == ENTITY_TYPE_LOCK)
-    {
-        if (gameState->cameraTweenController.NoTweens())
-        {
-            
-        Vector2 center = Vector2Add(followEnt->pivot, 
-                                    Vector2 
-                                    {
-                                        followEnt->tileSize * 0.5f,
-                                        followEnt->tileSize * 0.5f 
-                                    });
-        
-        // TODO adjust move and zoom speed based on move and zoom distance
-        
-        TweenParams params = {};
-        params.paramType = PARAM_TYPE_VECTOR2;
-        params.startVec2 = gameState->camera.target;
-        params.endVec2 = center;
-        params.realVec2  = &gameState->camera.target;
-        AddTweenUnique(gameState->cameraTweenController, CreateTween(params, CAMERA_MOVE_FUNC, CAMERA_MOVE_SPEED));
-            OnPlayEvent(&gameState->cameraTweenController);
-            // gameState->camera.target = Vector2Lerp(gameState->camera.target, center, 5 * GetFrameTime());
-        }
-    }
-    else
-    {
-    Vector2 finalPos = GetTilePivot(followEnt);
-    Rectangle finalRect = { finalPos.x, finalPos.y, followEnt->tileSize, followEnt->tileSize };
-    Map & current = gameState->tileMaps[gameState->currentMapIndex];
-    Vector2 mapMin = GetTilePivot(current.tilePos, MAP_TILE_SIZE);
-    Rectangle tileMapRec =
-    {
-        mapMin.x + MAP_TILE_SIZE,
-        mapMin.y + MAP_TILE_SIZE,
-        (float)current.width  * (float)MAP_TILE_SIZE,
-        (float)current.height * (float)MAP_TILE_SIZE
-    };
-    
-    if (followEnt->tweenController.playing && 
-        (followEnt->tweenController.channels[followEnt->tweenController.FindMovingChannel()].last().dt == BOUNCE_SPEED)
-        && !CheckCollisionRecs(finalRect, tileMapRec))
-    {
-            
-        Vector2 moveDir = GetTilePivot(followEnt) - followEnt->pivot;
-        Vector2 center = Vector2Add(followEnt->pivot, 
-                                    Vector2 
-                                    {
-                                        followEnt->tileSize * 0.5f,
-                                        followEnt->tileSize * 0.5f 
-                                    });
-        Vector2 camPos = gameState->camera.target;
-        
-        if ((Sign(center.x - gameState->camera.target.x) == Sign(moveDir.x)))
-        {
-            gameState->camera.target.x = Lerp(camPos.x, center.x, 10 * GetFrameTime());
-        }
-        
-        if ((Sign(center.y - gameState->camera.target.y) == Sign(moveDir.y)))
-        {
-            gameState->camera.target.y = Lerp(camPos.y, center.y, 10 * GetFrameTime());
-        }
-    }
-        else
-        {
+    FindTileMapResult result = { 0 };
     for (int32 i = 0; i < gameState->tileMapCount; i++)
     {
         Map & map = gameState->tileMaps[i];
-        Vector2 mapMin = GetTilePivot(map.tilePos, MAP_TILE_SIZE);
         
-        Rectangle followRec = GetEntityRect(followEnt);
+        int32 minX = map.tilePos.x + 1;
+        int32 minY = map.tilePos.y + 1;
+        int32 maxX = minX + map.width - 1;
+        int32 maxY = minY + map.height - 1;
+        
+        if (tilePos.x >= minX && tilePos.x <= maxX && 
+            tilePos.y >= minY && tilePos.y <= maxY)
+        {
+            result.map = &map;
+            result.mapIndex = i;
+            break;
+        }
+    }
+    return result;
+}
+
+ void SetCamFollowState(MyCamera & cam, Entity * followEnt)
+{
+    if (followEnt->type == ENTITY_TYPE_LOCK)
+    {
+        cam.followState = MyCamera::FOLLOW_CENTER;
+        return;
+    }
+    
+    Vector2 finalPos = GetTilePivot(followEnt);
+        Rectangle finalRect = { finalPos.x, finalPos.y, followEnt->tileSize, followEnt->tileSize };
+        Map & current = gameState->tileMaps[gameState->currentMapIndex];
+        Vector2 mapMin = GetTilePivot(current.tilePos, MAP_TILE_SIZE);
         Rectangle tileMapRec =
         {
             mapMin.x + MAP_TILE_SIZE,
             mapMin.y + MAP_TILE_SIZE,
-            (float)map.width  * (float)MAP_TILE_SIZE,
-            (float)map.height * (float)MAP_TILE_SIZE
-        };
-        
-        if( CheckCollisionRecs(followRec, tileMapRec) )
+            (float)current.width  * (float)MAP_TILE_SIZE,
+            (float)current.height * (float)MAP_TILE_SIZE
+    };
+    
+        if (followEnt->tweenController.playing && 
+            (followEnt->tweenController.channels[followEnt->tweenController.FindMovingChannel()].last().dt == BOUNCE_SPEED)
+            && !CheckCollisionRecs(finalRect, tileMapRec))
         {
-            
-            Vector2 pos = TilePositionToPixelPosition(map.width * 0.5f + map.tilePos.x + 0.5f, 
-                                                      map.height * 0.5f + map.tilePos.y + 0.5f);
-            
-            if (gameState->cameraFollowEntityIndex == gameState->playerEntityIndex)
+        cam.followState = MyCamera::FOLLOW_ALONG_AXIS;
+        return;
+    }
+    
+    cam.followState = MyCamera::LOCK_TO_MAP;
+    
+    }
+
+inline bool8 UpdateCamera(bool refocus = false)
+{
+    
+    MyCamera & cam = gameState->camera;
+    
+    bool8 updated = false;
+    
+    Entity * followEnt = GetEntity(cam.followEntityIndex);
+    if (!followEnt) return false;
+    
+    SetCamFollowState(cam, followEnt);
+    
+    Vector2 followPos = followEnt->pivot;
+    
+    switch (cam.followState)
+    {
+        case MyCamera::LOCK_TO_MAP:
+        {
+             FindTileMapResult result = FindTileMap(followEnt->tilePos);
+            if (result.map)
             {
-                gameState->playerMapIndex = i;
-            }
-            
-                    if (gameState->cameraTweenController.NoTweens() && (JustPressed(RECOVER_KEY) || refocus))
-            {
-                UpdateCameraToTileMapSmooth(map, pos, i);
-            }
-            
-            if (!Vector2Equals(pos, gameState->camera.target))
-            {
-                if (IsSlime(followEnt) && 
-                    followEnt->tweenController.NoTweens() && 
-                    !map.firstEnter)
+                Map * map = result.map;
+                int32 mapIndex = result.mapIndex;
+                Vector2 pos = TilePositionToPixelPosition(map->width * 0.5f + map->tilePos.x + 0.5f, 
+                                                          map->height * 0.5f + map->tilePos.y + 0.5f);
+                
+                if (cam.followEntityIndex == gameState->playerEntityIndex)
                 {
-                    UndoState::EntityArray ea = GetCurrentStateEntities();
-                    map.initUndoState.playerIndex = gameState->playerEntityIndex;
-                    map.initUndoState.undoEntities.clear();
-                    map.initUndoState.undoEntities.insert(map.initUndoState.undoEntities.begin(),
-                                             &ea.entities[0], 
-                                             &ea.entities[ea.entityCount]);
-                    map.firstEnter = true;
+                    gameState->playerMapIndex = mapIndex;
                 }
                 
-                if (gameState->currentMapIndex == -1)
+                if (cam.tweenController.NoTweens() && (JustPressed(RECOVER_KEY) || refocus))
                 {
-                    gameState->screenWidth = GetScreenWidth();
-                    gameState->screenHeight = GetScreenHeight();
+                    UpdateCameraToTileMapSmooth(*map, pos, mapIndex);
+                }
+                
+                if (!Vector2Equals(pos, cam.base.target))
+                {
+                    if (IsSlime(followEnt) && 
+                        followEnt->tweenController.NoTweens() && 
+                        !map->firstEnter)
+                    {
+                        UndoState::EntityArray ea = GetCurrentStateEntities();
+                        map->initUndoState.playerIndex = gameState->playerEntityIndex;
+                        map->initUndoState.undoEntities.clear();
+                        map->initUndoState.undoEntities.insert(map->initUndoState.undoEntities.begin(),
+                                                              &ea.entities[0], 
+                                                              &ea.entities[ea.entityCount]);
+                        map->firstEnter = true;
+                    }
                     
-                    gameState->currentMapIndex = i;
+                    if (gameState->currentMapIndex == -1)
+                    {
+                        gameState->screenWidth = GetScreenWidth();
+                        gameState->screenHeight = GetScreenHeight();
+                        
+                        gameState->currentMapIndex = mapIndex;
+                        
+                        cam.base.rotation = 0.0f;
+                        cam.base.target = pos;
+                        cam.base.zoom = GetCameraZoom(*map);
+                        cam.base.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+                    }
                     
-                    gameState->camera.rotation = 0.0f;
-                    gameState->camera.target = pos;
-                    gameState->camera.zoom = GetCameraZoom(map);
-                    gameState->camera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+                    if (gameState->currentMapIndex != mapIndex)
+                    {
+                        UpdateCameraToTileMapSmooth(*map, pos, mapIndex);
+                    }
+                    
+                    updated = true;
                 }
                 
-                if (gameState->currentMapIndex != i)
-                {
-                    UpdateCameraToTileMapSmooth(map, pos, i);
-                }
+                break;
+            }
+             cam.base.target = Vector2Lerp(cam.base.target, followEnt->pivot, 5 * GetFrameTime());
+            break;
+            }
+        case MyCamera::FOLLOW_CENTER:
+        {
+            if (cam.tweenController.NoTweens())
+            {
+                Vector2 center = Vector2Add(followEnt->pivot, 
+                                            Vector2 
+                                            {
+                                                followEnt->tileSize * 0.5f,
+                                                followEnt->tileSize * 0.5f 
+                                            });
                 
-                updated = true;
+                // TODO adjust move and zoom speed based on move and zoom distance
+                
+                TweenParams params = {};
+                params.paramType = PARAM_TYPE_VECTOR2;
+                params.startVec2 = cam.base.target;
+                params.endVec2 = center;
+                params.realVec2  = &cam.base.target;
+                AddTweenUnique(cam.tweenController, CreateTween(params, CAMERA_MOVE_FUNC, CAMERA_MOVE_SPEED));
+                OnPlayEvent(&cam.tweenController);
+                // cam.base.target = Vector2Lerp(cam.base.target, center, 5 * GetFrameTime());
             }
             break;
         }
+        case MyCamera::FOLLOW_ALONG_AXIS:
+        {
+            Vector2 moveDir = GetTilePivot(followEnt) - followEnt->pivot;
+            Vector2 center = Vector2Add(followEnt->pivot, 
+                                        Vector2 
+                                        {
+                                            followEnt->tileSize * 0.5f,
+                                            followEnt->tileSize * 0.5f 
+                                        });
+            Vector2 camPos = cam.base.target;
+            
+            if ((Sign(center.x - cam.base.target.x) == Sign(moveDir.x)))
+            {
+                cam.base.target.x = Lerp(camPos.x, center.x, 10 * GetFrameTime());
             }
+            
+            if ((Sign(center.y - cam.base.target.y) == Sign(moveDir.y)))
+            {
+                cam.base.target.y = Lerp(camPos.y, center.y, 10 * GetFrameTime());
+            }
+            break;
         }
-    }
+        }
     
     if (GetScreenWidth() != gameState->screenWidth || GetScreenHeight() != gameState->screenHeight)
     {
-        gameState->camera.zoom = GetCameraZoom(gameState->tileMaps[gameState->currentMapIndex]);
-        gameState->camera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+        cam.base.zoom = GetCameraZoom(gameState->tileMaps[gameState->currentMapIndex]);
+        cam.base.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
         gameState->screenWidth = GetScreenWidth();
         gameState->screenHeight = GetScreenHeight();
     }
     
-    if (!gameState->cameraTweenController.NoTweens())
+    if (!cam.tweenController.NoTweens())
     {
-        gameState->cameraTweenController.Update();
+        cam.tweenController.Update();
     }
     
     return updated;
@@ -835,7 +874,7 @@ inline void Undo()
 {
     UndoState & undoState = gameState->undoStack.back();
     gameState->playerEntityIndex = undoState.playerIndex;
-    gameState->cameraFollowEntityIndex = gameState->playerEntityIndex;
+    gameState->camera.followEntityIndex = gameState->playerEntityIndex;
     
     std::vector<Entity> & undoEntities = undoState.undoEntities;
     SetUndoEntities(undoEntities);        
@@ -1104,14 +1143,15 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                     color = LIME;
                 }
                 
+                DrawSprite(gameState->camera.base, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, color);
+                
+#if 0
+                
                 if (!IsSlime(entity) && FindAttachSlime(entity))
                 {
-                     color = BLUE;
+                    color = BLUE;
                 }
                 
-                DrawSprite(gameState->camera, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, color);
-                
-                #if 0
                 if (IsSlime(entity))
                 {
                     DrawCircleV(Vector2Add(entity->pivot, {entity->tileSize/2, entity->tileSize/2}), 3, ColorAlpha(YELLOW, 0.8f));
@@ -1157,7 +1197,7 @@ inline bool8 SelectNextAsPlayer(Entity * player = nullptr)
     if (nextPlayerEntity)
     {
         gameState->playerEntityIndex = nextPlayerEntity->entityIndex;
-        gameState->cameraFollowEntityIndex = gameState->playerEntityIndex;
+        gameState->camera.followEntityIndex = gameState->playerEntityIndex;
         
         if (player) player->color = GRAY;
         
@@ -1213,18 +1253,18 @@ void GameplayUpdateAndRender()
         // NOTE: CameraZoom
         // Camera zoom controls
         // Uses log scaling to provide consistent zoom speed
-        gameState->camera.zoom = expf(logf(gameState->camera.zoom) + ((float)GetMouseWheelMove()*0.1f));
+        gameState->camera.base.zoom = expf(logf(gameState->camera.base.zoom) + ((float)GetMouseWheelMove()*0.1f));
         
         // NOTE: Camera Drag
         if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
         {
             Vector2 mouseDelta = GetMouseDelta();
-            gameState->camera.target.x -= mouseDelta.x;
-            gameState->camera.target.y -= mouseDelta.y;
+            gameState->camera.base.target.x -= mouseDelta.x;
+            gameState->camera.base.target.y -= mouseDelta.y;
         }
         
-        //if (gameState->camera.zoom > 10.0f) gameState->camera.zoom = 10.0f;
-        if (gameState->camera.zoom < 0.1f) gameState->camera.zoom = 0.1f;
+        //if (gameState->camera.base.zoom > 10.0f) gameState->camera.base.zoom = 10.0f;
+        if (gameState->camera.base.zoom < 0.1f) gameState->camera.base.zoom = 0.1f;
         
             UpdateCamera();
     }
@@ -1404,16 +1444,16 @@ void GameplayUpdateAndRender()
                         if (entity->actionState == MOVE_STATE) SetActionState(entity, ANIMATE_STATE);
                     }
                         entity->tweenController.Update();
-                        Entity * followEnt = GetEntity(gameState->cameraFollowEntityIndex);
+                        Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
                         
                         if (//(!followEnt || followEnt->tweenController.NoTweens()) && 
                             (!followEnt || (entity->tilePos - followEnt->tilePos).SqrMagnitude() > 1)&& entity->tweenController.playing)
                         {
-                            gameState->cameraFollowEntityIndex = entity->entityIndex;
+                            gameState->camera.followEntityIndex = entity->entityIndex;
                         }
                         else if (layer == LAYER_KEY_LOCK)
                         {
-                            gameState->cameraFollowEntityIndex = entity->entityIndex;
+                            gameState->camera.followEntityIndex = entity->entityIndex;
                         }
                 }
                 else
@@ -1424,11 +1464,11 @@ void GameplayUpdateAndRender()
         }
         }
         
-        Entity * followEnt = GetEntity(gameState->cameraFollowEntityIndex);
+        Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
         if (!followEnt || stateChanged || 
             (followEnt->tweenController.NoTweens() && JustPressed(RECOVER_KEY)))
         {
-            gameState->cameraFollowEntityIndex = gameState->playerEntityIndex;
+            gameState->camera.followEntityIndex = gameState->playerEntityIndex;
         }
         
     }
@@ -1579,7 +1619,7 @@ void GameplayUpdateAndRender()
         UpdateAndDrawStarFieldBG(&gameState->starFields, 
                                  (GetScreenWidth() - mn) / 2,
                                  (GetScreenHeight() - mn) / 2);
-        BeginMode2D(gameState->camera);
+        BeginMode2D(gameState->camera.base);
         
         
         Color colors[] = {
@@ -1616,17 +1656,17 @@ void GameplayUpdateAndRender()
         
         EntityLayer orderedDrawLayers[] = 
         {
-            LAYER_PORTAL,
             LAYER_WALL, 
             LAYER_CABLE,
             LAYER_SOURCE,
             LAYER_CONNECTION,
             LAYER_PIT,
-            LAYER_BLOCK,
-            LAYER_DOOR,
             LAYER_KEY_LOCK,
+            LAYER_PORTAL,
             LAYER_SLIME,
+            LAYER_BLOCK,
             LAYER_GLASS,  
+            LAYER_DOOR,
             };
         
         int32 count = ArrayCount(orderedDrawLayers);
@@ -1636,7 +1676,7 @@ void GameplayUpdateAndRender()
         // Rectangle cameraRect = GetCameraRect(gameState->camera);
         // DrawRectangleLinesEx(cameraRect, 1, RED);
         
-        Entity * followEnt = GetEntity(gameState->cameraFollowEntityIndex);
+        Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
         
         if (followEnt)
         {
@@ -1648,10 +1688,10 @@ void GameplayUpdateAndRender()
                                     });
         
         //DrawCircleV(center, 5,  RED);
-        //DrawCircleV(gameState->camera.target, 5, YELLOW);
+        //DrawCircleV(gameState->camera.base.target, 5, YELLOW);
         }
         
-        Rectangle source = GetCameraRect(gameState->camera);
+        Rectangle source = GetCameraRect(gameState->camera.base);
         if (source.width > source.height) 
         {
             source.x += (source.width - source.height) * 0.5f;
@@ -1722,18 +1762,20 @@ void GameplayUpdateAndRender()
         
 #if  GAME_INTERNAL
         // NOTE: UI Draw Game Informations
-        
-        
         Entity * player = GetEntity(gameState->playerEntityIndex);
         if (player)
         {
         IVec2 centerPos = player->tilePos;
-        Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera);
+        Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera.base);
         }
         
         DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
                             player->tilePos.x, player->tilePos.y,
                             player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
+        
+        DrawText(TextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f",
+                            gameState->camera.base.target.x, gameState->camera.base.target.y,
+                            gameState->camera.base.offset.x, gameState->camera.base.offset.y, gameState->camera.base.zoom), 10, 50, 20, RAYWHITE);
         
 #if 0
         
@@ -1757,10 +1799,6 @@ void GameplayUpdateAndRender()
         
         DrawText(TextFormat("Player pivot (%.2f, %.2f), mouse world (%.2f, %.2f)",
                             player->pivot.x, player->pivot.y, mousePos.x, mousePos.y ), 10, 200, 20, GREEN);
-        
-        DrawText(TextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f",
-                            gameState->camera.target.x, gameState->camera.target.y,
-                            gameState->camera.offset.x, gameState->camera.offset.y, gameState->camera.zoom), 10, 50, 20, RAYWHITE);
         
         DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
                             centerPos.x, centerPos.y,
@@ -1848,7 +1886,8 @@ void InitializeGame()
     gameState->currentMapIndex = -1;
     gameState->simulating = false;
     
-    gameState->cameraFollowEntityIndex = gameState->playerEntityIndex;
+    gameState->camera.followEntityIndex = gameState->playerEntityIndex;
+    gameState->camera.followState = MyCamera::LOCK_TO_MAP;
     
     gameState->shakeTime = 0.0f;
     
@@ -1860,7 +1899,7 @@ void CleanUpGame()
     CleanUpKeyMapping();
     
     gameState->initialized = false;    
-    gameState->cameraTweenController.Reset();
+    gameState->camera.tweenController.Reset();
     for (int32 i = 0; i < LAYER_COUNT; i++)
     {
         gameState->entityTable[i].Clear();

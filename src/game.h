@@ -49,19 +49,13 @@ constexpr float cameraSwitchTargetDelay = 1.0f;
 
 #include "raylib.h"
 #include "raymath.h"
-
 #include "engine_lib.h"
-
-
 #include "assets.h"
 #include "render_interface.h"
-
-
 #include "electric_door.h"
 #include "entity.h"
 #include "tween_controller.h"
 #include "game_ui.h"
-//#include "action_input.h"
 
 // ----------------------------------------------------
 // NOTE: Game Structs
@@ -193,6 +187,21 @@ struct UndoStack
     
 };
 
+struct MyCamera
+{
+    enum FollowState
+    {
+        LOCK_TO_MAP,
+        FOLLOW_WITHIN_MAP,
+        FOLLOW_CENTER,
+        FOLLOW_ALONG_AXIS,
+    };
+    
+    Camera2D base;
+    TweenController tweenController;
+    int32 followEntityIndex;
+    FollowState followState;
+};
 
 // NOTE: GameState
 struct GameState
@@ -200,9 +209,7 @@ struct GameState
     // TODO: Undo Stack is still too big and has very limited max undo steps
     UndoStack undoStack;
     
-    Camera2D camera;
-    TweenController cameraTweenController;
-    
+    MyCamera camera;
     Texture2D texture;
     RenderTexture2D renderTarget;
     
@@ -228,7 +235,6 @@ struct GameState
     IVec2 tileMin, tileMax;
     
     int32 playerEntityIndex;
-    int32 cameraFollowEntityIndex;
     int32 currentMapIndex;
     int32 playerMapIndex;
     int32 lastTutBlockIndex;
@@ -282,6 +288,12 @@ struct CheckThings
     Entity * pushEnt;
     PushResult pushResult;
     CheckThings * parent;
+};
+
+struct FindTileMapResult
+{
+    Map * map;
+    int32 mapIndex;
 };
 
 // ----------------------------------------------------

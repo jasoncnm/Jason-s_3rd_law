@@ -12,6 +12,7 @@
 #include "entity.h"
 
 #define TEXTURE_PATH "Assets/Texture/SpriteAtlas-10x.png"
+#define BACKGROUND_PATH "Assets/Texture/Backgrounds/2.png"
 #define VS_PATH "Assets/Shaders/jason.vs"
 
 //  ========================================================================
