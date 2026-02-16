@@ -211,7 +211,7 @@ SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePo
     {
         
     }
-    else
+    else if (id != LOCK)
     {
         SM_ASSERT(false, "Unable to register ID (%d)", id);
     }

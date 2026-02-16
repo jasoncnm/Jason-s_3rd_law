@@ -211,6 +211,9 @@ struct GameState
     
     MyCamera camera;
     Texture2D texture;
+    
+    Texture2D fgTexture;
+    
     RenderTexture2D renderTarget;
     
     StarFields starFields;

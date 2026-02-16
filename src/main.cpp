@@ -149,6 +149,17 @@ int main(int argumentCount, char *argumentArray[])
             return -1;
         }
         
+        SetTextureFilter(gameState->texture, TEXTURE_FILTER_POINT);
+        
+        gameState->fgTexture = LoadTexture(FG_PATH);
+        if (!IsTextureValid(gameState->fgTexture))
+        {
+            SM_ERROR("Unable to load file (%s) to texture", FG_PATH);
+            return -1;
+        }
+        SetTextureFilter(gameState->fgTexture, TEXTURE_FILTER_BILINEAR);
+        
+        
         for (uint32 shaderType = 0; shaderType < FX_COUNT; shaderType++)
         {
             if (FileExists(shaderPaths[shaderType]))
@@ -180,8 +191,6 @@ int main(int argumentCount, char *argumentArray[])
         BeginTextureMode(gameState->starFields.starTexture);
         DrawCircle(12, 12, 10, WHITE);
         EndTextureMode();
-        
-         SetTextureFilter(gameState->texture, TEXTURE_FILTER_POINT);
         
         gameState->currentScreen = TITLE_SCREEN;
         
