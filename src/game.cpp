@@ -1660,48 +1660,8 @@ void GameplayUpdateAndRender()
             DrawTileMap(gameState->camera, tileMap.tilePos, 
                         IVec2{ tileMap.width, tileMap.height },
                         mColors[mapIndex], mColors[mapIndex]);
-            
-            
-            Map & tileMap = gameState->tileMaps[mapIndex];
-            
-            Vector2 mapMin = GetTilePivot(tileMap.tilePos, MAP_TILE_SIZE);
-            Rectangle tileMapRec =
-            {
-                mapMin.x + MAP_TILE_SIZE,
-                mapMin.y + MAP_TILE_SIZE,
-                (float)tileMap.width  * (float)MAP_TILE_SIZE,
-                (float)tileMap.height * (float)MAP_TILE_SIZE
-            };
-            
-            
-            Color color = ColorLerp(SKYBLUE, GREEN, 0.3f);
-            
-            DrawTextureTiled(gameState->fgTexture, 
-                             Rectangle { 0, 0, 64, 64 },
-                             tileMapRec,
-                             Vector2 { 0, 0 }, 0, 1, ColorAlpha(color, 0.7f));
-            
-#endif
-            
-        }
-        
-        
-        #if 0
-        Vector2 mapMin = GetTilePivot(IVec2 { gameState->tileMin.x, gameState->tileMin.y }, MAP_TILE_SIZE);
-        Rectangle tileMapRec =
-        {
-            mapMin.x - 2 * MAP_TILE_SIZE,
-            mapMin.y - 2 * MAP_TILE_SIZE,
-            (float)(gameState->tileMax.x - gameState->tileMin.x + 4) * (float)MAP_TILE_SIZE,
-            (float)(gameState->tileMax.y - gameState->tileMin.y + 4) * (float)MAP_TILE_SIZE
-        };
-        
-        
-        DrawTextureTiled(gameState->fgTexture, 
-                         Rectangle { 0, 0, 64, 64 },
-                         tileMapRec,
-                         Vector2 { 0, 0 }, 0, 2, BLUE);
-#endif
+            #endif
+            }
         
         
         EntityLayer orderedDrawLayers[] = 
@@ -1770,8 +1730,6 @@ void GameplayUpdateAndRender()
             UnloadTexture(gameState->texture);    // Unload render texture
             gameState->texture = LoadTexture(TEXTURE_PATH);
             SetShake(0.05f);
-            UnloadTexture(gameState->fgTexture);    // Unload render texture
-            gameState->fgTexture = LoadTexture(FG_PATH);
             
             }
         gameState->shakeTime -= GetFrameTime();
