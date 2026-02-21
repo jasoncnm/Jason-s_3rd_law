@@ -197,6 +197,7 @@ struct MyCamera
         FOLLOW_ALONG_AXIS,
     };
     
+    Vector2 moveDir = { 0, 0 };
     Camera2D base;
     TweenController tweenController;
     int32 followEntityIndex;
@@ -211,6 +212,7 @@ struct GameState
     
     MyCamera camera;
     Texture2D texture;
+    Texture2D bgTexture;
     
     Texture2D fgTexture;
     

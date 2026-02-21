@@ -22,7 +22,7 @@ float numColors = 10.0;
 // Custom uniforms
 uniform vec2 u_frameSize;
 uniform float offset = 0.0;
-uniform float brightness = 1;
+uniform float brightness = 1.75;
 uniform bool shake;
 
 vec4 applyBloom(vec4 color, vec2 uv)
@@ -47,10 +47,13 @@ vec4 applyBloom(vec4 color, vec2 uv)
 vec4 applyVignette(vec4 color)
 {
     vec2 position = (gl_FragCoord.xy / u_frameSize) - vec2(0.5);           
-    float dist = length(position * vec2(u_frameSize.x/u_frameSize.y, 1.0));
+    float dist = length(position.y * vec2(u_frameSize.x/u_frameSize.y, 1.0));
 
-    float radius = 1.3;
-    float softness = .8;
+    float ratio = 0.47;
+    float strength = 11;
+    
+    float radius = ratio * strength;
+    float softness = (1.0 - ratio) * strength;
     float vignette = smoothstep(radius, radius - softness, dist);
 
     color.rgb = color.rgb - (1.0 - vignette);

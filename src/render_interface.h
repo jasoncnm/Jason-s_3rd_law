@@ -14,6 +14,7 @@
 #define TEXTURE_PATH "Assets/Texture/SpriteAtlas-10x.png"
 #define FG_PATH "Assets/Texture/Backgrounds/5.png"
 #define VS_PATH "Assets/Shaders/jason.vs"
+#define BG_PATH "Assets/Texture/gradient.png"
 
 //  ========================================================================
 //              NOTE: Render Structs
@@ -161,18 +162,21 @@ void DrawError()
     DrawText("SOMETHING IS WRONG PLEASE UNDO(Z) OR RESET(R)", GetScreenWidth() / 2, GetScreenHeight() / 2, 20, RED);
 }
 
-void UpdateStarField(Vector3 * stars, Vector2 * starsScreenPos, float flySpeed, float dt,
+void UpdateStarField(Vector3 * stars, Vector2 * starsScreenPos, Vector2 moveDir, float flySpeed, float dt,
                      int32 screenWidth, int32 screenHeight, int32 offsetX, int32 offsetY,
                      uint32 start, uint32 end)
 {
+    float moveSpeed = 2000;
     for (uint32 i = start; i < end; i++)
     {
+        stars[i].x += moveDir.x * dt * moveSpeed;
+        stars[i].y += moveDir.y * dt * moveSpeed;
     // Update star's timer
     stars[i].z -= dt * flySpeed;
     // Calculate the screen position
         starsScreenPos[i] =
     {
-        screenWidth *  0.5f + stars[i].x/stars[i].z,
+        screenWidth  * 0.5f + stars[i].x/stars[i].z,
         screenHeight * 0.5f + stars[i].y/stars[i].z,
     };
     
@@ -190,7 +194,16 @@ void UpdateStarField(Vector3 * stars, Vector2 * starsScreenPos, float flySpeed, 
     }
     }
 
-void UpdateAndDrawStarFieldBG(StarFields * starFields, int32 offsetX = 0, int32 offsetY = 0)
+void DrawBackGround(Texture2D & backGround, Color tint = WHITE)
+{
+    Vector2 position = { 0 };
+    
+    DrawTextureV(backGround, position, tint);
+    
+}
+
+void UpdateAndDrawStarFieldBG(StarFields * starFields, int32 offsetX = 0, int32 offsetY = 0, 
+                              Vector2 moveDir = {0, 0})
 {
     if (!starFields->initialized)
     {
@@ -230,7 +243,7 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields, int32 offsetX = 0, int32 
         int32 end = (tid + 1) * chunck;
         if (end > STAR_COUNT) end = STAR_COUNT;
         
-        UpdateStarField(stars, starsScreenPos, flySpeed,  dt, screenWidth, screenHeight, offsetX, offsetY,
+        UpdateStarField(stars, starsScreenPos, moveDir, flySpeed,  dt, screenWidth, screenHeight, offsetX, offsetY,
                         start, end);
 
     }
@@ -239,7 +252,7 @@ for (uint32 i = 0; i < STAR_COUNT; i++)
     {
          float radius = Lerp(stars[i].z, 1, 5);
         Color color = ColorLerp(DARKPURPLE, SKYBLUE, stars[i].z);
-        DrawCircleV(starsScreenPos[i], radius, color);
+        DrawCircleV(starsScreenPos[i], radius * 2, color);
     }
     
 }
@@ -392,6 +405,8 @@ void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vecto
         }
     }
 }
+
+
 
 #define RENDER_INTERFACE_H
 #endif

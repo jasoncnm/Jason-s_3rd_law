@@ -148,7 +148,6 @@ int main(int argumentCount, char *argumentArray[])
             SM_ERROR("Unable to load file (%s) to texture", TEXTURE_PATH);
             return -1;
         }
-        
         SetTextureFilter(gameState->texture, TEXTURE_FILTER_POINT);
         
         gameState->fgTexture = LoadTexture(FG_PATH);
@@ -158,6 +157,14 @@ int main(int argumentCount, char *argumentArray[])
             return -1;
         }
         SetTextureFilter(gameState->fgTexture, TEXTURE_FILTER_BILINEAR);
+        
+        gameState->bgTexture = LoadTexture(BG_PATH);
+        if (!IsTextureValid(gameState->bgTexture))
+        {
+            SM_ERROR("Unable to load file (%s) to texture", BG_PATH);
+            return -1;
+        }
+        SetTextureFilter(gameState->bgTexture, TEXTURE_FILTER_BILINEAR);
         
         
         for (uint32 shaderType = 0; shaderType < FX_COUNT; shaderType++)

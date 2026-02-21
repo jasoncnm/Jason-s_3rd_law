@@ -27,10 +27,6 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 6. bug fixes, improve post effect 1wk
 2. saves and loads 3d
 
- TODO: PostProcessing
-3. chromatic aberration
-6. shake
-
 // NOTE: done but need testing
 1. tutorial logic: this week
 2. key and door
@@ -710,7 +706,6 @@ inline bool8 UpdateCamera(bool refocus = false)
 {
     
     MyCamera & cam = gameState->camera;
-    
     bool8 updated = false;
     
     Entity * followEnt = GetEntity(cam.followEntityIndex);
@@ -775,12 +770,13 @@ inline bool8 UpdateCamera(bool refocus = false)
                         UpdateCameraToTileMapSmooth(*map, pos, mapIndex);
                     }
                     
-                    updated = true;
+                    
+                updated = true;
                 }
                 
                 break;
             }
-             cam.base.target = Vector2Lerp(cam.base.target, followEnt->pivot, 5 * GetFrameTime());
+            cam.base.target = Vector2Lerp(cam.base.target, followEnt->pivot, 5 * GetFrameTime());
             break;
             }
         case MyCamera::FOLLOW_CENTER:
@@ -1271,7 +1267,16 @@ void GameplayUpdateAndRender()
         //if (gameState->camera.base.zoom > 10.0f) gameState->camera.base.zoom = 10.0f;
         if (gameState->camera.base.zoom < 0.1f) gameState->camera.base.zoom = 0.1f;
         
-            UpdateCamera();
+        Vector2 oldTarget = gameState->camera.base.target;
+        UpdateCamera();
+        Vector2 newTarget = gameState->camera.base.target;
+        
+        gameState->camera.moveDir = { 0 };
+        if (!Vector2Equals(oldTarget, newTarget))
+        {
+            gameState->camera.moveDir = Vector2Subtract(oldTarget, newTarget);
+        }
+        
     }
     
     // NOTE: Recored if State Changes
@@ -1620,10 +1625,11 @@ void GameplayUpdateAndRender()
         ClearBackground(gameState->bgColor);
         
         int mn = Min(GetScreenWidth(), GetScreenHeight());
-        
         UpdateAndDrawStarFieldBG(&gameState->starFields, 
                                  (GetScreenWidth() - mn) / 2,
-                                 (GetScreenHeight() - mn) / 2);
+                                 (GetScreenHeight() - mn) / 2,
+                                 gameState->camera.moveDir);
+        
         BeginMode2D(gameState->camera.base);
         
         
