@@ -8,12 +8,12 @@
 
 #include "tween_controller.h"
 
-int32 TweenController::FindMovingChannel()
+int32 TweenController::FindMovingChannel(ParamType type)
 {
     int32 result = -1;
     for (int32 i = 0; i < MAX_CHANNEL; i++)
     {
-        if (!channels[i].IsEmpty() && channels[i].last().params.paramType == PARAM_TYPE_VECTOR2)
+        if (!channels[i].IsEmpty() && channels[i].last().params.paramType == type)
         {
             result = i;
         }

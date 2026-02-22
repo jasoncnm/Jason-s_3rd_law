@@ -108,7 +108,7 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
             TweenController & c = current.parent->pushEnt->tweenController;
             if (!c.NoTweens()) 
             {
-                int32 channel = c.FindMovingChannel();
+                int32 channel = c.FindMovingChannel(PARAM_TYPE_VECTOR2);
                 Tween & ani = c.channels[channel].last();
                 
                 int32 index = ani.endEvents.Add(TweenEvent{0});
@@ -159,7 +159,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
         
         if (!ent->tweenController.NoTweens())
         {
-            int32 channel = ent->tweenController.FindMovingChannel();
+            int32 channel = ent->tweenController.FindMovingChannel(PARAM_TYPE_VECTOR2);
             Tween & current = ent->tweenController.channels[channel].last();
             
             int32 index = current.endEvents.Add(TweenEvent{ 0 });
@@ -273,7 +273,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir,
                                    BLOCK_MOVE_FUNC, BOUNCE_SPEED);
                     
-                    int32 channel = projectedEnt->tweenController.FindMovingChannel();
+                    int32 channel = projectedEnt->tweenController.FindMovingChannel(PARAM_TYPE_VECTOR2);
                     
                     Tween & current = projectedEnt->tweenController.channels[channel].last();
                     
@@ -613,20 +613,24 @@ inline float GetCameraZoom(Map & currentMap)
 
 inline void UpdateCameraToTileMapSmooth(Map & map)
 {
-    
-    Vector2 endPos = gameState->camera.base.target;
-     gameState->camera.tweenController.Reset();
-    gameState->camera.base.target = endPos;
-    
+    Vector2 startPos = gameState->camera.base.target;
+    real32 startZoom = gameState->camera.base.zoom;
     Vector2 pos = TilePositionToPixelPosition(map.width * 0.5f + map.tilePos.x + 0.5f, 
                                               map.height * 0.5f + map.tilePos.y + 0.5f);
     
-    if (!Vector2Equals(endPos, pos))
+    if (!gameState->camera.tweenController.NoTweens())
+    {
+        gameState->camera.tweenController.Reset();
+        gameState->camera.base.target = startPos;
+        gameState->camera.base.zoom = startZoom;
+}
+    
+    if (!Vector2Equals(gameState->camera.base.target, pos))
     {
     // TODO adjust move and zoom speed based on move and zoom distance
     TweenParams params = {};
     params.paramType = PARAM_TYPE_VECTOR2;
-    params.startVec2 = endPos;
+        params.startVec2 = startPos;
     params.endVec2 = pos;
     params.realVec2  = &gameState->camera.base.target;
     AddTweenUnique(gameState->camera.tweenController, CreateTween(params, CAMERA_MOVE_FUNC, CAMERA_MOVE_SPEED));
@@ -704,7 +708,7 @@ bool8 IsNeighbour(Map & prevMap, Map & currentMap)
     if (gameState->currentMapIndex >= 0)
     {
         if ((gameState->prevMapIndex != gameState->currentMapIndex &&
-            followEnt->tweenController.playing && (followEnt->tweenController.channels[followEnt->tweenController.FindMovingChannel()].last().dt == BOUNCE_SPEED)) ||
+                 followEnt->tweenController.playing && (followEnt->tweenController.GetCurrentAniSpeed() == BOUNCE_SPEED)) ||
              !IsSlime(followEnt))
     #if 0
     if (!CheckCollisionRecs(finalRect, tileMapRec) &&
@@ -723,7 +727,6 @@ bool8 IsNeighbour(Map & prevMap, Map & currentMap)
 
 inline bool8 UpdateCamera(bool refocus = false)
 {
-    
     MyCamera & cam = gameState->camera;
     bool8 updated = false;
     
@@ -760,16 +763,17 @@ inline bool8 UpdateCamera(bool refocus = false)
                 break;
             }
             
-            Map * map = &gameState->tileMaps[gameState->currentMapIndex];
-            
-            if (cam.tweenController.NoTweens())
+            if (gameState->camera.tweenController.NoTweens())
             {
+                FindTileMapResult result = FindTileMap(followEnt->tilePos);
+                if (result.map) UpdateCameraToTileMapSmooth(*result.map);
+            }
+            
+            #if 0
             if (gameState->currentMapIndex != gameState->prevMapIndex)
             {
                 UpdateCameraToTileMapSmooth(*map);
             }
-            }
-            #if 0
             
                 if (!Vector2Equals(pos, cam.base.target))
                 {
@@ -825,7 +829,7 @@ inline bool8 UpdateCamera(bool refocus = false)
                                             followEnt->tileSize * 0.5f,
                                             followEnt->tileSize * 0.5f 
                                         });
-            float speed = 10;
+            float speed = 6;
             
             Vector2 nextPos = cam.base.target;
             
@@ -1253,19 +1257,6 @@ inline bool8 SelectNextAsPlayer(Entity * player = nullptr)
     return result;
 }
 
-inline bool8 SlimeSelection(Entity * player)
-{
-    
-    bool8 stateChanged = false;
-    
-    if (JustPressed(POSSES_KEY))// && gameState->lv2Map && gameState->lv2Map->firstEnter)
-    {
-        stateChanged = SelectNextAsPlayer(player);
-        }
-    
-    return stateChanged;
-}
-
 #if 0
 void UpdateSprite(EntityLayer layer)
 {
@@ -1297,23 +1288,22 @@ void GameplayUpdateAndRender()
         // NOTE: CameraZoom
         // Camera zoom controls
         // Uses log scaling to provide consistent zoom speed
-        gameState->camera.base.zoom = expf(logf(gameState->camera.base.zoom) + ((float)GetMouseWheelMove()*0.1f));
+        real32 wheelDelta = (float)GetMouseWheelMove();
+        Vector2 oldTarget = gameState->camera.base.target;
         
+        gameState->camera.base.zoom = expf(logf(gameState->camera.base.zoom) + (wheelDelta*0.1f));
         // NOTE: Camera Drag
-        if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
+         if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
         {
             Vector2 mouseDelta = GetMouseDelta();
             gameState->camera.base.target.x -= mouseDelta.x;
             gameState->camera.base.target.y -= mouseDelta.y;
         }
-        
         //if (gameState->camera.base.zoom > 10.0f) gameState->camera.base.zoom = 10.0f;
         if (gameState->camera.base.zoom < 0.1f) gameState->camera.base.zoom = 0.1f;
         
-        Vector2 oldTarget = gameState->camera.base.target;
-        UpdateCamera();
+          UpdateCamera();
         Vector2 newTarget = gameState->camera.base.target;
-        
         gameState->camera.moveDir = { 0 };
         if (!Vector2Equals(oldTarget, newTarget))
         {
@@ -1325,6 +1315,7 @@ void GameplayUpdateAndRender()
     // NOTE: Recored if State Changes
     bool8 stateChanged = false;
     bool8 isPressed = false;
+    bool8 slimeSwitched = false;
     // NOTE: Actions
     if (GetPlayer() && !gameState->simulating) {
         
@@ -1334,7 +1325,6 @@ void GameplayUpdateAndRender()
         uint32 prevPlayerIndex = gameState->playerEntityIndex;
         
         // NOTE SlimeSelection
-        stateChanged = SlimeSelection(player);
         UpdateElectricDoor();
         
         {
@@ -1345,11 +1335,15 @@ void GameplayUpdateAndRender()
                     
                     IVec2 actionDir = { 0 };
                     // NOTE: read input
-                    if (JustPressed(SPLIT_KEY))
+                    if (JustPressed(POSSES_KEY))
+                    {
+                        stateChanged = SelectNextAsPlayer(player);
+                        slimeSwitched = stateChanged;
+                        }
+                    else if (JustPressed(SPLIT_KEY))
                     {
                         isPressed = true;
                          actionDir= -player->attachDir;
-                        
                         stateChanged = stateChanged || SplitAction(player, actionDir);
                         }
                     else
@@ -1475,6 +1469,7 @@ void GameplayUpdateAndRender()
     }
     
     // NOTE: Simulate
+    Entity * lastFollowEnt = GetEntity(gameState->camera.followEntityIndex);
     {
         gameState->simulating = false;
         // NOTE: Update: Entity
@@ -1533,13 +1528,14 @@ void GameplayUpdateAndRender()
             } 
         }
         }
-        
-        Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
-        if (!followEnt || isPressed || 
-            (followEnt->tweenController.NoTweens() && JustPressed(RECOVER_KEY)))
-        {
-            gameState->camera.followEntityIndex = gameState->playerEntityIndex;
         }
+    
+    Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
+    if (JustPressed(RECOVER_KEY) || 
+        !followEnt || 
+        (isPressed && (followEnt != GetPlayer()) && followEnt->tweenController.NoTweens()))
+    {
+        gameState->camera.followEntityIndex = gameState->playerEntityIndex;
         }
     
     // NOTE: update mapIndex
@@ -1569,8 +1565,14 @@ void GameplayUpdateAndRender()
         {
             gameState->playerMapIndex = result.mapIndex;
             }
-        
-    }
+        if (slimeSwitched || 
+            (followEnt != lastFollowEnt) && 
+                           (GetPlayer() == followEnt))
+        {
+            UpdateCamera(true);
+        }
+        }
+    
     
     if (!GetPlayer())
     {
@@ -1755,10 +1757,10 @@ void GameplayUpdateAndRender()
         
         EntityLayer orderedDrawLayers[] = 
         {
-            LAYER_WALL, 
-            LAYER_CABLE,
             LAYER_SOURCE,
+            LAYER_CABLE,
             LAYER_CONNECTION,
+            LAYER_WALL, 
             LAYER_PIT,
             LAYER_KEY_LOCK,
             LAYER_PORTAL,
@@ -1878,8 +1880,10 @@ void GameplayUpdateAndRender()
                                      gameState->camera.base.offset.x, gameState->camera.base.offset.y, gameState->camera.base.zoom,
                                      GetCameraState(gameState->camera)), 10, 50, 20, RAYWHITE);
         
-        DrawText(TextFormat("Follow Entity Type: %s(%d)", GetEntityType(followEnt), followEnt->entityIndex),
-                 10, 200, 40, YELLOW);
+        DrawText(TextFormat("Follow Entity Type: %s(%d)\nLast Follow Entity Type: %s(%d)", 
+                                     GetEntityType(followEnt), followEnt->entityIndex,
+                                     GetEntityType(lastFollowEnt), lastFollowEnt->entityIndex),
+                 10, 200, 25, YELLOW);
         
 #if 0
         

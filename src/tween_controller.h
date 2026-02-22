@@ -28,8 +28,12 @@ struct TweenController
     // NOTE: Update Every frame
     void Update();
     
-    int32 FindMovingChannel();
-    
+    int32 FindMovingChannel(ParamType type);
+        
+    real32 GetCurrentAniSpeed()
+    {
+        return channels[FindMovingChannel(PARAM_TYPE_VECTOR2)][0].dt;
+    }
     
     bool8 NoTweens()
     {

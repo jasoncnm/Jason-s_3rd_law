@@ -265,7 +265,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 param.realVec2  = &entity->pivot;
                 
                 
-                int32 channel = entity->tweenController.FindMovingChannel();
+                int32 channel = entity->tweenController.FindMovingChannel(PARAM_TYPE_VECTOR2);
                 
                 if (channel < 0)
                 {
@@ -325,7 +325,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         param.endVec2 = endPivot;
         param.realVec2  = &entity->pivot;
         
-        int32 channel = entity->tweenController.FindMovingChannel();
+        int32 channel = entity->tweenController.FindMovingChannel(PARAM_TYPE_VECTOR2);
         
         if (channel < 0)
         {
@@ -708,7 +708,7 @@ inline void UpdateSlimes()
                     float aniSpeed = BOUNCE_SPEED;
                     if (!attach->tweenController.NoTweens())
                     {
-                        aniSpeed = attach->tweenController.channels[attach->tweenController.FindMovingChannel()].last().dt;
+                        aniSpeed = attach->tweenController.channels[attach->tweenController.FindMovingChannel(PARAM_TYPE_VECTOR2)].last().dt;
                     }
                     
                     if (blockedEnt)

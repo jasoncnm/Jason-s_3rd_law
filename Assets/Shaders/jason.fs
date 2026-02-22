@@ -22,7 +22,7 @@ float numColors = 10.0;
 // Custom uniforms
 uniform vec2 u_frameSize;
 uniform float offset = 0.0;
-uniform float brightness = 1.65;
+uniform float brightness = 1.5;
 uniform bool shake;
 
 vec4 applyBloom(vec4 color, vec2 uv)
@@ -44,16 +44,17 @@ vec4 applyBloom(vec4 color, vec2 uv)
     return ((sum/(samples*samples)) + color)*colDiffuse;
 }
 
-vec4 applyVignette(vec4 color, vec2 min, vec2 max)
+vec4 applyVignette(vec4 color, vec2 uv, float miny, float maxy)
 {
-    vec2 position = (gl_FragCoord.xy / u_frameSize) - vec2(0.5);           
-    float dist = length(position.y * vec2((max.y - min.y), 1.0));
+    vec2 position = ((uv) - vec2(0.5));           
+    float dist = abs(position.y)/(maxy - miny);
 
-    float ratio = 0.48;
-    float strength = 10;
+    float ratio = 0.49;
+    float strength = 4;
     
     float radius = ratio * strength;
     float softness = (1.0 - ratio) * strength;
+
     float vignette = smoothstep(radius, radius - softness, dist);
 
     color.rgb = color.rgb - (1.0 - vignette);
@@ -171,6 +172,18 @@ void main()
     float miny = (u_frameSize.y - u_frameSize.x) / (2.0 * u_frameSize.y);
     float maxy = (u_frameSize.y + u_frameSize.x) / (2.0 * u_frameSize.y);
 
+    if (u_frameSize.x > u_frameSize.y)
+    {
+        miny = 0.0;
+        maxy = 1.0;
+    }
+    else
+    {
+        minx = 0.0;
+        maxx = 1.0;
+    }
+
+
     vec2 uv = curve(fragTexCoord);
     vec4 color = texture(texture0, uv);
     if (shake)
@@ -184,7 +197,10 @@ void main()
     color = applyPosterization(color);
     color = applyBloom(color, uv);
     color = applyScanline(color, uv);
-    color = applyVignette(color, vec2(minx, miny), vec2(maxx, maxy));
+
+    
+
+    color = applyVignette(color, uv, miny, maxy);
     // color = mix(color, vfx, 1);
 
     
@@ -192,23 +208,10 @@ void main()
     // NOTE: Implement here your fragment shader code
 
     // clipped unwanted uvs only render square
-	if (uv.y < 0.0 || uv.y > 1.0)
-		color *= 0.0;
-    
-    if (uv.x < 0.0 || uv.x > 1.0)
-		color *= 0.0;
-    
-    if (u_frameSize.x > u_frameSize.y)
-    {
-        if (uv.x < minx || uv.x > maxx)
-            color *= 0.0;
-    }
-    else
-    {
-        if (uv.y < miny || uv.y > maxy)
-            color *= 0.0;
-    }
-
+    if (uv.x < minx || uv.x > maxx)
+        color *= 0.0;
+    if (uv.y < miny || uv.y > maxy)
+        color *= 0.0;
 
     finalColor = color; 
 }
