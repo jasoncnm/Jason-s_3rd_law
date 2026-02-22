@@ -194,14 +194,6 @@ void UpdateStarField(Vector3 * stars, Vector2 * starsScreenPos, Vector2 moveDir,
     }
     }
 
-void DrawBackGround(Texture2D & backGround, Color tint = WHITE)
-{
-    Vector2 position = { 0 };
-    
-    DrawTextureV(backGround, position, tint);
-    
-}
-
 void UpdateAndDrawStarFieldBG(StarFields * starFields, int32 offsetX = 0, int32 offsetY = 0, 
                               Vector2 moveDir = {0, 0})
 {
@@ -250,9 +242,9 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields, int32 offsetX = 0, int32 
     
 for (uint32 i = 0; i < STAR_COUNT; i++)
     {
-         float radius = Lerp(stars[i].z, 1, 5);
+        float radius = Lerp(stars[i].z, 1, 5);
         Color color = ColorLerp(DARKPURPLE, SKYBLUE, stars[i].z);
-        DrawCircleV(starsScreenPos[i], radius * 2, color);
+        DrawCircleV(starsScreenPos[i], radius * 1.5f, color);
     }
     
 }

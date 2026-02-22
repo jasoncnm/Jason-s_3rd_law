@@ -628,7 +628,7 @@ inline Entity * FindEntityByLocationAndLayers(IVec2 pos, EntityLayer * layers, u
 
 inline Entity * FindAttachSlime(Entity * attachObject)
 {
-    SM_ASSERT(!IsSlime(attachObject), "Slime Cannot attach to slime");
+    // SM_ASSERT(!IsSlime(attachObject), "Slime Cannot attach to slime");
     
     Entity * attachSlime = nullptr;
     

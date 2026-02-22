@@ -531,7 +531,6 @@ void SetUpElectricDoor()
 
 inline void UpdateElectricDoor()
 {
-    
     for (uint32 i = 0; i < Source_Indices.count; i++)
     {
         int32 sourceCableIndex = Source_Indices[i];
@@ -549,14 +548,8 @@ inline void UpdateElectricDoor()
             if (!source->conductive)
                 OnSourcePowerOn(sourceCableIndex);
         }
-        else
-        {
-            ShutDownPower(sourceCableIndex);
         }
-        
-    }
-
-    for (uint32 i = 0; i < Connection_Indices.count; i++)
+for (uint32 i = 0; i < Connection_Indices.count; i++)
     {
         Entity * connection = GetEntity(Connection_Indices[i]);
         SM_ASSERT(connection, "Entity is not active");
@@ -579,31 +572,5 @@ inline void UpdateElectricDoor()
                     }
                 }
             }
-
-        if (!GetEntity(connection->sourceIndex)->sourceLit) 
-        {
-            EntityLayer layers[] = { LAYER_BLOCK, LAYER_SLIME };
-                if (!FindEntityByLocationAndLayers(connection->tilePos, layers, ArrayCount(layers)))
-                {
-                    connection->conductive = false;
-                        
-                    int32 indexes[4] =
-                        {
-                            connection->leftIndex,
-                            connection->rightIndex,
-                            connection->upIndex,
-                            connection->downIndex
-                        };
-                    for (int32 i = 0; i < 4; i++)
-                    {
-                        int32 id = indexes[i];
-                        if (id >= 0)
-                        {
-                            ShutDownPower(id);                    
-                        }
-                    }
-                }
-            }
-        
-    }
+}
 }

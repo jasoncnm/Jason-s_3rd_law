@@ -120,5 +120,90 @@ Color IntToRGBA(uint32 val)
     return color;
 }
 
+const char * GetCameraState(MyCamera & camera)
+{
+    switch (camera.followState)
+    {
+        case MyCamera::LOCK_TO_MAP:
+        {
+            return "LOCK_TO_MAP";
+        }
+        case MyCamera::FOLLOW_WITHIN_MAP:
+        {
+            return "FOLLOW_WITHIN_MAP";
+        }
+        case MyCamera::FOLLOW_CENTER:
+        {
+            return "FOLLOW_CENTER";
+        }
+        case MyCamera::FOLLOW_ALONG_AXIS:
+        {
+            return "FOLLOW_ALONG_AXIS";
+        }
+    }
+    
+    return "none";
+}
+
+const char * GetEntityType(Entity * entity)
+{
+    if (entity)
+    {
+    switch (entity->type)
+    {
+        case ENTITY_TYPE_PLAYER:
+        {
+            return "ENTITY_TYPE_PLAYER";
+        }
+        case ENTITY_TYPE_CLONE:
+        {
+            return "ENTITY_TYPE_CLONE";
+        }
+        case ENTITY_TYPE_WALL:
+        {
+            return "ENTITY_TYPE_WALL";
+        }
+        case ENTITY_TYPE_BLOCK:
+        {
+            return "ENTITY_TYPE_BLOCK";
+        }
+        case ENTITY_TYPE_GLASS:
+        {
+            return "ENTITY_TYPE_GLASS";
+        }
+        case ENTITY_TYPE_ELECTRIC_DOOR:
+        {
+            return "ENTITY_TYPE_ELECTRIC_DOOR";
+        }
+        case ENTITY_TYPE_PIT:
+        {
+            return "ENTITY_TYPE_PIT";
+        }
+        case ENTITY_TYPE_TUT_PORTAL:
+        {
+            return "ENTITY_TYPE_TUT_PORTAL";
+        }
+        case ENTITY_TYPE_MAIN_PORTAL:
+        {
+            return "ENTITY_TYPE_MAIN_PORTAL";
+        }
+        case ENTITY_TYPE_SLIME_PORTAL:
+        {
+            return "ENTITY_TYPE_SLIME_PORTAL";
+        }
+        case ENTITY_TYPE_KEY:
+        {
+            return "ENTITY_TYPE_KEY";
+        }
+        case ENTITY_TYPE_LOCK:
+        {
+            return "ENTITY_TYPE_LOCK";
+        }
+        
+        }
+    }
+    return "NONE";
+}
+
 #define GAME_UTIL_H
 #endif

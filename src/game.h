@@ -121,6 +121,19 @@ struct UndoState
     // TODO: optimize this by allocate entities 
     //       into our own allocator aka EntityArray
     std::vector<Entity> undoEntities;
+    
+    Entity * GetByEntityIndex(int32 entityIndex)
+    {
+        for (uint32 i = 0; i < undoEntities.size(); i++)
+        {
+            if (undoEntities[i].entityIndex == entityIndex)
+            {
+                return &undoEntities[i];
+            }
+        }
+        return nullptr;
+    }
+    
 };
 
 struct Map
@@ -237,7 +250,12 @@ struct GameState
     IVec2 tileMin, tileMax;
     
     int32 playerEntityIndex;
+    
+    // NOTE: map index of the map containing camera follow entity current tilePos
     int32 currentMapIndex;
+    // NOTE: map index of the map containing camera follow entity prev tilePos
+    int32 prevMapIndex;
+    // NOTE: map index of the map containing player tilePos
     int32 playerMapIndex;
     int32 lastTutBlockIndex;
     

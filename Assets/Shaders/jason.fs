@@ -22,7 +22,7 @@ float numColors = 10.0;
 // Custom uniforms
 uniform vec2 u_frameSize;
 uniform float offset = 0.0;
-uniform float brightness = 1.75;
+uniform float brightness = 1.65;
 uniform bool shake;
 
 vec4 applyBloom(vec4 color, vec2 uv)
@@ -44,13 +44,13 @@ vec4 applyBloom(vec4 color, vec2 uv)
     return ((sum/(samples*samples)) + color)*colDiffuse;
 }
 
-vec4 applyVignette(vec4 color)
+vec4 applyVignette(vec4 color, vec2 min, vec2 max)
 {
     vec2 position = (gl_FragCoord.xy / u_frameSize) - vec2(0.5);           
-    float dist = length(position.y * vec2(u_frameSize.x/u_frameSize.y, 1.0));
+    float dist = length(position.y * vec2((max.y - min.y), 1.0));
 
-    float ratio = 0.47;
-    float strength = 11;
+    float ratio = 0.48;
+    float strength = 10;
     
     float radius = ratio * strength;
     float softness = (1.0 - ratio) * strength;
@@ -166,7 +166,10 @@ void main()
 {
     // vec2 uv = fragTexCoord;
     float dim = min(u_frameSize.x, u_frameSize.y);
-
+    float minx = (u_frameSize.x - u_frameSize.y) / (2.0 * u_frameSize.x);
+    float maxx = (u_frameSize.x + u_frameSize.y) / (2.0 * u_frameSize.x);
+    float miny = (u_frameSize.y - u_frameSize.x) / (2.0 * u_frameSize.y);
+    float maxy = (u_frameSize.y + u_frameSize.x) / (2.0 * u_frameSize.y);
 
     vec2 uv = curve(fragTexCoord);
     vec4 color = texture(texture0, uv);
@@ -179,9 +182,9 @@ void main()
     // color = vfx;
     // color = applyPixelizer(uv);
     color = applyPosterization(color);
-    color = applyVignette(color);
     color = applyBloom(color, uv);
     color = applyScanline(color, uv);
+    color = applyVignette(color, vec2(minx, miny), vec2(maxx, maxy));
     // color = mix(color, vfx, 1);
 
     
@@ -197,15 +200,11 @@ void main()
     
     if (u_frameSize.x > u_frameSize.y)
     {
-        float minx = (u_frameSize.x - u_frameSize.y) / (2.0 * u_frameSize.x);
-        float maxx = (u_frameSize.x + u_frameSize.y) / (2.0 * u_frameSize.x);
         if (uv.x < minx || uv.x > maxx)
             color *= 0.0;
     }
     else
     {
-        float miny = (u_frameSize.y - u_frameSize.x) / (2.0 * u_frameSize.y);
-        float maxy = (u_frameSize.y + u_frameSize.x) / (2.0 * u_frameSize.y);
         if (uv.y < miny || uv.y > maxy)
             color *= 0.0;
     }
