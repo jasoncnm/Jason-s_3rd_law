@@ -930,7 +930,7 @@ inline void Undo()
     std::vector<Entity> & undoEntities = undoState.undoEntities;
     SetUndoEntities(undoEntities);        
     gameState->undoStack.pop_back();
-    UpdateCamera(true);
+    // UpdateCamera(true);
 }
 
 
@@ -1569,8 +1569,7 @@ void GameplayUpdateAndRender()
         if (gameState->camera.base.zoom < 0.1f) gameState->camera.base.zoom = 0.1f;
         }
     
-    if (slimeSwitched || 
-        ((followEnt != lastFollowEnt) && (GetPlayer() == followEnt)))
+        if (slimeSwitched)//  || ((followEnt != lastFollowEnt) && (GetPlayer() == followEnt)))
     {
         UpdateCamera(true);
     }
