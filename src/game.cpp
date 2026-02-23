@@ -822,6 +822,9 @@ inline bool8 UpdateCamera(bool refocus = false)
         }
         case MyCamera::FOLLOW_ALONG_AXIS:
         {
+            
+            if (gameState->prevMapIndex == gameState->currentMapIndex) break;
+            
             Vector2 moveDir = GetTilePivot(followEnt) - followEnt->pivot;
             Vector2 center = Vector2Add(followEnt->pivot, 
                                         Vector2 
@@ -830,7 +833,6 @@ inline bool8 UpdateCamera(bool refocus = false)
                                             followEnt->tileSize * 0.5f 
                                         });
             float speed = 6;
-            
             Vector2 nextPos = cam.base.target;
             
             
@@ -859,7 +861,13 @@ inline bool8 UpdateCamera(bool refocus = false)
                     followEnt->tweenController.NoTweens())
                 {
                      nextPos = Vector2Lerp(cam.base.target, finalPos, speed * GetFrameTime());
-                }
+            }
+            
+            if (followEnt->tweenController.NoTweens())
+            {
+                real32 nextZoom = GetCameraZoom(*currentMap);
+                cam.base.zoom = Lerp(cam.base.zoom, nextZoom, speed * GetFrameTime());
+            }
             
             cam.base.target = nextPos;
             
@@ -1283,35 +1291,6 @@ void UpdateSprite(EntityLayer layer)
 void GameplayUpdateAndRender()
 {
     
-    // NOTE: Debug Camera Control
-    {
-        // NOTE: CameraZoom
-        // Camera zoom controls
-        // Uses log scaling to provide consistent zoom speed
-        real32 wheelDelta = (float)GetMouseWheelMove();
-        Vector2 oldTarget = gameState->camera.base.target;
-        
-        gameState->camera.base.zoom = expf(logf(gameState->camera.base.zoom) + (wheelDelta*0.1f));
-        // NOTE: Camera Drag
-         if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
-        {
-            Vector2 mouseDelta = GetMouseDelta();
-            gameState->camera.base.target.x -= mouseDelta.x;
-            gameState->camera.base.target.y -= mouseDelta.y;
-        }
-        //if (gameState->camera.base.zoom > 10.0f) gameState->camera.base.zoom = 10.0f;
-        if (gameState->camera.base.zoom < 0.1f) gameState->camera.base.zoom = 0.1f;
-        
-          UpdateCamera();
-        Vector2 newTarget = gameState->camera.base.target;
-        gameState->camera.moveDir = { 0 };
-        if (!Vector2Equals(oldTarget, newTarget))
-        {
-            gameState->camera.moveDir = Vector2Subtract(oldTarget, newTarget);
-        }
-        
-    }
-    
     // NOTE: Recored if State Changes
     bool8 stateChanged = false;
     bool8 isPressed = false;
@@ -1469,7 +1448,7 @@ void GameplayUpdateAndRender()
     }
     
     // NOTE: Simulate
-    Entity * lastFollowEnt = GetEntity(gameState->camera.followEntityIndex);
+    Entity * lastFollowEnt = gameState->simulating ? nullptr : GetEntity(gameState->camera.followEntityIndex);
     {
         gameState->simulating = false;
         // NOTE: Update: Entity
@@ -1565,14 +1544,47 @@ void GameplayUpdateAndRender()
         {
             gameState->playerMapIndex = result.mapIndex;
             }
-        if (slimeSwitched || 
-            (followEnt != lastFollowEnt) && 
-                           (GetPlayer() == followEnt))
-        {
-            UpdateCamera(true);
-        }
         }
     
+    // NOTE: Camera Updates
+    {
+    Vector2 oldTarget = gameState->camera.base.target;
+    
+    // NOTE: Debug Camera Control
+    {
+        // NOTE: CameraZoom
+        // Camera zoom controls
+        // Uses log scaling to provide consistent zoom speed
+        real32 wheelDelta = (float)GetMouseWheelMove();
+        
+        gameState->camera.base.zoom = expf(logf(gameState->camera.base.zoom) + (wheelDelta*0.1f));
+        // NOTE: Camera Drag
+        if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
+        {
+            Vector2 mouseDelta = GetMouseDelta();
+            gameState->camera.base.target.x -= mouseDelta.x;
+            gameState->camera.base.target.y -= mouseDelta.y;
+        }
+        //if (gameState->camera.base.zoom > 10.0f) gameState->camera.base.zoom = 10.0f;
+        if (gameState->camera.base.zoom < 0.1f) gameState->camera.base.zoom = 0.1f;
+        }
+    
+    if (slimeSwitched || 
+        ((followEnt != lastFollowEnt) && (GetPlayer() == followEnt)))
+    {
+        UpdateCamera(true);
+    }
+    else 
+    {
+        UpdateCamera();
+    }
+    Vector2 newTarget = gameState->camera.base.target;
+    gameState->camera.moveDir = { 0 };
+    if (!Vector2Equals(oldTarget, newTarget))
+    {
+        gameState->camera.moveDir = Vector2Subtract(oldTarget, newTarget);
+    }
+    }
     
     if (!GetPlayer())
     {
@@ -1814,7 +1826,7 @@ void GameplayUpdateAndRender()
         BeginDrawing();
         
         
-        ClearBackground(gameState->bgColor);
+        ClearBackground(IntToRGBA(0x465a6f));
         
         if (IsKeyPressed(KEY_R))
         {
@@ -1880,9 +1892,7 @@ void GameplayUpdateAndRender()
                                      gameState->camera.base.offset.x, gameState->camera.base.offset.y, gameState->camera.base.zoom,
                                      GetCameraState(gameState->camera)), 10, 50, 20, RAYWHITE);
         
-        DrawText(TextFormat("Follow Entity Type: %s(%d)\nLast Follow Entity Type: %s(%d)", 
-                                     GetEntityType(followEnt), followEnt->entityIndex,
-                                     GetEntityType(lastFollowEnt), lastFollowEnt->entityIndex),
+        DrawText(TextFormat("Follow Entity Type: %s(%d)", GetEntityType(followEnt), followEnt->entityIndex),
                  10, 200, 25, YELLOW);
         
 #if 0
@@ -1998,6 +2008,8 @@ void InitializeGame()
     gameState->camera.followState = MyCamera::LOCK_TO_MAP;
     
     gameState->shakeTime = 0.0f;
+    
+    UpdateCamera();
     
 }
 
