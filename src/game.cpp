@@ -1761,6 +1761,11 @@ void GameplayUpdateAndRender()
             }
         }
         
+        if (IsKeyPressed(KEY_DELETE))
+        {
+            end = true;
+        }
+        
         if (end)
         {
             Entity player = *GetPlayer();
