@@ -59,24 +59,22 @@ enum TileID
     CABLE_DOWN_RIGHT = 6,
     CABLE_H          = 7,
     CABLE_DOWN_LEFT  = 8,
+    SOURCE_DOWN_RIGHT = 9,
+    SOURCE_DOWN_LEFT  = 10,
+    
     CABLE_V          = 16,
+    SOURCE_UP_RIGHT   = 19,
+    SOURCE_UP_LEFT     = 20,
     CABLE_UP_RIGHT   = 26,
     CABLE_UP_LEFT    = 28,
-    
+    SOURCE_V          = 29,
+    SOURCE_H          = 30,
     SOURCE_RIGHT = 36,
     SOURCE_LEFT  = 37,
     SOURCE_DOWN  = 38,
     SOURCE_UP    = 48,
-    
-    SOURCE_H          = 30,
-    SOURCE_V          = 29,
-    SOURCE_UP_RIGHT   = 19,
-    SOURCE_UP_LEFT     = 20,
-    SOURCE_DOWN_RIGHT = 9,
-    SOURCE_DOWN_LEFT  = 10,
-    
-    
     CABLE_CONNECTION = 72,
+    
 };
 
 
@@ -99,6 +97,15 @@ TileID GetCablePowerOnID(TileID tileID)
     if (tileID >= (50 + CABLE_DOWN_RIGHT))
     {
         return (TileID)(tileID - 50);
+    }
+    return tileID;
+}
+
+TileID GetCablePowerOffID(TileID tileID)
+{
+    if ((tileID) <= SOURCE_UP)
+    {
+        return (TileID)(tileID + 50);
     }
     return tileID;
 }

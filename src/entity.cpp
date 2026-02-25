@@ -8,9 +8,150 @@
 #include "entity.h"
 #include "game_util.h"
 
-inline bool8 DoorBlocked(Entity * door, IVec2 reachDir);
-inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir);
-inline bool8 IsDoor(Entity * door);
+// --------------------------------------------------------------------
+// NOTE: Entity Actions
+// --------------------------------------------------------------------
+
+inline void DeleteEntity(Entity * entity)
+{
+    entity->changed = true;
+    entity->active = false;
+    entity->type = ENTITY_TYPE_NULL;
+    entity->tweenController.Reset();
+}
+
+inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
+{
+    SM_ASSERT(mergeSlime->active && mergedSlime->active, "entity does not exist");
+    SM_ASSERT(mergeSlime != mergedSlime, "Entity cannot merge itself");
+    
+    mergedSlime->changed = true;
+    mergeSlime->changed = true;
+    
+    if (mergedSlime->entityIndex == gameState->playerEntityIndex)
+    {
+        mergeSlime->type = ENTITY_TYPE_PLAYER;
+        gameState->playerEntityIndex = mergeSlime->entityIndex;
+        mergeSlime->color = WHITE;
+    }
+    
+    // mergeSlime->tileSize = endSize;
+    // mergeSlime->pivot = GetTilePivot(mergeSlime);
+    {
+        // Merge Slime Tween
+        
+        float startSize = GetSlimeSize(mergeSlime);
+        Vector2 startPivot = GetTilePivot(mergeSlime);
+        mergeSlime->mass++;
+        float endSize = GetSlimeSize(mergeSlime);
+        Vector2 endPivot = GetTilePivot(mergeSlime->tilePos, endSize, mergeSlime->attachDir);
+        
+        TweenParams params2 = {};
+        params2.paramType = PARAM_TYPE_VECTOR2;
+        params2.startVec2 = startPivot;
+        params2.endVec2 = endPivot;
+        params2.realVec2 = &mergeSlime->pivot;
+        AddTweenUnique(mergeSlime->tweenController, CreateTween(params2));
+        
+        TweenParams params1 = {};
+        params1.paramType = PARAM_TYPE_FLOAT;
+        params1.startF = startSize;
+        params1.endF = endSize;
+        params1.realF = &mergeSlime->tileSize;
+        AddTweenUnique(mergeSlime->tweenController, CreateTween(params1));
+    }
+    
+    {
+        // Merged Slime Tween
+        mergedSlime->tweenController.Reset();
+        
+        Entity * attach = nullptr;
+        if (mergeSlime->attach)
+        {
+            attach = GetEntity(mergeSlime->attachedEntityIndex);
+        }
+        
+        TweenEvent endEvent = { 0 };
+        endEvent.controller = &mergeSlime->tweenController;
+        endEvent.deleteEntity = mergedSlime;
+        mergedSlime->tweenController.endEvents.Add(endEvent);
+        
+        MoveEntity(mergedSlime, attach, nullptr, mergeSlime->tilePos, BLOCK_MOVE_FUNC, BOUNCE_SPEED);
+        
+    }
+    return mergeSlime;
+}
+
+inline void SetEntityPosition(Entity * entity, Entity * attachedEntity, IVec2 tilePos)
+{
+    SM_ASSERT(entity->active, "entity does not exist");
+    SM_ASSERT(entity->movable, "entity cannot be moved");
+    
+    entity->changed = true;
+    
+    entity->tilePos = tilePos;
+    
+    if (attachedEntity)
+    {
+        IVec2 dir = (attachedEntity->tilePos - entity->tilePos);
+        
+        dir.x = dir.x == 0 ? 0 : Sign(dir.x);
+        dir.y = dir.y == 0 ? 0 : Sign(dir.y);
+        
+        SM_ASSERT(IsDoor(entity) || IsDoor(attachedEntity) || dir.SqrMagnitude() == 1, "Invalid direction");
+        
+        if (IsSlime(entity))
+        {
+            entity->attach = true;
+            entity->attachedEntityIndex = attachedEntity->entityIndex;
+            entity->attachDir = dir;
+        }
+        
+        if (IsSlime(attachedEntity))
+        {
+            attachedEntity->attach = true;
+            attachedEntity->attachedEntityIndex = entity->entityIndex;
+            attachedEntity->attachDir = -dir;
+        }
+    }
+    else
+    {
+        entity->attach = false;
+        entity->attachedEntityIndex = entity->entityIndex;
+    }
+}
+
+inline Entity * CreateSlimeClone(Entity * ent)
+{
+    ent->changed = true;
+    IVec2 tilePos = ent->tilePos;
+    auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
+    Entity * freeEntity = nullptr;
+    for (uint32 i = 0; i < slimeEntityIndices.count; i++)
+    {
+        Entity * slime = &gameState->entities[slimeEntityIndices[i]];
+        if (!slime->active)
+        {
+            freeEntity = slime;
+            *freeEntity = *ent;
+            freeEntity->entityIndex = slimeEntityIndices[i];
+            freeEntity->active = true;
+            freeEntity->tilePos = tilePos;
+            freeEntity->type = ENTITY_TYPE_CLONE;
+            freeEntity->mass = 1;
+            freeEntity->tileSize = GetSlimeSize(freeEntity);
+            freeEntity->color = GRAY;  
+            freeEntity->pivot = GetTilePivot(freeEntity);
+            freeEntity->changed = true;
+        }
+    }
+    SM_ASSERT(freeEntity, "slimes slots are full");
+    return freeEntity;
+    
+}
+
+
+// --------------------------------------------------------------------
 
 inline Entity * GetEntity(int32 i)
 {
@@ -158,55 +299,14 @@ AddConnection(IVec2 tilePos, TileID tileID)
     return entityResult;
 }
 
-inline void DeleteEntity(Entity * entity)
-{
-    entity->active = false;
-    entity->type = ENTITY_TYPE_NULL;
-    entity->tweenController.Reset();
-}
-
 inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * playEvent,
                        IVec2 targetPos, float (*MoveFunc)(float), float speed)
 {
     SM_ASSERT(entity->active, "entity does not exist");
     SM_ASSERT(entity->movable, "entity cannot be moved");
     Entity old = *entity;
-    
-    entity->changed = true;
-    
-    // Vector2 startPivot = entity->pivot;
     Vector2 startPivot = GetTilePivot(entity);
-    entity->tilePos = targetPos;
-    if (attachedEntity)
-    {
-        attachedEntity->changed = true;
-        IVec2 dir = (attachedEntity->tilePos - entity->tilePos);
-        
-        dir.x = dir.x == 0 ? 0 : Sign(dir.x);
-        dir.y = dir.y == 0 ? 0 : Sign(dir.y);
-        
-        SM_ASSERT(IsDoor(entity) || IsDoor(attachedEntity) || dir.SqrMagnitude() == 1, "Invalid direction");
-        
-        if (IsSlime(entity))
-        {
-            entity->attach = true;
-            entity->attachedEntityIndex = attachedEntity->entityIndex;
-            entity->attachDir = dir;
-        }
-        
-        if (IsSlime(attachedEntity))
-        {
-            attachedEntity->attach = true;
-            attachedEntity->attachedEntityIndex = entity->entityIndex;
-            attachedEntity->attachDir = -dir;
-            
-        }
-    }
-    else
-    {
-        entity->attach = false;
-        entity->attachedEntityIndex = entity->entityIndex;
-    }
+    SetEntityPosition(entity, attachedEntity, targetPos);
     Vector2 endPivot = GetTilePivot(entity);
     
     if (Vector2Equals(startPivot, endPivot))
@@ -375,34 +475,6 @@ inline void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir)
     }
 }
 
-inline void SetEntityPosition(Entity * entity, Entity * touchingEntity, IVec2 tilePos)
-{
-    SM_ASSERT(entity->active, "entity does not exist");
-    SM_ASSERT(entity->movable, "entity cannot be moved");
-    
-    // entity->positionSetMarker = true;
-    
-    entity->tilePos = tilePos;
-    // entity->pivot = GetTilePivot(entity);
-    
-    if (touchingEntity && touchingEntity && (entity->type == ENTITY_TYPE_PLAYER || entity->type == ENTITY_TYPE_CLONE))
-    {
-        IVec2 dir = (touchingEntity->tilePos - entity->tilePos);
-        
-        dir.x = dir.x == 0 ? 0 : Sign(dir.x);
-        dir.y = dir.y == 0 ? 0 : Sign(dir.y);
-        
-        SM_ASSERT(dir.SqrMagnitude() == 1, "Invalid bounce direction");
-        
-        SetAttach(entity, touchingEntity, dir);
-    }
-    else
-    {
-        entity->attach = false;
-    }
-    
-}
-
 inline void SetActionState(Entity * entity, ActionState state)
 {
     SM_ASSERT(entity->active, "entity does not exist");
@@ -424,70 +496,6 @@ inline float GetSlimeSize(int32 mass)
 inline float GetSlimeSize(Entity * slime)
 {
     return GetSlimeSize(slime->mass);
-}
-
-inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
-{
-    SM_ASSERT(mergeSlime->active && mergedSlime->active, "entity does not exist");
-    SM_ASSERT(mergeSlime != mergedSlime, "Entity cannot merge itself");
-    
-    mergedSlime->changed = true;
-    mergeSlime->changed = true;
-    
-    if (mergedSlime->entityIndex == gameState->playerEntityIndex)
-    {
-        mergeSlime->type = ENTITY_TYPE_PLAYER;
-        gameState->playerEntityIndex = mergeSlime->entityIndex;
-        mergeSlime->color = WHITE;
-    }
-    
-    // mergeSlime->tileSize = endSize;
-    // mergeSlime->pivot = GetTilePivot(mergeSlime);
-    {
-        // Merge Slime Tween
-        
-        float startSize = GetSlimeSize(mergeSlime);
-        Vector2 startPivot = GetTilePivot(mergeSlime);
-        mergeSlime->mass++;
-        float endSize = GetSlimeSize(mergeSlime);
-        Vector2 endPivot = GetTilePivot(mergeSlime->tilePos, endSize, mergeSlime->attachDir);
-
-        TweenParams params2 = {};
-        params2.paramType = PARAM_TYPE_VECTOR2;
-        params2.startVec2 = startPivot;
-        params2.endVec2 = endPivot;
-        params2.realVec2 = &mergeSlime->pivot;
-        AddTweenUnique(mergeSlime->tweenController, CreateTween(params2));
-        
-        TweenParams params1 = {};
-        params1.paramType = PARAM_TYPE_FLOAT;
-        params1.startF = startSize;
-        params1.endF = endSize;
-        params1.realF = &mergeSlime->tileSize;
-        AddTweenUnique(mergeSlime->tweenController, CreateTween(params1));
-    }
-
-    {
-        // Merged Slime Tween
-        mergedSlime->tweenController.Reset();
-        
-        Entity * attach = nullptr;
-        if (mergeSlime->attach)
-        {
-            attach = GetEntity(mergeSlime->attachedEntityIndex);
-        }
-        
-        TweenEvent endEvent = { 0 };
-        endEvent.controller = &mergeSlime->tweenController;
-        endEvent.deleteEntity = mergedSlime;
-        mergedSlime->tweenController.endEvents.Add(endEvent);
-        
-        MoveEntity(mergedSlime, attach, nullptr, mergeSlime->tilePos, BLOCK_MOVE_FUNC, BOUNCE_SPEED);
-        
-    }
-    
-    return mergeSlime;
-    
 }
 
 
@@ -742,35 +750,6 @@ inline void UpdateSlimes()
         
     }
     }
-
-inline Entity * CreateSlimeClone(Entity * ent)
-{
-    IVec2 tilePos = ent->tilePos;
-    
-    auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
-    Entity * freeEntity = nullptr;
-    for (uint32 i = 0; i < slimeEntityIndices.count; i++)
-    {
-        Entity * slime = &gameState->entities[slimeEntityIndices[i]];
-        if (!slime->active)
-        {
-        freeEntity = slime;
-            *freeEntity = *ent;
-            freeEntity->entityIndex = slimeEntityIndices[i];
-        freeEntity->active = true;
-        freeEntity->tilePos = tilePos;
-        freeEntity->type = ENTITY_TYPE_CLONE;
-        freeEntity->mass = 1;
-        freeEntity->tileSize = GetSlimeSize(freeEntity);
-            freeEntity->color = GRAY;  
-            freeEntity->pivot = GetTilePivot(freeEntity);
-            freeEntity->changed = true;
-        }
-    }
-SM_ASSERT(freeEntity, "slimes slots are full");
-    return freeEntity;
-    
-}
 
 void ShiftEntities(IVec2 startPos, IVec2 bounceDir)
 {

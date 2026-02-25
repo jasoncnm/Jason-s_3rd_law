@@ -24,7 +24,7 @@
 #define BOUNCE_SPEED 10.0f
 #define MOVE_SPEED 5.0f
 
-#define CAMERA_MOVE_SPEED 2.1f
+#define CAMERA_MOVE_SPEED 1.8f
 #define CAMERA_ZOOM_SPEED 1.7f
 
 #define MAX_GAMEPAD 5
@@ -172,21 +172,8 @@ struct UndoStack
             
         }
     }
-    
-    void push_back(uint32 playerIndex, UndoState::EntityArray & ea)
-    {
-        last++;
-        count++;
-        if (last > MAX_UNDO) last = 1;
-        if (count > MAX_UNDO) count = MAX_UNDO;
+    void push_back(uint32 playerIndex, UndoState::EntityArray & ea);
         
-        UndoState & state = undoStack[last - 1];
-        state.playerIndex = playerIndex;
-        state.undoEntities.clear();
-        state.undoEntities.insert(state.undoEntities.begin(), &ea.entities[0], &ea.entities[ea.entityCount]);
-        
-         }
-    
     bool empty()
     {
         return count == 0;

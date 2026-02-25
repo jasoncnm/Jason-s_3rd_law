@@ -113,5 +113,14 @@ struct FindAttachableResult
 };
 
 
+inline bool8 DoorBlocked(Entity * door, IVec2 reachDir);
+inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir);
+inline bool8 IsDoor(Entity * door);
+inline float GetSlimeSize(Entity * slime);
+inline Entity * GetEntity(int32 i);
+inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * playEvent,
+                       IVec2 targetPos, float (*MoveFunc)(float), float speed);
+
+
 #define ENTITY_H
 #endif

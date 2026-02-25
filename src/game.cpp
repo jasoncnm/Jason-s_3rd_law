@@ -33,12 +33,41 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 */
 
 //  ========================================================================
-//              NOTE: Game Structs (internal)
+//              NOTE: Internal Functions (internal)
 //  ========================================================================
+
+void UndoStack::push_back(uint32 playerIndex, UndoState::EntityArray & ea)
+{
+    last++;
+    count++;
+    if (last > MAX_UNDO) last = 1;
+    if (count > MAX_UNDO) count = MAX_UNDO;
+    
+    UndoState & state = undoStack[last - 1];
+    state.playerIndex = playerIndex;
+    state.undoEntities.clear();
+    
+    #if 0
+    for (uint32 i = 0; i < ea.entityCount; i++)
+    {
+        Entity * ent = &gameState->entities[ea.entities[i].entityIndex];
+        if (ent->changed) 
+        {
+            ent->changed = false;
+            state.undoEntities.push_back(ea.entities[i]);
+        }
+    }
+    #else
+    state.undoEntities.insert(state.undoEntities.begin(), &ea.entities[0], &ea.entities[ea.entityCount]);
+    #endif
+    }
+
 
 //  ========================================================================
 //              NOTE: Game Functions (internal)
 //  ========================================================================
+
+
 void SetShake(float duration)
 {
     gameState->shake = true;
@@ -78,10 +107,8 @@ inline UndoState::EntityArray GetCurrentStateEntities()
         for (uint32 entId = 0; entId < entList.count; entId++)
         {
             Entity & ent = gameState->entities[entList[entId]];
-            
             entities[i++] = ent;
-            
-        }
+            }
     }
     
     return { i, entities };
@@ -611,7 +638,8 @@ inline float GetCameraZoom(Map & currentMap)
     return zoom;
 }
 
-inline void UpdateCameraToTileMapSmooth(Map & map)
+inline void UpdateCameraToTileMapSmooth(Map & map, real32 (*MoveFunc)(real32), real32 (*ZoomFunc)(real32),
+                                        real32 moveSpeed, real32 zoomSpeed)
 {
     Vector2 startPos = gameState->camera.base.target;
     real32 startZoom = gameState->camera.base.zoom;
@@ -627,13 +655,12 @@ inline void UpdateCameraToTileMapSmooth(Map & map)
     
     if (!Vector2Equals(gameState->camera.base.target, pos))
     {
-    // TODO adjust move and zoom speed based on move and zoom distance
-    TweenParams params = {};
+        TweenParams params = {};
     params.paramType = PARAM_TYPE_VECTOR2;
         params.startVec2 = startPos;
     params.endVec2 = pos;
     params.realVec2  = &gameState->camera.base.target;
-    AddTweenUnique(gameState->camera.tweenController, CreateTween(params, CAMERA_MOVE_FUNC, CAMERA_MOVE_SPEED));
+    AddTweenUnique(gameState->camera.tweenController, CreateTween(params, MoveFunc, moveSpeed));
     }
     
     float oldZoom = gameState->camera.base.zoom;
@@ -645,7 +672,7 @@ inline void UpdateCameraToTileMapSmooth(Map & map)
         params.startF = oldZoom;
         params.endF = newZoom;
         params.realF  = &gameState->camera.base.zoom;
-        AddTweenUnique(gameState->camera.tweenController, CreateTween(params, CAMERA_ZOOM_FUNC, CAMERA_ZOOM_SPEED));
+        AddTweenUnique(gameState->camera.tweenController, CreateTween(params, ZoomFunc, zoomSpeed));
     }
     
     OnPlayEvent(&gameState->camera.tweenController);
@@ -766,7 +793,9 @@ inline bool8 UpdateCamera(bool refocus = false)
             if (gameState->camera.tweenController.NoTweens())
             {
                 FindTileMapResult result = FindTileMap(followEnt->tilePos);
-                if (result.map) UpdateCameraToTileMapSmooth(*result.map);
+                if (result.map) UpdateCameraToTileMapSmooth(*result.map,
+                                                            CAMERA_MOVE_FUNC, CAMERA_ZOOM_FUNC,
+                                                            CAMERA_MOVE_SPEED, CAMERA_ZOOM_SPEED);
             }
             
             #if 0
@@ -809,14 +838,28 @@ inline bool8 UpdateCamera(bool refocus = false)
                                                 followEnt->tileSize * 0.5f 
                                             });
                 
+                real32 dist = Vector2Distance(center, cam.base.target) / (real32)MAP_TILE_SIZE;
+                
                 TweenParams params = {};
                 params.paramType = PARAM_TYPE_VECTOR2;
                 params.startVec2 = cam.base.target;
                 params.endVec2 = center;
                 params.realVec2  = &cam.base.target;
-                AddTweenUnique(cam.tweenController, CreateTween(params, CAMERA_MOVE_FUNC, CAMERA_MOVE_SPEED));
+                AddTweenUnique(cam.tweenController, CreateTween(params, 
+                                                                CAMERA_MOVE_FUNC, 
+                                                                               CAMERA_MOVE_SPEED * 5.0f,
+                                                                               dist));
+                
+                SM_ASSERT(followEnt->type == ENTITY_TYPE_LOCK, "camera behaviour for lock only!");
+                if (!followEnt->tweenController.NoTweens() && !followEnt->tweenController.playing)
+                {
+                
+                TweenEvent playEvent;
+                playEvent.controller = &followEnt->tweenController;
+                cam.tweenController.endEvents.Add(playEvent);
+                    // cam.base.target = Vector2Lerp(cam.base.target, center, 5 * GetFrameTime());
+                }
                 OnPlayEvent(&cam.tweenController);
-                // cam.base.target = Vector2Lerp(cam.base.target, center, 5 * GetFrameTime());
             }
             break;
         }
@@ -825,6 +868,24 @@ inline bool8 UpdateCamera(bool refocus = false)
             
             if (gameState->prevMapIndex == gameState->currentMapIndex) break;
             
+            
+            Map * currentMap = &gameState->tileMaps[gameState->currentMapIndex];
+            Vector2 finalPos = TilePositionToPixelPosition(currentMap->width * 0.5f + currentMap->tilePos.x + 0.5f, 
+                                                           currentMap->height * 0.5f + currentMap->tilePos.y + 0.5f);
+            
+             real32 speed = 6;
+            
+            
+            if (followEnt->tweenController.NoTweens())
+            {
+                // nextPos = Vector2Lerp(cam.base.target, finalPos, speed * GetFrameTime());
+                if (cam.tweenController.NoTweens()) UpdateCameraToTileMapSmooth(*currentMap, 
+                                                                                CAMERA_MOVE_FUNC, CAMERA_ZOOM_FUNC,
+                                                                                CAMERA_MOVE_SPEED, CAMERA_ZOOM_SPEED);
+                break;
+            }
+            
+            
             Vector2 moveDir = GetTilePivot(followEnt) - followEnt->pivot;
             Vector2 center = Vector2Add(followEnt->pivot, 
                                         Vector2 
@@ -832,7 +893,6 @@ inline bool8 UpdateCamera(bool refocus = false)
                                             followEnt->tileSize * 0.5f,
                                             followEnt->tileSize * 0.5f 
                                         });
-            float speed = 6;
             Vector2 nextPos = cam.base.target;
             
             
@@ -852,23 +912,21 @@ inline bool8 UpdateCamera(bool refocus = false)
                 nextPos.y = Lerp(nextPos.y, center.y, speed * GetFrameTime());
             }
             
-            Map * currentMap = &gameState->tileMaps[gameState->currentMapIndex];
-            Vector2 finalPos = TilePositionToPixelPosition(currentMap->width * 0.5f + currentMap->tilePos.x + 0.5f, 
-                                                           currentMap->height * 0.5f + currentMap->tilePos.y + 0.5f);
-                
-                if (Abs(moveDir.x) > 0 && Sign(finalPos.x - center.x) != Sign(moveDir.x) || 
-                    Abs(moveDir.y) > 0 && Sign(finalPos.y - center.y) != Sign(moveDir.y) ||
-                    followEnt->tweenController.NoTweens())
-                {
-                     nextPos = Vector2Lerp(cam.base.target, finalPos, speed * GetFrameTime());
-            }
+#if 0
+            
+            if (Abs(moveDir.x) > 0 && Sign(finalPos.x - center.x) != Sign(moveDir.x) || 
+                Abs(moveDir.y) > 0 && Sign(finalPos.y - center.y) != Sign(moveDir.y) ||
+followEnt->tweenController.NoTweens())
+            {
+                 nextPos = Vector2Lerp(cam.base.target, finalPos, speed * GetFrameTime());
+                }
             
             if (followEnt->tweenController.NoTweens())
             {
                 real32 nextZoom = GetCameraZoom(*currentMap);
                 cam.base.zoom = Lerp(cam.base.zoom, nextZoom, speed * GetFrameTime());
             }
-            
+            #endif
             cam.base.target = nextPos;
             
             break;
@@ -877,8 +935,13 @@ inline bool8 UpdateCamera(bool refocus = false)
     
     if ((JustPressed(RECOVER_KEY) || refocus))
     {
-        FindTileMapResult result = FindTileMap(GetPlayer()->tilePos);
-        if (result.map) UpdateCameraToTileMapSmooth(*result.map);
+        if (GetPlayer())
+        {
+            FindTileMapResult result = FindTileMap(GetPlayer()->tilePos);
+            if (result.map) UpdateCameraToTileMapSmooth(*result.map,
+                                                        CAMERA_MOVE_FUNC, CAMERA_ZOOM_FUNC, 
+                                                        CAMERA_MOVE_SPEED, CAMERA_ZOOM_SPEED);
+        }
     }
     
     
@@ -1436,7 +1499,7 @@ void GameplayUpdateAndRender()
                             TweenEvent deleteEvent2;
                             deleteEvent2.deleteEntity = lock;
                             lock->tweenController.endEvents.Add(deleteEvent2);
-                            OnPlayEvent(&lock->tweenController);
+                            // OnPlayEvent(&lock->tweenController);
                             
                         }
                         break;
@@ -1490,15 +1553,16 @@ void GameplayUpdateAndRender()
                                 }
                                 
                             }
-                            else if (layer == LAYER_KEY_LOCK)
-                            {
-                                gameState->camera.followEntityIndex = entity->entityIndex;
-                            }
                             else if (followEnt->tweenController.NoTweens())
                             {
                                 gameState->camera.followEntityIndex = entity->entityIndex;
                             }
                         }
+                        else if (layer == LAYER_KEY_LOCK)
+                        {
+                            gameState->camera.followEntityIndex = entity->entityIndex;
+                        }
+                        
                         }
                 else
                 {
@@ -1539,11 +1603,14 @@ void GameplayUpdateAndRender()
             gameState->currentMapIndex = result.mapIndex;
         }
         
+        if (GetPlayer())
+        {
             result = FindTileMap(GetPlayer()->tilePos);
         if (result.map)
         {
             gameState->playerMapIndex = result.mapIndex;
             }
+        }
         }
     
     // NOTE: Camera Updates
