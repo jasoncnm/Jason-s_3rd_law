@@ -155,7 +155,7 @@ void SetFreeze()
                         endPivot = GetTilePivot(freezePos, slime->tileSize);
                     }
                     
-                    if (!Vector2Equals(startPivot, endPivot))
+                    if ((startPivot != endPivot))
                     {
                     slime->tweenController.Reset();
                     
@@ -240,7 +240,7 @@ inline bool8 PowerOnCable(Entity * cable, bool8 & end)
                 ActionCheck(entity, bounceDir, CHECK_PROJECT);
                 Vector2 moveEnd = GetTilePivot(entity);
                 
-                if (Vector2Equals(moveStart, moveEnd))
+                if ((moveStart ==  moveEnd))
                 {
                     ShiftEntities(entity->tilePos, bounceDir);                    
                 }

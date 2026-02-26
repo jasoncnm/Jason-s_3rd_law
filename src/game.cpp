@@ -804,7 +804,7 @@ inline bool8 UpdateCamera(bool refocus = false)
                 UpdateCameraToTileMapSmooth(*map);
             }
             
-                if (!Vector2Equals(pos, cam.base.target))
+                if (pos != cam.base.target)
                 {
                     if (IsSlime(followEnt) && 
                         followEnt->tweenController.NoTweens() && 
@@ -831,12 +831,8 @@ inline bool8 UpdateCamera(bool refocus = false)
             FindTileMapResult result = FindTileMap(followEnt->tilePos);
             if (cam.tweenController.NoTweens())
             {
-                Vector2 center = Vector2Add(followEnt->pivot, 
-                                            Vector2 
-                                            {
-                                                followEnt->tileSize * 0.5f,
-                                                followEnt->tileSize * 0.5f 
-                                            });
+                Vector2 center = followEnt->pivot +
+                                            Vector2 { followEnt->tileSize * 0.5f, followEnt->tileSize * 0.5f };
                 
                 real32 dist = Vector2Distance(center, cam.base.target) / (real32)MAP_TILE_SIZE;
                 
@@ -887,12 +883,8 @@ inline bool8 UpdateCamera(bool refocus = false)
             
             
             Vector2 moveDir = GetTilePivot(followEnt) - followEnt->pivot;
-            Vector2 center = Vector2Add(followEnt->pivot, 
-                                        Vector2 
-                                        {
-                                            followEnt->tileSize * 0.5f,
-                                            followEnt->tileSize * 0.5f 
-                                        });
+            Vector2 center = followEnt->pivot + 
+                Vector2 { followEnt->tileSize * 0.5f, followEnt->tileSize * 0.5f };
             Vector2 nextPos = cam.base.target;
             
             
@@ -1039,13 +1031,13 @@ bool8 MoveAction(IVec2 actionDir)
             
             Vector2 dir = { (float)actionDir.x, (float)actionDir.y };
             Vector2 startPivot = GetTilePivot(player);
-            Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale(dir, .2f * (MAP_TILE_SIZE - player->tileSize)));
+        Vector2 middlePivot = startPivot + (dir * .2f * (MAP_TILE_SIZE - player->tileSize));
             
             player->attach = true;
             player->attachedEntityIndex = door->entityIndex;
             player->attachDir = actionDir;
             
-            Vector2 endPivot = Vector2Subtract(GetTilePivot(player), Vector2Scale(dir, 5.0f));
+        Vector2 endPivot = GetTilePivot(player) - (dir * 5.0f);
             
             TweenParams params1 = {};
             params1.paramType = PARAM_TYPE_VECTOR2;
@@ -1273,20 +1265,22 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                 
                 if (IsSlime(entity))
                 {
-                    DrawCircleV(Vector2Add(entity->pivot, {entity->tileSize/2, entity->tileSize/2}), 3, ColorAlpha(YELLOW, 0.8f));
+                    
+                    DrawCircleV(entity->pivot + Vector2 {entity->tileSize/2, entity->tileSize/2}, 
+                                3, ColorAlpha(YELLOW, 0.8f));
                     DrawTile(PivotToTilePos(entity->pivot, entity->tileSize), ColorAlpha(RED, 0.5f));
                     }
 
                 if (IsSlime(entity))
                 {
                     real32 halfSize = entity->tileSize/2;
-                    Vector2 center = Vector2Add(entity->pivot, {halfSize, halfSize});
-                    Vector2 attachPos = Vector2Add(center, { halfSize * entity->attachDir.x, halfSize * entity->attachDir.y });
+                    Vector2 center = entity->pivot + Vector2 {halfSize, halfSize};
+                    Vector2 attachPos = center + { halfSize * entity->attachDir.x, halfSize * entity->attachDir.y };
                     
                     IVec2 parallel = { entity->attachDir.y, entity->attachDir.x };
                     
-                    Vector2 A = Vector2Add(attachPos, { parallel.x * halfSize, parallel.y * halfSize });
-                    Vector2 B = Vector2Subtract(attachPos, { parallel.x * halfSize, parallel.y * halfSize });
+                    Vector2 A = attachPos + { parallel.x * halfSize, parallel.y * halfSize };
+                    Vector2 B = attachPos - { parallel.x * halfSize, parallel.y * halfSize };
                     DrawLineEx(A, B, 5, BLUE);
                     
                 }
@@ -1648,7 +1642,7 @@ void GameplayUpdateAndRender()
     gameState->camera.moveDir = { 0 };
     if (!Vector2Equals(oldTarget, newTarget))
     {
-        gameState->camera.moveDir = Vector2Subtract(oldTarget, newTarget);
+        gameState->camera.moveDir = oldTarget - newTarget;
     }
     }
     
@@ -1864,12 +1858,7 @@ void GameplayUpdateAndRender()
         
         if (followEnt)
         {
-        Vector2 center = Vector2Add(followEnt->pivot, 
-                                    Vector2 
-                                    {
-                                        followEnt->tileSize * 0.5f,
-                                        followEnt->tileSize * 0.5f 
-                                    });
+        Vector2 center = followEnt->pivot + Vector2 { followEnt->tileSize * 0.5f, followEnt->tileSize * 0.5f };
         
         //DrawCircleV(center, 5,  RED);
         //DrawCircleV(gameState->camera.base.target, 5, YELLOW);

@@ -852,11 +852,11 @@
             }
         },
         "TileMap/Room_0.tmj": {
-            "scale": 2,
-            "selectedLayer": 1,
+            "scale": 0.33,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 1723.75,
-                "y": 981.75
+                "x": 322.727272727273,
+                "y": 1356.0606060606062
             }
         },
         "TileMap/Room_1.tmj": {
@@ -1804,7 +1804,8 @@
         "TileMap/Room_0.tmj",
         "TileMap/Path_86.tmj",
         "TileMap/Froom_1.tmj",
-        "TileMap/Path_89.tmj"
+        "TileMap/Path_89.tmj",
+        "TileMap/Room_67.tmj"
     ],
     "project": "level_edit.tiled-project",
     "property.type": "file",
