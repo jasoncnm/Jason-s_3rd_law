@@ -380,8 +380,7 @@ inline bool8 DoorBlocked(Entity * door, IVec2 reachDir)
     SM_ASSERT(reachDir.SqrMagnitude() <= 1, "Directional Vector should be a unit vector");
     
     bool8 result = false;
-
-    if (reachDir.x == 1)
+if (reachDir.x == 1)
     {
         result = (door->tileID == DOOR_RIGHT || door->tileID == DOOR_RIGHT_R);
     }
@@ -392,8 +391,7 @@ inline bool8 DoorBlocked(Entity * door, IVec2 reachDir)
     else if (reachDir.y == 1)
     {
         result = (door->tileID == DOOR_DOWN || door->tileID == DOOR_DOWN_R);
-        
-    }
+        }
     else if (reachDir.y == -1)
     {
         result = (door->tileID == DOOR_UP || door->tileID == DOOR_UP_R);
@@ -535,8 +533,9 @@ void SetUpElectricDoor()
 }
 
 
-inline void UpdateElectricDoor()
+inline bool8 UpdateElectricDoor()
 {
+    bool8 changed = false;
     for (uint32 i = 0; i < Source_Indices.count; i++)
     {
         int32 sourceCableIndex = Source_Indices[i];
@@ -550,7 +549,10 @@ inline void UpdateElectricDoor()
         {
             block->actionState = FREEZE_STATE;
             if (!source->conductive && OnSourcePowerOn(sourceCableIndex))
+            {
+                changed = true;
                 source->sourceLit = true;
+            }
                 
         }
     }
@@ -573,11 +575,13 @@ for (uint32 i = 0; i < Connection_Indices.count; i++)
                         if (OnSourcePowerOn(connection->sourceIndex))
                         {
                             Entity * source = GetEntity(connection->sourceIndex);
-                            connection->sourceLit = true;
+                        connection->sourceLit = true;
+                        changed = true;
                         }
 
                     }
             }
         }
-}
+    }
+    return changed;
 }

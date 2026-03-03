@@ -88,17 +88,38 @@ inline void SetEntityPosition(Entity * entity, Entity * attachedEntity, IVec2 ti
     SM_ASSERT(entity->movable, "entity cannot be moved");
     
     entity->changed = true;
-    
     entity->tilePos = tilePos;
     
     if (attachedEntity)
     {
         IVec2 dir = (attachedEntity->tilePos - entity->tilePos);
-        
         dir.x = dir.x == 0 ? 0 : Sign(dir.x);
         dir.y = dir.y == 0 ? 0 : Sign(dir.y);
+        // SM_ASSERT(IsDoor(entity) || IsDoor(attachedEntity) || dir.SqrMagnitude() == 1, "Invalid direction");
         
-        SM_ASSERT(IsDoor(entity) || IsDoor(attachedEntity) || dir.SqrMagnitude() == 1, "Invalid direction");
+        Entity * door = nullptr;
+        if (IsDoor(entity)) door = entity;
+        if (IsDoor(attachedEntity)) door = attachedEntity;
+        if (door && (tilePos == door->tilePos))
+        {
+            TileID doorID = door->tileID;
+            if (door->tileID == DOOR_RIGHT || door->tileID == DOOR_RIGHT_R)
+            {
+                dir = IVec2 { -1, 0 };
+            }
+            if (door->tileID == DOOR_LEFT || door->tileID == DOOR_LEFT_R)
+            {
+                dir = IVec2 { 1, 0 };
+            }
+            if (door->tileID == DOOR_DOWN || door->tileID == DOOR_DOWN_R)
+            {
+                dir = IVec2 { 0, -1 };
+            }
+            if (door->tileID == DOOR_UP || door->tileID == DOOR_UP_R)
+            {
+                dir = IVec2 { 0, 1 };
+            }
+            }
         
         if (IsSlime(entity))
         {
@@ -325,11 +346,15 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
             if ((Abs(old.attachDir) != Abs(entity->attachDir)))
             {
                 
-                Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({(float)offset.x, (float)offset.y}, MAP_TILE_SIZE));
+                Vector2 middlePivot = 
+                    endPivot + Vector2 { (real32)old.attachDir.x, (real32)old.attachDir.y } * 
+                (0.5f * (MAP_TILE_SIZE - entity->tileSize));
                 
-                IVec2 dir = entity->attachDir;
-                middlePivot = Vector2Add(middlePivot, Vector2Scale({ (float)dir.x, (float)dir.y },
-                                                                   0.5f * (MAP_TILE_SIZE - entity->tileSize)));
+                Entity * prevAttach = GetEntity(old.attachedEntityIndex);
+                if (IsDoor(prevAttach) && (targetPos == prevAttach->tilePos))
+                {
+                    middlePivot -= Vector2 { (real32)old.attachDir.x, (real32)old.attachDir.y } * 5;
+                }
                 
                 TweenParams params1 = {};
                 params1.paramType = PARAM_TYPE_VECTOR2;
@@ -703,7 +728,7 @@ inline void UpdateSlimes()
                     }
                     
                     IVec2 dir = newPos - oldPos;
-                    SM_ASSERT(((dir.x != 0 && dir.y == 0) || (dir.y != 0 && dir.x == 0 )), "invalid direction");
+                    // SM_ASSERT(((dir.x != 0 && dir.y == 0) || (dir.y != 0 && dir.x == 0 )), "invalid direction");
                     dir.x = dir.x != 0 ? Sign(dir.x) : 0;
                     dir.y = dir.y != 0 ? Sign(dir.y) : 0;
                     if (slime->tweenController.playing) 

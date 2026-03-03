@@ -14,49 +14,49 @@ constexpr float rightStickDeadzoneY = 0.1f;
 constexpr float leftTriggerDeadzone = -0.9f;
 constexpr float rightTriggerDeadzone = -0.9f;
 
-inline void CleanUpKeyMapping()
+inline void CleanUpKeyMapping(KeyMapping * keyMappings)
 {
     for (int32 i = 0; i < GAME_INPUT_COUNT; i++)
     {
-        gameState->keyMappings[i].keys.Clear();
+        keyMappings[i].keys.Clear();
     }
 }
 
-inline void InitKeyMapping()
+inline void InitKeyMapping(KeyMapping * keyMappings)
 {
-    gameState->keyMappings[MOUSE_LEFT].keys.Add(MOUSE_BUTTON_LEFT);
-    gameState->keyMappings[MOUSE_RIGHT].keys.Add(MOUSE_BUTTON_RIGHT);
+    keyMappings[MOUSE_LEFT].keys.Add(MOUSE_BUTTON_LEFT);
+    keyMappings[MOUSE_RIGHT].keys.Add(MOUSE_BUTTON_RIGHT);
     
-    gameState->keyMappings[LEFT_KEY].keys.Add(KEY_A);
-    gameState->keyMappings[LEFT_KEY].keys.Add(KEY_LEFT);
-    gameState->keyMappings[LEFT_KEY].gamepadButton = GAMEPAD_BUTTON_LEFT_FACE_LEFT;
+    keyMappings[LEFT_KEY].keys.Add(KEY_A);
+    keyMappings[LEFT_KEY].keys.Add(KEY_LEFT);
+    keyMappings[LEFT_KEY].gamepadButton = GAMEPAD_BUTTON_LEFT_FACE_LEFT;
         
-    gameState->keyMappings[RIGHT_KEY].keys.Add(KEY_D);
-    gameState->keyMappings[RIGHT_KEY].keys.Add(KEY_RIGHT);
-    gameState->keyMappings[RIGHT_KEY].gamepadButton = GAMEPAD_BUTTON_LEFT_FACE_RIGHT;
+    keyMappings[RIGHT_KEY].keys.Add(KEY_D);
+    keyMappings[RIGHT_KEY].keys.Add(KEY_RIGHT);
+    keyMappings[RIGHT_KEY].gamepadButton = GAMEPAD_BUTTON_LEFT_FACE_RIGHT;
 
-    gameState->keyMappings[UP_KEY].keys.Add(KEY_W);
-    gameState->keyMappings[UP_KEY].keys.Add(KEY_UP);
-    gameState->keyMappings[UP_KEY].gamepadButton = GAMEPAD_BUTTON_LEFT_FACE_UP;
+    keyMappings[UP_KEY].keys.Add(KEY_W);
+    keyMappings[UP_KEY].keys.Add(KEY_UP);
+    keyMappings[UP_KEY].gamepadButton = GAMEPAD_BUTTON_LEFT_FACE_UP;
     
-    gameState->keyMappings[DOWN_KEY].keys.Add(KEY_S);
-    gameState->keyMappings[DOWN_KEY].keys.Add(KEY_DOWN);
-    gameState->keyMappings[DOWN_KEY].gamepadButton = GAMEPAD_BUTTON_LEFT_FACE_DOWN;
+    keyMappings[DOWN_KEY].keys.Add(KEY_S);
+    keyMappings[DOWN_KEY].keys.Add(KEY_DOWN);
+    keyMappings[DOWN_KEY].gamepadButton = GAMEPAD_BUTTON_LEFT_FACE_DOWN;
 
-    gameState->keyMappings[SPLIT_KEY].keys.Add(KEY_SPACE);
-    gameState->keyMappings[SPLIT_KEY].gamepadButton = GAMEPAD_BUTTON_RIGHT_FACE_DOWN;
+    keyMappings[SPLIT_KEY].keys.Add(KEY_SPACE);
+    keyMappings[SPLIT_KEY].gamepadButton = GAMEPAD_BUTTON_RIGHT_FACE_DOWN;
     
-    gameState->keyMappings[POSSES_KEY].keys.Add(KEY_F);
-    gameState->keyMappings[POSSES_KEY].gamepadButton = GAMEPAD_BUTTON_RIGHT_FACE_LEFT;
+    keyMappings[POSSES_KEY].keys.Add(KEY_F);
+    keyMappings[POSSES_KEY].gamepadButton = GAMEPAD_BUTTON_RIGHT_FACE_LEFT;
     
 
-    gameState->keyMappings[UNDO_KEY].keys.Add(KEY_Z);
-    gameState->keyMappings[UNDO_KEY].gamepadButton = GAMEPAD_BUTTON_LEFT_TRIGGER_1;
+    keyMappings[UNDO_KEY].keys.Add(KEY_Z);
+    keyMappings[UNDO_KEY].gamepadButton = GAMEPAD_BUTTON_LEFT_TRIGGER_1;
         
-    gameState->keyMappings[RESET_KEY].keys.Add(KEY_R);
-    gameState->keyMappings[RESET_KEY].gamepadButton = GAMEPAD_BUTTON_RIGHT_FACE_UP;
+    keyMappings[RESET_KEY].keys.Add(KEY_R);
+    keyMappings[RESET_KEY].gamepadButton = GAMEPAD_BUTTON_RIGHT_FACE_UP;
     
-    gameState->keyMappings[RECOVER_KEY].keys.Add(KEY_TAB);
+    keyMappings[RECOVER_KEY].keys.Add(KEY_TAB);
     
     
 }
@@ -89,24 +89,10 @@ inline bool8 ProccessJoysticks(GameInputType type, int32 gamepad)
     return false;
 }
 
-inline bool8 JustPressed(GameInputType type)
+inline bool8 JustPressed(KeyMapping * keyMappings, GameInputType type)
 {
 
-    if (type == ANY_KEY)
-    {
-        if (!IsKeyDown(KEY_LEFT_ALT)  &&
-            !IsKeyDown(KEY_RIGHT_ALT) &&
-            !IsKeyDown(KEY_LEFT_SUPER) &&
-            !IsKeyDown(KEY_RIGHT_SUPER) &&
-            (GetKeyPressed() > 0 || GetGamepadButtonPressed() > 0))
-        {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    KeyMapping & mapping = gameState->keyMappings[type];
+    KeyMapping & mapping = keyMappings[type];
     for (uint32 idx = 0; idx < mapping.keys.count; idx++)
     {
         if (IsKeyPressed(mapping.keys[idx])) 
@@ -124,15 +110,7 @@ inline bool8 JustPressed(GameInputType type)
         }
     }
     
-    while(GetKeyPressed() > 0);
-    
     return false;
-}
-
-inline bool8 JustPressedMoveKey()
-{
-    bool8 result = JustPressed(UP_KEY) || JustPressed(DOWN_KEY) || JustPressed(LEFT_KEY) || JustPressed(RIGHT_KEY);
-    return result;
 }
 
 inline bool8 IsAnyGamepadButtonDown(int32 button)
@@ -145,21 +123,10 @@ inline bool8 IsAnyGamepadButtonDown(int32 button)
     return false;
 }
 
-inline bool8 IsDown(GameInputType type)
+inline bool8 IsDown(KeyMapping * keyMappings, GameInputType type)
 {
     
-    if (type == ANY_KEY)
-    {
-        int32 keycode = GetKeyPressed();
-        int32 gamepadButton = GetGamepadButtonPressed();
-        return !IsKeyDown(KEY_LEFT_ALT)  &&
-               !IsKeyDown(KEY_RIGHT_ALT) &&
-               !IsKeyDown(KEY_LEFT_SUPER) &&
-               !IsKeyDown(KEY_RIGHT_SUPER) &&
-               (IsKeyDown(keycode) || IsAnyGamepadButtonDown(gamepadButton));
-    }
-    
-    KeyMapping mapping = gameState->keyMappings[type];
+    KeyMapping mapping = keyMappings[type];
     for (uint32 idx = 0; idx < mapping.keys.count; idx++)
     {
         if (IsKeyDown(mapping.keys[idx])) 

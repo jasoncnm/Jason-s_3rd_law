@@ -8,6 +8,11 @@
    ======================================================================== */
 
 #include "engine_lib.h"
+#define DIR_UP IVec2 { 0, -1 }
+#define DIR_DOWN IVec2 { 0 ,1 }
+#define DIR_LEFT IVec2 { -1, 0 }
+#define DIR_RIGHT IVec2 { 1, 0 }
+
 
 inline bool8 IsSlime(Entity * entity);
 
@@ -85,6 +90,12 @@ Vector2 GetTilePivot(Entity * entity)
     if (IsSlime(entity) && entity->attach)
     {
         topLeft = GetTilePivot(entity->tilePos, entity->tileSize, entity->attachDir);
+        
+        Entity * attach = GetEntity(entity->attachedEntityIndex);
+        if (IsDoor(attach) && (entity->tilePos == attach->tilePos))
+        {
+            topLeft -= Vector2 { (real32)entity->attachDir.x, (real32)entity->attachDir.y } * 5;
+        }
     }
     
     return topLeft;

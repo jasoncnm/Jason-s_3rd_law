@@ -21,12 +21,12 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - No restart good idea ??
 
   TODO: Things that I can do beside arts and design I guess
-1. background 1wk
-3. collectable: show in ui, 4d
-5. Sound effect, 1wk
-6. bug fixes, improve post effect 1wk
-2. saves and loads 3d
-
+1. background
+3. collectable: show in ui
+5. Sound effect
+6. bug fixes, improve post effect
+2. saves and loads
+-  reset system
 // NOTE: done but need testing
 1. tutorial logic: this week
 2. key and door
@@ -67,6 +67,22 @@ void UndoStack::push_back(uint32 playerIndex, UndoState::EntityArray & ea)
 //              NOTE: Game Functions (internal)
 //  ========================================================================
 
+inline bool8 CheckProjectState(Entity * entity)
+{
+    bool8 result = true;
+    IVec2 dirs[] = { DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT };
+    EntityLayer checkLayers[] = { LAYER_WALL, LAYER_DOOR ,LAYER_BLOCK };
+    for (uint32 i = 0; i < 4; i++)
+    {
+        Entity * ent = FindEntityByLocationAndLayers(entity->tilePos + dirs[i], checkLayers, 1);
+        if (ent && ent->type != ENTITY_TYPE_ELECTRIC_DOOR || 
+            ent && SameSide(ent, ent->tilePos, dirs[i]) && DoorBlocked(ent, dirs[i]))
+        {
+             result = false;
+        }
+    }
+    return result;
+    }
 
 void SetShake(float duration)
 {
@@ -488,8 +504,8 @@ else if (IsSlime(ent) && GetEntity(ent->attachedEntityIndex) == target)
                                         {
                                         current.pushResult.state = PUSH_BLOCKED;
                                             current.pushResult.blockedEntity = target;
+                                            return;
                                         }
-                                        return;
                                     }
                                 }
                             continue;
@@ -925,7 +941,7 @@ followEnt->tweenController.NoTweens())
         }
         }
     
-    if ((JustPressed(RECOVER_KEY) || refocus))
+    if ((JustPressed(gameState->input.keyMappings, RECOVER_KEY) || refocus))
     {
         if (GetPlayer())
         {
@@ -1028,7 +1044,10 @@ bool8 MoveAction(IVec2 actionDir)
                     return true;
             }
             }
-            
+        
+        MoveEntity(player, door, nullptr, player->tilePos, PLAYER_MOVE_FUNC, MOVE_SPEED);
+        
+        #if 0
             Vector2 dir = { (float)actionDir.x, (float)actionDir.y };
             Vector2 startPivot = GetTilePivot(player);
         Vector2 middlePivot = startPivot + (dir * .2f * (MAP_TILE_SIZE - player->tileSize));
@@ -1059,7 +1078,8 @@ bool8 MoveAction(IVec2 actionDir)
             uint32 channel = AddTweenUnique(player->tweenController, CreateTween(params1, PLAYER_MOVE_FUNC, speed, tileDist));
             
             AddTween(player->tweenController, CreateTween(params2, PLAYER_MOVE_FUNC, speed  * 2), channel);
-            OnPlayEvent(&player->tweenController);
+        OnPlayEvent(&player->tweenController);
+        #endif
             return true;
         }
         
@@ -1207,8 +1227,26 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
     Entity * clone = CreateSlimeClone(player);
     player->attach = false;
     player->pivot = GetTilePivot(player);
-    ActionCheck(player, bounceDir, CHECK_PROJECT);
-    ActionCheck(clone, -bounceDir, CHECK_PROJECT);
+    
+    bool8 playerProjectable = true;
+    bool8 cloneProjectable = true;
+    
+    EntityLayer layers[] = { LAYER_DOOR };
+    Entity * door = FindEntityByLocationAndLayers(player->tilePos, layers, ArrayCount(layers));
+    if (door)
+    {
+        if (DoorBlocked(door, -bounceDir))
+        {
+            playerProjectable = false;
+        }
+        else if (DoorBlocked(door, bounceDir))
+        {
+            cloneProjectable = false;
+        }
+    }
+    
+    if (playerProjectable) ActionCheck(player, bounceDir, CHECK_PROJECT);
+    if (cloneProjectable) ActionCheck(clone, -bounceDir, CHECK_PROJECT);
     
     Entity * playerAttach = GetEntity(player->attachedEntityIndex);
     Entity * cloneAttach = GetEntity(clone->attachedEntityIndex);
@@ -1251,12 +1289,19 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                 
                 if (entity->type == ENTITY_TYPE_GLASS)
                 {
-                    color = ColorAlpha(color, 0.7f);
+                    color = ColorAlpha(color, 0.6f);
                 }
                 
                 DrawSprite(gameState->camera.base, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, color);
                 
 #if 0
+                else if (entity->type == ENTITY_TYPE_BLOCK)
+                {
+                    if (CheckProjectState(entity))
+                    {
+                        color = ColorTint(color, GRAY);
+                    }
+                }
                 
                 if (!IsSlime(entity) && FindAttachSlime(entity))
                 {
@@ -1361,8 +1406,7 @@ void GameplayUpdateAndRender()
         uint32 prevPlayerIndex = gameState->playerEntityIndex;
         
         // NOTE SlimeSelection
-        UpdateElectricDoor();
-        
+        if (!UpdateElectricDoor())
         {
             switch(player->actionState)
             {
@@ -1371,12 +1415,12 @@ void GameplayUpdateAndRender()
                     
                     IVec2 actionDir = { 0 };
                     // NOTE: read input
-                    if (JustPressed(POSSES_KEY))
+                    if (JustPressed(gameState->input.keyMappings, POSSES_KEY))
                     {
                         stateChanged = SelectNextAsPlayer(player);
                         slimeSwitched = stateChanged;
                         }
-                    else if (JustPressed(SPLIT_KEY))
+                    else if (JustPressed(gameState->input.keyMappings, SPLIT_KEY))
                     {
                         isPressed = true;
                          actionDir= -player->attachDir;
@@ -1385,25 +1429,25 @@ void GameplayUpdateAndRender()
                     else
                     {
                     
-                    if (IsDown(LEFT_KEY))
+                        if (IsDown(gameState->input.keyMappings, LEFT_KEY))
                     {
                         actionDir = { -1 , 0};                    
                         isPressed = true;
                     }
                     
-                    if (IsDown(RIGHT_KEY))
+                        if (IsDown(gameState->input.keyMappings, RIGHT_KEY))
                     {
                         actionDir = {1, 0};
                         isPressed = true;
                     }
                     
-                    if (IsDown(UP_KEY))
+                        if (IsDown(gameState->input.keyMappings, UP_KEY))
                     {
                         actionDir = {0, -1};
                         isPressed = true;
                     }
                     
-                    if (IsDown(DOWN_KEY))
+                        if (IsDown(gameState->input.keyMappings, DOWN_KEY))
                     {
                         actionDir = {0, 1};
                         isPressed = true;
@@ -1442,7 +1486,7 @@ void GameplayUpdateAndRender()
             
             timeSinceLastPress -= GetFrameTime();
             
-            if (timeSinceLastPress < 0 && IsDown(UNDO_KEY) && !gameState->undoStack.empty())
+        if (timeSinceLastPress < 0 && IsDown(gameState->input.keyMappings, UNDO_KEY) && !gameState->undoStack.empty())
             {
                 // NOTE: Undo
                 Undo();
@@ -1568,7 +1612,7 @@ void GameplayUpdateAndRender()
         }
     
     Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
-    if (JustPressed(RECOVER_KEY) || 
+    if (JustPressed(gameState->input.keyMappings, RECOVER_KEY) || 
         !followEnt || 
         (isPressed && (followEnt != GetPlayer()) && followEnt->tweenController.NoTweens()))
     {
@@ -1578,6 +1622,8 @@ void GameplayUpdateAndRender()
     // NOTE: update mapIndex
     {
         Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
+        if (followEnt)
+        {
         Entity * prevFollowEnt = gameState->undoStack.back().GetByEntityIndex(followEnt->entityIndex);
         
         gameState->prevMapIndex = 0;
@@ -1596,15 +1642,16 @@ void GameplayUpdateAndRender()
         {
             gameState->currentMapIndex = result.mapIndex;
         }
-        
-        if (GetPlayer())
-        {
-            result = FindTileMap(GetPlayer()->tilePos);
-        if (result.map)
-        {
-            gameState->playerMapIndex = result.mapIndex;
+            if (GetPlayer())
+            {
+                result = FindTileMap(GetPlayer()->tilePos);
+                if (result.map)
+                {
+                    gameState->playerMapIndex = result.mapIndex;
+                }
             }
         }
+        
         }
     
     // NOTE: Camera Updates
@@ -1815,23 +1862,6 @@ void GameplayUpdateAndRender()
                                                         gameState->tileMapCount,
                                                         sizeof(bool));
         
-        for (int32 mapIndex = 0; mapIndex < gameState->tileMapCount; mapIndex++)
-        {
-#if 0
-            if (!set[mapIndex])
-            {
-                set[mapIndex] = true;
-                int32 colorIndex = GetRandomValue(0, colorCount-1);
-                mColors[mapIndex] = colors[colorIndex];
-            }
-            
-            DrawTileMap(gameState->camera, tileMap.tilePos, 
-                        IVec2{ tileMap.width, tileMap.height },
-                        mColors[mapIndex], mColors[mapIndex]);
-            #endif
-            }
-        
-        
         EntityLayer orderedDrawLayers[] = 
         {
             LAYER_SOURCE,
@@ -1849,6 +1879,34 @@ void GameplayUpdateAndRender()
         
         int32 count = ArrayCount(orderedDrawLayers);
         DrawSpriteLayers(orderedDrawLayers, count);
+        
+        
+        for (int32 mapIndex = 0; mapIndex < gameState->tileMapCount; mapIndex++)
+        {
+#if 0
+            if (!set[mapIndex])
+            {
+                set[mapIndex] = true;
+                int32 colorIndex = GetRandomValue(0, colorCount-1);
+                mColors[mapIndex] = colors[colorIndex];
+            }
+            
+            DrawTileMap(gameState->camera, tileMap.tilePos, 
+                        IVec2{ tileMap.width, tileMap.height },
+                        mColors[mapIndex], mColors[mapIndex]);
+            Map & map = gameState->tileMaps[mapIndex];
+            Rectangle mapRect = 
+            { 
+                (real32)map.tilePos.x * MAP_TILE_SIZE, (real32)map.tilePos.y * MAP_TILE_SIZE, 
+                (real32)map.width * MAP_TILE_SIZE,  (real32)map.height * MAP_TILE_SIZE
+            };
+            DrawRectangleLinesEx(mapRect, 5, BLUE);
+            
+#endif
+            
+        }
+        
+        
         
         // Draw rectangle outline with extended parameters
         // Rectangle cameraRect = GetCameraRect(gameState->camera);
@@ -1923,14 +1981,17 @@ void GameplayUpdateAndRender()
             if (shaderType >= FX_COUNT) shaderType = 0;
                 }
             
+            
+            #if 0
             UpdateAndRenderWithShader(gameState->renderTarget, gameState->postFX, 
                                       shaderType, gameState->screenWidth, gameState->screenHeight,
                                       gameState->shake, gameState->time);
+            #endif
             }
             else
             {
-            UpdateAndRenderWithShader(gameState->renderTarget, gameState->postFX, 
-                                      FX_JASON, gameState->screenWidth, gameState->screenHeight,
+            UpdateAndRenderWithShader(gameState->renderTarget, gameState->postShader, 
+                                      gameState->screenWidth, gameState->screenHeight,
                                       gameState->shake, gameState->time);
             }
         
@@ -1942,6 +2003,7 @@ void GameplayUpdateAndRender()
         IVec2 centerPos = player->tilePos;
         Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera.base);
         }
+#if 0
         
         DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
                             player->tilePos.x, player->tilePos.y,
@@ -1955,8 +2017,7 @@ void GameplayUpdateAndRender()
         DrawText(TextFormat("Follow Entity Type: %s(%d)", GetEntityType(followEnt), followEnt->entityIndex),
                  10, 200, 25, YELLOW);
         
-#if 0
-        
+
         DrawText(TextFormat("TotalLine: %d, Connection: %d, Door: %d, TotalSource: %d",
                                      Cable_Indices.count,
                                      CP_Indices.count,
@@ -2008,8 +2069,6 @@ void InitializeGame()
 {
     // NOTE: Initialization
     gameState->initialized = true;
-    
-    InitKeyMapping();
     
     // NOTE: Initiaize slimes
     {
@@ -2076,7 +2135,6 @@ void InitializeGame()
 void CleanUpGame()
 {
     gameState->undoStack.reset();
-    CleanUpKeyMapping();
     
     gameState->initialized = false;    
     gameState->camera.tweenController.Reset();
@@ -2114,6 +2172,12 @@ UPDATE_AND_RENDER(UpdateAndRender)
         GuiLoadStyle(RAYLIB_GUI_STYLE_PATH);
     }
     
+    if (!gameState->input.initialized)
+    {
+        gameState->input.initialized = true;
+        InitKeyMapping(gameState->input.keyMappings);
+    }
+    
     Color colorA = IntToRGBA(0x62345); // 0x163355 0x4545 0x62345
      
     gameState->bgColor = colorA;
@@ -2123,7 +2187,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
         case TITLE_SCREEN:
         {
             
-            if (JustPressed(ANY_KEY))
+            if (JustPressed(gameState->input.keyMappings, SPLIT_KEY))
             {
                 gameState->currentScreen = MENU_SCREEN;
                 for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
@@ -2139,7 +2203,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             int32 TitleTextY = (GetScreenHeight() - 40) / 2 - 100;
             DrawText(Title, TitleTextX, TitleTextY, 40, DARKGREEN);
             
-            const char * Instructions = "PRESS Any Key to JUMP to GAMEPLAY SCREEN";
+            const char * Instructions = "PRESS SPACE";
             int32 instX = (GetScreenWidth() - MeasureText(Instructions, 20)) / 2;
             int32 instY = (GetScreenHeight()) / 2;
             DrawText(Instructions, instX, instY, 20, DARKGREEN);
@@ -2294,14 +2358,13 @@ UPDATE_AND_RENDER(UpdateAndRender)
             if (IsKeyPressed(KEY_ESCAPE))
             {
                 gameState->currentScreen = PAUSE_MENU_SCREEN;
-                for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
             }
             break;
         }
         case ENDING_SCREEN:
         {
             
-            if (JustPressed(ANY_KEY))
+            if (JustPressed(gameState->input.keyMappings, SPLIT_KEY))
             {
                 gameState->currentScreen = TITLE_SCREEN;
             }

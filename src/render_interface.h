@@ -13,7 +13,9 @@
 
 #define TEXTURE_PATH "Assets/Texture/SpriteAtlas-10x.png"
 #define FG_PATH "Assets/Texture/Backgrounds/5.png"
-#define VS_PATH "Assets/Shaders/jason.vs"
+#define POST_VS_PATH "Assets/Shaders/PostShaders/post.vs"
+#define POST_FS_PATH "Assets/Shaders/PostShaders/post.fs"
+
 #define BG_PATH "Assets/Texture/gradient.png"
 
 //  ========================================================================
@@ -35,13 +37,14 @@ enum PostShaderType
     FX_BLOOM,
     FX_BLUR,
     FX_VIGNETTE,
-    FX_JASON,
     FX_COUNT,
     //FX_FXAA
 };
 
-struct PostFX
+struct ShaderInfo
 {
+    char vsPath[100];
+     char fsPath[100];
     Shader shader;
     long fsWriteTime;
     long vsWriteTime;
@@ -59,6 +62,7 @@ struct StarFields
 //              NOTE: Render Globals
 //  ========================================================================
 
+
 static const char * shaderPaths[FX_COUNT] = 
 {
         "Assets/Shaders/grayscale.fs",
@@ -74,12 +78,33 @@ static const char * shaderPaths[FX_COUNT] =
     "Assets/Shaders/bloom.fs",
     "Assets/Shaders/blur.fs",
     "Assets/Shaders/vignette.fs",
-    "Assets/Shaders/jason.fs",
-};
+    };
 
 //  ========================================================================
 //              NOTE: Render Functions
 //  ========================================================================
+
+ bool LoadShaderInfo(ShaderInfo * shaderInfo, const char * vsPath, const char * fsPath)
+{
+    if (FileExists(vsPath) && FileExists(fsPath))
+    {
+        TextCopy(shaderInfo->vsPath, vsPath);
+        TextCopy(shaderInfo->fsPath, fsPath);
+        shaderInfo->shader = LoadShader(vsPath, fsPath);
+        if (!IsShaderValid(shaderInfo->shader)) return false;
+        shaderInfo->vsWriteTime = GetFileModTime(vsPath);
+        shaderInfo->fsWriteTime = GetFileModTime(fsPath);
+        
+        return true;
+        }
+    
+    return false;
+}
+
+void UnloadShaderInfo(ShaderInfo * shaderInfo)
+{
+    UnloadShader(shaderInfo->shader);
+}
 
 Rectangle GetCameraRect(Camera2D camera)
 {
@@ -249,27 +274,21 @@ for (uint32 i = 0; i < STAR_COUNT; i++)
     
 }
 
-void UpdateAndRenderWithShader(RenderTexture2D & renderTarget, PostFX * postFX, 
-                               int32 shaderType, int32 screenWidth, int32 screenHeight,
+void UpdateAndRenderWithShader(RenderTexture2D & renderTarget, ShaderInfo & shader, 
+                               int32 screenWidth, int32 screenHeight,
                                  int32 shake, float time)
 {
     
-    if (GetFileModTime(shaderPaths[shaderType]) != 
-        postFX[shaderType].fsWriteTime ||
-        GetFileModTime(VS_PATH) != postFX[shaderType].vsWriteTime)
+    if (GetFileModTime(shader.fsPath) != shader.fsWriteTime ||
+        GetFileModTime(shader.vsPath) != shader.vsWriteTime)
     {
-        UnloadShader(postFX[shaderType].shader);
-        postFX[shaderType].shader =
-            LoadShader(VS_PATH, shaderPaths[shaderType]);
-        if (!IsShaderValid(postFX[shaderType].shader))
+        UnloadShaderInfo(&shader);
+        if (!LoadShaderInfo(&shader, shader.vsPath, shader.fsPath))
         {
-            SM_ERROR(false, "Unable to load shader file (%s)", 
-                     "Assets/Shaders/bloom.fs");
+            SM_ERROR(false, "Unable to load shader, vs(%s) fs(%s)", 
+                     shader.vsPath, shader.fsPath);
+            }
         }
-        postFX[shaderType].fsWriteTime = GetFileModTime(shaderPaths[shaderType]);
-        postFX[shaderType].vsWriteTime = GetFileModTime(VS_PATH);
-        
-    }
     
     float mn = (float)Min(screenWidth, screenHeight);
     
@@ -278,21 +297,21 @@ void UpdateAndRenderWithShader(RenderTexture2D & renderTarget, PostFX * postFX,
         (float)screenWidth, (float)screenHeight
     };
     
-    int32 shakeLoc = GetShaderLocation(postFX[shaderType].shader, "shake");
-    int32 timeLoc = GetShaderLocation(postFX[shaderType].shader, "time");
-    int32 frameBufferSizeLoc = GetShaderLocation(postFX[shaderType].shader, "u_frameSize");
-    int32 offsetLoc = GetShaderLocation(postFX[shaderType].shader, "offset");
+    int32 shakeLoc = GetShaderLocation(shader.shader, "shake");
+    int32 timeLoc = GetShaderLocation(shader.shader, "time");
+    int32 frameBufferSizeLoc = GetShaderLocation(shader.shader, "u_frameSize");
+    int32 offsetLoc = GetShaderLocation(shader.shader, "offset");
     static float val = 0; 
     val -= GetFrameTime() * 0.0015f;
     
     
-    SetShaderValue(postFX[shaderType].shader, frameBufferSizeLoc, size, SHADER_UNIFORM_VEC2);
-    SetShaderValue(postFX[shaderType].shader, offsetLoc, &val, SHADER_UNIFORM_FLOAT);
-    SetShaderValue(postFX[FX_JASON].shader, shakeLoc, &shake, SHADER_UNIFORM_INT);
-    SetShaderValue(postFX[FX_JASON].shader, timeLoc, &time, SHADER_UNIFORM_FLOAT);
+    SetShaderValue(shader.shader, frameBufferSizeLoc, size, SHADER_UNIFORM_VEC2);
+    SetShaderValue(shader.shader, offsetLoc, &val, SHADER_UNIFORM_FLOAT);
+    SetShaderValue(shader.shader, shakeLoc, &shake, SHADER_UNIFORM_INT);
+    SetShaderValue(shader.shader, timeLoc, &time, SHADER_UNIFORM_FLOAT);
     
     
-    BeginShaderMode(postFX[shaderType].shader);
+    BeginShaderMode(shader.shader);
     
     Rectangle source =
     {

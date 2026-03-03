@@ -21,8 +21,8 @@
 #define MAX_ANIMATION 50
 #define DIST_ONE_TILE MAP_TILE_SIZE
 
-#define BOUNCE_SPEED 10.0f
-#define MOVE_SPEED 5.0f
+#define BOUNCE_SPEED 9.0f
+#define MOVE_SPEED 3.9f
 
 #define CAMERA_MOVE_SPEED 1.8f
 #define CAMERA_ZOOM_SPEED 1.7f
@@ -78,8 +78,6 @@ enum GameInputType
     RESET_KEY,
     
     RECOVER_KEY,
-    
-    ANY_KEY,
     GAME_INPUT_COUNT,
 };
 
@@ -146,7 +144,7 @@ struct Map
     int32   height;             // Number of tiles in Y axis
     
     bool8 firstEnter = false;
-};
+    };
 
 struct UndoStack
 {
@@ -204,6 +202,19 @@ struct MyCamera
     FollowState followState;
 };
 
+struct Input
+{
+    bool initialized = false;
+    KeyMapping keyMappings[GAME_INPUT_COUNT];
+    
+};
+
+struct SceneData
+{
+    char * levelPath;
+    UndoState entityState;
+    };
+
 // NOTE: GameState
 struct GameState
 {
@@ -221,7 +232,8 @@ struct GameState
     bool8 shake = false;
     real32 shakeTime = 0;
     real32 time = 0.0f;
-    PostFX postFX[FX_COUNT];
+    //PostFX postFX[FX_COUNT];
+     ShaderInfo postShader;
     
     Array<uint16, MAX_ENTITIES> entityTable[LAYER_COUNT];
     Array<Entity, MAX_ENTITIES> entities;
@@ -230,8 +242,7 @@ struct GameState
     Map tileMaps[500];
     Map * lv2Map;
     
-    KeyMapping keyMappings[GAME_INPUT_COUNT];
-    
+    Input input;
     Color bgColor;
     
     IVec2 tileMin, tileMax;

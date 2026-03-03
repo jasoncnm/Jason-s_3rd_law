@@ -22,7 +22,7 @@ float numColors = 10.0;
 // Custom uniforms
 uniform vec2 u_frameSize;
 uniform float offset = 0.0;
-uniform float brightness = 1.5;
+uniform float brightness = 1.3;
 uniform bool shake;
 
 vec4 applyBloom(vec4 color, vec2 uv)
@@ -131,8 +131,8 @@ vec2 fisheyeUV()
 
 vec4 applyPixelizer(vec2 uv)
 {
-    float pixelWidth = 2;
-    float pixelHeight = 2;
+    float pixelWidth = 5;
+    float pixelHeight = 5;
     float renderWidth = u_frameSize.x;
 	float renderHeight = u_frameSize.y;
 
@@ -184,29 +184,25 @@ void main()
     }
 
 
-    vec2 uv = curve(fragTexCoord);
+    vec2 uv = fragTexCoord;
+    uv = curve(uv);
     vec4 color = texture(texture0, uv);
     if (shake)
     {
         color = applyBlur(color, uv);
     }
-    // vec4 vfx = PostFX(texture0, uv);
+    
+    //vec4 vfx = PostFX(texture0, uv);
     // Texel color fetching from texture sampler
     // color = vfx;
     // color = applyPixelizer(uv);
     color = applyPosterization(color);
     color = applyBloom(color, uv);
     color = applyScanline(color, uv);
-
-    
-
     color = applyVignette(color, uv, miny, maxy);
-    // color = mix(color, vfx, 1);
-
-    
+    // color = mix(color, vfx, 1);  
     color.rgb = pow(color.rgb, vec3(1.0/brightness));
-    // NOTE: Implement here your fragment shader code
-
+ 
     // clipped unwanted uvs only render square
     if (uv.x < minx || uv.x > maxx)
         color *= 0.0;
