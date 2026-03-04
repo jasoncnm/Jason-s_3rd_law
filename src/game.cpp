@@ -737,12 +737,7 @@ bool8 IsNeighbour(Map & prevMap, Map & currentMap)
         if ((gameState->prevMapIndex != gameState->currentMapIndex &&
                  followEnt->tweenController.playing && (followEnt->tweenController.GetCurrentAniSpeed() == BOUNCE_SPEED)) ||
              !IsSlime(followEnt))
-    #if 0
-    if (!CheckCollisionRecs(finalRect, tileMapRec) &&
-         ||
-         !IsSlime(followEnt)))
-        #endif
-        {
+    {
         cam.followState = MyCamera::FOLLOW_ALONG_AXIS;
         return;
     }
@@ -1610,21 +1605,25 @@ void GameplayUpdateAndRender()
         {
         Entity * prevFollowEnt = gameState->undoStack.back().GetByEntityIndex(followEnt->entityIndex);
         
-        gameState->prevMapIndex = 0;
+        gameState->prevMapIndex = -1;
         
-        if (prevFollowEnt)
+        if (prevFollowEnt && prevFollowEnt->active)
         {
         FindTileMapResult prevResult = FindTileMap(prevFollowEnt->tilePos);
         if (prevResult.map)
         {
             gameState->prevMapIndex = prevResult.mapIndex;
         }
-        }
-        
+            }
+            
         FindTileMapResult result = FindTileMap(followEnt->tilePos);
         if (result.map)
         {
-            gameState->currentMapIndex = result.mapIndex;
+                gameState->currentMapIndex = result.mapIndex;
+                if (gameState->prevMapIndex < 0)
+                {
+                    gameState->prevMapIndex = gameState->currentMapIndex;
+                }
         }
             if (GetPlayer())
             {
@@ -1890,8 +1889,6 @@ void GameplayUpdateAndRender()
             
         }
         
-        
-        
         // Draw rectangle outline with extended parameters
         // Rectangle cameraRect = GetCameraRect(gameState->camera);
         // DrawRectangleLinesEx(cameraRect, 1, RED);
@@ -1987,20 +1984,22 @@ void GameplayUpdateAndRender()
         IVec2 centerPos = player->tilePos;
         Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera.base);
         }
-#if 0
+        
+        
+        DrawText(TextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f\nCamera State: %s",
+                            gameState->camera.base.target.x, gameState->camera.base.target.y,
+                            gameState->camera.base.offset.x, gameState->camera.base.offset.y, gameState->camera.base.zoom,
+                            GetCameraState(gameState->camera)), 10, 50, 20, RAYWHITE);
+        
+        DrawText(TextFormat("Follow Entity Type: %s(%d)", GetEntityType(followEnt), followEnt->entityIndex),
+                 10, 200, 25, YELLOW);
+        
         
         DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
                             player->tilePos.x, player->tilePos.y,
                             player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
         
-        DrawText(TextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f\nCamera State: %s",
-                            gameState->camera.base.target.x, gameState->camera.base.target.y,
-                                     gameState->camera.base.offset.x, gameState->camera.base.offset.y, gameState->camera.base.zoom,
-                                     GetCameraState(gameState->camera)), 10, 50, 20, RAYWHITE);
-        
-        DrawText(TextFormat("Follow Entity Type: %s(%d)", GetEntityType(followEnt), followEnt->entityIndex),
-                 10, 200, 25, YELLOW);
-        
+#if 0
 
         DrawText(TextFormat("TotalLine: %d, Connection: %d, Door: %d, TotalSource: %d",
                                      Cable_Indices.count,
