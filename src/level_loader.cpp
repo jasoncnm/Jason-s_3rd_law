@@ -19,19 +19,16 @@ inline AddEntityResult LoadGameObject(GameState & state, TileID id, IVec2 tilePo
     {
         entityResult = AddEntity(ENTITY_TYPE_PIT, tilePos, id);
 
-        SM_TRACE("Pit generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
-    }
+        }
     else if (id == WALL_1)
     {
         entityResult = AddEntity(ENTITY_TYPE_WALL, tilePos, id);
 
-        SM_TRACE("Wall generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
-    }
+        }
     else if (id == WALL_2)
     {
         entityResult = AddEntity(ENTITY_TYPE_WALL, tilePos, id);
-        SM_TRACE("Wall generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
-    }
+        }
     else if (id == BRIDGE_RIGHT_A || id == BRIDGE_RIGHT_B || id == BRIDGE_LEFT_A || id == BRIDGE_LEFT_B)
     {
         entityResult = AddDoor(tilePos, id, true, true, false, false);
@@ -45,21 +42,19 @@ inline AddEntityResult LoadGameObject(GameState & state, TileID id, IVec2 tilePo
         entityResult = AddEntity(ENTITY_TYPE_BLOCK, tilePos, id);
         entityResult.entity->mass = 2;
         entityResult.entity->movable = true;
-SM_TRACE("BLOCK 2 generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
-        
+
     }
     else if (id == BLOCK)
     {
         entityResult = AddEntity(ENTITY_TYPE_BLOCK, tilePos, id);
         entityResult.entity->mass = 1;
         entityResult.entity->movable = true;
-SM_TRACE("BLOCK 1 generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+
     }
     else if (id == GLASS)
     {
         entityResult = AddEntity(ENTITY_TYPE_GLASS, tilePos, id);
-SM_TRACE("GLASS generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
-    }
+}
     else if (id == PLAYER_1)
     {
         entityResult = AddEntity(ENTITY_TYPE_CLONE, tilePos, PLAYER_IDLE);
@@ -67,7 +62,7 @@ SM_TRACE("GLASS generated (tile location: %i, %i)", entityResult.entity->tilePos
         entityResult.entity->tileSize = GetSlimeSize(entityResult.entity);
         entityResult.entity->color = GRAY;
 entityResult.entity->movable = true;
-                                SM_TRACE("CLONE 1 generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+                                
     }
     else if (id >= DOOR_LEFT && id <= DOOR_DOWN)
     {
@@ -84,8 +79,7 @@ entityResult.entity->movable = true;
             SM_ASSERT(false, "Possible Door id miss match (id %d)", id);
         }
         
-        SM_TRACE("DOOR generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
-    }
+        }
     else if (id >= DOOR_LEFT_R && id <= DOOR_DOWN_R)
     {
         if (id == DOOR_LEFT_R || id == DOOR_RIGHT_R)
@@ -101,98 +95,92 @@ entityResult.entity->movable = true;
             SM_ASSERT(false, "Possible Door id miss match (id %d)", id);
         }
         
-        SM_TRACE("DOOR generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
         
     }
     else if (id == CABLE_DOWN_RIGHT || (id - 50) == CABLE_DOWN_RIGHT)
     {
         entityResult = AddCable(tilePos, (TileID)(CABLE_DOWN_RIGHT + 50), false, true, false, true);
-SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
-    }
+}
     else if (id == CABLE_H || (id - 50) == CABLE_H)
     {
         entityResult = AddCable(tilePos,(TileID)(CABLE_H + 50), true, true, false, false);
-SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
-    }
+}
     else if (id == CABLE_DOWN_LEFT || (id - 50) == CABLE_DOWN_LEFT)
     {
         entityResult = AddCable(tilePos,(TileID)(CABLE_DOWN_LEFT + 50), true, false, false, true);
-SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
-    }
+}
     else if (id == CABLE_V || (id - 50) == CABLE_V)
     {
         entityResult = AddCable(tilePos,(TileID)(CABLE_V + 50), false, false, true, true);
-SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
-    }
+}
     else if (id == CABLE_UP_RIGHT || (id - 50) == CABLE_UP_RIGHT)
     {
         entityResult = AddCable(tilePos,(TileID)(CABLE_UP_RIGHT + 50), false, true, true, false);
-SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
-    }
+}
     else if (id == CABLE_UP_LEFT || (id - 50) == CABLE_UP_LEFT)
     {
         entityResult = AddCable(tilePos,(TileID)(CABLE_UP_LEFT + 50), true, false, true, false);
-SM_TRACE("CABLE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+
     }
     else if (id == SOURCE_RIGHT || (id - 50) == SOURCE_RIGHT)
     {
         entityResult = AddSource(tilePos, (TileID)(SOURCE_RIGHT + 50), false, true, false, false);
-SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+
     }
     else if (id == SOURCE_LEFT || (id - 50) == SOURCE_LEFT)
     {
         entityResult = AddSource(tilePos, (TileID)(SOURCE_LEFT + 50), true, false, false, false);
-SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+
     }
     else if (id == SOURCE_DOWN || (id - 50) == SOURCE_DOWN)
     {
         entityResult = AddSource(tilePos, (TileID)(SOURCE_DOWN + 50), false, false, false, true);
-SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+
     }
     else if (id == SOURCE_UP || (id - 50) == SOURCE_UP)
     {
         entityResult = AddSource(tilePos, (TileID)(SOURCE_UP + 50), false, false, true, false);
-        SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+        
     }
     else if (id == SOURCE_H || (id - 50) == SOURCE_H)
     {
         entityResult = AddSource(tilePos, (TileID)(SOURCE_H + 50), true, true, false, false);
-        SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+        
     }
     else if (id == SOURCE_V || (id - 50) == SOURCE_V)
     {
         entityResult = AddSource(tilePos, (TileID)(SOURCE_V + 50), false, false, true, true);
-        SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+        
     }
     else if (id == SOURCE_UP_RIGHT || (id - 50) == SOURCE_UP_RIGHT)
     {
         entityResult = AddSource(tilePos, (TileID)(SOURCE_UP_RIGHT + 50), false, true, true, false);
-        SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+        
     }
     else if (id == SOURCE_UP_LEFT || (id - 50) == SOURCE_UP_LEFT)
     {
         entityResult = AddSource(tilePos, (TileID)(SOURCE_UP_LEFT + 50), true, false, true, false);
         
         
-        SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+        
     }
     else if (id == SOURCE_DOWN_RIGHT || (id - 50) == SOURCE_DOWN_RIGHT)
     {
         entityResult = AddSource(tilePos, (TileID)(SOURCE_DOWN_RIGHT + 50), false, true, false, true);
         
-        SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+        
     }
     else if (id == SOURCE_DOWN_LEFT || (id - 50) == SOURCE_DOWN_LEFT)
     {
         entityResult = AddSource(tilePos, (TileID)(SOURCE_DOWN_LEFT + 50), true, false, false, true);
         
-        SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+        
     }
     else if (id == CABLE_CONNECTION)
     {
         entityResult = AddConnection(tilePos, CABLE_CONNECTION);
         
-        SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+        
     }
     else if (id == TUT_1)
     {
@@ -216,7 +204,7 @@ SM_TRACE("SOURCE generated (tile location: %i, %i)", entityResult.entity->tilePo
     }
     else if (id != LOCK)
     {
-        SM_ASSERT(false, "Unable to register ID (%d)", id);
+        SM_WARN("Unknown ID (%d)", id);
     }
     return entityResult;
 }

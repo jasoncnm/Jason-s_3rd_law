@@ -3,10 +3,11 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TestLevels/Test.tmj",
+    "activeFile": "TileMap/Room_10.tmj",
     "expandedProjectPaths": [
         "TestLevels",
-        "."
+        ".",
+        "TileMap"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -788,11 +789,11 @@
             }
         },
         "TileMap/Path_80.tmj": {
-            "scale": 0.33,
+            "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 80.30303030303031,
-                "y": 175.75757575757575
+                "x": 1388,
+                "y": -881
             }
         },
         "TileMap/Path_81.tmj": {
@@ -884,19 +885,19 @@
             }
         },
         "TileMap/Room_1.tmj": {
-            "scale": 3,
+            "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": -181.33333333333331,
-                "y": 155.5
+                "x": -212,
+                "y": 975
             }
         },
         "TileMap/Room_10.tmj": {
-            "scale": 0.75,
+            "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.66666666666669,
-                "y": 176
+                "x": 1034,
+                "y": -1335
             }
         },
         "TileMap/Room_11.tmj": {
@@ -1228,11 +1229,11 @@
             }
         },
         "TileMap/Room_48.tmj": {
-            "scale": 0.75,
+            "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.66666666666669,
-                "y": 352
+                "x": 940,
+                "y": -81
             }
         },
         "TileMap/Room_5.tmj": {
@@ -1663,35 +1664,29 @@
     "map.lastUsedFormat": "json",
     "map.width": 11,
     "openFiles": [
-        "TileMap/Path_88.tmj",
-        "TileMap/Room_1.tmj",
-        "TileMap/Room_33.tmj",
-        "TileMap/Room_34.tmj",
-        "TileMap/Room_31.tmj",
         "TileMap/Room_59.tmj",
-        "TileMap/Room_21.tmj",
-        "TileMap/Room_15.tmj",
-        "TileMap/Broom_3.tmj",
-        "TileMap/Room_42.tmj",
-        "TileMap/Room_47.tmj",
-        "TestLevels/Test_2.tmj",
-        "TestLevels/Test.tmj",
-        "TestLevels/Test_3.tmj"
+        "TileMap/Room_60.tmj",
+        "TileMap/Room_31.tmj",
+        "TileMap/Room_1.tmj",
+        "TileMap/Path_3.tmj",
+        "TileMap/Path_80.tmj",
+        "TileMap/Room_48.tmj",
+        "TileMap/Room_10.tmj"
     ],
     "project": "level_edit.tiled-project",
     "property.type": "file",
     "recentFiles": [
+        "TileMap/Room_59.tmj",
+        "TileMap/Room_60.tmj",
         "TileMap/Room_31.tmj",
+        "TileMap/Room_1.tmj",
+        "TileMap/Path_3.tmj",
+        "TileMap/Path_80.tmj",
+        "TileMap/Room_48.tmj",
+        "TileMap/Room_10.tmj",
         "TileMap/Room_21.tmj",
         "TileMap/Room_15.tmj",
         "TileMap/Broom_3.tmj",
-        "TileMap/Room_42.tmj",
-        "TileMap/Room_47.tmj",
-        "TestLevels/Test_2.tmj",
-        "TestLevels/Test.tmj",
-        "TestLevels/Test_3.tmj",
-        "TileMap/Room_34.tmj",
-        "TileMap/Room_33.tmj",
-        "TileMap/Room_1.tmj"
+        "TileMap/Room_42.tmj"
     ]
 }
