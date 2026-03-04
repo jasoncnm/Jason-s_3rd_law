@@ -32,11 +32,14 @@ inline AddEntityResult LoadGameObject(GameState & state, TileID id, IVec2 tilePo
         entityResult = AddEntity(ENTITY_TYPE_WALL, tilePos, id);
         SM_TRACE("Wall generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
     }
-    else if (id >= WALL_EDGE_START && id <= WALL_EDGE_END)
+    else if (id == BRIDGE_RIGHT_A || id == BRIDGE_RIGHT_B || id == BRIDGE_LEFT_A || id == BRIDGE_LEFT_B)
     {
-        entityResult = AddEntity(ENTITY_TYPE_WALL, tilePos, id);
-        SM_TRACE("Wall generated (tile location: %i, %i)", entityResult.entity->tilePos.x, entityResult.entity->tilePos.y);
+        entityResult = AddDoor(tilePos, id, true, true, false, false);
     }
+    else if (id == BRIDGE_UP_A || id == BRIDGE_UP_B || id == BRIDGE_DOWN_A || id == BRIDGE_DOWN_B)
+    {
+        entityResult = AddDoor(tilePos, id, false, false, true, true);
+        }
     else if (id == BLOCK_2)
     {
         entityResult = AddEntity(ENTITY_TYPE_BLOCK, tilePos, id);
@@ -301,7 +304,7 @@ void SetupEntityTable(GameState & state)
                     state.entityTable[LAYER_KEY_LOCK].Add(entity->entityIndex);
                     break;
                 }
-            }
+                }
         }
     }
     

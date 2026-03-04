@@ -67,23 +67,6 @@ void UndoStack::push_back(uint32 playerIndex, UndoState::EntityArray & ea)
 //              NOTE: Game Functions (internal)
 //  ========================================================================
 
-inline bool8 CheckProjectState(Entity * entity)
-{
-    bool8 result = true;
-    IVec2 dirs[] = { DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT };
-    EntityLayer checkLayers[] = { LAYER_WALL, LAYER_DOOR ,LAYER_BLOCK };
-    for (uint32 i = 0; i < 4; i++)
-    {
-        Entity * ent = FindEntityByLocationAndLayers(entity->tilePos + dirs[i], checkLayers, 1);
-        if (ent && ent->type != ENTITY_TYPE_ELECTRIC_DOOR || 
-            ent && SameSide(ent, ent->tilePos, dirs[i]) && DoorBlocked(ent, dirs[i]))
-        {
-             result = false;
-        }
-    }
-    return result;
-    }
-
 void SetShake(float duration)
 {
     gameState->shake = true;
@@ -333,15 +316,16 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     break;
                 }
                 case ENTITY_TYPE_ELECTRIC_DOOR:
-                {
-                    SM_ASSERT(target->cableType == CABLE_TYPE_DOOR, "other cable type is not reachble");
-                    bool8 blocked = DoorBlocked(target, pushDir) || DoorBlocked(target, -pushDir);
-                    if (!blocked) break;
-                }
                 case ENTITY_TYPE_WALL:
                 case ENTITY_TYPE_PIT:
                 case ENTITY_TYPE_LOCK:
                 {
+                    if (target->type == ENTITY_TYPE_ELECTRIC_DOOR && target->cableType == CABLE_TYPE_DOOR)
+                    {
+                    bool8 blocked = DoorBlocked(target, pushDir) || DoorBlocked(target, -pushDir);
+                    if (!blocked) break;
+                    }
+                    
                     Entity * blockedEntity = target;
                     IVec2 targetPos = blockedEntity->tilePos - pushDir;
                     
@@ -461,7 +445,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 {
                     EntityLayer layers[] = { LAYER_DOOR };
                     Entity * door = FindEntityByLocationAndLayers(target->tilePos, layers, ArrayCount(layers));
-                    if (door && DoorBlocked(door, -current.pushDir))
+                    if (door && (DoorBlocked(door, -current.pushDir)))
                     {
                         current.pushResult.state = PUSH_BLOCKED;
                         current.pushResult.blockedEntity = target;

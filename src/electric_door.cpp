@@ -382,19 +382,23 @@ inline bool8 DoorBlocked(Entity * door, IVec2 reachDir)
     bool8 result = false;
 if (reachDir.x == 1)
     {
-        result = (door->tileID == DOOR_RIGHT || door->tileID == DOOR_RIGHT_R);
+        result = (door->tileID == DOOR_RIGHT || door->tileID == DOOR_RIGHT_R) ||
+        (door->tileID == BRIDGE_RIGHT_A || door->tileID == BRIDGE_RIGHT_B);
     }
     else if (reachDir.x == -1)
     {
-        result = (door->tileID == DOOR_LEFT || door->tileID == DOOR_LEFT_R);
+        result = (door->tileID == DOOR_LEFT || door->tileID == DOOR_LEFT_R) ||
+        (door->tileID == BRIDGE_LEFT_A || door->tileID == BRIDGE_LEFT_B);
     }
     else if (reachDir.y == 1)
     {
-        result = (door->tileID == DOOR_DOWN || door->tileID == DOOR_DOWN_R);
+        result = (door->tileID == DOOR_DOWN || door->tileID == DOOR_DOWN_R) ||
+        (door->tileID == BRIDGE_DOWN_A || door->tileID == BRIDGE_DOWN_B);
         }
     else if (reachDir.y == -1)
     {
-        result = (door->tileID == DOOR_UP || door->tileID == DOOR_UP_R);
+        result = (door->tileID == DOOR_UP || door->tileID == DOOR_UP_R) ||
+        (door->tileID == BRIDGE_UP_A || door->tileID == BRIDGE_UP_B);
     }
     
     return result;

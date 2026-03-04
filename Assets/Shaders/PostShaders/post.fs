@@ -58,6 +58,7 @@ vec4 applyVignette(vec4 color, vec2 uv, float miny, float maxy)
     float vignette = smoothstep(radius, radius - softness, dist);
 
     color.rgb = color.rgb - (1.0 - vignette);
+    color.rgb = clamp(color.rgb, vec3(0.0), vec3(1.0));
 
     return color;
 }

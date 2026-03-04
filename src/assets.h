@@ -28,9 +28,6 @@ enum TileID
     WALL_1   = 34,
     WALL_2   = 35,
     
-    WALL_EDGE_START = 111,
-    WALL_EDGE_END = 133,
-    
     BACKGROUND_1 = 141,
     
     BLOCK    = 33,
@@ -45,6 +42,16 @@ enum TileID
     SLIME_PORTAL = 11,
     KEY = 21,
     LOCK = 31,
+    
+    BRIDGE_LEFT_A = 107,
+    BRIDGE_LEFT_B = 117,
+    BRIDGE_RIGHT_A = 108,
+    BRIDGE_RIGHT_B = 118,
+    BRIDGE_UP_A = 109,
+    BRIDGE_UP_B = 110,
+    BRIDGE_DOWN_A = 119,
+    BRIDGE_DOWN_B = 120,
+    
     
     DOOR_LEFT  = 82,
     DOOR_RIGHT = 83,
@@ -112,11 +119,12 @@ TileID GetCablePowerOffID(TileID tileID)
 
 Sprite GetSprite(TileID tileID)
 {
-     int32 row = tileID / TileSetCols;
-     int32 col = tileID % TileSetCols;
+    int id = tileID - 1;
+     int32 row = id / TileSetCols;
+     int32 col = id % TileSetCols;
     
     Sprite sprite = { 0 };
-    sprite.altasOffset = IVec2 { (col - 1) * 32, row * 32 };
+    sprite.altasOffset = IVec2 { col * 32, row * 32 };
     sprite.spriteSize = IVec2 { 32, 32 };
     
     return sprite;

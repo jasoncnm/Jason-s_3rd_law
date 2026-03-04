@@ -197,6 +197,32 @@ inline bool8 IsSlime(Entity * entity)
     return entity->type == ENTITY_TYPE_CLONE || entity->type == ENTITY_TYPE_PLAYER;
 }
 
+#if 0
+inline bool8 BridgeBlocked(Entity * bridge, IVec2 reachDir)
+{
+    SM_ASSERT(reachDir.SqrMagnitude() <= 1, "Directional Vector should be a unit vector");
+    
+    bool8 result = false;
+    if (reachDir.x == 1)
+    {
+        result = (bridge->tileID == BRIDGE_RIGHT_A || bridge->tileID == BRIDGE_RIGHT_B);
+    }
+    else if (reachDir.x == -1)
+    {
+        result = (bridge->tileID == BRIDGE_LEFT_A || bridge->tileID == BRIDGE_LEFT_B);
+    }
+    else if (reachDir.y == 1)
+    {
+        result = (bridge->tileID == BRIDGE_DOWN_A || bridge->tileID == BRIDGE_DOWN_B);
+    }
+    else if (reachDir.y == -1)
+    {
+        result = (bridge->tileID == BRIDGE_UP_A || bridge->tileID == BRIDGE_UP_B);
+    }
+    
+    return result;
+}
+#endif
 
 inline void SetEntitySprite(Entity * entity, TileID tileID)
 {
