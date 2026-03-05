@@ -79,8 +79,8 @@
             "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 419.33333333333326,
-                "y": 514.3333333333333
+                "x": 456,
+                "y": 157
             }
         },
         "TileMap/Broom_5.tmj": {
@@ -823,8 +823,8 @@
             "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 670,
-                "y": 4.333333333333371
+                "x": 808,
+                "y": -195
             }
         },
         "TileMap/Path_88.tmj": {
@@ -860,11 +860,11 @@
             }
         },
         "TileMap/Room_1.tmj": {
-            "scale": 1.5,
+            "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 405.33333333333326,
-                "y": 105
+                "x": 934.6666666666665,
+                "y": 71.33333333333337
             }
         },
         "TileMap/Room_10.tmj": {
@@ -903,8 +903,8 @@
             "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -478,
-                "y": 355
+                "x": 1164,
+                "y": 1204.3333333333333
             }
         },
         "TileMap/Room_15.tmj": {
@@ -1300,11 +1300,11 @@
             }
         },
         "TileMap/Room_6.tmj": {
-            "scale": 1,
+            "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 175.5,
-                "y": 175.5
+                "x": -666.6666666666665,
+                "y": 67.66666666666669
             }
         },
         "TileMap/Room_60.tmj": {
@@ -1413,10 +1413,10 @@
         },
         "TileMap/Room_9.tmj": {
             "scale": 0.75,
-            "selectedLayer": 1,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 69.33333333333337,
-                "y": 32.66666666666674
+                "x": -121.33333333333326,
+                "y": 71.33333333333337
             }
         },
         "TileMap/Test.tmj": {
