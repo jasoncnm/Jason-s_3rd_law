@@ -428,7 +428,7 @@ inline bool8 CheckDoor(IVec2 tilePos)
 void SetUpElectricDoor()
 {
     auto Visited = [](Entity * ent) {
-        bool8 result = ent && (ent->leftIndex > 0 || ent->rightIndex > 0 || ent->upIndex > 0 || ent->downIndex > 0);
+        bool8 result = ent && (ent->leftIndex >= 0 || ent->rightIndex >= 0 || ent->upIndex >= 0 || ent->downIndex >= 0);
         return result;
     };
     
