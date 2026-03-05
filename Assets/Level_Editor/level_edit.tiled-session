@@ -852,11 +852,11 @@
             }
         },
         "TileMap/Room_0.tmj": {
-            "scale": 1.5,
-            "selectedLayer": 0,
+            "scale": 0.75,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 106.66666666666669,
-                "y": 423
+                "x": 446.6666666666666,
+                "y": -252.66666666666663
             }
         },
         "TileMap/Room_1.tmj": {
