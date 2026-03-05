@@ -40,6 +40,12 @@
          "id":3,
          "name":"Lock",
          "opacity":1,
+         "properties":[
+                {
+                 "name":"Lock_count",
+                 "type":"int",
+                 "value":10
+                }],
          "type":"tilelayer",
          "visible":true,
          "width":11,
@@ -71,6 +77,12 @@
  "nextlayerid":4,
  "nextobjectid":1,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"Lock_count",
+         "type":"int",
+         "value":10
+        }],
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
  "tileheight":32,
