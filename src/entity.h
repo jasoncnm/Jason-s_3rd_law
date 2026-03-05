@@ -22,7 +22,8 @@ enum EntityLayer
     LAYER_BLOCK,
     LAYER_PIT,
     LAYER_PORTAL,
-    LAYER_KEY_LOCK,
+    LAYER_KEY,
+    LAYER_LOCK,
     LAYER_COUNT,
 };
 
@@ -71,18 +72,16 @@ struct Entity
     
     Vector2 pivot;
     
-    float tileSize = 32.0f;
+     real32 tileSize = 32.0f;
     
      uint16 entityIndex;
     int32 attachedEntityIndex;
-    
     int32 unlockEntityIndex;
-    
     int32 sourceIndex = -1;
     int32 rightIndex = -1, leftIndex = -1, upIndex = -1, downIndex = -1;
-    
     int32 mass = 1;
     int32 maxMass = 2;
+    int32 unlockCount = 0;
     
     bool8 movable = false;
     
@@ -116,10 +115,10 @@ struct FindAttachableResult
 inline bool8 DoorBlocked(Entity * door, IVec2 reachDir);
 inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir);
 inline bool8 IsDoor(Entity * door);
-inline float GetSlimeSize(Entity * slime);
+inline real32 GetSlimeSize(Entity * slime);
 inline Entity * GetEntity(int32 i);
 inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * playEvent,
-                       IVec2 targetPos, float (*MoveFunc)(float), float speed);
+                       IVec2 targetPos, real32 (*MoveFunc)(real32), real32 speed);
 
 
 #define ENTITY_H

@@ -202,6 +202,10 @@ entityResult.entity->movable = true;
     {
         
     }
+    else if (id == KEY)
+    {
+        entityResult = AddEntity(ENTITY_TYPE_KEY, tilePos, id);
+    }
     else if (id != LOCK)
     {
         SM_WARN("Unknown ID (%d)", id);
@@ -287,9 +291,13 @@ void SetupEntityTable(GameState & state)
                     break;
                 }
                 case ENTITY_TYPE_KEY:
+                {
+                    state.entityTable[LAYER_KEY].Add(entity->entityIndex);
+                    break;
+                }
                 case ENTITY_TYPE_LOCK:
                 {
-                    state.entityTable[LAYER_KEY_LOCK].Add(entity->entityIndex);
+                    state.entityTable[LAYER_LOCK].Add(entity->entityIndex);
                     break;
                 }
                 }
@@ -403,75 +411,20 @@ state.currentMapIndex = -1;
                                         
                                         SM_TRACE("Player generated (tile location: %i, %i)", result.entity->tilePos.x, result.entity->tilePos.y);
                                     }
-                                    else if (name == "Key")
+                                    else if (name == "Lock")
                                     {
-                                        result = AddEntity(ENTITY_TYPE_KEY, tilePos, KEY);
-                                        
-                                        Entity * key = result.entity;
-                                        
+                                        result = AddEntity(ENTITY_TYPE_LOCK, tilePos, tileId);
                                         json properties = layer["properties"];
                                         for (auto & prop : properties)
                                         {
-                                            if (prop["type"] == "file")
+                                            if (prop["type"] == "int")
                                             {
-                                                std::string fname = prop["value"];
-                                                
-                                                // const char * npath = GetDirectoryPath(path.c_str());
-                                                
-                                                std::string lockMapPath = "/" + fname;
-                                                lockMapPath = GetDirectoryPath(path.c_str()) + lockMapPath;
-                                                std::ifstream file(lockMapPath);
-                                                json lockMap = json::parse(file);
-                                                
-                                                json lockMapMeta;
-                                                for (uint32 mapIdx = 0; mapIdx < tileMaps.size(); mapIdx++)
-                                                {
-                                                    std::string p = tileMaps[mapIdx]["fileName"];
-                                                    if (fname == FindFileNameFromPath(p))
-                                                    {
-                                                        lockMapMeta = tileMaps[mapIdx];
-                                                        break;
-                                                    }
-                                                }
-                                                int32 lockMapWidth =  (int32)lockMapMeta["width"] / tileWidth;
-                                                int32 lockMapHeight = (int32)lockMapMeta["height"] / tileWidth;
-                                                int32 lockStartPosX = (int32)lockMapMeta["x"] / tileWidth;
-                                                int32 lockStartPosY = (int32)lockMapMeta["y"] / tileWidth;
-                                                IVec2 lockMapStartPos = { lockStartPosX, lockStartPosY };
-                                                for (auto & layer : lockMap["layers"])
-                                                {
-                                                    if (layer["name"] == "Lock")
-                                                    {
-                                                        std::vector<int32> lData = layer["data"];
-                                                        for (int32 lrow = 0; lrow < lockMapWidth; lrow++)
-                                                        {
-                                                            for (int32 lcol = 0; lcol < lockMapHeight; lcol++)
-                                                            {
-                                                                int32 ltileId = lData[lcol + lrow * lockMapWidth];
-                                                                if (ltileId == LOCK)
-                                                                {
-                                                                    IVec2 lOffset = { lcol, lrow };
-                                                                    IVec2 lTilePos = lockMapStartPos + lOffset;
-                                                                    
-                                                                    AddEntityResult lResult = AddEntity(ENTITY_TYPE_LOCK, lTilePos, LOCK);
-                                                                    
-                                                                    lResult.entity->open = false;
-                                                                    
-                                                                    key->unlockEntityIndex = lResult.entity->entityIndex;
-                                                                    
-                                                                    break;
-                                                                }
-                                                            }
-                                                        }
-                                                        break;
-                                                    }
-                                                    }
-                                                
+                                                result.entity->unlockCount = (int32)prop["value"];
                                                 break;
                                             }
                                         }
                                     }
-                                    else if (name != "Lock")
+                                    else
                                     {
                                         result = LoadGameObject(state, tileId, tilePos);
                                     }
@@ -508,9 +461,84 @@ state.currentMapIndex = -1;
     {
         state.tileMin = min;
         state.tileMax = max;
+        state.keysCollected = 0;
     }
     
     SetupEntityTable(state);
     SetUpElectricDoor();
 }
- 
+
+
+
+
+
+#if 0
+else if (name == "Key")
+{
+    result = AddEntity(ENTITY_TYPE_KEY, tilePos, KEY);
+    
+    Entity * key = result.entity;
+    
+    json properties = layer["properties"];
+    for (auto & prop : properties)
+    {
+        if (prop["type"] == "file")
+        {
+            std::string fname = prop["value"];
+            
+            // const char * npath = GetDirectoryPath(path.c_str());
+            
+            std::string lockMapPath = "/" + fname;
+            lockMapPath = GetDirectoryPath(path.c_str()) + lockMapPath;
+            std::ifstream file(lockMapPath);
+            json lockMap = json::parse(file);
+            
+            json lockMapMeta;
+            for (uint32 mapIdx = 0; mapIdx < tileMaps.size(); mapIdx++)
+            {
+                std::string p = tileMaps[mapIdx]["fileName"];
+                if (fname == FindFileNameFromPath(p))
+                {
+                    lockMapMeta = tileMaps[mapIdx];
+                    break;
+                }
+            }
+            int32 lockMapWidth =  (int32)lockMapMeta["width"] / tileWidth;
+            int32 lockMapHeight = (int32)lockMapMeta["height"] / tileWidth;
+            int32 lockStartPosX = (int32)lockMapMeta["x"] / tileWidth;
+            int32 lockStartPosY = (int32)lockMapMeta["y"] / tileWidth;
+            IVec2 lockMapStartPos = { lockStartPosX, lockStartPosY };
+            for (auto & layer : lockMap["layers"])
+            {
+                if (layer["name"] == "Lock")
+                {
+                    std::vector<int32> lData = layer["data"];
+                    for (int32 lrow = 0; lrow < lockMapWidth; lrow++)
+                    {
+                        for (int32 lcol = 0; lcol < lockMapHeight; lcol++)
+                        {
+                            int32 ltileId = lData[lcol + lrow * lockMapWidth];
+                            if (ltileId == LOCK)
+                            {
+                                IVec2 lOffset = { lcol, lrow };
+                                IVec2 lTilePos = lockMapStartPos + lOffset;
+                                
+                                AddEntityResult lResult = AddEntity(ENTITY_TYPE_LOCK, lTilePos, LOCK);
+                                
+                                lResult.entity->open = false;
+                                
+                                key->unlockEntityIndex = lResult.entity->entityIndex;
+                                
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            
+            break;
+        }
+    }
+}
+#endif

@@ -84,7 +84,8 @@ inline UndoState::EntityArray GetCurrentStateEntities()
         LAYER_GLASS,
         LAYER_SLIME,
         LAYER_BLOCK,
-        LAYER_KEY_LOCK,
+        LAYER_KEY,
+        LAYER_LOCK,
     };
     uint32 layerCount = ArrayCount(pushLayers);
     
@@ -557,7 +558,7 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
     SM_ASSERT(startEnt->movable, "Static entity cannot be pushing blocks!");
     
     // IMPORTANT: the order of the layers are important, for example, we don't want to check blocks before checking doors in the same tile
-    EntityLayer checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_KEY_LOCK };
+    EntityLayer checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_LOCK };
     uint32 layerCount = ArrayCount(checkLayers);
     
     Array<CheckThings, 100> checkList;
@@ -1490,15 +1491,15 @@ void GameplayUpdateAndRender()
         for (uint32 slimeIndex = 0; slimeIndex < slimeIndexTable.count; slimeIndex++)
         {
             Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
-            if (slime)
+            if (slime && slime->tweenController.NoTweens())
             {
-                auto & keyTable = gameState->entityTable[LAYER_KEY_LOCK];
-                for (uint32 keyLockIndex = 0; keyLockIndex < keyTable.count; keyLockIndex++)
+                auto & keyTable = gameState->entityTable[LAYER_KEY];
+                for (uint32 keyIndex = 0; keyIndex < keyTable.count; keyIndex++)
                 {
-                    Entity * key = GetEntity(keyTable[keyLockIndex]);
-                    if (key && key->type == ENTITY_TYPE_KEY && 
-                        PivotToTilePos(slime->pivot, slime->tileSize) == key->tilePos)
+                    Entity * key = GetEntity(keyTable[keyIndex]);
+                    if (key && (key->tilePos == slime->tilePos))
                     {
+                        #if 0
                         Entity * lock = GetEntity(key->unlockEntityIndex);
                         if (!lock->open)
                         {
@@ -1517,11 +1518,37 @@ void GameplayUpdateAndRender()
                             deleteEvent2.deleteEntity = lock;
                             lock->tweenController.endEvents.Add(deleteEvent2);
                             // OnPlayEvent(&lock->tweenController);
-                            
                         }
+#else
+                        DeleteEntity(key);
+                        gameState->keysCollected++;
+                        #endif
                         break;
                     }
                 }
+            }
+        }
+        
+        auto & lockTable = gameState->entityTable[LAYER_LOCK];
+        for (uint32 lockIndex = 0; lockIndex < lockTable.count; lockIndex++)
+        {
+            Entity * lock = GetEntity(lockTable[lockIndex]);
+            if (lock && !lock->open && (lock->unlockCount <= gameState->keysCollected))
+            {
+                SM_ASSERT(lock->unlockCount == gameState->keysCollected, "this lock should be unlocked earlier");
+                lock->open = true;
+                float delayTime = 1.0f;
+                TweenParams params = { 0 };
+                params.paramType = PARAM_TYPE_COLOR;
+                params.startColor = WHITE;
+                params.endColor = ColorAlpha(WHITE, 0.0f);
+                params.realColor = &lock->color;
+                AddTweenUnique(lock->tweenController, CreateTween(params, nullptr, 1.0f, delayTime));
+                TweenEvent deleteEvent2;
+                deleteEvent2.deleteEntity = lock;
+                lock->tweenController.endEvents.Add(deleteEvent2);
+                // OnPlayEvent(&lock->tweenController);
+                
             }
         }
         
@@ -1532,7 +1559,7 @@ void GameplayUpdateAndRender()
     {
         gameState->simulating = false;
         // NOTE: Update: Entity
-        EntityLayer simulateLayers[] = { LAYER_SLIME, LAYER_BLOCK, LAYER_KEY_LOCK };
+        EntityLayer simulateLayers[] = { LAYER_SLIME, LAYER_BLOCK, LAYER_LOCK };
         for (uint32 idx = 0; idx < ArrayCount(simulateLayers); idx++)
         {
             uint32 layer = simulateLayers[idx];
@@ -1575,7 +1602,7 @@ void GameplayUpdateAndRender()
                                 gameState->camera.followEntityIndex = entity->entityIndex;
                             }
                         }
-                        else if (layer == LAYER_KEY_LOCK)
+                        else if (layer == LAYER_LOCK)
                         {
                             gameState->camera.followEntityIndex = entity->entityIndex;
                         }
@@ -1852,7 +1879,8 @@ void GameplayUpdateAndRender()
             LAYER_CONNECTION,
             LAYER_WALL, 
             LAYER_PIT,
-            LAYER_KEY_LOCK,
+            LAYER_KEY,
+            LAYER_LOCK,
             LAYER_PORTAL,
             LAYER_SLIME,
             LAYER_BLOCK,
@@ -1993,6 +2021,10 @@ void GameplayUpdateAndRender()
         
         DrawText(TextFormat("Follow Entity Type: %s(%d)", GetEntityType(followEnt), followEnt->entityIndex),
                  10, 200, 25, YELLOW);
+        
+        
+        DrawText(TextFormat("Stars Collected: %d", gameState->keysCollected),
+                 10, 250, 25, YELLOW);
         
         
         DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",

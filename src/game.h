@@ -257,6 +257,8 @@ struct GameState
     int32 playerMapIndex;
     int32 lastTutBlockIndex;
     
+    int32 keysCollected = 0;
+    
     int32 screenWidth = SCREEN_WIDTH;
     int32 screenHeight = SCREEN_HEIGHT;
     GameScreen currentScreen = TITLE_SCREEN;
