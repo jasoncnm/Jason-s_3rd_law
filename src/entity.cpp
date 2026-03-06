@@ -102,23 +102,7 @@ inline void SetEntityPosition(Entity * entity, Entity * attachedEntity, IVec2 ti
         if (IsDoor(attachedEntity)) door = attachedEntity;
         if (door && (tilePos == door->tilePos))
         {
-            TileID doorID = door->tileID;
-            if (door->tileID == DOOR_RIGHT || door->tileID == DOOR_RIGHT_R)
-            {
-                dir = IVec2 { -1, 0 };
-            }
-            if (door->tileID == DOOR_LEFT || door->tileID == DOOR_LEFT_R)
-            {
-                dir = IVec2 { 1, 0 };
-            }
-            if (door->tileID == DOOR_DOWN || door->tileID == DOOR_DOWN_R)
-            {
-                dir = IVec2 { 0, -1 };
-            }
-            if (door->tileID == DOOR_UP || door->tileID == DOOR_UP_R)
-            {
-                dir = IVec2 { 0, 1 };
-            }
+            dir = -GetDoorDirection(door);
             }
         
         if (IsSlime(entity))

@@ -108,10 +108,12 @@ void UnloadShaderInfo(ShaderInfo * shaderInfo)
 
 Rectangle GetCameraRect(Camera2D camera)
 {
-    Vector2 offset = Vector2Scale(camera.offset, 1.0f / camera.zoom);        
+    //Vector2 delta = { 50.0f, 50.0f };
+    Vector2 offset = Vector2Scale(camera.offset, 1.0f / camera.zoom);//  - delta;        
     Vector2 topleft = Vector2Subtract(camera.target, offset);
-
-    Rectangle result = { topleft.x, topleft.y, offset.x * 2, offset.y * 2 };
+    
+    Rectangle result = { topleft.x, topleft.y,
+        offset.x * 2, offset.y * 2 };
 
     return result;
 }
@@ -173,13 +175,10 @@ void DrawSprite(Camera2D camera, Texture2D texture, Sprite & sprite, Vector2 top
             //topLeft.x + tileSize, topLeft.y + tileSize,
             topLeft.x, topLeft.y,
             tileSize, tileSize
-        };
-
-    if (CheckCollisionRecs(dest, GetCameraRect(camera)))
-    {
-        // Draw a part of a texture defined by a rectangle with 'pro' parameters
+    };
+    
+// Draw a part of a texture defined by a rectangle with 'pro' parameters
         DrawTexturePro(texture,  source,  dest, { 0, 0 }, 0, color);
-        }
 }
 
 void DrawError()
@@ -191,7 +190,7 @@ void UpdateStarField(Vector3 * stars, Vector2 * starsScreenPos, Vector2 moveDir,
                      int32 screenWidth, int32 screenHeight, int32 offsetX, int32 offsetY,
                      uint32 start, uint32 end)
 {
-    float moveSpeed = 2000;
+    float moveSpeed = 500;
     for (uint32 i = start; i < end; i++)
     {
         stars[i].x += moveDir.x * dt * moveSpeed;

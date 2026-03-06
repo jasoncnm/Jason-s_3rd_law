@@ -36,7 +36,8 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 //              NOTE: Internal Functions (internal)
 //  ========================================================================
 
-void UndoStack::push_back(uint32 playerIndex, UndoState::EntityArray & ea)
+void UndoStack::push_back(uint32 playerIndex, uint32 starCount, 
+                          UndoState::EntityArray & ea)
 {
     last++;
     count++;
@@ -45,6 +46,7 @@ void UndoStack::push_back(uint32 playerIndex, UndoState::EntityArray & ea)
     
     UndoState & state = undoStack[last - 1];
     state.playerIndex = playerIndex;
+    state.starCount = starCount;
     state.undoEntities.clear();
     
     #if 0
@@ -66,6 +68,53 @@ void UndoStack::push_back(uint32 playerIndex, UndoState::EntityArray & ea)
 //  ========================================================================
 //              NOTE: Game Functions (internal)
 //  ========================================================================
+
+bool8 MapIsVisible(Map & tileMap)
+{
+    bool8 result = tileMap.visibleStarCount <= gameState->starCount;
+    return result;
+}
+
+bool8 MapIsVisible(int32 mapIndex)
+{
+    bool8 result = false;
+    if (mapIndex >= 0)
+    {
+        result = MapIsVisible(gameState->tileMaps[mapIndex]);
+    }
+    return result;
+}
+
+void SetDrawingEntities()
+{
+    for (uint32 i = 0; i < gameState->entities.count; i++)
+    {
+        Entity * ent = GetEntity(i);
+        if (ent)
+        {
+            FindTileMapResult mapResult = FindTileMap(ent->tilePos);
+            if (ent->tweenController.NoTweens() && mapResult.map && !MapIsVisible(*mapResult.map))
+            {
+                ent->isVisible = false;
+                continue;
+            }
+            
+            Rectangle dest =
+            {
+                //topLeft.x + tileSize, topLeft.y + tileSize,
+                ent->pivot.x, ent->pivot.y,
+                ent->tileSize, ent->tileSize
+            };
+            ent->isVisible =
+                CheckCollisionRecs(dest, GetCameraRect(gameState->camera.base));
+                }
+    }
+}
+
+void SetActiveEntities()
+{
+    
+}
 
 void SetShake(float duration)
 {
@@ -110,6 +159,7 @@ inline UndoState::EntityArray GetCurrentStateEntities()
             entities[i++] = ent;
             }
     }
+    
     
     return { i, entities };
     }
@@ -735,13 +785,13 @@ bool8 IsNeighbour(Map & prevMap, Map & currentMap)
     
     if (gameState->currentMapIndex >= 0)
     {
-        if ((gameState->prevMapIndex != gameState->currentMapIndex &&
-                 followEnt->tweenController.playing && (followEnt->tweenController.GetCurrentAniSpeed() == BOUNCE_SPEED)) ||
+        if (gameState->prevMapIndex != gameState->currentMapIndex &&
+            (followEnt->tweenController.playing && (followEnt->tweenController.GetCurrentAniSpeed() == BOUNCE_SPEED)) ||
              !IsSlime(followEnt))
     {
         cam.followState = MyCamera::FOLLOW_ALONG_AXIS;
         return;
-    }
+            }
     }
     
      cam.followState = MyCamera::LOCK_TO_MAP;
@@ -970,16 +1020,19 @@ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
     }
     }
 
-
+inline void SetGameState(UndoState & undoState)
+{
+    gameState->playerEntityIndex = undoState.playerIndex;
+    gameState->camera.followEntityIndex = gameState->playerEntityIndex;
+    gameState->starCount = undoState.starCount;
+    std::vector<Entity> & undoEntities = undoState.undoEntities;
+    SetUndoEntities(undoEntities);        
+    }
 
 inline void Undo()
 {
     UndoState & undoState = gameState->undoStack.back();
-    gameState->playerEntityIndex = undoState.playerIndex;
-    gameState->camera.followEntityIndex = gameState->playerEntityIndex;
-    
-    std::vector<Entity> & undoEntities = undoState.undoEntities;
-    SetUndoEntities(undoEntities);        
+    SetGameState(undoState);
     gameState->undoStack.pop_back();
     // UpdateCamera(true);
 }
@@ -988,16 +1041,14 @@ inline void Undo()
 inline void Restart()
 {
     UndoState::EntityArray ea = GetCurrentStateEntities();
-    gameState->undoStack.push_back(gameState->playerEntityIndex, ea);
+    gameState->undoStack.push_back(gameState->playerEntityIndex, 
+                                   gameState->starCount, 
+                                   ea);
     Map & currentMap = gameState->tileMaps[gameState->currentMapIndex];
     
     UndoState & initState = currentMap.initUndoState;
-    gameState->playerEntityIndex = initState.playerIndex;
-    
-    std::vector<Entity> & initEntities = initState.undoEntities;
-    SetUndoEntities(initEntities);
-    
-}
+    SetGameState(initState);
+    }
 
 bool8 MoveAction(IVec2 actionDir)
 {
@@ -1259,7 +1310,7 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
         for (uint32 i = 0; i < entityIndexArray.count; i++)
         {
             Entity * entity = GetEntity(entityIndexArray[i]);
-            if (entity)
+            if (entity && entity->isVisible)
             {
                 Color color = entity->color;
                 if (entity->actionState == FREEZE_STATE)
@@ -1451,10 +1502,15 @@ void GameplayUpdateAndRender()
         
         if (stateChanged)
         {
-            gameState->undoStack.push_back(prevPlayerIndex, prevState);
+            gameState->undoStack.push_back(prevPlayerIndex,
+                                           gameState->starCount,
+                                           prevState);
             }
         
     }
+    
+    static uint32 change_count = 0;
+    if (stateChanged) change_count++;
     
     SetFreeze();
         UpdateSlimes();
@@ -1521,7 +1577,7 @@ void GameplayUpdateAndRender()
                         }
 #else
                         DeleteEntity(key);
-                        gameState->keysCollected++;
+                        gameState->starCount++;
                         #endif
                         break;
                     }
@@ -1533,9 +1589,9 @@ void GameplayUpdateAndRender()
         for (uint32 lockIndex = 0; lockIndex < lockTable.count; lockIndex++)
         {
             Entity * lock = GetEntity(lockTable[lockIndex]);
-            if (lock && !lock->open && (lock->unlockCount <= gameState->keysCollected))
+            if (lock && !lock->open && (lock->unlockCount <= gameState->starCount))
             {
-                SM_ASSERT(lock->unlockCount == gameState->keysCollected, "this lock should be unlocked earlier");
+                SM_ASSERT(lock->unlockCount == gameState->starCount, "this lock should be unlocked earlier");
                 lock->open = true;
                 float delayTime = 1.0f;
                 TweenParams params = { 0 };
@@ -1644,14 +1700,16 @@ void GameplayUpdateAndRender()
             }
             
         FindTileMapResult result = FindTileMap(followEnt->tilePos);
-        if (result.map)
+            if (result.map && MapIsVisible(*result.map))
         {
                 gameState->currentMapIndex = result.mapIndex;
-                if (gameState->prevMapIndex < 0)
-                {
-                    gameState->prevMapIndex = gameState->currentMapIndex;
                 }
-        }
+            
+            if (gameState->prevMapIndex < 0)
+            {
+                gameState->prevMapIndex = gameState->currentMapIndex;
+            }
+            
             if (GetPlayer())
             {
                 result = FindTileMap(GetPlayer()->tilePos);
@@ -1668,8 +1726,10 @@ void GameplayUpdateAndRender()
     {
     Vector2 oldTarget = gameState->camera.base.target;
     
+        bool8 freeForm = IsKeyDown(KEY_T);
+        
     // NOTE: Debug Camera Control
-    {
+        {
         // NOTE: CameraZoom
         // Camera zoom controls
         // Uses log scaling to provide consistent zoom speed
@@ -1678,15 +1738,17 @@ void GameplayUpdateAndRender()
         gameState->camera.base.zoom = expf(logf(gameState->camera.base.zoom) + (wheelDelta*0.1f));
         // NOTE: Camera Drag
         if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
-        {
-            Vector2 mouseDelta = GetMouseDelta();
+            {
+                Vector2 mouseDelta = GetMouseDelta();
             gameState->camera.base.target.x -= mouseDelta.x;
             gameState->camera.base.target.y -= mouseDelta.y;
         }
         //if (gameState->camera.base.zoom > 10.0f) gameState->camera.base.zoom = 10.0f;
         if (gameState->camera.base.zoom < 0.1f) gameState->camera.base.zoom = 0.1f;
         }
-    
+        
+        if (!freeForm)
+        {
         if (slimeSwitched)//  || ((followEnt != lastFollowEnt) && (GetPlayer() == followEnt)))
     {
         UpdateCamera(true);
@@ -1694,12 +1756,14 @@ void GameplayUpdateAndRender()
     else 
     {
         UpdateCamera();
-    }
+        }
+        }
+        
     Vector2 newTarget = gameState->camera.base.target;
     gameState->camera.moveDir = { 0 };
     if (!Vector2Equals(oldTarget, newTarget))
     {
-        gameState->camera.moveDir = oldTarget - newTarget;
+            gameState->camera.moveDir = (oldTarget - newTarget) * gameState->camera.base.zoom;
     }
     }
     
@@ -1822,11 +1886,11 @@ void GameplayUpdateAndRender()
             Entity player = *GetPlayer();
             CleanUpGame();
             LoadTileMapsAndEntities(*gameState, MAIN_PATH);
-            gameState->playerEntityIndex = gameState->lastState.playerIndex;
-            SetUndoEntities(gameState->lastState.undoEntities);
-            gameState->currentScreen = GAME_MAIN_SCREEN;
-            for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
             
+            SetGameState(gameState->lastState);
+            gameState->currentScreen = GAME_MAIN_SCREEN;
+            
+            // NOTE: Reset electric door sprite
             for (uint32 i = 0; i < Source_Indices.count; i++)
             {
                 Entity * source = GetEntity(Source_Indices[i]);
@@ -1857,6 +1921,8 @@ void GameplayUpdateAndRender()
         
         BeginMode2D(gameState->camera.base);
         
+        
+        SetDrawingEntities();
         
         Color colors[] = {
             LIGHTGRAY, GRAY, DARKGRAY, YELLOW, GOLD, ORANGE, PINK, RED, MAROON, GREEN, LIME, DARKGREEN, SKYBLUE, BLUE, DARKBLUE, PURPLE, VIOLET, DARKPURPLE, BEIGE, BROWN, DARKBROWN, WHITE, BLACK, BLANK, MAGENTA, RAYWHITE,
@@ -2023,7 +2089,8 @@ void GameplayUpdateAndRender()
                  10, 200, 25, YELLOW);
         
         
-        DrawText(TextFormat("Stars Collected: %d", gameState->keysCollected),
+        DrawText(TextFormat("Stars Collected: %d\n Change Count: %d",
+                            gameState->starCount, change_count),
                  10, 250, 25, YELLOW);
         
         

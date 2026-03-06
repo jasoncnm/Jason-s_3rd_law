@@ -74,7 +74,8 @@ struct Entity
     
      real32 tileSize = 32.0f;
     
-     uint16 entityIndex;
+    uint16 entityIndex;
+    
     int32 attachedEntityIndex;
     int32 unlockEntityIndex;
     int32 sourceIndex = -1;
@@ -84,19 +85,17 @@ struct Entity
     int32 unlockCount = 0;
     
     bool8 movable = false;
-    
     bool8 attach = false;
-    
     bool8 broken = false;
-    
+    bool8 isVisible = false;
     bool8 open = false;
     bool8 conductive = false;
     bool8 left = false, right = false, up = false, down = false;
     bool8 sourceLit = false;
     bool8 hasPower = false;
     bool8 changed = false;
-    
     bool8 active = false;
+    
 };
 
 struct AddEntityResult
@@ -111,7 +110,7 @@ struct FindAttachableResult
     bool8 has;
 };
 
-
+inline IVec2 GetDoorDirection(Entity * door);
 inline bool8 DoorBlocked(Entity * door, IVec2 reachDir);
 inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir);
 inline bool8 IsDoor(Entity * door);

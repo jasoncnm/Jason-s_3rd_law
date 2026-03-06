@@ -116,6 +116,7 @@ struct UndoState
     };
     
     int32 playerIndex;
+    int32 starCount;
     // TODO: optimize this by allocate entities 
     //       into our own allocator aka EntityArray
     std::vector<Entity> undoEntities;
@@ -142,6 +143,7 @@ struct Map
     IVec2 tilePos;            // Top left tile position of the map
     int32   width;              // Number of tiles in X axis
     int32   height;             // Number of tiles in Y axis
+    int32 visibleStarCount = 0;
     
     bool8 firstEnter = false;
     };
@@ -170,7 +172,7 @@ struct UndoStack
             
         }
     }
-    void push_back(uint32 playerIndex, UndoState::EntityArray & ea);
+    void push_back(uint32 playerIndex, uint32 starCount, UndoState::EntityArray & ea);
         
     bool empty()
     {
@@ -256,8 +258,7 @@ struct GameState
     // NOTE: map index of the map containing player tilePos
     int32 playerMapIndex;
     int32 lastTutBlockIndex;
-    
-    int32 keysCollected = 0;
+    int32 starCount = 0;
     
     int32 screenWidth = SCREEN_WIDTH;
     int32 screenHeight = SCREEN_HEIGHT;
@@ -330,6 +331,7 @@ MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec
 PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState);
 void CleanUpGame();
 void SetShake(float duration);
+FindTileMapResult FindTileMap(IVec2 tilePos);
 
 
 

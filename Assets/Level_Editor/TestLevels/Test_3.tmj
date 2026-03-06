@@ -23,8 +23,25 @@
          "width":11,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":3,
+         "name":"level_info",
+         "objects":[],
+         "opacity":1,
+         "properties":[
+                {
+                 "name":"visible_star_count",
+                 "type":"int",
+                 "value":3
+                }],
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":3,
+ "nextlayerid":4,
  "nextobjectid":1,
  "orientation":"orthogonal",
  "renderorder":"right-down",

@@ -359,8 +359,6 @@ state.currentMapIndex = -1;
             tileMap.tilePos = { startPosX - 1, startPosY - 1 };
             tileMap.width = mapWidth, tileMap.height =  mapHeight;
             
-            state.tileMaps[index] = tileMap;
-            
             if (fileName == LEVEL_2_ROOM_NAME)
             {
                 state.lv2Map = &state.tileMaps[index];
@@ -378,6 +376,22 @@ state.currentMapIndex = -1;
                     if (!layer["visible"]) continue;
                     
                     std::string name = layer["name"];
+                    
+                    if (name == "level_info")
+                    {
+                        json properties = layer["properties"];
+                        for (auto & prop : properties)
+                        {
+                            if ((prop["name"] == "visible_star_count") &&
+                                (prop["type"] == "int"))
+                            {
+                                 tileMap.visibleStarCount = (int32)prop["value"];
+                                break;
+                            }
+                        }
+                        continue;
+                    }
+                    
                     if (layer["type"] == "tilelayer")
                     {
                         // tileCountX = width;
@@ -440,6 +454,8 @@ state.currentMapIndex = -1;
                 SM_TRACE("Level width: %i, Level height: %i", mapWidth, mapHeight);
             }
             
+            state.tileMaps[index] = tileMap;
+            
             if (min.x > startPos.x) min.x = startPos.x;
             if (min.y > startPos.y) min.y = startPos.y;
 
@@ -461,7 +477,7 @@ state.currentMapIndex = -1;
     {
         state.tileMin = min;
         state.tileMax = max;
-        state.keysCollected = 0;
+        state.starCount = 0;
     }
     
     SetupEntityTable(state);
