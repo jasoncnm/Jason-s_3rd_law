@@ -85,6 +85,15 @@ bool8 MapIsVisible(int32 mapIndex)
     return result;
 }
 
+bool8 IsDisappearing(Entity * entity)
+{
+    FindTileMapResult mapResult = FindTileMap(entity->tilePos);
+    bool8 result = !mapResult.map || 
+        !entity->tweenController.NoTweens()  && !MapIsVisible(*mapResult.map);
+    
+    return result;
+}
+
 void SetDrawingEntities()
 {
     for (uint32 i = 0; i < gameState->entities.count; i++)
@@ -109,11 +118,6 @@ void SetDrawingEntities()
                 CheckCollisionRecs(dest, GetCameraRect(gameState->camera.base));
                 }
     }
-}
-
-void SetActiveEntities()
-{
-    
 }
 
 void SetShake(float duration)
@@ -845,18 +849,15 @@ inline bool8 UpdateCamera(bool refocus = false)
             }
             
             #if 0
-            if (gameState->currentMapIndex != gameState->prevMapIndex)
+            if (pos != cam.base.target)
             {
-                UpdateCameraToTileMapSmooth(*map);
-            }
-            
-                if (pos != cam.base.target)
-                {
+                
+                // TODO: Reset Level Logic (Probably move this outside of UpdateCamera())
                     if (IsSlime(followEnt) && 
                         followEnt->tweenController.NoTweens() && 
                         !map->firstEnter)
-                    {
-                        UndoState::EntityArray ea = GetCurrentStateEntities();
+                {
+                    UndoState::EntityArray ea = GetCurrentStateEntities();
                         map->initUndoState.playerIndex = gameState->playerEntityIndex;
                         map->initUndoState.undoEntities.clear();
                         map->initUndoState.undoEntities.insert(map->initUndoState.undoEntities.begin(),
@@ -950,21 +951,6 @@ inline bool8 UpdateCamera(bool refocus = false)
                 nextPos.y = Lerp(nextPos.y, center.y, speed * GetFrameTime());
             }
             
-#if 0
-            
-            if (Abs(moveDir.x) > 0 && Sign(finalPos.x - center.x) != Sign(moveDir.x) || 
-                Abs(moveDir.y) > 0 && Sign(finalPos.y - center.y) != Sign(moveDir.y) ||
-followEnt->tweenController.NoTweens())
-            {
-                 nextPos = Vector2Lerp(cam.base.target, finalPos, speed * GetFrameTime());
-                }
-            
-            if (followEnt->tweenController.NoTweens())
-            {
-                real32 nextZoom = GetCameraZoom(*currentMap);
-                cam.base.zoom = Lerp(cam.base.zoom, nextZoom, speed * GetFrameTime());
-            }
-            #endif
             cam.base.target = nextPos;
             
             break;
@@ -1077,41 +1063,7 @@ bool8 MoveAction(IVec2 actionDir)
             }
         
         MoveEntity(player, door, nullptr, player->tilePos, PLAYER_MOVE_FUNC, MOVE_SPEED);
-        
-        #if 0
-            Vector2 dir = { (float)actionDir.x, (float)actionDir.y };
-            Vector2 startPivot = GetTilePivot(player);
-        Vector2 middlePivot = startPivot + (dir * .2f * (MAP_TILE_SIZE - player->tileSize));
-            
-            player->attach = true;
-            player->attachedEntityIndex = door->entityIndex;
-            player->attachDir = actionDir;
-            
-        Vector2 endPivot = GetTilePivot(player) - (dir * 5.0f);
-            
-            TweenParams params1 = {};
-            params1.paramType = PARAM_TYPE_VECTOR2;
-            params1.startVec2 = startPivot;
-            params1.endVec2 = middlePivot;
-            params1.realVec2  = &player->pivot;
-            
-            TweenParams params2 = {};
-            params2.paramType = PARAM_TYPE_VECTOR2;
-            params2.startVec2 = middlePivot;
-            params2.endVec2 = endPivot;
-            params2.realVec2  = &player->pivot;
-            
-            float dist = Vector2Distance(startPivot, middlePivot);
-        float tileDist = dist / MAP_TILE_SIZE;
-        
-        float speed = (tileDist > 1) ?  BOUNCE_SPEED : MOVE_SPEED;
-            
-            uint32 channel = AddTweenUnique(player->tweenController, CreateTween(params1, PLAYER_MOVE_FUNC, speed, tileDist));
-            
-            AddTween(player->tweenController, CreateTween(params2, PLAYER_MOVE_FUNC, speed  * 2), channel);
-        OnPlayEvent(&player->tweenController);
-        #endif
-            return true;
+        return true;
         }
         
     {
@@ -1326,6 +1278,7 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                 DrawSprite(gameState->camera.base, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, color);
                 
 #if 0
+                // NOTE: Draw Debug Informations
                 else if (entity->type == ENTITY_TYPE_BLOCK)
                 {
                     if (CheckProjectState(entity))
@@ -1397,29 +1350,6 @@ inline bool8 SelectNextAsPlayer(Entity * player = nullptr)
     
     return result;
 }
-
-#if 0
-void UpdateSprite(EntityLayer layer)
-{
-    auto & entityIndexArray = gameState->entityTable[layer];
-    IVec2 dir[4] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
-    
-    for (uint32 i = 0; i < entityIndexArray.count; i++)
-    {
-        Entity * entity = GetEntity(entityIndexArray[i]);
-        if (entity)
-        {
-            IVec2 offset = { 0 };
-            int32 spriteSizeX = entity->sprite.spriteSize.x;
-            int32 spriteSizeY = entity->sprite.spriteSize.y;
-            entity->sprite = GetSprite(entity->spriteID);
-            if (layer == LAYER_WALL) offset = { spriteSizeX, spriteSizeY };
-            if (layer == LAYER_GLASS) offset = { spriteSizeX, 7 * spriteSizeY };   
-            entity->sprite.altasOffset = entity->sprite.altasOffset + offset;
-        }
-    }
-}
-#endif
 
 void GameplayUpdateAndRender()
 {
@@ -1531,7 +1461,7 @@ void GameplayUpdateAndRender()
             }
         
         #if 0
-            // NOTE: Restart States
+            // TODO: Restart States
             repeat = repeat && !stateChanged;
             if (JustPressed(RESET_KEY) && !repeat)
             {
@@ -1555,30 +1485,9 @@ void GameplayUpdateAndRender()
                     Entity * key = GetEntity(keyTable[keyIndex]);
                     if (key && (key->tilePos == slime->tilePos))
                     {
-                        #if 0
-                        Entity * lock = GetEntity(key->unlockEntityIndex);
-                        if (!lock->open)
-                        {
-                            lock->open = true;
-                            float delayTime = 1.0f;
-                            TweenParams params = { 0 };
-                            params.paramType = PARAM_TYPE_COLOR;
-                            params.startColor = WHITE;
-                            params.endColor = ColorAlpha(WHITE, 0.0f);
-                            params.realColor = &lock->color;
-                            AddTweenUnique(lock->tweenController, CreateTween(params, nullptr, 1.0f, delayTime));
-                            TweenEvent deleteEvent;
-                            deleteEvent.deleteEntity = key;
-                            lock->tweenController.endEvents.Add(deleteEvent);
-                            TweenEvent deleteEvent2;
-                            deleteEvent2.deleteEntity = lock;
-                            lock->tweenController.endEvents.Add(deleteEvent2);
-                            // OnPlayEvent(&lock->tweenController);
-                        }
-#else
+                        
                         DeleteEntity(key);
                         gameState->starCount++;
-                        #endif
                         break;
                     }
                 }
@@ -1627,13 +1536,15 @@ void GameplayUpdateAndRender()
                 {
                 if (!entity->tweenController.NoTweens())
                 {
-                    gameState->simulating = true;
                     if (IsSlime(entity))
                     {
                         if (entity->actionState == MOVE_STATE) SetActionState(entity, ANIMATE_STATE);
                     }
                         entity->tweenController.Update();
                         
+                        if (!IsDisappearing(entity))
+                        {
+                        gameState->simulating = true;
                         Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
                         if (entity->tweenController.playing)
                         {
@@ -1661,8 +1572,9 @@ void GameplayUpdateAndRender()
                         else if (layer == LAYER_LOCK)
                         {
                             gameState->camera.followEntityIndex = entity->entityIndex;
+                            }
                         }
-                        
+                    
                         }
                 else
                 {
@@ -1924,20 +1836,6 @@ void GameplayUpdateAndRender()
         
         SetDrawingEntities();
         
-        Color colors[] = {
-            LIGHTGRAY, GRAY, DARKGRAY, YELLOW, GOLD, ORANGE, PINK, RED, MAROON, GREEN, LIME, DARKGREEN, SKYBLUE, BLUE, DARKBLUE, PURPLE, VIOLET, DARKPURPLE, BEIGE, BROWN, DARKBROWN, WHITE, BLACK, BLANK, MAGENTA, RAYWHITE,
-        };
-        
-        int32 colorCount = ArrayCount(colors);
-        
-        static Color * mColors = (Color *)BumpAllocArray(gameMemory->persistentStorage,
-                                                   gameState->tileMapCount,
-                                                   sizeof(Color));
-        
-        static bool * set = (bool *)BumpAllocArray(gameMemory->persistentStorage,
-                                                        gameState->tileMapCount,
-                                                        sizeof(bool));
-        
         EntityLayer orderedDrawLayers[] = 
         {
             LAYER_SOURCE,
@@ -1952,15 +1850,29 @@ void GameplayUpdateAndRender()
             LAYER_BLOCK,
             LAYER_GLASS,  
             LAYER_DOOR,
-            };
+        };
         
         int32 count = ArrayCount(orderedDrawLayers);
         DrawSpriteLayers(orderedDrawLayers, count);
         
+#if 0
+        Color colors[] = {
+            LIGHTGRAY, GRAY, DARKGRAY, YELLOW, GOLD, ORANGE, PINK, RED, MAROON, GREEN, LIME, DARKGREEN, SKYBLUE, BLUE, DARKBLUE, PURPLE, VIOLET, DARKPURPLE, BEIGE, BROWN, DARKBROWN, WHITE, BLACK, BLANK, MAGENTA, RAYWHITE,
+        };
+        
+        int32 colorCount = ArrayCount(colors);
+        
+        static Color * mColors = (Color *)BumpAllocArray(gameMemory->persistentStorage,
+                                                         gameState->tileMapCount,
+                                                         sizeof(Color));
+        
+        static bool * set = (bool *)BumpAllocArray(gameMemory->persistentStorage,
+                                                   gameState->tileMapCount,
+                                                   sizeof(bool));
         
         for (int32 mapIndex = 0; mapIndex < gameState->tileMapCount; mapIndex++)
         {
-#if 0
+            
             if (!set[mapIndex])
             {
                 set[mapIndex] = true;
@@ -1968,6 +1880,8 @@ void GameplayUpdateAndRender()
                 mColors[mapIndex] = colors[colorIndex];
             }
             
+            
+            // NOTE: Could be a setting
             DrawTileMap(gameState->camera, tileMap.tilePos, 
                         IVec2{ tileMap.width, tileMap.height },
                         mColors[mapIndex], mColors[mapIndex]);
@@ -1977,11 +1891,12 @@ void GameplayUpdateAndRender()
                 (real32)map.tilePos.x * MAP_TILE_SIZE, (real32)map.tilePos.y * MAP_TILE_SIZE, 
                 (real32)map.width * MAP_TILE_SIZE,  (real32)map.height * MAP_TILE_SIZE
             };
+            
             DrawRectangleLinesEx(mapRect, 5, BLUE);
             
-#endif
             
         }
+#endif
         
         // Draw rectangle outline with extended parameters
         // Rectangle cameraRect = GetCameraRect(gameState->camera);
