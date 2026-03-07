@@ -36,6 +36,18 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 //              NOTE: Internal Functions (internal)
 //  ========================================================================
 
+void InitUndoState(UndoState * undoState, 
+               uint32 playerIndex, uint32 starCount, UndoState::EntityArray & ea)
+{
+    if (undoState)
+    {
+        undoState->playerIndex = playerIndex;
+    undoState->starCount = starCount;
+    undoState->undoEntities.clear();
+    undoState->undoEntities.insert(undoState->undoEntities.begin(), &ea.entities[0], &ea.entities[ea.entityCount]);
+    }
+    }
+
 void UndoStack::push_back(uint32 playerIndex, uint32 starCount, 
                           UndoState::EntityArray & ea)
 {
@@ -43,25 +55,7 @@ void UndoStack::push_back(uint32 playerIndex, uint32 starCount,
     count++;
     if (last > MAX_UNDO) last = 1;
     if (count > MAX_UNDO) count = MAX_UNDO;
-    
-    UndoState & state = undoStack[last - 1];
-    state.playerIndex = playerIndex;
-    state.starCount = starCount;
-    state.undoEntities.clear();
-    
-    #if 0
-    for (uint32 i = 0; i < ea.entityCount; i++)
-    {
-        Entity * ent = &gameState->entities[ea.entities[i].entityIndex];
-        if (ent->changed) 
-        {
-            ent->changed = false;
-            state.undoEntities.push_back(ea.entities[i]);
-        }
-    }
-    #else
-    state.undoEntities.insert(state.undoEntities.begin(), &ea.entities[0], &ea.entities[ea.entityCount]);
-    #endif
+    InitUndoState(&undoStack[last - 1], playerIndex, starCount, ea);
     }
 
 
@@ -790,8 +784,8 @@ bool8 IsNeighbour(Map & prevMap, Map & currentMap)
     if (gameState->currentMapIndex >= 0)
     {
         if (gameState->prevMapIndex != gameState->currentMapIndex &&
-            (followEnt->tweenController.playing && (followEnt->tweenController.GetCurrentAniSpeed() == BOUNCE_SPEED)) ||
-             !IsSlime(followEnt))
+            ((followEnt->tweenController.playing && (followEnt->tweenController.GetCurrentAniSpeed() == BOUNCE_SPEED)) ||
+             !IsSlime(followEnt)))
     {
         cam.followState = MyCamera::FOLLOW_ALONG_AXIS;
         return;
@@ -848,29 +842,6 @@ inline bool8 UpdateCamera(bool refocus = false)
                                                             CAMERA_MOVE_SPEED, CAMERA_ZOOM_SPEED);
             }
             
-            #if 0
-            if (pos != cam.base.target)
-            {
-                
-                // TODO: Reset Level Logic (Probably move this outside of UpdateCamera())
-                    if (IsSlime(followEnt) && 
-                        followEnt->tweenController.NoTweens() && 
-                        !map->firstEnter)
-                {
-                    UndoState::EntityArray ea = GetCurrentStateEntities();
-                        map->initUndoState.playerIndex = gameState->playerEntityIndex;
-                        map->initUndoState.undoEntities.clear();
-                        map->initUndoState.undoEntities.insert(map->initUndoState.undoEntities.begin(),
-                                                              &ea.entities[0], 
-                                                              &ea.entities[ea.entityCount]);
-                        map->firstEnter = true;
-                    }
-                    
-                updated = true;
-                
-                break;
-            }
-            #endif
             break;
             }
         case MyCamera::FOLLOW_CENTER:
@@ -1017,11 +988,9 @@ inline void SetGameState(UndoState & undoState)
 
 inline void Undo()
 {
-    UndoState & undoState = gameState->undoStack.back();
-    SetGameState(undoState);
+    SetGameState(gameState->undoStack.back());
     gameState->undoStack.pop_back();
-    // UpdateCamera(true);
-}
+    }
 
 
 inline void Restart()
@@ -1030,10 +999,8 @@ inline void Restart()
     gameState->undoStack.push_back(gameState->playerEntityIndex, 
                                    gameState->starCount, 
                                    ea);
-    Map & currentMap = gameState->tileMaps[gameState->currentMapIndex];
-    
-    UndoState & initState = currentMap.initUndoState;
-    SetGameState(initState);
+    Map & currentMap = gameState->tileMaps[gameState->playerMapIndex];
+    SetGameState(currentMap.resetState);
     }
 
 bool8 MoveAction(IVec2 actionDir)
@@ -1460,10 +1427,10 @@ void GameplayUpdateAndRender()
                 repeat = false;
             }
         
-        #if 0
+        #if 1
             // TODO: Restart States
             repeat = repeat && !stateChanged;
-            if (JustPressed(RESET_KEY) && !repeat)
+            if (JustPressed(gameState->input.keyMappings, RESET_KEY) && !repeat)
             {
                 repeat = true;
                 Restart();
@@ -1628,15 +1595,46 @@ void GameplayUpdateAndRender()
                 if (result.map)
                 {
                     gameState->playerMapIndex = result.mapIndex;
+                    
+                    if (!result.map->stateInitilized)
+                    {
+                        result.map->stateInitilized = true;
+                        UndoState::EntityArray ea = GetCurrentStateEntities();
+                        InitUndoState(&result.map->resetState,
+                                      gameState->playerEntityIndex,
+                                      gameState->starCount,
+                                      ea);
+                        
+                    }
                 }
+                
             }
         }
         
         }
     
+    
+    // NOTE: Debug Cheats
+    {
+        if (IsKeyPressed(KEY_EQUAL))
+        {
+            gameState->starCount++;
+        }
+        
+        
+        if (IsKeyPressed(KEY_NINE))
+        {
+            UnloadTexture(gameState->texture);    // Unload render texture
+            gameState->texture = LoadTexture(TEXTURE_PATH);
+            SetShake(0.05f);
+            
+        }
+        
+    }
+    
     // NOTE: Camera Updates
     {
-    Vector2 oldTarget = gameState->camera.base.target;
+        Vector2 oldTarget = gameState->camera.base.target;
     
         bool8 freeForm = IsKeyDown(KEY_T);
         
@@ -1936,13 +1934,6 @@ void GameplayUpdateAndRender()
         
         ClearBackground(IntToRGBA(0x465a6f));
         
-        if (IsKeyPressed(KEY_R))
-        {
-            UnloadTexture(gameState->texture);    // Unload render texture
-            gameState->texture = LoadTexture(TEXTURE_PATH);
-            SetShake(0.05f);
-            
-            }
         gameState->shakeTime -= GetFrameTime();
         if (gameState->shakeTime < 0)
         {

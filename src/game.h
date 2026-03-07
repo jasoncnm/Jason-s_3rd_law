@@ -138,14 +138,14 @@ struct UndoState
 struct Map
 {
     char mapID[100];
-    UndoState initUndoState;
+    UndoState resetState;
     
     IVec2 tilePos;            // Top left tile position of the map
     int32   width;              // Number of tiles in X axis
     int32   height;             // Number of tiles in Y axis
     int32 visibleStarCount = 0;
     
-    bool8 firstEnter = false;
+    bool8 stateInitilized = false;
     };
 
 struct UndoStack
