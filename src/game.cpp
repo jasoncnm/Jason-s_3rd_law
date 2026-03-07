@@ -1623,8 +1623,13 @@ void GameplayUpdateAndRender()
         }
     
     
+    static float contrast = -10.0f;
+    static float saturation = -10.0f;
+    static float brightness = 1.3f;
+    
     // NOTE: Debug Cheats
     {
+        
         if (IsKeyPressed(KEY_EQUAL))
         {
             gameState->starCount++;
@@ -1950,36 +1955,20 @@ void GameplayUpdateAndRender()
             gameState->time = 0;
             }
         
-        if (IsKeyPressed(KEY_GRAVE))
         {
-            gameState->enableFX = !gameState->enableFX;
-        }
-        
-        
-        if (gameState->enableFX)
-        {
-            static int32 shaderType = 0;
+            int32 contrastLoc =
+                GetShaderLocation(gameState->postShader.shader, "contrast");
+            int32 saturationLoc =
+                GetShaderLocation(gameState->postShader.shader, "saturation");
+            int32 brightnessLoc = 
+                GetShaderLocation(gameState->postShader.shader, "brightness");
             
-            if (IsKeyPressed(KEY_KP_4))
-            {
-                shaderType--;
-            if (shaderType < 0) shaderType = (int32)(FX_COUNT) - 1;
-                }
-            else if (IsKeyPressed(KEY_KP_6))
-            {
-                shaderType++;
-            if (shaderType >= FX_COUNT) shaderType = 0;
-                }
+            SetShaderValue(gameState->postShader.shader, contrastLoc, &contrast, SHADER_UNIFORM_FLOAT);
             
+            SetShaderValue(gameState->postShader.shader, saturationLoc, &saturation, SHADER_UNIFORM_FLOAT);
             
-            #if 0
-            UpdateAndRenderWithShader(gameState->renderTarget, gameState->postFX, 
-                                      shaderType, gameState->screenWidth, gameState->screenHeight,
-                                      gameState->shake, gameState->time);
-            #endif
-            }
-            else
-            {
+            SetShaderValue(gameState->postShader.shader, brightnessLoc, &brightness, SHADER_UNIFORM_FLOAT);
+            
             UpdateAndRenderWithShader(gameState->renderTarget, gameState->postShader, 
                                       gameState->screenWidth, gameState->screenHeight,
                                       gameState->shake, gameState->time);
@@ -2003,10 +1992,15 @@ void GameplayUpdateAndRender()
         DrawText(TextFormat("Follow Entity Type: %s(%d)", GetEntityType(followEnt), followEnt->entityIndex),
                  10, 200, 25, YELLOW);
         
+        real32 vert = 445;
+        real32 gap = 100;
+        GuiSliderBar(Rectangle{ 100, vert, 400, 30 }, "Contrast", TextFormat("%.1f", contrast), &contrast, -100.0f, 100.0f);
+        GuiSliderBar(Rectangle{ 100, vert + gap, 400, 30 }, "Saturation", TextFormat("%.1f", saturation), &saturation, -100.0f, 100.0f);
+        GuiSliderBar(Rectangle{ 100, vert + gap * 2, 400, 30 }, "Brightness", TextFormat("%.1f", brightness), &brightness, 0, 10.0f);
         
-        DrawText(TextFormat("Stars Collected: %d\n Change Count: %d",
-                            gameState->starCount, change_count),
-                 10, 250, 25, YELLOW);
+        DrawText(TextFormat("Stars Collected: %d",
+                                     gameState->starCount),
+                 10, 250, 25, ORANGE);
         
         
         DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
@@ -2356,32 +2350,6 @@ UPDATE_AND_RENDER(UpdateAndRender)
             {
                 gameState->currentScreen = PAUSE_MENU_SCREEN;
             }
-            break;
-        }
-        case ENDING_SCREEN:
-        {
-            
-            if (JustPressed(gameState->input.keyMappings, SPLIT_KEY))
-            {
-                gameState->currentScreen = TITLE_SCREEN;
-            }
-            
-            BeginDrawing();
-            ClearBackground(gameState->bgColor);
-            DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLUE);
-            
-            const char * endText = "ENDING SCREEN";
-            int32 endTextX = (GetScreenWidth() - MeasureText(endText, 40)) / 2;
-            int32 endTextY = (GetScreenHeight() - 40) / 2 - 100;
-            DrawText(endText, endTextX, endTextY, 40, DARKBLUE);
-            
-            const char * endInstructions = "PRESS Any Key to RETURN to TITLE SCREEN";
-            int32 endInstX = (GetScreenWidth() - MeasureText(endInstructions, 20)) / 2;
-            int32 endInstY = (GetScreenHeight()) / 2;
-            DrawText(endInstructions, endInstX, endInstY, 20, DARKBLUE);
-            
-            EndDrawing();
-            
             break;
         }
     }

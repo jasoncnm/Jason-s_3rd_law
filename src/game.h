@@ -89,8 +89,7 @@ enum GameScreen
     GAME_MAIN_SCREEN,
     GAME_TUT_SCREEN,
     PAUSE_MENU_SCREEN,
-    ENDING_SCREEN,
-};
+    };
 
 struct KeyMapping
 {
@@ -230,7 +229,6 @@ struct GameState
     
     StarFields starFields;
     
-    bool8 enableFX = true;
     bool8 shake = false;
     real32 shakeTime = 0;
     real32 time = 0.0f;
