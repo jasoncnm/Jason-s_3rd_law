@@ -21,13 +21,13 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - No restart good idea ??
 
   TODO: Things that I can do beside arts and design I guess
-1. background
 3. collectable: show in ui
 5. Sound effect
 6. bug fixes, improve post effect
 2. saves and loads
--  reset system
 // NOTE: done but need testing
+1. background
+-  reset system
 1. tutorial logic: this week
 2. key and door
 */
@@ -35,18 +35,6 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 //  ========================================================================
 //              NOTE: Internal Functions (internal)
 //  ========================================================================
-
-void InitUndoState(UndoState * undoState, 
-               uint32 playerIndex, uint32 starCount, UndoState::EntityArray & ea)
-{
-    if (undoState)
-    {
-        undoState->playerIndex = playerIndex;
-    undoState->starCount = starCount;
-    undoState->undoEntities.clear();
-    undoState->undoEntities.insert(undoState->undoEntities.begin(), &ea.entities[0], &ea.entities[ea.entityCount]);
-    }
-    }
 
 void UndoStack::push_back(uint32 playerIndex, uint32 starCount, 
                           UndoState::EntityArray & ea)
@@ -63,6 +51,18 @@ void UndoStack::push_back(uint32 playerIndex, uint32 starCount,
 //              NOTE: Game Functions (internal)
 //  ========================================================================
 
+void InitUndoState(UndoState * undoState, 
+                   uint32 playerIndex, uint32 starCount, UndoState::EntityArray & ea)
+{
+    if (undoState)
+    {
+        undoState->playerIndex = playerIndex;
+        undoState->starCount = starCount;
+        undoState->undoEntities.clear();
+        undoState->undoEntities.insert(undoState->undoEntities.begin(), &ea.entities[0], &ea.entities[ea.entityCount]);
+    }
+}
+
 bool8 MapIsVisible(Map & tileMap)
 {
     bool8 result = tileMap.visibleStarCount <= gameState->starCount;
@@ -77,6 +77,15 @@ bool8 MapIsVisible(int32 mapIndex)
         result = MapIsVisible(gameState->tileMaps[mapIndex]);
     }
     return result;
+}
+
+void ResetResetStates()
+{
+    for (uint32 mapIndex = 0; mapIndex < gameState->tileMapCount; mapIndex++)
+    {
+        Map & map = gameState->tileMaps[mapIndex];
+        map.stateInitilized = false;
+    }
 }
 
 bool8 IsDisappearing(Entity * entity)
@@ -730,7 +739,7 @@ inline void UpdateCameraToTileMapSmooth(Map & map, real32 (*MoveFunc)(real32), r
  FindTileMapResult FindTileMap(IVec2 tilePos)
 {
     FindTileMapResult result = { 0 };
-    for (int32 i = 0; i < gameState->tileMapCount; i++)
+    for (uint32 i = 0; i < gameState->tileMapCount; i++)
     {
         Map & map = gameState->tileMaps[i];
         
@@ -1452,7 +1461,7 @@ void GameplayUpdateAndRender()
                     Entity * key = GetEntity(keyTable[keyIndex]);
                     if (key && (key->tilePos == slime->tilePos))
                     {
-                        
+                        ResetResetStates();
                         DeleteEntity(key);
                         gameState->starCount++;
                         break;

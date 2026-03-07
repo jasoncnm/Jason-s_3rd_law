@@ -329,7 +329,7 @@ state.currentMapIndex = -1;
         state.tileMapCount = (int32)tileMaps.size();
 
         int32 index = 0;
-        for (int32 i = 0; i < state.tileMapCount; i++)
+        for (uint32 i = 0; i < state.tileMapCount; i++)
         {
             
             json mapMeta = tileMaps[i];

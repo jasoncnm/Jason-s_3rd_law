@@ -240,7 +240,7 @@ struct GameState
     Array<uint16, MAX_ENTITIES> entityTable[LAYER_COUNT];
     Array<Entity, MAX_ENTITIES> entities;
     
-    int32 tileMapCount;
+    uint32 tileMapCount;
     Map tileMaps[500];
     Map * lv2Map;
     
@@ -332,6 +332,8 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState);
 void CleanUpGame();
 void SetShake(float duration);
 FindTileMapResult FindTileMap(IVec2 tilePos);
+void InitUndoState(UndoState * undoState, 
+                   uint32 playerIndex, uint32 starCount, UndoState::EntityArray & ea);
 
 
 
