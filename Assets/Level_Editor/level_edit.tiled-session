@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TileMap/Room_69.tmj",
+    "activeFile": "TileMap/Room_53.tmj",
     "expandedProjectPaths": [
         ".",
         "TileMap"
@@ -1268,11 +1268,11 @@
             }
         },
         "TileMap/Room_53.tmj": {
-            "scale": 1,
+            "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": -1448,
-                "y": 246.5
+                "x": -204,
+                "y": 605
             }
         },
         "TileMap/Room_54.tmj": {
@@ -1847,9 +1847,6 @@
     "project": "level_edit.tiled-project",
     "property.type": "int",
     "recentFiles": [
-        "TileMap/Room_1.tmj",
-        "TileMap/Path_84.tmj",
-        "TileMap/Room_35.tmj",
         "TileMap/Room_3.tmj",
         "TileMap/Test.tmj",
         "TileMap/Room_9.tmj",
@@ -1858,6 +1855,9 @@
         "TileMap/Room_44.tmj",
         "TileMap/Room_50.tmj",
         "TileMap/Room_51.tmj",
-        "TileMap/Room_17.tmj"
+        "TileMap/Room_17.tmj",
+        "TileMap/Room_21.tmj",
+        "TileMap/room_43.tmj",
+        "TileMap/Room_15.tmj"
     ]
 }
