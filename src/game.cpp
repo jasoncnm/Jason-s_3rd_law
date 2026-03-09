@@ -1251,7 +1251,18 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                     color = ColorAlpha(color, 0.6f);
                 }
                 
+                if (IsSlime(entity))
+                {
+                BeginShaderMode(gameState->movableShader.shader);
+                
                 DrawSprite(gameState->camera.base, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, color);
+                EndShaderMode();
+                }
+                else
+                {
+                    DrawSprite(gameState->camera.base, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, color);
+                    
+                }
                 
 #if 0
                 // NOTE: Draw Debug Informations
@@ -1290,7 +1301,6 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                     
                 }
 #endif
-                
                 
                 }
         }
@@ -1623,8 +1633,8 @@ void GameplayUpdateAndRender()
         }
     
     
-    static float contrast = -10.0f;
-    static float saturation = -10.0f;
+    static float contrast = 0.0f;
+    static float saturation = 0.0f;
     static float brightness = 1.3f;
     
     // NOTE: Debug Cheats
@@ -1834,6 +1844,9 @@ void GameplayUpdateAndRender()
     // NOTE: Render
     {
         
+        UpdateShaderInfo(gameState->movableShader);
+        UpdateShaderInfo(gameState->postShader);
+        
         BeginTextureMode(gameState->renderTarget);
         ClearBackground(gameState->bgColor);
         
@@ -1969,7 +1982,7 @@ void GameplayUpdateAndRender()
             
             SetShaderValue(gameState->postShader.shader, brightnessLoc, &brightness, SHADER_UNIFORM_FLOAT);
             
-            UpdateAndRenderWithShader(gameState->renderTarget, gameState->postShader, 
+            PostProcessing(gameState->renderTarget, gameState->postShader, 
                                       gameState->screenWidth, gameState->screenHeight,
                                       gameState->shake, gameState->time);
             }

@@ -8,6 +8,27 @@
 
 #include "electric_door.h"
 
+bool8 IsCable(Entity * entity)
+{
+    bool8 result = false;
+    if (entity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+        (entity->cableType == CABLE_TYPE_SOURCE ||
+         entity->cableType == CABLE_TYPE_CONNECT ||
+          entity->cableType == CABLE_TYPE_CONNECTION_POINT ||
+         (entity->cableType == CABLE_TYPE_DOOR &&
+          (
+           entity->tileID == DOOR_RIGHT || entity->tileID == DOOR_RIGHT_R ||
+           entity->tileID == DOOR_LEFT || entity->tileID == DOOR_LEFT_R ||
+           entity->tileID == DOOR_DOWN || entity->tileID == DOOR_DOWN_R ||
+           entity->tileID == DOOR_UP || entity->tileID == DOOR_UP_R
+           ))))
+    {
+        result = true;
+    }
+    
+    return result;
+}
+
  IVec2 SetDoorOpen(Entity * door)
 {
     IVec2 bounceDir = { 0 };
@@ -472,7 +493,7 @@ void SetUpElectricDoor()
             if (current->up) 
             {
                 Entity * cable = FindEntityByLocationAndLayers(current->tilePos + IVec2{ 0, -1 }, findLayers, layerCount);
-                if (cable && !Visited(cable) && cable->down)
+                if (cable && IsCable(cable) && !Visited(cable) && cable->down)
                 {
                     current->upIndex = cable->entityIndex;
                     callStack.Add(cable->entityIndex);
@@ -483,7 +504,7 @@ void SetUpElectricDoor()
             if (current->down) 
             {
                 Entity * cable = FindEntityByLocationAndLayers(current->tilePos + IVec2{ 0, 1 }, findLayers, layerCount);
-                if (cable && !Visited(cable) && cable->up)
+                if (cable && IsCable(cable) && !Visited(cable) && cable->up)
                 {
                     current->downIndex = cable->entityIndex;
                     callStack.Add(cable->entityIndex);
@@ -495,7 +516,7 @@ void SetUpElectricDoor()
             if (current->left) 
             {
                 Entity * cable = FindEntityByLocationAndLayers(current->tilePos + IVec2{ -1, 0 }, findLayers, layerCount);
-                if (cable && !Visited(cable) && cable->right)
+                if (cable && IsCable(cable) && !Visited(cable) && cable->right)
                 {
                     current->leftIndex = cable->entityIndex;
                     callStack.Add(cable->entityIndex);
@@ -507,7 +528,7 @@ void SetUpElectricDoor()
             if (current->right) 
             {
                 Entity * cable = FindEntityByLocationAndLayers(current->tilePos + IVec2{ 1, 0 }, findLayers, layerCount);
-                if (cable && !Visited(cable) && cable->left)
+                if (cable && IsCable(cable) && !Visited(cable) && cable->left)
                 {
                     current->rightIndex = cable->entityIndex;
                     callStack.Add(cable->entityIndex);

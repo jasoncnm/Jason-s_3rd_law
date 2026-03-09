@@ -233,7 +233,8 @@ struct GameState
     real32 shakeTime = 0;
     real32 time = 0.0f;
     //PostFX postFX[FX_COUNT];
-     ShaderInfo postShader;
+    ShaderInfo postShader;
+    ShaderInfo movableShader;
     
     Array<uint16, MAX_ENTITIES> entityTable[LAYER_COUNT];
     Array<Entity, MAX_ENTITIES> entities;

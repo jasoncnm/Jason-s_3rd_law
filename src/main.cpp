@@ -150,28 +150,15 @@ int main(int argumentCount, char *argumentArray[])
         }
         SetTextureFilter(gameState->texture, TEXTURE_FILTER_POINT);
         
-        #if 0
-        for (uint32 shaderType = 0; shaderType < FX_COUNT; shaderType++)
-        {
-            if (FileExists(shaderPaths[shaderType]))
-            {
-                // NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default vertex shader
-                gameState->postFX[shaderType].shader =
-                    LoadShader(VS_PATH, shaderPaths[shaderType]);
-                if (!IsShaderValid(gameState->postFX[shaderType].shader))
-                {
-                    SM_ERROR("Unable to load shader file (%s)", 
-                             shaderPaths[shaderType]);
-                }
-                gameState->postFX[shaderType].fsWriteTime = GetFileModTime(shaderPaths[shaderType]);
-                gameState->postFX[shaderType].vsWriteTime = GetFileModTime(VS_PATH);
-                }
-        }
-#endif
         if (!LoadShaderInfo(&gameState->postShader, POST_VS_PATH, POST_FS_PATH))
         {
             SM_ERROR(false, "Unable to load post shader");
             }
+        
+        if (!LoadShaderInfo(&gameState->movableShader, MOVE_VS_PATH, MOVE_FS_PATH))
+        {
+            SM_ERROR(false, "Unable to load post shader");
+        }
         
         gameState->renderTarget = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
         if (!IsRenderTextureValid(gameState->renderTarget))
@@ -226,5 +213,6 @@ int main(int argumentCount, char *argumentArray[])
         UnloadTexture(gameState->texture);
         UnloadRenderTexture(gameState->starFields.starTexture);
         UnloadShaderInfo(&gameState->postShader);
+        UnloadShaderInfo(&gameState->movableShader);
         } 
 }

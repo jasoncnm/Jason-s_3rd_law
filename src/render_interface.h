@@ -11,35 +11,19 @@
 #include "engine_lib.h"
 #include "entity.h"
 
-#define TEXTURE_PATH "Assets/Texture/SpriteAtlas-10x.png"
 #define FG_PATH "Assets/Texture/Backgrounds/5.png"
+#define TEXTURE_PATH "Assets/Texture/SpriteAtlas-10x.png"
+
+#define BASE_VS_PATH "Assets/Shaders/base.vs"
+#define BASE_FS_PATH "Assets/Shaders/base.fs"
 #define POST_VS_PATH "Assets/Shaders/PostShaders/post.vs"
 #define POST_FS_PATH "Assets/Shaders/PostShaders/post.fs"
-
-#define BG_PATH "Assets/Texture/gradient.png"
+#define MOVE_VS_PATH "Assets/Shaders/EntityShaders/moveable.vs"
+#define MOVE_FS_PATH "Assets/Shaders/EntityShaders/moveable.fs"
 
 //  ========================================================================
 //              NOTE: Render Structs
 //  ========================================================================
-
-enum PostShaderType
-{
-    FX_GRAYSCALE = 0,
-    FX_POSTERIZATION,
-    FX_DREAM_VISION,
-    FX_PIXELIZER,
-    FX_CROSS_HATCHING,
-    FX_CROSS_STITCHING,
-    FX_PREDATOR_VIEW,
-    FX_SCANLINES,
-    FX_FISHEYE,
-    FX_SOBEL,
-    FX_BLOOM,
-    FX_BLUR,
-    FX_VIGNETTE,
-    FX_COUNT,
-    //FX_FXAA
-};
 
 struct ShaderInfo
 {
@@ -61,24 +45,6 @@ struct StarFields
 //  ========================================================================
 //              NOTE: Render Globals
 //  ========================================================================
-
-
-static const char * shaderPaths[FX_COUNT] = 
-{
-        "Assets/Shaders/grayscale.fs",
-        "Assets/Shaders/posterization.fs",
-        "Assets/Shaders/dream_vision.fs",
-        "Assets/Shaders/pixelizer.fs",
-        "Assets/Shaders/cross_hatching.fs",
-        "Assets/Shaders/cross_stitching.fs",
-        "Assets/Shaders/predator.fs",
-        "Assets/Shaders/scanlines.fs",
-        "Assets/Shaders/fisheye.fs",
-        "Assets/Shaders/sobel.fs",
-    "Assets/Shaders/bloom.fs",
-    "Assets/Shaders/blur.fs",
-    "Assets/Shaders/vignette.fs",
-    };
 
 //  ========================================================================
 //              NOTE: Render Functions
@@ -103,7 +69,23 @@ static const char * shaderPaths[FX_COUNT] =
 
 void UnloadShaderInfo(ShaderInfo * shaderInfo)
 {
-    UnloadShader(shaderInfo->shader);
+    if (IsShaderValid(shaderInfo->shader)) UnloadShader(shaderInfo->shader);
+}
+
+void UpdateShaderInfo(ShaderInfo & shaderInfo)
+{
+    
+    if (GetFileModTime(shaderInfo.fsPath) != shaderInfo.fsWriteTime ||
+        GetFileModTime(shaderInfo.vsPath) != shaderInfo.vsWriteTime)
+    {
+        UnloadShaderInfo(&shaderInfo);
+        if (!LoadShaderInfo(&shaderInfo, shaderInfo.vsPath, shaderInfo.fsPath))
+        {
+            SM_ERROR(false, "Unable to load shader, vs(%s) fs(%s)", 
+                     shaderInfo.vsPath, shaderInfo.fsPath);
+        }
+    }
+    
 }
 
 Rectangle GetCameraRect(Camera2D camera)
@@ -273,21 +255,10 @@ for (uint32 i = 0; i < STAR_COUNT; i++)
     
 }
 
-void UpdateAndRenderWithShader(RenderTexture2D & renderTarget, ShaderInfo & shader, 
+void PostProcessing(RenderTexture2D & renderTarget, ShaderInfo & shader, 
                                int32 screenWidth, int32 screenHeight,
                                  int32 shake, float time)
 {
-    
-    if (GetFileModTime(shader.fsPath) != shader.fsWriteTime ||
-        GetFileModTime(shader.vsPath) != shader.vsWriteTime)
-    {
-        UnloadShaderInfo(&shader);
-        if (!LoadShaderInfo(&shader, shader.vsPath, shader.fsPath))
-        {
-            SM_ERROR(false, "Unable to load shader, vs(%s) fs(%s)", 
-                     shader.vsPath, shader.fsPath);
-            }
-        }
     
     float mn = (float)Min(screenWidth, screenHeight);
     
@@ -303,12 +274,10 @@ void UpdateAndRenderWithShader(RenderTexture2D & renderTarget, ShaderInfo & shad
     static float val = 0; 
     val -= GetFrameTime() * 0.0015f;
     
-    
     SetShaderValue(shader.shader, frameBufferSizeLoc, size, SHADER_UNIFORM_VEC2);
     SetShaderValue(shader.shader, offsetLoc, &val, SHADER_UNIFORM_FLOAT);
     SetShaderValue(shader.shader, shakeLoc, &shake, SHADER_UNIFORM_INT);
     SetShaderValue(shader.shader, timeLoc, &time, SHADER_UNIFORM_FLOAT);
-    
     
     BeginShaderMode(shader.shader);
     
