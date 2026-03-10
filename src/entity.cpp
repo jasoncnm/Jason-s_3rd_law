@@ -383,6 +383,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 
                 uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed, tileDist));
                 AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed * 2), channel);
+                
                 }
             else
             {
@@ -409,7 +410,10 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 else
                 {
                     AddTween(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist), channel);
-                    }
+                }
+                
+                // NOTE: Squash and Stretch
+                
                 
                 }
         }

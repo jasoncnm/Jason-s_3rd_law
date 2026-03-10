@@ -1446,15 +1446,12 @@ void GameplayUpdateAndRender()
                 repeat = false;
             }
         
-        #if 1
-            // TODO: Restart States
-            repeat = repeat && !stateChanged;
+        repeat = repeat && !stateChanged;
             if (JustPressed(gameState->input.keyMappings, RESET_KEY) && !repeat)
             {
                 repeat = true;
                 Restart();
         }
-        #endif
         }
     
     // NOTE: Keys and Locks
@@ -1463,13 +1460,13 @@ void GameplayUpdateAndRender()
         for (uint32 slimeIndex = 0; slimeIndex < slimeIndexTable.count; slimeIndex++)
         {
             Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
-            if (slime && slime->tweenController.NoTweens())
+            if (slime)
             {
                 auto & keyTable = gameState->entityTable[LAYER_KEY];
                 for (uint32 keyIndex = 0; keyIndex < keyTable.count; keyIndex++)
                 {
                     Entity * key = GetEntity(keyTable[keyIndex]);
-                    if (key && (key->tilePos == slime->tilePos))
+                    if (key && (key->tilePos == PivotToTilePos(slime->pivot, slime->tileSize)))
                     {
                         ResetResetStates();
                         DeleteEntity(key);

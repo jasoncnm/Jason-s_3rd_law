@@ -137,7 +137,8 @@ void DrawTileMap(Camera2D camera, IVec2 startPos, IVec2 dim, Color tileColor, Co
     }
 }
 
-void DrawSprite(Camera2D camera, Texture2D texture, Sprite & sprite, Vector2 topLeft, float tileSize = 32, Color color = WHITE)
+void DrawSprite(Camera2D camera, Texture2D texture, Sprite & sprite, Vector2 topLeft, 
+                float tileSize = 32, Color color = WHITE)
 {
 
     SM_ASSERT(IsTextureValid(texture), "Texture is not valid");
