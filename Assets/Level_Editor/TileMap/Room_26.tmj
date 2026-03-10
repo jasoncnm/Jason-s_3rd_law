@@ -25,6 +25,17 @@
          "y":0
         }, 
         {
+         "draworder":"topdown",
+         "id":3,
+         "name":"level_info",
+         "objects":[],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "data":[0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 84, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 26, 7, 7, 72, 0, 0,
@@ -46,9 +57,15 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":3,
+ "nextlayerid":4,
  "nextobjectid":1,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"visible_star_count",
+         "type":"int",
+         "value":10
+        }],
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
  "tileheight":32,
