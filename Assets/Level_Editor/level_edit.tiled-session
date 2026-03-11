@@ -3,10 +3,10 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TileMap/Room_24.tmj",
+    "activeFile": "TileMap/Broom_6.tmj",
     "expandedProjectPaths": [
-        ".",
-        "TileMap"
+        "TileMap",
+        "."
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -92,11 +92,11 @@
             }
         },
         "TileMap/Broom_6.tmj": {
-            "scale": 1,
-            "selectedLayer": 2,
+            "scale": 0.75,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.5,
-                "y": 176
+                "x": 383.33333333333326,
+                "y": 72.66666666666674
             }
         },
         "TileMap/Broom_7.tmj": {
@@ -781,10 +781,10 @@
         },
         "TileMap/Path_82.tmj": {
             "scale": 0.75,
-            "selectedLayer": 1,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.66666666666669,
-                "y": 176
+                "x": 415.33333333333326,
+                "y": 424.66666666666663
             }
         },
         "TileMap/Path_83.tmj": {
@@ -972,27 +972,27 @@
             }
         },
         "TileMap/Room_22.tmj": {
-            "scale": 2,
+            "scale": 0.75,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.25,
-                "y": 176
+                "x": 604.6666666666666,
+                "y": -1337.9999999999998
             }
         },
         "TileMap/Room_23.tmj": {
-            "scale": 1,
+            "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.5,
-                "y": 176
+                "x": 497.66666666666663,
+                "y": -171
             }
         },
         "TileMap/Room_24.tmj": {
-            "scale": 1,
+            "scale": 0.75,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.5,
-                "y": 176
+                "x": 768.6666666666666,
+                "y": -112.66666666666674
             }
         },
         "TileMap/Room_25.tmj": {
@@ -1116,11 +1116,11 @@
             }
         },
         "TileMap/Room_38.tmj": {
-            "scale": 1,
-            "selectedLayer": 1,
+            "scale": 0.5,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.5,
-                "y": 160
+                "x": -1317,
+                "y": 2023
             }
         },
         "TileMap/Room_39.tmj": {
@@ -1204,11 +1204,11 @@
             }
         },
         "TileMap/Room_48.tmj": {
-            "scale": 1,
-            "selectedLayer": 1,
+            "scale": 0.75,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.5,
-                "y": 144
+                "x": 1439.3333333333333,
+                "y": 40.66666666666674
             }
         },
         "TileMap/Room_5.tmj": {
@@ -1639,25 +1639,7 @@
     "last.imagePath": "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Texture",
     "last.worldFilePath": "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor",
     "loadedWorlds": [
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/main.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Broom_3_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_0_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_34_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_59_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_2_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_29_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_6_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_47_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_60_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_18_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_9_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_11_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_4_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_22_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Broom_4_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_17_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_4_Tutorial (2).world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Tutorial_1_Tutorial.world"
+        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/main.world"
     ],
     "map.height": 11,
     "map.lastUsedFormat": "json",

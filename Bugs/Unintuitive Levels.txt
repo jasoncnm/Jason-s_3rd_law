@@ -1,0 +1,6 @@
+Unintuitive Levels
+
+- Room_22 (suppose to be a split introduction level but way too advance, require slime block to solve)
+- Room_38 (Unsolved issue from last playtest)
+- Room_48 (Star can be collected without solving the puzzle, Animation bug)
+- Broom_6 (Star can be collected without solving the puzzle)
