@@ -14,7 +14,7 @@ IF NOT EXIST "bin" mkdir bin
 
 pushd %LIBPATH%
 
-cl /LD %RAYLIB_DEFINES%  /Fe: "raylib" %RAYLIB% /link %LIBRARIES%
+cl /LD /Zi /Od /DEBUG:FULL %RAYLIB_DEFINES%  /Fe: "raylib" %RAYLIB% /link %LIBRARIES%
 
 popd
 
@@ -23,6 +23,7 @@ copy %LIBPATH%\raymath.h  src
 
 move %LIBPATH%\raylib.dll bin
 move %LIBPATH%\raylib.lib bin
+move %LIBPATH%\*.pdb bin
 
 del  %LIBPATH%\*.obj
 del  %LIBPATH%\*.exp

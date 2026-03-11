@@ -13,6 +13,7 @@
 
 #define FG_PATH "Assets/Texture/Backgrounds/5.png"
 #define TEXTURE_PATH "Assets/Texture/SpriteAtlas-10x.png"
+#define PLAYER_TEXTURE_PATH "Assets/Texture/SpriteAtlas-10x.png"
 
 #define BASE_VS_PATH "Assets/Shaders/base.vs"
 #define BASE_FS_PATH "Assets/Shaders/base.fs"
@@ -249,7 +250,7 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields, int32 offsetX = 0, int32 
     
 for (uint32 i = 0; i < STAR_COUNT; i++)
     {
-        float radius = Lerp(stars[i].z, 1, 5);
+        float radius = Lerp(5.5f, 1.2f, stars[i].z);
         Color color = ColorLerp(DARKPURPLE, SKYBLUE, stars[i].z);
         DrawCircleV(starsScreenPos[i], radius * 1.5f, color);
     }

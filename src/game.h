@@ -116,8 +116,8 @@ struct UndoState
     
     int32 playerIndex;
     int32 starCount;
-    // TODO: optimize this by allocate entities 
-    //       into our own allocator aka EntityArray
+    
+    // NOTE: using vector for dynamic heap allocations
     std::vector<Entity> undoEntities;
     
     Entity * GetByEntityIndex(int32 entityIndex)
@@ -219,7 +219,6 @@ struct SceneData
 // NOTE: GameState
 struct GameState
 {
-    // TODO: Undo Stack is still too big and has very limited max undo steps
     UndoStack undoStack;
     
     MyCamera camera;

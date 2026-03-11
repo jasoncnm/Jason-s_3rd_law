@@ -348,7 +348,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                             attach = pushEnt;
                         }
                         
-                        MoveEntity(projectedEnt, attach, nullptr, pos - pushDir,  
+                        MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,  
                                    BLOCK_MOVE_FUNC, BOUNCE_SPEED); 
                         return;
                     }
