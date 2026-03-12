@@ -51,6 +51,22 @@ void UndoStack::push_back(uint32 playerIndex, uint32 starCount,
 //              NOTE: Game Functions (internal)
 //  ========================================================================
 
+ DA FindAllMapsWithStarCount(int32 starCount)
+{
+    uint32 count = 0;
+    int32 * indices = (int32 *)BumpAllocArray(gameMemory->transientStorage, starCount, sizeof(int32));
+    for (uint32 mapIndex = 0; mapIndex < gameState->tileMapCount; mapIndex++)
+        if (gameState->tileMaps[mapIndex].visibleStarCount == starCount)
+    {
+        {
+            indices[count++] = mapIndex;
+        }
+    }
+    
+    return DA { count, (void *)indices };
+    
+}
+
 void InitUndoState(UndoState * undoState, 
                    uint32 playerIndex, uint32 starCount, UndoState::EntityArray & ea)
 {
@@ -1506,6 +1522,12 @@ void GameplayUpdateAndRender()
                 deleteEvent2.deleteEntity = lock;
                 lock->tweenController.endEvents.Add(deleteEvent2);
                 // OnPlayEvent(&lock->tweenController);
+                
+                DA da = FindAllMapsWithStarCount(gameState->starCount);
+                uint32 unlockedMapCount = da.count;
+                int32 * unlockedMaps = (int32 *)da.elements;
+                
+                // NOTE: sort the map by their ids?
                 
             }
         }
