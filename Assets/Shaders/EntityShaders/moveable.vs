@@ -14,7 +14,6 @@ out vec2 fragTexCoord;
 out vec4 fragColor;
 
 // NOTE: Add your custom variables here
-uniform mat4 deformMat = mat4(1);
 
 void main()
 {
@@ -24,6 +23,5 @@ void main()
     fragColor = vertexColor;
 
     // Calculate final vertex position
-    gl_Position = mvp * deformMat * vec4(vertexPosition, 1.0);
-
+    gl_Position = mvp * vec4(vertexPosition, 1.0);
 }

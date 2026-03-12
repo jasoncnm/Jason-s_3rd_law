@@ -139,7 +139,16 @@ int main(int argumentCount, char *argumentArray[])
             SM_ERROR("Unable to initialize Audio Device");
             return -1;
         }
-                
+        
+        gameState->playerTexture = LoadTexture(PLAYER_TEXTURE_PATH);
+        if (!IsTextureValid(gameState->playerTexture))
+        {
+            SM_ERROR("Unable to load file (%s) to texture", PLAYER_TEXTURE_PATH);
+            return -1;
+        }
+        SetTextureFilter(gameState->playerTexture, TEXTURE_FILTER_POINT);
+        
+        
         gameState->texture = LoadTexture(TEXTURE_PATH); // Initialize Texture
         if (!IsTextureValid(gameState->texture))
         {
@@ -155,7 +164,7 @@ int main(int argumentCount, char *argumentArray[])
         
         if (!LoadShaderInfo(&gameState->movableShader, MOVE_VS_PATH, MOVE_FS_PATH))
         {
-            SM_ERROR(false, "Unable to load post shader");
+            SM_ERROR(false, "Unable to load player shader");
         }
         
         gameState->renderTarget = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -209,6 +218,7 @@ int main(int argumentCount, char *argumentArray[])
         CloseAudioDevice();
         CloseWindow();
         UnloadTexture(gameState->texture);
+        UnloadTexture(gameState->playerTexture);
         UnloadRenderTexture(gameState->starFields.starTexture);
         UnloadShaderInfo(&gameState->postShader);
         UnloadShaderInfo(&gameState->movableShader);

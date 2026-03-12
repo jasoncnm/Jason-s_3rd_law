@@ -79,6 +79,10 @@ void Tween::Reset()
             *params.realColor = color;
             break;
         }
+        case PARAM_TYPE_INT:
+        {
+            
+        }
     }
     
 }

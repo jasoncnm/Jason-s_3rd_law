@@ -29,6 +29,7 @@ struct TweenEvent
 enum ParamType
 {
     PARAM_TYPE_NONE,
+    PARAM_TYPE_INT,
     PARAM_TYPE_FLOAT,
     PARAM_TYPE_VECTOR2,
     PARAM_TYPE_COLOR,
@@ -40,6 +41,12 @@ struct TweenParams
 
     union
     {
+        struct
+        {
+            int32 startI;
+            int32 endI;
+            float * realI;
+        };
         struct
         {
             float startF;

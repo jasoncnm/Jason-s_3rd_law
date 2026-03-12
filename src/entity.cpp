@@ -492,6 +492,14 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         OnPlayEvent(&entity->tweenController);
         }
     }
+    
+    if (CheckOutOfBound(targetPos))
+    {
+        TweenEvent deleteEvent = { 0 };
+        deleteEvent.deleteEntity = entity;
+        entity->tweenController.endEvents.Add(deleteEvent);
+        }
+    
 }
 
 inline void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir)
@@ -758,6 +766,8 @@ inline void UpdateSlimes()
                         aniSpeed = attach->tweenController.channels[attach->tweenController.FindMovingChannel(PARAM_TYPE_VECTOR2)].last().dt;
                     }
                     
+                    IVec2 targetPos = newPos;
+                    
                     if (blockedEnt)
                     {
                         
@@ -776,13 +786,11 @@ inline void UpdateSlimes()
                             MergeSlimes(blockedEnt, slime);
                         return;
                         }
-                        MoveEntity(slime, blockedEnt, playEvent, blockedEnt->tilePos - dir, BLOCK_MOVE_FUNC, aniSpeed);
-                    }
-                    else 
-                    {
-                        
-                        MoveEntity(slime, attach, playEvent, newPos, BLOCK_MOVE_FUNC, aniSpeed);
-                    }
+                        targetPos = blockedEnt->tilePos - dir;
+                        attach = blockedEnt;
+                        }
+                    MoveEntity(slime, attach, playEvent, targetPos, BLOCK_MOVE_FUNC, aniSpeed);
+                    
                     }
                 }
         }

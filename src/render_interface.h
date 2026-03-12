@@ -165,9 +165,14 @@ void DrawSprite(Camera2D camera, Texture2D texture, Sprite & sprite, Vector2 top
         DrawTexturePro(texture,  source,  dest, { 0, 0 }, 0, color);
 }
 
+
 void DrawError()
 {
-    DrawText("SOMETHING IS WRONG PLEASE UNDO(Z) OR RESET(R)", GetScreenWidth() / 2, GetScreenHeight() / 2, 20, RED);
+    char * text = "SOMETHING IS WRONG PLEASE UNDO(Z) OR RESET(R)";
+    int32 size = 20;
+    int32 x = (GetScreenWidth() - MeasureText(text, size)) / 2;
+    int32 y = ((GetScreenHeight() - size) / 2);
+    DrawText(text, x, y, size, RED);
 }
 
 void UpdateStarField(Vector3 * stars, Vector2 * starsScreenPos, Vector2 moveDir, float flySpeed, float dt,

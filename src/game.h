@@ -223,6 +223,7 @@ struct GameState
     
     MyCamera camera;
     Texture2D texture;
+    Texture2D playerTexture;
     
     RenderTexture2D renderTarget;
     

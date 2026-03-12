@@ -310,7 +310,6 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         attach = target;
                         
                     }
-                    
                     MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,
                                BLOCK_MOVE_FUNC, BOUNCE_SPEED);
                         
@@ -408,11 +407,8 @@ inline void ProjectAndCheck(Entity * projectedEnt,
         
         if (CheckOutOfBound(pos))
         {
-            MoveEntity(projectedEnt, nullptr, playEvent, pos, 
+            MoveEntity(projectedEnt, nullptr, playEvent, pos + pushDir * 2, 
                        BLOCK_MOVE_FUNC, BOUNCE_SPEED);
-            TweenEvent deleteEvent = { 0 };
-            deleteEvent.deleteEntity = projectedEnt;
-            projectedEnt->tweenController.endEvents.Add(deleteEvent);
             // DeleteEntity(projectedEnt);
             return;
         }
@@ -657,8 +653,10 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
                         int32 index = parent->parent->pushEnt->tweenController.endEvents.Add(TweenEvent{0});
                         playEvent = &parent->parent->pushEnt->tweenController.endEvents[index];
                     }
-                    MoveEntity(parent->pushEnt, nullptr, playEvent, 
-                               current.pushEnt->tilePos - current.pushDir,  BLOCK_MOVE_FUNC, BOUNCE_SPEED);
+                    
+                    IVec2 pos = current.pushEnt->tilePos - current.pushDir;
+                    MoveEntity(parent->pushEnt, nullptr, playEvent, pos, BLOCK_MOVE_FUNC, BOUNCE_SPEED);
+                    
                 }
             }
             }
@@ -1025,8 +1023,8 @@ bool8 MoveAction(IVec2 actionDir)
         return false;
     }
     
-    EntityLayer layers[] = { LAYER_DOOR };
-        Entity * door = FindEntityByLocationAndLayers(currentPos, layers, ArrayCount(layers));
+    EntityLayer doorLayer[] = { LAYER_DOOR };
+        Entity * door = FindEntityByLocationAndLayers(currentPos, doorLayer, ArrayCount(doorLayer));
         if (door && DoorBlocked(door, -actionDir))
         {
             if (actionDir == -player->attachDir)
@@ -1077,10 +1075,17 @@ bool8 MoveAction(IVec2 actionDir)
             }
             
             IVec2 actionTilePos = player->tilePos + actionDir;
+            
             // NOTE: no obsticale, move player
             IVec2 standingPlatformPos = actionTilePos + player->attachDir;
-            FindAttachableResult findResult = FindAttachable(standingPlatformPos, player->attachDir);
-            if (findResult.has)
+            
+            if (Entity * door = FindEntityByLocationAndLayers(actionTilePos, doorLayer, ArrayCount(doorLayer));
+                door && DoorBlocked(door, -player->attachDir))
+            {
+                MoveEntity(player, door, nullptr, door->tilePos, PLAYER_MOVE_FUNC, MOVE_SPEED);
+                }
+            else if (FindAttachableResult findResult = FindAttachable(standingPlatformPos, player->attachDir);
+                findResult.has)
             {
                 Entity * resultEntity = findResult.entity;
                 if (resultEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
@@ -1091,7 +1096,12 @@ bool8 MoveAction(IVec2 actionDir)
                 }
                 SetSlimeSprite(player, actionDir);
                 MoveEntity(player, findResult.entity, nullptr, actionTilePos, PLAYER_MOVE_FUNC, MOVE_SPEED);
-                }
+            }
+            else if (Entity * door = FindEntityByLocationAndLayers(standingPlatformPos, doorLayer, 1);
+                     door && DoorBlocked(door, actionDir))
+            {
+                return false;
+            }
             else
             {
                 EntityLayer layers[] = { LAYER_SLIME  };
@@ -1698,9 +1708,10 @@ void GameplayUpdateAndRender()
     }
     }
     
-    if (!GetPlayer())
+    bool8 noPlayer = false;
+    if (!GetPlayer() && !SelectNextAsPlayer())
     {
-        SelectNextAsPlayer();
+        noPlayer = true;
     }
     
     
@@ -1865,14 +1876,14 @@ void GameplayUpdateAndRender()
             LAYER_CONNECTION,
             LAYER_WALL, 
             LAYER_PIT,
-            LAYER_KEY,
-            LAYER_LOCK,
             LAYER_PORTAL,
             LAYER_SLIME,
             LAYER_BLOCK,
             LAYER_GLASS,  
             LAYER_DOOR,
-        };
+            LAYER_KEY,
+            LAYER_LOCK,
+         };
         
         int32 count = ArrayCount(orderedDrawLayers);
         DrawSpriteLayers(orderedDrawLayers, count);
@@ -1984,6 +1995,11 @@ void GameplayUpdateAndRender()
                                       gameState->shake, gameState->time);
             }
         
+        
+        if (noPlayer)
+        {
+            DrawError();
+        }
 #if  GAME_INTERNAL
         // NOTE: UI Draw Game Informations
         Entity * player = GetEntity(gameState->playerEntityIndex);
@@ -1999,8 +2015,11 @@ void GameplayUpdateAndRender()
                             gameState->camera.base.offset.x, gameState->camera.base.offset.y, gameState->camera.base.zoom,
                             GetCameraState(gameState->camera)), 10, 50, 20, RAYWHITE);
         
+        if (followEnt)
+        {
         DrawText(TextFormat("Follow Entity Type: %s(%d)", GetEntityType(followEnt), followEnt->entityIndex),
                  10, 200, 25, YELLOW);
+        }
         
         real32 vert = 445;
         real32 gap = 100;
@@ -2013,9 +2032,12 @@ void GameplayUpdateAndRender()
                  10, 250, 25, ORANGE);
         
         
+        if (player)
+        {
         DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
                             player->tilePos.x, player->tilePos.y,
                             player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
+        }
         
 #if 0
 
