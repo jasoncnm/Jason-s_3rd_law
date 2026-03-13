@@ -599,10 +599,14 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
     
     bool8 has = false;
     Entity * entity = nullptr;
-
-    for (uint32 i = 0; i < gameState->entities.count; i++)
+    
+    EntityLayer layers[] = { LAYER_WALL, LAYER_BLOCK, LAYER_GLASS, LAYER_LOCK, LAYER_DOOR,  };
+    
+    auto entList = FindAllEntitiesFromLocationAndLayers(tilePos, layers, ArrayCount(layers));
+    
+    for (uint32 idx = 0; idx < entList.count; idx++)
     {
-        entity = GetEntity(i);
+         entity = entList[idx];
         if (entity && entity->tilePos == tilePos)
         {
             switch(entity->type)
@@ -624,8 +628,9 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
                     if (entity->cableType == CABLE_TYPE_DOOR) 
                     {
                         has = DoorBlocked(entity, attachDir);
+                        
+                        if (has) break;
                     }
-                    break;
                 }
                 case ENTITY_TYPE_PIT:
                 {
@@ -633,11 +638,10 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
                     goto EndLoop;     
                 }
             }
-            
             if (has) break;
         }
-    } EndLoop:;
-
+    }EndLoop:;
+    
     result.has = has; 
     result.entity = entity;
     return result;
