@@ -18,7 +18,6 @@
 /*
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Fix weird animation bugs 
-- No restart good idea ??
 
   TODO: Things that I can do beside arts and design I guess
 3. collectable: show in ui
@@ -695,12 +694,12 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
     return checkList.last().pushResult;
     }
 
-inline float GetCameraZoom(int32 mapWidth, int32 mapHeight)
+inline float GetCameraZoom(Map & currentMap)
 {
     int32 newWidth = GetScreenWidth();
     int32 newHeight = GetScreenHeight();
     
-    int32 camMax = (mapWidth > mapHeight) ? mapWidth : mapHeight;
+     int32 camMax = (currentMap.width > currentMap.height) ? currentMap.width : currentMap.height;
     
     // int32 camMax = 11; 
     
@@ -708,44 +707,35 @@ inline float GetCameraZoom(int32 mapWidth, int32 mapHeight)
     (newWidth < newHeight) ? zoom *= newWidth : zoom *= newHeight;
     
     return zoom;
-    
 }
 
-inline float GetCameraZoom(Map & currentMap)
-{
-    return GetCameraZoom(currentMap.width, currentMap.height);
-    }
-
-inline void UpdateCameraToTileMapSmooth(int32 tileX, int32 tileY,
-                                        int32 mapWidth, int32 mapHeight,
-                                        real32 (*MoveFunc)(real32), real32 (*ZoomFunc)(real32),
-                                        real32 moveSpeed, real32 zoomSpeed,
-                                        TweenEvent * playEvent = nullptr)
+inline void UpdateCameraToTileMapSmooth(Map & map, real32 (*MoveFunc)(real32), real32 (*ZoomFunc)(real32),
+                                        real32 moveSpeed, real32 zoomSpeed)
 {
     Vector2 startPos = gameState->camera.base.target;
     real32 startZoom = gameState->camera.base.zoom;
-    Vector2 pos = TilePositionToPixelPosition(mapWidth  * 0.5f + tileX + 0.5f, 
-                                               mapHeight * 0.5f + tileY + 0.5f);
+    Vector2 pos = TilePositionToPixelPosition(map.width * 0.5f + map.tilePos.x + 0.5f, 
+                                              map.height * 0.5f + map.tilePos.y + 0.5f);
     
     if (!gameState->camera.tweenController.NoTweens())
     {
         gameState->camera.tweenController.Reset();
         gameState->camera.base.target = startPos;
         gameState->camera.base.zoom = startZoom;
-    }
+}
     
     if (!Vector2Equals(gameState->camera.base.target, pos))
     {
         TweenParams params = {};
-        params.paramType = PARAM_TYPE_VECTOR2;
+    params.paramType = PARAM_TYPE_VECTOR2;
         params.startVec2 = startPos;
-        params.endVec2 = pos;
-        params.realVec2  = &gameState->camera.base.target;
-        AddTweenUnique(gameState->camera.tweenController, CreateTween(params, MoveFunc, moveSpeed));
+    params.endVec2 = pos;
+    params.realVec2  = &gameState->camera.base.target;
+    AddTweenUnique(gameState->camera.tweenController, CreateTween(params, MoveFunc, moveSpeed));
     }
     
     float oldZoom = gameState->camera.base.zoom;
-    float newZoom = GetCameraZoom(mapWidth, mapHeight);
+    float newZoom = GetCameraZoom(map);
     if (!FloatEquals(oldZoom, newZoom))
     {
         TweenParams params = {};
@@ -756,21 +746,7 @@ inline void UpdateCameraToTileMapSmooth(int32 tileX, int32 tileY,
         AddTweenUnique(gameState->camera.tweenController, CreateTween(params, ZoomFunc, zoomSpeed));
     }
     
-    if (playEvent)
-    {
-        playEvent->controller = &gameState->camera.tweenController;
-    }
-    else
-    {
-        OnPlayEvent(&gameState->camera.tweenController);
-    }
-}
-
-inline void UpdateCameraToTileMapSmooth(Map & map, real32 (*MoveFunc)(real32), real32 (*ZoomFunc)(real32),
-                                        real32 moveSpeed, real32 zoomSpeed)
-{
-    UpdateCameraToTileMapSmooth(map.tilePos.x, map.tilePos.y, map.width, map.height, 
-                                MoveFunc, ZoomFunc, moveSpeed, zoomSpeed);
+    OnPlayEvent(&gameState->camera.tweenController);
     }
 
  FindTileMapResult FindTileMap(IVec2 tilePos)
@@ -895,26 +871,6 @@ inline bool8 UpdateCamera(bool refocus = false)
             FindTileMapResult result = FindTileMap(followEnt->tilePos);
             if (cam.tweenController.NoTweens())
             {
-                #if 0
-                // TODO: Move this to UpdateCamera
-                // NOTE: Zoom out to see the whole map
-                int32 tileX = gameState->tileMin.x - 1;
-                int32 tileY = gameState->tileMin.y - 1;
-                int32 width = gameState->tileMax.x - gameState->tileMin.x;
-                int32 height = gameState->tileMax.y - gameState->tileMin.y;
-                
-                // NOTE: Reveal at camera end event
-                // TODO
-                int32 channel = lock->tweenController.FindMovingChannel(PARAM_TYPE_COLOR);
-                Tween & current = lock->tweenController.channels[channel].last();
-                int32 index = current.endEvents.Add(TweenEvent{ 0 });
-                TweenEvent *playEvent = &current.endEvents[index];
-                
-                UpdateCameraToTileMapSmooth(tileX, tileY, width, height, 
-                                            CAMERA_MOVE_FUNC, CAMERA_ZOOM_FUNC,
-                                            CAMERA_MOVE_SPEED, CAMERA_ZOOM_SPEED, playEvent);
-                #endif
-                
                 Vector2 center = followEnt->pivot +
                                             Vector2 { followEnt->tileSize * 0.5f, followEnt->tileSize * 0.5f };
                 
@@ -933,7 +889,7 @@ inline bool8 UpdateCamera(bool refocus = false)
                 SM_ASSERT(followEnt->type == ENTITY_TYPE_LOCK, "camera behaviour for lock only!");
                 if (!followEnt->tweenController.NoTweens() && !followEnt->tweenController.playing)
                 {
-                    // NOTE: Play lock vanish animation
+                
                 TweenEvent playEvent;
                 playEvent.controller = &followEnt->tweenController;
                 cam.tweenController.endEvents.Add(playEvent);
@@ -1159,15 +1115,11 @@ bool8 MoveAction(IVec2 actionDir)
             else if (Entity * door = FindEntityByLocationAndLayers(standingPlatformPos, doorLayer, 1);
                      door && DoorBlocked(door, actionDir))
             {
-                #if 0
                 return false;
-#else
-                MoveEntity(player, door, nullptr, standingPlatformPos, PLAYER_MOVE_FUNC, MOVE_SPEED);
-                #endif
             }
             else
             {
-                EntityLayer layers[] = { LAYER_SLIME };
+                EntityLayer layers[] = { LAYER_SLIME  };
                 Entity * ent = FindEntityByLocationAndLayers(standingPlatformPos, layers, ArrayCount(layers));
                 
                 if (ent)
@@ -1179,13 +1131,18 @@ bool8 MoveAction(IVec2 actionDir)
                     IVec2 newTile = standingPlatformPos;
                     IVec2 newAttach = - actionDir;
                     
-                    FindAttachableResult findResult = FindAttachable(newTile + newAttach, newAttach);
+                    Entity * attachedEntity = GetEntity(player->attachedEntityIndex);
                     
-                    if (!findResult.has) return false;
+                    if (attachedEntity && attachedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
+                        attachedEntity->cableType == CABLE_TYPE_DOOR &&
+                        !SameSide(attachedEntity, newTile, newAttach))
+                    {
+                        return false;
+                    }
                     
                     SetSlimeSprite(player, player->attachDir);
                     
-                    MoveEntity(player, findResult.entity, nullptr, newTile, PLAYER_MOVE_FUNC, MOVE_SPEED);
+                    MoveEntity(player, attachedEntity, nullptr, newTile, PLAYER_MOVE_FUNC, MOVE_SPEED);
                 }
                 else 
                 {
@@ -1554,7 +1511,6 @@ void GameplayUpdateAndRender()
                 SM_ASSERT(lock->unlockCount == gameState->starCount, "this lock should be unlocked earlier");
                 lock->open = true;
                 float delayTime = 1.0f;
-                
                 TweenParams params = { 0 };
                 params.paramType = PARAM_TYPE_COLOR;
                 params.startColor = WHITE;
@@ -1569,8 +1525,8 @@ void GameplayUpdateAndRender()
                 DA da = FindAllMapsWithStarCount(gameState->starCount);
                 uint32 unlockedMapCount = da.count;
                 int32 * unlockedMaps = (int32 *)da.elements;
-                // TODO: sort the map by their ids?
                 
+                // NOTE: sort the map by their ids?
                 
             }
         }
@@ -1624,7 +1580,7 @@ void GameplayUpdateAndRender()
                             }
                             else if (followEnt->tweenController.NoTweens())
                             {
-                                gameState->camera.followEntityIndex = entity->entityIndex;
+                                gameState->camera.followEntityIndex = entity->ensxtityIndex;
                             }
                         }
                         else if (layer == LAYER_LOCK)
