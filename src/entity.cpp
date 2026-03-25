@@ -447,8 +447,6 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                     AddTween(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist), channel);
                 }
                 
-                // NOTE: Squash and Stretch
-                
                 
                 }
         }
@@ -572,7 +570,7 @@ inline void SetGlassBeBroken(Entity * glass)
 
 inline float GetSlimeSize(int32 mass, real32 tileSize)
 {
-    return mass == 1 ? 0.55f * tileSize :  0.7f * tileSize;
+     return mass == 1 ? 0.7f * tileSize :  tileSize;
 }
 
 inline float GetSlimeSize(Entity * slime)

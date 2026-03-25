@@ -1278,24 +1278,27 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                 
                 Texture2D drawTexture = gameState->texture;
                 Sprite drawSprite = entity->sprite;
+                Vector2 drawPivot = entity->pivot;
                 
                 // TODO temcode
                 if (IsSlime(entity) && entity->spriteType == SPRITE_TYPE_ANIMATED)
                 {
                     drawTexture = gameState->playerTexture;
                     drawSprite = GetCurrentSpriteFrame(&entity->animatedSprite);
+                    drawPivot += 
+                        Vector2 { (real32)entity->attachDir.x, (real32) entity->attachDir.y } * entity->tileSize * 0.25f;
                 }
                 
                 if (IsSlime(entity))
                 {
                 BeginShaderMode(gameState->movableShader.shader);
                 
-                DrawSprite(gameState->camera.base, drawTexture, drawSprite, entity->pivot, entity->tileSize, color);
+                DrawSprite(gameState->camera.base, drawTexture, drawSprite, drawPivot, entity->tileSize, color);
                 EndShaderMode();
                 }
                 else
                 {
-                    DrawSprite(gameState->camera.base, drawTexture, drawSprite, entity->pivot, entity->tileSize, color);
+                    DrawSprite(gameState->camera.base, drawTexture, drawSprite, drawPivot, entity->tileSize, color);
                     
                 }
                 

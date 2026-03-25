@@ -142,7 +142,7 @@ void DrawSprite(Camera2D camera, Texture2D texture, Sprite & sprite, Vector2 top
 
     SM_ASSERT(IsTextureValid(texture), "Texture is not valid");
 
-    float offset = 0.1f;
+    float offset = 0.0f;
             
     Rectangle source =
         {
