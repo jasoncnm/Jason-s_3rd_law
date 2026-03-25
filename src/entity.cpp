@@ -238,8 +238,43 @@ inline void SetSlimeSprite(Entity * slime, IVec2 dir)
     }
 }
 
+inline void SetSlimeAnimatedSprite(Entity * slime, IVec2 dir)
+{
+    enum 
+    {
+        SLIME_ANI_RIGHT,
+        SLIME_ANI_LEFT,
+        SLIME_ANI_UP,
+        SLIME_ANI_DOWN,
+    };
+    
+    real32 ani_seconds_per_frame = 0.05f;
+    
+    if (dir == IVec2 { -1, 0 })
+    {
+        // LEFT
+        BeginAnimation(&slime->animatedSprite, SLIME_ANI_LEFT, ani_seconds_per_frame, false, false);
+        }
+    else if (dir == IVec2 { 1, 0 })
+    {
+        // RIGHT
+        BeginAnimation(&slime->animatedSprite, SLIME_ANI_RIGHT, ani_seconds_per_frame, false, false);
+        }
+    else if (dir == IVec2 { 0, -1 })
+    {
+        // UP
+        BeginAnimation(&slime->animatedSprite, SLIME_ANI_UP, ani_seconds_per_frame, false, false);
+    }
+    else if (dir == IVec2 { 0, 1 })
+    {
+        // DOWN
+        BeginAnimation(&slime->animatedSprite, SLIME_ANI_DOWN, ani_seconds_per_frame, false, false);
+    }
+}
+
 inline AddEntityResult
-AddEntity(EntityType type, IVec2 tilePos, TileID tileID, Color color = WHITE, int32 tileSize = MAP_TILE_SIZE)
+AddEntity(EntityType type, IVec2 tilePos, TileID tileID,
+          Color color = WHITE, int32 tileSize = MAP_TILE_SIZE)
 {
     AddEntityResult result;
 
@@ -535,14 +570,14 @@ inline void SetGlassBeBroken(Entity * glass)
     glass->sprite = GetSprite(GLASS_BROKEN);
 }
 
-inline float GetSlimeSize(int32 mass)
+inline float GetSlimeSize(int32 mass, real32 tileSize)
 {
-    return mass == 1 ? 0.55f * MAP_TILE_SIZE :  0.7f * MAP_TILE_SIZE;
+    return mass == 1 ? 0.55f * tileSize :  0.7f * tileSize;
 }
 
 inline float GetSlimeSize(Entity * slime)
 {
-    return GetSlimeSize(slime->mass);
+    return GetSlimeSize(slime->mass, slime->tileSize);
 }
 
 

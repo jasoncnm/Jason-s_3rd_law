@@ -53,18 +53,27 @@ enum ActionState
     FREEZE_STATE,
 };
 
+enum SpriteType
+{
+    SPRITE_TYPE_SPRITE = 0,
+    SPRITE_TYPE_ANIMATED,
+};
+
 struct Entity
 {
     
     EntityType type;
     CableType cableType;
     
+    SpriteType spriteType;
+    AnimatedSprite animatedSprite;
+        Sprite sprite;
+        
     ActionState actionState = MOVE_STATE;
     
     TweenController tweenController;
     
-    Sprite sprite;
-       TileID tileID;
+    TileID tileID;
     Color color;
     
     IVec2 tilePos;

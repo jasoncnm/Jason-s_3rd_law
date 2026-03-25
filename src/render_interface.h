@@ -12,8 +12,6 @@
 #include "entity.h"
 
 #define FG_PATH "Assets/Texture/Backgrounds/5.png"
-#define TEXTURE_PATH "Assets/Texture/SpriteAtlas-10x.png"
-#define PLAYER_TEXTURE_PATH "Assets/Texture/SpriteAtlas-10x.png"
 
 #define BASE_VS_PATH "Assets/Shaders/base.vs"
 #define BASE_FS_PATH "Assets/Shaders/base.fs"

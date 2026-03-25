@@ -140,10 +140,10 @@ int main(int argumentCount, char *argumentArray[])
             return -1;
         }
         
-        gameState->playerTexture = LoadTexture(PLAYER_TEXTURE_PATH);
+        gameState->playerTexture = LoadTexture(ANIMATED_PLAYER_PATH);
         if (!IsTextureValid(gameState->playerTexture))
         {
-            SM_ERROR("Unable to load file (%s) to texture", PLAYER_TEXTURE_PATH);
+            SM_ERROR("Unable to load file (%s) to texture", ANIMATED_PLAYER_PATH);
             return -1;
         }
         SetTextureFilter(gameState->playerTexture, TEXTURE_FILTER_POINT);

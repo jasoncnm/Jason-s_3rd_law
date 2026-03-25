@@ -6,7 +6,7 @@
    $Notice: $
    ======================================================================== */
 
-#include "level_loader.h"
+#include "assets_loader.h"
 
 //  ========================================================================
 //              NOTE: Level Functions
@@ -420,6 +420,37 @@ state.currentMapIndex = -1;
                                         result.entity->mass = 1;
                                         result.entity->tileSize = GetSlimeSize(result.entity); 
                                         result.entity->movable = true;
+                                        result.entity->spriteType = SPRITE_TYPE_ANIMATED;
+                                        
+                                        // NOTE: Add animated sprite, TODO temporary need refactor
+                                        {
+                                            const uint32 tWidth = 64;
+                                            const uint32 tHeight = 64;
+                                            const uint32 frames = 6;
+                                            const uint32 animationCount = 4;
+                                            
+                                            AnimatedSprite & animatedSprite = result.entity->animatedSprite;
+                                            animatedSprite.animationCount = animationCount;
+                                            animatedSprite.currentAnimation = 0;
+                                            animatedSprite.spriteAnimation = 
+                                            (SpriteAnimation *)BumpAllocArray(gameMemory->persistentStorage, animationCount, sizeof(SpriteAnimation));
+                                            
+                                            for (uint32 idx = 0; idx < animationCount; idx++)
+                                            {
+                                                // NOTE: Add Sprite Animation
+                                                SpriteAnimation * spriteAnimation = animatedSprite.spriteAnimation + idx;
+                                                spriteAnimation->frameCount = frames;
+                                                spriteAnimation->frames = 
+                                                (Sprite *)BumpAllocArray(gameMemory->persistentStorage, frames, sizeof(Sprite));
+                                                for (uint32 frame = 0; frame < frames; frame++)
+                                                {
+                                                    IVec2 altasOffset = { (int32)frame * (int32)tWidth,
+                                                        (int32)idx * (int32)tHeight };
+                                                    IVec2 spriteSize = { (int32)tWidth, (int32)tHeight };
+                                                    spriteAnimation->frames[frame] = { altasOffset, spriteSize };
+                                                }
+                                            }
+                                        }
                                         
                                         state.playerEntityIndex = result.entityIndex;
                                         
@@ -487,74 +518,3 @@ state.currentMapIndex = -1;
 
 
 
-
-#if 0
-else if (name == "Key")
-{
-    result = AddEntity(ENTITY_TYPE_KEY, tilePos, KEY);
-    
-    Entity * key = result.entity;
-    
-    json properties = layer["properties"];
-    for (auto & prop : properties)
-    {
-        if (prop["type"] == "file")
-        {
-            std::string fname = prop["value"];
-            
-            // const char * npath = GetDirectoryPath(path.c_str());
-            
-            std::string lockMapPath = "/" + fname;
-            lockMapPath = GetDirectoryPath(path.c_str()) + lockMapPath;
-            std::ifstream file(lockMapPath);
-            json lockMap = json::parse(file);
-            
-            json lockMapMeta;
-            for (uint32 mapIdx = 0; mapIdx < tileMaps.size(); mapIdx++)
-            {
-                std::string p = tileMaps[mapIdx]["fileName"];
-                if (fname == FindFileNameFromPath(p))
-                {
-                    lockMapMeta = tileMaps[mapIdx];
-                    break;
-                }
-            }
-            int32 lockMapWidth =  (int32)lockMapMeta["width"] / tileWidth;
-            int32 lockMapHeight = (int32)lockMapMeta["height"] / tileWidth;
-            int32 lockStartPosX = (int32)lockMapMeta["x"] / tileWidth;
-            int32 lockStartPosY = (int32)lockMapMeta["y"] / tileWidth;
-            IVec2 lockMapStartPos = { lockStartPosX, lockStartPosY };
-            for (auto & layer : lockMap["layers"])
-            {
-                if (layer["name"] == "Lock")
-                {
-                    std::vector<int32> lData = layer["data"];
-                    for (int32 lrow = 0; lrow < lockMapWidth; lrow++)
-                    {
-                        for (int32 lcol = 0; lcol < lockMapHeight; lcol++)
-                        {
-                            int32 ltileId = lData[lcol + lrow * lockMapWidth];
-                            if (ltileId == LOCK)
-                            {
-                                IVec2 lOffset = { lcol, lrow };
-                                IVec2 lTilePos = lockMapStartPos + lOffset;
-                                
-                                AddEntityResult lResult = AddEntity(ENTITY_TYPE_LOCK, lTilePos, LOCK);
-                                
-                                lResult.entity->open = false;
-                                
-                                key->unlockEntityIndex = lResult.entity->entityIndex;
-                                
-                                break;
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-            
-            break;
-        }
-    }
-}
-#endif

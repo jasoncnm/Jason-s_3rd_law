@@ -10,6 +10,9 @@
 
 #include "engine_lib.h"
 
+#define TEXTURE_PATH "Assets/Texture/SpriteAtlas-10x.png"
+#define ANIMATED_PLAYER_PATH "Assets/Texture/player_ani-10x.png"
+
 #define TileSetCols 10
 //  ========================================================================
 //              NOTE: Assets Constants
@@ -95,9 +98,107 @@ struct Sprite
     IVec2 spriteSize;
 };
 
+struct SpriteAnimation
+{
+    bool8 playReverse = false;
+    bool8 loop = false;
+    real32 secondsPerFrame = 0.5f;
+     real32 frameTimer = 0.0f;
+    uint32 currentFrame = 0;
+    uint32 frameCount;
+    Sprite * frames;
+};
+
+struct AnimatedSprite
+{
+    bool8 playing = 0;
+    uint32 animationCount;
+    uint32 currentAnimation;
+      SpriteAnimation * spriteAnimation;
+};
+
 //  ========================================================================
 //              NOTE: Assets Functions
 //  ========================================================================
+
+ bool8 PlaySpriteAnimation(SpriteAnimation * spriteAnimation)
+{
+    bool8 finished = false;
+    spriteAnimation->frameTimer += GetFrameTime();
+    if (spriteAnimation->frameTimer >= spriteAnimation->secondsPerFrame)
+    {
+        spriteAnimation->frameTimer = 0;
+        if (spriteAnimation->playReverse)
+        {
+            spriteAnimation->currentFrame--;
+            if (spriteAnimation->currentFrame < 0)
+            {
+                if (spriteAnimation->loop) 
+                {
+                    spriteAnimation->currentFrame = spriteAnimation->frameCount - 1;
+                }
+                else
+                {
+                    spriteAnimation->currentFrame = 0;
+                    finished = true;
+                }
+            }
+        }
+        else
+        {
+            spriteAnimation->currentFrame++;
+            if (spriteAnimation->currentFrame >= spriteAnimation->frameCount)
+            {
+                if (spriteAnimation->loop)
+                {
+                    spriteAnimation->currentFrame = 0;
+                }
+                else
+                {
+                    spriteAnimation->currentFrame = spriteAnimation->frameCount - 1;
+                    finished = true;
+                }
+            }
+        }
+    }
+    
+    return finished;
+}
+
+void PlayAnimatedSprite(AnimatedSprite * animatedSprite)
+{
+    if (animatedSprite->playing)
+    {
+        SpriteAnimation * spriteAnimation = animatedSprite->spriteAnimation + animatedSprite->currentAnimation;
+        bool8 end = PlaySpriteAnimation(spriteAnimation);
+        animatedSprite->playing = !end;
+    }
+}
+
+Sprite GetCurrentSpriteFrame(AnimatedSprite * animatedSprite)
+{
+    SpriteAnimation * sa = animatedSprite->spriteAnimation + animatedSprite->currentAnimation;
+    return sa->frames[sa->currentFrame];
+}
+
+void BeginAnimation(AnimatedSprite * animatedSprite, uint32 animationID, real32 secondsPerFrame,
+                    bool8 playReverse, bool8 loop)
+{
+    animatedSprite->playing = true;
+    animatedSprite->currentAnimation = animationID;
+    SpriteAnimation * animation = animatedSprite->spriteAnimation + animationID;
+    animation->loop = loop;
+    animation->playReverse = playReverse;
+    animation->secondsPerFrame = secondsPerFrame;
+    if (playReverse)
+    {
+        animation->currentFrame = animation->frameCount - 1;
+    }
+    else
+    {
+        animation->currentFrame = 0;
+    }
+}
 
 TileID GetCablePowerOnID(TileID tileID)
 {
@@ -129,7 +230,6 @@ Sprite GetSprite(TileID tileID)
     
     return sprite;
 }
-
 
 #define ASSETS_H
 #endif

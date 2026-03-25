@@ -10,7 +10,7 @@
 
 #include "entity.cpp"
 #include "electric_door.cpp"
-#include "level_loader.cpp"
+#include "assets_loader.cpp"
 #include "tween.cpp"
 #include "tween_controller.cpp"
 #include "save_game.cpp"
@@ -1276,16 +1276,26 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                     color = ColorAlpha(color, 0.6f);
                 }
                 
+                Texture2D drawTexture = gameState->texture;
+                Sprite drawSprite = entity->sprite;
+                
+                // TODO temcode
+                if (IsSlime(entity) && entity->spriteType == SPRITE_TYPE_ANIMATED)
+                {
+                    drawTexture = gameState->playerTexture;
+                    drawSprite = GetCurrentSpriteFrame(&entity->animatedSprite);
+                }
+                
                 if (IsSlime(entity))
                 {
                 BeginShaderMode(gameState->movableShader.shader);
                 
-                DrawSprite(gameState->camera.base, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, color);
+                DrawSprite(gameState->camera.base, drawTexture, drawSprite, entity->pivot, entity->tileSize, color);
                 EndShaderMode();
                 }
                 else
                 {
-                    DrawSprite(gameState->camera.base, gameState->texture, entity->sprite, entity->pivot, entity->tileSize, color);
+                    DrawSprite(gameState->camera.base, drawTexture, drawSprite, entity->pivot, entity->tileSize, color);
                     
                 }
                 
@@ -1432,7 +1442,14 @@ void GameplayUpdateAndRender()
                     }
                     if (stateChanged) 
                     {
-                        SetSlimeSprite(player, actionDir);
+                        if (player->spriteType == SPRITE_TYPE_SPRITE)
+                        {
+                            SetSlimeSprite(player, actionDir);
+                        }
+                        else if (player->spriteType == SPRITE_TYPE_ANIMATED)
+                        {
+                            SetSlimeAnimatedSprite(player, actionDir);
+                        }
                     }
                     
                     break;
@@ -1548,6 +1565,13 @@ void GameplayUpdateAndRender()
                 Entity * entity = GetEntity(entList[entIdx]);
             if (entity)
                 {
+                    // NOTE: AnimatedSprite Updates
+                    if (entity->spriteType == SPRITE_TYPE_ANIMATED)
+                    {
+                        PlayAnimatedSprite(&entity->animatedSprite);
+                    }
+                    
+                    // NOTE: Tween updates
                 if (!entity->tweenController.NoTweens())
                 {
                     if (IsSlime(entity))
@@ -1580,7 +1604,7 @@ void GameplayUpdateAndRender()
                             }
                             else if (followEnt->tweenController.NoTweens())
                             {
-                                gameState->camera.followEntityIndex = entity->ensxtityIndex;
+                                gameState->camera.followEntityIndex = entity->entityIndex;
                             }
                         }
                         else if (layer == LAYER_LOCK)
