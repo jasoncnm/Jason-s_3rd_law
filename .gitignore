@@ -47,6 +47,7 @@
 *.a
 *.o
 *.rdi
+*.rdbg
 
 /data/save_data/*
 
