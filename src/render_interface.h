@@ -136,8 +136,7 @@ void DrawTileMap(Camera2D camera, IVec2 startPos, IVec2 dim, Color tileColor, Co
     }
 }
 
-void DrawSprite(Camera2D camera, Texture2D texture, Sprite & sprite, Vector2 topLeft, 
-                float tileSize = 32, Color color = WHITE)
+void DrawSprite(Camera2D camera, Texture2D texture, Sprite & sprite, Vector2 topLeft, Vector2 tileSize, Color color = WHITE)
 {
 
     SM_ASSERT(IsTextureValid(texture), "Texture is not valid");
@@ -156,7 +155,7 @@ void DrawSprite(Camera2D camera, Texture2D texture, Sprite & sprite, Vector2 top
         {
             //topLeft.x + tileSize, topLeft.y + tileSize,
             topLeft.x, topLeft.y,
-            tileSize, tileSize
+            tileSize.x, tileSize.y
     };
     
 // Draw a part of a texture defined by a rectangle with 'pro' parameters

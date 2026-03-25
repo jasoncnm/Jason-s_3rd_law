@@ -80,8 +80,8 @@ struct Entity
     IVec2 attachDir = {0,0};
     
     Vector2 pivot;
-    
-     real32 tileSize = 32.0f;
+     Vector2 tileSize;
+     // real32 tileSize = 32.0f;
     
     uint16 entityIndex;
     
@@ -123,7 +123,7 @@ inline IVec2 GetDoorDirection(Entity * door);
 inline bool8 DoorBlocked(Entity * door, IVec2 reachDir);
 inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir);
 inline bool8 IsDoor(Entity * door);
-inline real32 GetSlimeSize(Entity * slime);
+inline Vector2 GetSlimeSize(Entity * slime);
 inline Entity * GetEntity(int32 i);
 inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * playEvent,
                        IVec2 targetPos, real32 (*MoveFunc)(real32), real32 speed);

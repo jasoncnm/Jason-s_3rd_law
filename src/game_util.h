@@ -76,13 +76,13 @@ Vector2 TilePositionToPixelPosition(Vector2 tilePos)
 }
 
 
-Vector2 GetTilePivot(IVec2 tilePos, float tileSize, IVec2 attachDir = { 0, 0 })
+Vector2 GetTilePivot(IVec2 tilePos, Vector2 tileSize, IVec2 attachDir = { 0, 0 })
 {
     Vector2 playerPos = TilePositionToPixelPosition((float)tilePos.x, (float)tilePos.y);
-    Vector2 topLeft = Vector2Subtract(playerPos, Vector2Scale(Vector2One(), tileSize * 0.5f));
+    Vector2 topLeft = playerPos - Vector2 { tileSize.x, tileSize.y } * 0.5f;
     
-    float dist = (MAP_TILE_SIZE - tileSize) * 0.5f;
-    Vector2 offset = Vector2Scale({ (float)attachDir.x, (float)attachDir.y }, dist);
+    Vector2 dist = (Vector2 {MAP_TILE_SIZE, MAP_TILE_SIZE} - tileSize) * 0.5f;
+    Vector2 offset = Vector2{ (float)attachDir.x, (float)attachDir.y } * dist;
     topLeft = Vector2Add(topLeft, offset);                
     
     return topLeft;
@@ -110,15 +110,16 @@ Vector2 GetTilePivot(Entity * entity)
 
 void DrawTile(IVec2 tilePos, Color color)
 {
-    Vector2 pivot = GetTilePivot(tilePos, MAP_TILE_SIZE);
+    Vector2 tileSize = Vector2 { MAP_TILE_SIZE, MAP_TILE_SIZE };
+    Vector2 pivot = GetTilePivot(tilePos, tileSize);
     Rectangle rect = { pivot.x, pivot.y, MAP_TILE_SIZE, MAP_TILE_SIZE };
     DrawRectangleRec(rect, color);
 }
 
 
-IVec2 PivotToTilePos(Vector2 pivot, float tileSize)
+IVec2 PivotToTilePos(Vector2 pivot, Vector2 tileSize)
 {
-    Vector2 center = Vector2Add(pivot, { tileSize * 0.5f, tileSize * 0.5f });
+    Vector2 center = Vector2Add(pivot, { tileSize.x * 0.5f, tileSize.y * 0.5f });
     center.x += MAP_TILE_SIZE * (center.x > 0 ? 0.5f : -0.5f);
     center.y += MAP_TILE_SIZE * (center.y > 0 ? 0.5f : -0.5f);
     return PixelPositionToTilePos(center);

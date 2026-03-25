@@ -130,7 +130,7 @@ void SetDrawingEntities()
             {
                 //topLeft.x + tileSize, topLeft.y + tileSize,
                 ent->pivot.x, ent->pivot.y,
-                ent->tileSize, ent->tileSize
+                ent->tileSize.x, ent->tileSize.y
             };
             ent->isVisible =
                 CheckCollisionRecs(dest, GetCameraRect(gameState->camera.base));
@@ -872,7 +872,7 @@ inline bool8 UpdateCamera(bool refocus = false)
             if (cam.tweenController.NoTweens())
             {
                 Vector2 center = followEnt->pivot +
-                                            Vector2 { followEnt->tileSize * 0.5f, followEnt->tileSize * 0.5f };
+                                            Vector2 { followEnt->tileSize.x * 0.5f, followEnt->tileSize.y * 0.5f };
                 
                 real32 dist = Vector2Distance(center, cam.base.target) / (real32)MAP_TILE_SIZE;
                 
@@ -924,7 +924,7 @@ inline bool8 UpdateCamera(bool refocus = false)
             
             Vector2 moveDir = GetTilePivot(followEnt) - followEnt->pivot;
             Vector2 center = followEnt->pivot + 
-                Vector2 { followEnt->tileSize * 0.5f, followEnt->tileSize * 0.5f };
+                Vector2 { followEnt->tileSize.x * 0.5f, followEnt->tileSize.y * 0.5f };
             Vector2 nextPos = cam.base.target;
             
             
@@ -1987,7 +1987,7 @@ void GameplayUpdateAndRender()
         
         if (followEnt)
         {
-        Vector2 center = followEnt->pivot + Vector2 { followEnt->tileSize * 0.5f, followEnt->tileSize * 0.5f };
+        Vector2 center = followEnt->pivot + Vector2 { followEnt->tileSize.x * 0.5f, followEnt->tileSize.y * 0.5f };
         
         //DrawCircleV(center, 5,  RED);
         //DrawCircleV(gameState->camera.base.target, 5, YELLOW);

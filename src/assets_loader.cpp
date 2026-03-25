@@ -420,10 +420,11 @@ state.currentMapIndex = -1;
                                         result.entity->mass = 1;
                                         result.entity->tileSize = GetSlimeSize(result.entity); 
                                         result.entity->movable = true;
-                                        result.entity->spriteType = SPRITE_TYPE_ANIMATED;
                                         
+                                        #if 0
                                         // NOTE: Add animated sprite, TODO temporary need refactor
                                         {
+                                        result.entity->spriteType = SPRITE_TYPE_ANIMATED;
                                             const uint32 tWidth = 64;
                                             const uint32 tHeight = 64;
                                             const uint32 frames = 6;
@@ -451,7 +452,7 @@ state.currentMapIndex = -1;
                                                 }
                                             }
                                         }
-                                        
+                                        #endif
                                         state.playerEntityIndex = result.entityIndex;
                                         
                                         SM_TRACE("Player generated (tile location: %i, %i)", result.entity->tilePos.x, result.entity->tilePos.y);

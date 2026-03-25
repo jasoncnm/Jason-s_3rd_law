@@ -40,10 +40,10 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
     {
         // Merge Slime Tween
         
-        float startSize = GetSlimeSize(mergeSlime);
+         Vector2 startSize = GetSlimeSize(mergeSlime);
         Vector2 startPivot = GetTilePivot(mergeSlime);
         mergeSlime->mass++;
-        float endSize = GetSlimeSize(mergeSlime);
+         Vector2 endSize = GetSlimeSize(mergeSlime);
         Vector2 endPivot = GetTilePivot(mergeSlime->tilePos, endSize, mergeSlime->attachDir);
         
         TweenParams params2 = {};
@@ -54,10 +54,10 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
         AddTweenUnique(mergeSlime->tweenController, CreateTween(params2));
         
         TweenParams params1 = {};
-        params1.paramType = PARAM_TYPE_FLOAT;
-        params1.startF = startSize;
-        params1.endF = endSize;
-        params1.realF = &mergeSlime->tileSize;
+        params1.paramType = PARAM_TYPE_VECTOR2;
+        params1.startVec2 = startSize;
+        params1.endVec2 = endSize;
+        params1.realVec2 = &mergeSlime->tileSize;
         AddTweenUnique(mergeSlime->tweenController, CreateTween(params1));
     }
     
@@ -172,7 +172,7 @@ inline Entity * GetPlayer()
 
 inline Rectangle GetEntityRect(Entity * entity)
 {
-    Rectangle rect = { entity->pivot.x, entity->pivot.y, entity->tileSize, entity->tileSize };
+    Rectangle rect = { entity->pivot.x, entity->pivot.y, entity->tileSize.x, entity->tileSize.y };
     return rect;
 }
 
@@ -274,7 +274,8 @@ inline void SetSlimeAnimatedSprite(Entity * slime, IVec2 dir)
 
 inline AddEntityResult
 AddEntity(EntityType type, IVec2 tilePos, TileID tileID,
-          Color color = WHITE, int32 tileSize = MAP_TILE_SIZE)
+          Color color = WHITE,
+          Vector2 tileSize = Vector2 { MAP_TILE_SIZE, MAP_TILE_SIZE })
 {
     AddEntityResult result;
 
@@ -285,8 +286,8 @@ AddEntity(EntityType type, IVec2 tilePos, TileID tileID,
     entity.sprite = GetSprite(tileID);
     entity.color = color;
     entity.active = true;
-    entity.tileSize = (float)tileSize;
-    entity.pivot = GetTilePivot(tilePos, (float)tileSize);    
+    entity.tileSize = tileSize;
+    entity.pivot = GetTilePivot(tilePos, tileSize);    
         
     result.entityIndex = (uint16)gameState->entities.Add(entity);
     result.entity = &gameState->entities[result.entityIndex];
@@ -393,7 +394,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 
                 Vector2 middlePivot = 
                     endPivot + Vector2 { (real32)old.attachDir.x, (real32)old.attachDir.y } * 
-                (0.5f * (MAP_TILE_SIZE - entity->tileSize));
+                ((DEFAULT_TILE_SIZE - entity->tileSize) * 0.5f);
                 
                 Entity * prevAttach = GetEntity(old.attachedEntityIndex);
                 if (IsDoor(prevAttach) && (targetPos == prevAttach->tilePos))
@@ -466,9 +467,14 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 {
                     dir = IVec2 { Sign(offset.x), 0 };
                 }
-                }
-            Vector2 middlePivot = Vector2Add(startPivot, Vector2Scale({ (float)dir.x, (float)dir.y },
-                                                                      0.5f * (MAP_TILE_SIZE + entity->tileSize)));
+            }
+            
+            Vector2 middlePivot = startPivot + 
+            (Vector2 
+             {
+                 (float)dir.x, (float)dir.y
+             } * (DEFAULT_TILE_SIZE + entity->tileSize) * 0.5f);
+            
             TweenParams params1 = {};
             params1.paramType = PARAM_TYPE_VECTOR2;
             params1.startVec2 = startPivot;
@@ -568,12 +574,12 @@ inline void SetGlassBeBroken(Entity * glass)
     glass->sprite = GetSprite(GLASS_BROKEN);
 }
 
-inline float GetSlimeSize(int32 mass, real32 tileSize)
+inline Vector2 GetSlimeSize(int32 mass, Vector2 tileSize)
 {
-     return mass == 1 ? 0.7f * tileSize :  tileSize;
+     return mass == 1 ? tileSize * 0.6f :  tileSize * 0.8f;
 }
 
-inline float GetSlimeSize(Entity * slime)
+inline Vector2 GetSlimeSize(Entity * slime)
 {
     return GetSlimeSize(slime->mass, slime->tileSize);
 }

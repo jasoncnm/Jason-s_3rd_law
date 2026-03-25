@@ -34,7 +34,7 @@
                 {
                  "name":"visible_star_count",
                  "type":"int",
-                 "value":3
+                 "value":0
                 }],
          "type":"objectgroup",
          "visible":true,
