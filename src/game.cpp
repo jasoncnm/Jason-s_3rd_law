@@ -806,7 +806,7 @@ bool8 IsNeighbour(Map & prevMap, Map & currentMap)
     if (gameState->currentMapIndex >= 0)
     {
         if (gameState->prevMapIndex != gameState->currentMapIndex &&
-            ((followEnt->tweenController.playing && (followEnt->tweenController.GetMovingSpeed(&followEnt->pivot) == BOUNCE_SPEED)) ||
+            ((followEnt->tweenController.playing && (followEnt->tweenController.FindTweenByTweenProperty(PARAM_TYPE_VECTOR2, &followEnt->pivot)->dt == BOUNCE_SPEED)) ||
              !IsSlime(followEnt)))
     {
         cam.followState = MyCamera::FOLLOW_ALONG_AXIS;

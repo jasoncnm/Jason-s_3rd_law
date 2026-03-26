@@ -81,11 +81,37 @@ void Tween::Reset()
         }
         case PARAM_TYPE_INT:
         {
-            
+            // TODO
         }
     }
     
 }
+
+
+void * Tween::GetTweeningValue()
+{
+    switch (params.paramType)
+    {
+        case PARAM_TYPE_FLOAT: 
+        {
+            return params.realF; 
+            }
+        case PARAM_TYPE_VECTOR2:
+        {
+            return params.realVec2;
+            }
+        case PARAM_TYPE_COLOR:
+        {
+            return params.realColor;
+            }
+        case PARAM_TYPE_INT:
+        {
+            // TODO
+        }
+    }
+    return nullptr;
+    }
+
 
 void HandleEvents(Array<TweenEvent, MAX_EVENT> & events)
 {

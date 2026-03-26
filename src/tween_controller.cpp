@@ -21,21 +21,48 @@ int32 TweenController::FindChannelByParamType(ParamType type)
     
     return result;
 }
+Tween * TweenController::FindTweenByParamType(ParamType type)
+{
+    Tween * result = nullptr;
+    int32 ch = FindChannelByParamType(type);
+    if (ch >= 0)
+    {
+        result = &channels[ch][0];
+    }
+    return result;
+}
 
 int32 TweenController::FindChannelByTweenProperty(ParamType type, void * property)
 {
-    itn32 result = -1;
+     int32 result = -1;
     for (int32 i = 0; i < MAX_CHANNEL; i++)
     {
             if (!channels[i].IsEmpty())
         {
             Tween & tween = channels[i].last();
-            if (tween.paramType == type)
+            if (tween.params.paramType == type)
             {
-                // TODO:
-            }
+                if (property == tween.GetTweeningValue())
+                {
+                    result = i;
+                    break;
+                }
             }
     }
+    }
+    return result;
+}
+
+Tween * TweenController::FindTweenByTweenProperty(ParamType type, void * property)
+{
+    Tween * result = nullptr;
+    int32 ch = FindChannelByTweenProperty(type, property);
+    if (ch >= 0)
+    {
+        result = &channels[ch][0];
+    }
+    
+    return result;
 }
 
 void TweenController::Reset()

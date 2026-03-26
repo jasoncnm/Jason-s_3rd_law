@@ -45,13 +45,13 @@ struct TweenParams
         {
             int32 startI;
             int32 endI;
-            float * realI;
+             int32 * realI;
         };
         struct
         {
-            float startF;
-            float endF;
-            float * realF;
+            real32 startF;
+            real32 endF;
+            real32 * realF;
         };
 struct
         {
@@ -74,9 +74,9 @@ struct Tween
 
     TweenParams params;
     
-    float t = 0;
-    float target_t = 1;
-    float dt;
+     real32 t = 0;
+    real32  target_t = 1;
+    real32 dt;
     
     Array<TweenEvent, MAX_EVENT> startEvents;
     Array<TweenEvent, MAX_EVENT> endEvents;
@@ -85,16 +85,18 @@ struct Tween
     {
         return t >= target_t;
     }
+    
+    void UpdateEntityVal();
+    
+    void * GetTweeningValue();
 
-     void UpdateEntityVal();
-
-    float (*Easing)(float);
+    real32 (*Easing)(real32);
     
     void Reset();
     
 };
 
-Tween CreateTween(TweenParams params, float (*Easing)(float) = nullptr, float animateSpeed = 5.0f, float target_t = 1.0f);
+Tween CreateTween(TweenParams params, real32 (*Easing)(real32) = nullptr, real32 animateSpeed = 5.0f, real32 target_t = 1.0f);
 
 
 // NOTE: Handle event

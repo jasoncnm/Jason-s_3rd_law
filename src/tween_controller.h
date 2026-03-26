@@ -10,15 +10,15 @@
 #include "tween.h"
 
 #define MAX_CHANNEL 5
-
 struct TweenController
 {
-    using TweeningQueue = Array<Tween, 15>;
-
+    
     bool8 start   = false;
     bool8 playing = false;
     
-    TweeningQueue channels[MAX_CHANNEL];
+    using TweeningQueue = Array<Tween, 15>;
+    
+      TweeningQueue channels[MAX_CHANNEL];
 
     Array<TweenEvent, MAX_EVENT> startEvents;
     Array<TweenEvent, MAX_EVENT> endEvents;
@@ -29,9 +29,11 @@ struct TweenController
     void Update();
     
     int32 FindChannelByParamType(ParamType type);
+    Tween * FindTweenByParamType(ParamType type);
     
-    int32 FindChannelByTweenProperty(void * property);
-        
+    int32 FindChannelByTweenProperty(ParamType type, void * property);
+    Tween * FindTweenByTweenProperty(ParamType type, void * property);
+    
     bool8 NoTweens()
     {
         bool8 result = true;

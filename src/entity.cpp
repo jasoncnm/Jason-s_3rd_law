@@ -418,19 +418,19 @@ inline void StretchEntity(Entity * entity,
     
     int ch2 = AddTweenUnique(entity->tweenController, 
                              CreateTween(squash, MoveFunc,
-                                         speed * 2, 1));
+                                         speed, 0.5f));
     AddTween(entity->tweenController,
-             CreateTween(squash2, MoveFunc, speed * 2, 1), ch2);
+             CreateTween(squash2, MoveFunc, speed, 0.5f), ch2);
     
     if (channel < 0)
     {
-        int ch1 = AddTweenUnique(entity->tweenController, CreateTween(param, MoveFunc, speed * 2));
-        AddTween(entity->tweenController, CreateTween(param2, MoveFunc, speed * 2), ch1);
+        int ch1 = AddTweenUnique(entity->tweenController, CreateTween(param, MoveFunc, speed, 0.5f));
+        AddTween(entity->tweenController, CreateTween(param2, MoveFunc, speed, 0.5f), ch1);
     }
     else
     {
-        AddTween(entity->tweenController, CreateTween(param, MoveFunc, speed * 2), channel);
-        AddTween(entity->tweenController, CreateTween(param2, MoveFunc, speed * 2), channel);
+        AddTween(entity->tweenController, CreateTween(param, MoveFunc, speed, 0.5f), channel);
+        AddTween(entity->tweenController, CreateTween(param2, MoveFunc, speed, 0.5f), channel);
     }
     
 }
@@ -501,7 +501,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 
                 if (offset.SqrMagnitude() == 1 && entity->attachDir == old.attachDir)
                 {
-                    float stretch = 0.9f;
+                    float stretch = 0.8f;
                     StretchEntity(entity, idir, entity->attachDir, 
                                   old.tilePos, targetPos, stretch, MoveFunc, speed);
                 }
@@ -896,7 +896,8 @@ inline void UpdateSlimes()
                     float aniSpeed = BOUNCE_SPEED;
                     if (!attach->tweenController.NoTweens())
                     {
-                        aniSpeed = attach->tweenController.channels[attach->tweenController.FindChannelByParamType(PARAM_TYPE_VECTOR2)].last().dt;
+                        Tween * moveTween = attach->tweenController.FindTweenByTweenProperty(PARAM_TYPE_VECTOR2, &attach->pivot);
+                        aniSpeed = moveTween->dt; 
                     }
                     
                     IVec2 targetPos = newPos;
