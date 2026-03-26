@@ -6,6 +6,44 @@
    $Creator: Junjie Mao $
    $Notice: $
    ======================================================================== */
+
+#define MAX_GAMEPAD 5
+
+enum GameInputType 
+{
+    NO_INPUT,
+    MOUSE_LEFT,
+    MOUSE_RIGHT,
+    LEFT_KEY,
+    RIGHT_KEY,
+    UP_KEY,
+    DOWN_KEY,
+    
+    POSSES_KEY,
+    SPLIT_KEY,
+    
+    UNDO_KEY,
+    RESET_KEY,
+    
+    RECOVER_KEY,
+    GAME_INPUT_COUNT,
+};
+
+struct KeyMapping
+{
+    Array<int32, 3> keys;
+    int32 gamepadButton;
+    int32 gamepadAxis;
+};
+
+struct Input
+{
+    bool initialized = false;
+    KeyMapping keyMappings[GAME_INPUT_COUNT];
+    
+};
+
+
 // Set axis deadzones
 constexpr float leftStickDeadzoneX = 0.1f;
 constexpr float leftStickDeadzoneY = 0.1f;

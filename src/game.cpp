@@ -2,19 +2,18 @@
 #include "game.h"
 #include "game_util.h"
 #include "render_interface.h"
-#include "action_input.h"
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
 
+#include "assets.cpp"
 #include "entity.cpp"
 #include "electric_door.cpp"
 #include "assets_loader.cpp"
 #include "tween.cpp"
 #include "tween_controller.cpp"
 #include "save_game.cpp"
-
 /*
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Fix weird animation bugs 
@@ -35,6 +34,24 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 //              NOTE: Internal Functions (internal)
 //  ========================================================================
 
+Entity * UndoState::GetByEntityIndex(int32 entityIndex)
+{
+    for (uint32 i = 0; i < undoEntities.size(); i++)
+    {
+        if (undoEntities[i].entityIndex == entityIndex)
+        {
+            return &undoEntities[i];
+        }
+    }
+    return nullptr;
+}
+
+
+UndoState & UndoStack::back()
+{
+    return undoStack[last - 1];
+}
+
 void UndoStack::push_back(uint32 playerIndex, uint32 starCount, 
                           UndoState::EntityArray & ea)
 {
@@ -44,6 +61,20 @@ void UndoStack::push_back(uint32 playerIndex, uint32 starCount,
     if (count > MAX_UNDO) count = MAX_UNDO;
     InitUndoState(&undoStack[last - 1], playerIndex, starCount, ea);
     }
+
+void UndoStack::pop_back()
+{
+    if (count > 0)
+    {
+        last--;
+        
+        if (last <= 0) last = MAX_UNDO;
+        
+        count--;
+        
+    }
+}
+
 
 
 //  ========================================================================

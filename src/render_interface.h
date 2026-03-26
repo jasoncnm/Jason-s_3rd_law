@@ -11,6 +11,8 @@
 #include "engine_lib.h"
 #include "entity.h"
 
+#define STAR_COUNT 100
+
 #define FG_PATH "Assets/Texture/Backgrounds/5.png"
 
 #define BASE_VS_PATH "Assets/Shaders/base.vs"

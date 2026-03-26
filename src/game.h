@@ -18,7 +18,6 @@
 #define SCREEN_HEIGHT 1000
 
 #define MAP_TILE_SIZE 32       // Tiles size
-#define MAX_ANIMATION 50
 #define DIST_ONE_TILE MAP_TILE_SIZE
 
 #define DEFAULT_TILE_SIZE Vector2 { MAP_TILE_SIZE, MAP_TILE_SIZE }
@@ -29,11 +28,7 @@
 #define CAMERA_MOVE_SPEED 1.8f
 #define CAMERA_ZOOM_SPEED 1.7f
 
-#define MAX_GAMEPAD 5
-
 #define MAX_ENTITIES 9000
-
-#define STAR_COUNT 100
 
 #define GAME_SAVE_PATH "data/save_data/"
 
@@ -46,42 +41,22 @@
 
 constexpr float zoom_per_tile = 18.5f / 600.0f;
 constexpr float press_freq = 0.2f;
-constexpr float cameraSwitchTargetDelay = 1.0f;
 
 
 #include "raylib.h"
 #include "raymath.h"
 #include "engine_lib.h"
-#include "assets.h"
 #include "render_interface.h"
 #include "electric_door.h"
 #include "entity.h"
 #include "tween_controller.h"
 #include "game_ui.h"
+#include "action_input.h"
+#include "assets.h"
 
 // ----------------------------------------------------
 // NOTE: Game Structs
 // ----------------------------------------------------
-
-enum GameInputType 
-{
-    NO_INPUT,
-    MOUSE_LEFT,
-    MOUSE_RIGHT,
-    LEFT_KEY,
-    RIGHT_KEY,
-    UP_KEY,
-    DOWN_KEY,
-    
-    POSSES_KEY,
-    SPLIT_KEY,
-    
-    UNDO_KEY,
-    RESET_KEY,
-    
-    RECOVER_KEY,
-    GAME_INPUT_COUNT,
-};
 
 
 enum GameScreen
@@ -92,13 +67,6 @@ enum GameScreen
     GAME_TUT_SCREEN,
     PAUSE_MENU_SCREEN,
     };
-
-struct KeyMapping
-{
-    Array<int32, 3> keys;
-    int32 gamepadButton;
-    int32 gamepadAxis;
-};
 
 
 struct Memory
@@ -118,23 +86,11 @@ struct UndoState
     
     int32 playerIndex;
     int32 starCount;
-    
     // NOTE: using vector for dynamic heap allocations
     std::vector<Entity> undoEntities;
     
-    Entity * GetByEntityIndex(int32 entityIndex)
-    {
-        for (uint32 i = 0; i < undoEntities.size(); i++)
-        {
-            if (undoEntities[i].entityIndex == entityIndex)
-            {
-                return &undoEntities[i];
-            }
-        }
-        return nullptr;
-    }
-    
-};
+    Entity * GetByEntityIndex(int32 entityIndex);
+    };
 
 struct Map
 {
@@ -156,23 +112,10 @@ struct UndoStack
     int32 last = 1;
     uint32 count = 0;
     
-    UndoState & back()
-    {
-        return undoStack[last - 1];
-    }
+    UndoState & back();
     
-    void pop_back()
-    {
-        if (count > 0)
-        {
-            last--;
-            
-            if (last <= 0) last = MAX_UNDO;
-            
-            count--;
-            
-        }
-    }
+    void pop_back();
+    
     void push_back(uint32 playerIndex, uint32 starCount, UndoState::EntityArray & ea);
         
     bool empty()
@@ -203,13 +146,6 @@ struct MyCamera
     TweenController tweenController;
     int32 followEntityIndex;
     FollowState followState;
-};
-
-struct Input
-{
-    bool initialized = false;
-    KeyMapping keyMappings[GAME_INPUT_COUNT];
-    
 };
 
 struct SceneData

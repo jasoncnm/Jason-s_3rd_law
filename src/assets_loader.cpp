@@ -421,38 +421,7 @@ state.currentMapIndex = -1;
                                         result.entity->tileSize = GetSlimeSize(result.entity); 
                                         result.entity->movable = true;
                                         
-                                        #if 0
-                                        // NOTE: Add animated sprite, TODO temporary need refactor
-                                        {
-                                        result.entity->spriteType = SPRITE_TYPE_ANIMATED;
-                                            const uint32 tWidth = 64;
-                                            const uint32 tHeight = 64;
-                                            const uint32 frames = 6;
-                                            const uint32 animationCount = 4;
-                                            
-                                            AnimatedSprite & animatedSprite = result.entity->animatedSprite;
-                                            animatedSprite.animationCount = animationCount;
-                                            animatedSprite.currentAnimation = 0;
-                                            animatedSprite.spriteAnimation = 
-                                            (SpriteAnimation *)BumpAllocArray(gameMemory->persistentStorage, animationCount, sizeof(SpriteAnimation));
-                                            
-                                            for (uint32 idx = 0; idx < animationCount; idx++)
-                                            {
-                                                // NOTE: Add Sprite Animation
-                                                SpriteAnimation * spriteAnimation = animatedSprite.spriteAnimation + idx;
-                                                spriteAnimation->frameCount = frames;
-                                                spriteAnimation->frames = 
-                                                (Sprite *)BumpAllocArray(gameMemory->persistentStorage, frames, sizeof(Sprite));
-                                                for (uint32 frame = 0; frame < frames; frame++)
-                                                {
-                                                    IVec2 altasOffset = { (int32)frame * (int32)tWidth,
-                                                        (int32)idx * (int32)tHeight };
-                                                    IVec2 spriteSize = { (int32)tWidth, (int32)tHeight };
-                                                    spriteAnimation->frames[frame] = { altasOffset, spriteSize };
-                                                }
-                                            }
-                                        }
-                                        #endif
+                                        
                                         state.playerEntityIndex = result.entityIndex;
                                         
                                         SM_TRACE("Player generated (tile location: %i, %i)", result.entity->tilePos.x, result.entity->tilePos.y);
@@ -485,7 +454,6 @@ state.currentMapIndex = -1;
                 
                 SM_TRACE("Level width: %i, Level height: %i", mapWidth, mapHeight);
             }
-            
             state.tileMaps[index] = tileMap;
             
             if (min.x > startPos.x) min.x = startPos.x;
@@ -515,7 +483,6 @@ state.currentMapIndex = -1;
     SetupEntityTable(state);
     SetUpElectricDoor();
 }
-
 
 
 
