@@ -664,14 +664,14 @@ inline void SetGlassBeBroken(Entity * glass)
     glass->sprite = GetSprite(GLASS_BROKEN);
 }
 
-inline Vector2 GetSlimeSize(int32 mass, Vector2 tileSize)
+inline Vector2 GetSlimeSize(int32 mass)
 {
-     return mass == 1 ? tileSize * 0.6f :  tileSize * 0.8f;
+     return mass == 1 ? DEFAULT_TILE_SIZE * 0.6f : DEFAULT_TILE_SIZE * 0.8f;
 }
 
 inline Vector2 GetSlimeSize(Entity * slime)
 {
-    return GetSlimeSize(slime->mass, slime->tileSize);
+    return GetSlimeSize(slime->mass);
 }
 
 
@@ -741,6 +741,9 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
             switch(entity->type)
             {
                 case ENTITY_TYPE_LOCK:
+                {
+                    if (entity->open) break;
+                }
                 case ENTITY_TYPE_BLOCK:
                 case ENTITY_TYPE_WALL:
                 {

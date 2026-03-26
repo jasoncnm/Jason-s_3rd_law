@@ -94,9 +94,7 @@ entityResult.entity->movable = true;
         {
             SM_ASSERT(false, "Possible Door id miss match (id %d)", id);
         }
-        
-        
-    }
+        }
     else if (id == CABLE_DOWN_RIGHT || (id - 50) == CABLE_DOWN_RIGHT)
     {
         entityResult = AddCable(tilePos, (TileID)(CABLE_DOWN_RIGHT + 50), false, true, false, true);
@@ -173,15 +171,11 @@ entityResult.entity->movable = true;
     else if (id == SOURCE_DOWN_LEFT || (id - 50) == SOURCE_DOWN_LEFT)
     {
         entityResult = AddSource(tilePos, (TileID)(SOURCE_DOWN_LEFT + 50), true, false, false, true);
-        
-        
-    }
+        }
     else if (id == CABLE_CONNECTION)
     {
         entityResult = AddConnection(tilePos, CABLE_CONNECTION);
-        
-        
-    }
+        }
     else if (id == TUT_1)
     {
         entityResult = AddEntity(ENTITY_TYPE_TUT_PORTAL, tilePos, TUT_1);
@@ -197,10 +191,6 @@ entityResult.entity->movable = true;
     else if (id == SLIME_PORTAL)
     {
         entityResult = AddEntity(ENTITY_TYPE_SLIME_PORTAL, tilePos, SLIME_PORTAL);
-    }
-    else if (id == BACKGROUND_1)
-    {
-        
     }
     else if (id == KEY)
     {

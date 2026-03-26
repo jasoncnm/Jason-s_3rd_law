@@ -85,6 +85,8 @@ enum TileID
     SOURCE_UP    = 48,
     CABLE_CONNECTION = 72,
     
+    ERROR = 201,
+    
 };
 
 

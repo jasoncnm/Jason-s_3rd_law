@@ -29,6 +29,7 @@ struct DA
 //  ========================================================================
 //              NOTE: Game Util Functions
 //  ========================================================================
+
 inline bool8 CheckOutOfBound(int32 tileX, int32 tileY)
 {
     bool8 result =

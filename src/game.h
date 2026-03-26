@@ -205,6 +205,8 @@ struct GameState
     bool8 initialized;
     bool8 simulating = false;
     
+    bool8 switching = false;
+    GameScreen nextScreen;
 };
 
 struct MoveActionResult

@@ -81,6 +81,14 @@ void UndoStack::pop_back()
 //              NOTE: Game Functions (internal)
 //  ========================================================================
 
+void ChangeScreen(GameScreen screen)
+{
+    // TODO: make a scene transitions
+    gameState->switching = true;
+    gameState->nextScreen = screen;
+    for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
+    }
+
  DA FindAllMapsWithStarCount(int32 starCount)
 {
     uint32 count = 0;
@@ -418,10 +426,13 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     
                     break;
                 }
+                case ENTITY_TYPE_LOCK:
+                {
+                    if (target->open) break;
+                }
                 case ENTITY_TYPE_ELECTRIC_DOOR:
                 case ENTITY_TYPE_WALL:
                 case ENTITY_TYPE_PIT:
-                case ENTITY_TYPE_LOCK:
                 {
                     if (target->type == ENTITY_TYPE_ELECTRIC_DOOR && target->cableType == CABLE_TYPE_DOOR)
                     {
@@ -533,6 +544,9 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 }
                 }
             case ENTITY_TYPE_LOCK:
+            {
+                if (target->open) break;
+            }
             case ENTITY_TYPE_PIT:
             case ENTITY_TYPE_WALL:
             {
@@ -1839,10 +1853,10 @@ void GameplayUpdateAndRender()
             char worldPath[100];
             sprintf(worldPath, "%s/%s_Tutorial.world", levelPath, currentMapID);
             
-            LoadTileMapsAndEntities(*gameState, worldPath);
-            gameState->currentScreen = GAME_TUT_SCREEN;
-            for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
-            return;
+                LoadTileMapsAndEntities(*gameState, worldPath);
+                
+                ChangeScreen(GAME_TUT_SCREEN);
+                return;
         }
         }
     }
@@ -1909,7 +1923,6 @@ void GameplayUpdateAndRender()
             LoadTileMapsAndEntities(*gameState, MAIN_PATH);
             
             SetGameState(gameState->lastState);
-            gameState->currentScreen = GAME_MAIN_SCREEN;
             
             // NOTE: Reset electric door sprite
             for (uint32 i = 0; i < Source_Indices.count; i++)
@@ -1923,6 +1936,8 @@ void GameplayUpdateAndRender()
             Entity * attachBlock = GetEntity(gameState->lastTutBlockIndex);
             SM_ASSERT(attachBlock, "attach block gone");
             SetEntityPosition(GetPlayer(), attachBlock, attachBlock->tilePos - player.attachDir);
+            
+            ChangeScreen(GAME_MAIN_SCREEN);
             return;
             }
         
@@ -1944,8 +1959,6 @@ void GameplayUpdateAndRender()
                                  gameState->camera.moveDir);
         
         BeginMode2D(gameState->camera.base);
-        
-        
         SetDrawingEntities();
         
         EntityLayer orderedDrawLayers[] = 
@@ -2110,9 +2123,9 @@ void GameplayUpdateAndRender()
         
         if (player)
         {
-        DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
+            DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: (%.2f, %.2f),  Entity Count: %i",
                             player->tilePos.x, player->tilePos.y,
-                            player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
+                            player->mass, player->tileSize.x , player->tileSize.y,  gameState->entities.count), 10, 140, 20, GREEN);
         }
         
 #if 0
@@ -2160,7 +2173,7 @@ void GameplayUpdateAndRender()
         
         DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
         
-        EndDrawing();
+        ;
     }    
 }
 
@@ -2286,12 +2299,6 @@ UPDATE_AND_RENDER(UpdateAndRender)
         case TITLE_SCREEN:
         {
             
-            if (JustPressed(gameState->input.keyMappings, SPLIT_KEY))
-            {
-                gameState->currentScreen = MENU_SCREEN;
-                for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
-            }
-            
             BeginDrawing();
             ClearBackground(gameState->bgColor);
             
@@ -2307,7 +2314,12 @@ UPDATE_AND_RENDER(UpdateAndRender)
             int32 instY = (GetScreenHeight()) / 2;
             DrawText(Instructions, instX, instY, 20, DARKGREEN);
             
-            EndDrawing();
+            ;
+            
+            if (gameState->switching || JustPressed(gameState->input.keyMappings, SPLIT_KEY))
+            {
+                ChangeScreen(MENU_SCREEN);
+            }
             
             break;
         }
@@ -2335,8 +2347,8 @@ UPDATE_AND_RENDER(UpdateAndRender)
             if (GuiButton(bounds, NewGameText))
             {
                 LoadTileMapsAndEntities(*gameState, MAIN_PATH);
-                gameState->currentScreen = GAME_MAIN_SCREEN;
-            }
+                ChangeScreen(GAME_MAIN_SCREEN);
+                }
             
             #if 1
             // TODO: Experimental features, Very breakable!!!
@@ -2368,9 +2380,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                         
                         gameState->entities[loadedEntity.entityIndex] = loadedEntity;
                     }
-                    
-                    // memcpy(gameState->entities.elements, data, dataSize);
-                    gameState->currentScreen = GAME_MAIN_SCREEN;
+                    ChangeScreen(GAME_MAIN_SCREEN);
                 }
                 else
                 {
@@ -2384,9 +2394,8 @@ UPDATE_AND_RENDER(UpdateAndRender)
             if (GuiButton(bounds, TestLevel))
             {
                 LoadTileMapsAndEntities(*gameState, TEST_PATH);
-                gameState->currentScreen = GAME_MAIN_SCREEN;
-                
-            }
+                ChangeScreen(GAME_MAIN_SCREEN);
+                }
             
             const char * QuitGame = "quit game";
             bounds.y += 200;
@@ -2395,7 +2404,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 *running = false;   
             }
             
-            EndDrawing();
+            ;
             
             break;            
         }
@@ -2420,7 +2429,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
             if (GuiButton(bounds, ContinueGameText))
             {
-                gameState->currentScreen = GAME_MAIN_SCREEN;
+                ChangeScreen(GAME_MAIN_SCREEN);
             }
             
             #if 1
@@ -2438,10 +2447,8 @@ UPDATE_AND_RENDER(UpdateAndRender)
             if (GuiButton(bounds, QuitMenuText))
             {
                 CleanUpGame();
-                gameState->currentScreen = MENU_SCREEN;
+                ChangeScreen(MENU_SCREEN);
             };
-            
-            EndDrawing();
             
             break;
         }
@@ -2456,10 +2463,47 @@ UPDATE_AND_RENDER(UpdateAndRender)
             GameplayUpdateAndRender();
             if (IsKeyPressed(KEY_ESCAPE))
             {
-                gameState->currentScreen = PAUSE_MENU_SCREEN;
+                ChangeScreen(PAUSE_MENU_SCREEN);
             }
             break;
         }
     }
     
-}
+    if (gameState->switching)
+    {
+        real32 fadeSpeed = 5.0f;
+        static real32 alpha = 0;
+        static bool fadeIn = true;
+        
+        if (fadeIn)
+        {
+        // NOTE FadeIn
+        alpha += fadeSpeed * GetFrameTime();
+        alpha = Clamp(alpha, 0.0f, 1.0f);
+        
+        if (FloatEquals(alpha, 1.0f))
+        {
+             fadeIn = false;
+                gameState->currentScreen = gameState->nextScreen;
+                }
+        }
+        else
+        {
+            // NOTE FadeOut
+            alpha -= fadeSpeed * GetFrameTime();
+            alpha = Clamp(alpha, 0.0f, 1.0f);
+            
+            if (FloatEquals(alpha, 0.0f))
+            {
+                fadeIn = true;
+                gameState->switching = false;
+            }
+            
+        }
+        DrawRectangleRec(Rectangle{0,0,(real32)GetScreenWidth(), (real32)GetScreenHeight()},
+                      Fade(BLACK, alpha));
+        
+        }
+    
+    EndDrawing();
+    }
