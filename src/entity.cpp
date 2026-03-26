@@ -275,7 +275,7 @@ inline void SetSlimeAnimatedSprite(Entity * slime, IVec2 dir)
 inline AddEntityResult
 AddEntity(EntityType type, IVec2 tilePos, TileID tileID,
           Color color = WHITE,
-          Vector2 tileSize = Vector2 { MAP_TILE_SIZE, MAP_TILE_SIZE })
+          Vector2 tileSize = DEFAULT_TILE_SIZE)
 {
     AddEntityResult result;
 
@@ -366,6 +366,75 @@ AddConnection(IVec2 tilePos, TileID tileID)
     return entityResult;
 }
 
+
+inline void StretchEntity(Entity * entity,
+                          IVec2 moveDir, IVec2 attachDir,
+                          IVec2 startPos, IVec2 endPos,
+                          real32 stretch, float (*MoveFunc)(float), float speed,
+                          bool8 invert = false)
+{
+    Vector2 size_mid = entity->tileSize * Vector2 { stretch, 1 / stretch };
+    if (Abs(moveDir.x) == 1)
+    {
+        size_mid = entity->tileSize * Vector2 { 1 / stretch, stretch };
+    }
+    
+    if (invert)
+    {
+        real32 tmp = size_mid.x;
+        size_mid.x = size_mid.y;
+        size_mid.y = tmp;
+    }
+    
+    Vector2 end_mid = (GetTilePivot(endPos, size_mid, attachDir) + 
+                       GetTilePivot(startPos, size_mid, attachDir)) / 2;
+    
+    TweenParams squash = {};
+    squash.paramType = PARAM_TYPE_VECTOR2;
+    squash.startVec2 = entity->tileSize;
+    squash.endVec2 = size_mid;
+    squash.realVec2 = &entity->tileSize;
+    
+    TweenParams param = {};
+    param.paramType = PARAM_TYPE_VECTOR2;
+    param.startVec2 = GetTilePivot(startPos, entity->tileSize, attachDir);
+    param.endVec2 = end_mid;
+    param.realVec2  = &entity->pivot;
+    
+    TweenParams squash2 = {};
+    squash2.paramType = PARAM_TYPE_VECTOR2;
+    squash2.startVec2 = size_mid;
+    squash2.endVec2 = entity->tileSize;
+    squash2.realVec2 = &entity->tileSize;
+    
+    TweenParams param2 = {};
+    param2.paramType = PARAM_TYPE_VECTOR2;
+    param2.startVec2 = end_mid;
+    param2.endVec2 = GetTilePivot(entity);
+    param2.realVec2  = &entity->pivot;
+    
+    
+    int32 channel = entity->tweenController.FindChannelByParamType(PARAM_TYPE_VECTOR2);
+    
+    int ch2 = AddTweenUnique(entity->tweenController, 
+                             CreateTween(squash, MoveFunc,
+                                         speed * 2, 1));
+    AddTween(entity->tweenController,
+             CreateTween(squash2, MoveFunc, speed * 2, 1), ch2);
+    
+    if (channel < 0)
+    {
+        int ch1 = AddTweenUnique(entity->tweenController, CreateTween(param, MoveFunc, speed * 2));
+        AddTween(entity->tweenController, CreateTween(param2, MoveFunc, speed * 2), ch1);
+    }
+    else
+    {
+        AddTween(entity->tweenController, CreateTween(param, MoveFunc, speed * 2), channel);
+        AddTween(entity->tweenController, CreateTween(param2, MoveFunc, speed * 2), channel);
+    }
+    
+}
+
 inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * playEvent,
                        IVec2 targetPos, float (*MoveFunc)(float), float speed)
 {
@@ -430,26 +499,34 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 float dist = Vector2Distance(startPivot, endPivot);
                 float tileDist = dist / MAP_TILE_SIZE;
                 
+                if (offset.SqrMagnitude() == 1 && entity->attachDir == old.attachDir)
+                {
+                    float stretch = 0.9f;
+                    StretchEntity(entity, idir, entity->attachDir, 
+                                  old.tilePos, targetPos, stretch, MoveFunc, speed);
+                }
+                else
+                {
+                
                 TweenParams param = {};
                 param.paramType = PARAM_TYPE_VECTOR2;
                 param.startVec2 = startPivot;
                 param.endVec2 = endPivot;
                 param.realVec2  = &entity->pivot;
                 
-                
-                int32 channel = entity->tweenController.FindMovingChannel(PARAM_TYPE_VECTOR2);
+                int32 channel = entity->tweenController.FindChannelByParamType(PARAM_TYPE_VECTOR2);
                 
                 if (channel < 0)
                 {
                     AddTweenUnique(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist));
-                }
+                    }
                 else
                 {
                     AddTween(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist), channel);
-                }
+                    }
                 
-                
                 }
+            }
         }
         else
         {
@@ -494,6 +571,19 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         }
     else
     {
+        
+        IVec2 offset = targetPos - old.tilePos;
+        if (offset.SqrMagnitude() == 1)
+        {
+            StretchEntity(entity, 
+                          offset, 
+                          IVec2 { 0, 0 }, 
+                          old.tilePos,
+                          entity->tilePos,
+                          0.8f, MoveFunc, speed, true);
+        }
+        else
+        {
         float dist = Vector2Distance(startPivot, endPivot);
         float tileDist = dist / MAP_TILE_SIZE;
         
@@ -503,7 +593,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         param.endVec2 = endPivot;
         param.realVec2  = &entity->pivot;
         
-        int32 channel = entity->tweenController.FindMovingChannel(PARAM_TYPE_VECTOR2);
+        int32 channel = entity->tweenController.FindChannelByParamType(PARAM_TYPE_VECTOR2);
         
         if (channel < 0)
         {
@@ -517,7 +607,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         
         SM_TRACE("channel: %d", channel);
         SM_TRACE("end tile pos: %d", targetPos.x);
-        
+    }
         }
     
     if (!entity->tweenController.NoTweens())
@@ -806,7 +896,7 @@ inline void UpdateSlimes()
                     float aniSpeed = BOUNCE_SPEED;
                     if (!attach->tweenController.NoTweens())
                     {
-                        aniSpeed = attach->tweenController.channels[attach->tweenController.FindMovingChannel(PARAM_TYPE_VECTOR2)].last().dt;
+                        aniSpeed = attach->tweenController.channels[attach->tweenController.FindChannelByParamType(PARAM_TYPE_VECTOR2)].last().dt;
                     }
                     
                     IVec2 targetPos = newPos;

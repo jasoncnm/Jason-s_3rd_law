@@ -64,10 +64,10 @@
                 3
             ],
             "scale": 1,
-            "selectedLayer": 1,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 13,
-                "y": 364.5
+                "x": 379,
+                "y": 419.5
             }
         },
         "TestLevels/test_4.tmj": {

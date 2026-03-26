@@ -207,7 +207,7 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
             TweenController & c = current.parent->pushEnt->tweenController;
             if (!c.NoTweens()) 
             {
-                int32 channel = c.FindMovingChannel(PARAM_TYPE_VECTOR2);
+                int32 channel = c.FindChannelByParamType(PARAM_TYPE_VECTOR2);
                 Tween & ani = c.channels[channel].last();
                 
                 int32 index = ani.endEvents.Add(TweenEvent{0});
@@ -258,7 +258,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
         
         if (!ent->tweenController.NoTweens())
         {
-            int32 channel = ent->tweenController.FindMovingChannel(PARAM_TYPE_VECTOR2);
+            int32 channel = ent->tweenController.FindChannelByParamType(PARAM_TYPE_VECTOR2);
             Tween & current = ent->tweenController.channels[channel].last();
             
             int32 index = current.endEvents.Add(TweenEvent{ 0 });
@@ -371,7 +371,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir,
                                    BLOCK_MOVE_FUNC, BOUNCE_SPEED);
                     
-                    int32 channel = projectedEnt->tweenController.FindMovingChannel(PARAM_TYPE_VECTOR2);
+                    int32 channel = projectedEnt->tweenController.FindChannelByParamType(PARAM_TYPE_VECTOR2);
                     
                     Tween & current = projectedEnt->tweenController.channels[channel].last();
                     
@@ -806,7 +806,7 @@ bool8 IsNeighbour(Map & prevMap, Map & currentMap)
     if (gameState->currentMapIndex >= 0)
     {
         if (gameState->prevMapIndex != gameState->currentMapIndex &&
-            ((followEnt->tweenController.playing && (followEnt->tweenController.GetCurrentAniSpeed() == BOUNCE_SPEED)) ||
+            ((followEnt->tweenController.playing && (followEnt->tweenController.GetMovingSpeed(&followEnt->pivot) == BOUNCE_SPEED)) ||
              !IsSlime(followEnt)))
     {
         cam.followState = MyCamera::FOLLOW_ALONG_AXIS;
@@ -2007,14 +2007,11 @@ void GameplayUpdateAndRender()
         
         DrawRectangleLinesEx(source, 5, RAYWHITE);
         
-        
         EndMode2D();
         EndTextureMode();
         
         // NOTE: Draw
         BeginDrawing();
-        
-        
         ClearBackground(IntToRGBA(0x465a6f));
         
         gameState->shakeTime -= GetFrameTime();
