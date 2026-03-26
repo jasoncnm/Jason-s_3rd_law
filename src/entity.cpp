@@ -373,6 +373,10 @@ inline void StretchEntity(Entity * entity,
                           real32 stretch, float (*MoveFunc)(float), float speed,
                           bool8 invert = false)
 {
+    
+    Vector2 startPivot = GetTilePivot(startPos, entity->tileSize, attachDir);
+    Vector2 endPivot = GetTilePivot(endPos, entity->tileSize, attachDir);
+    
     Vector2 size_mid = entity->tileSize * Vector2 { stretch, 1 / stretch };
     if (Abs(moveDir.x) == 1)
     {
@@ -397,7 +401,7 @@ inline void StretchEntity(Entity * entity,
     
     TweenParams param = {};
     param.paramType = PARAM_TYPE_VECTOR2;
-    param.startVec2 = GetTilePivot(startPos, entity->tileSize, attachDir);
+    param.startVec2 = startPivot;
     param.endVec2 = end_mid;
     param.realVec2  = &entity->pivot;
     
@@ -410,7 +414,7 @@ inline void StretchEntity(Entity * entity,
     TweenParams param2 = {};
     param2.paramType = PARAM_TYPE_VECTOR2;
     param2.startVec2 = end_mid;
-    param2.endVec2 = GetTilePivot(entity);
+    param2.endVec2 = endPivot;
     param2.realVec2  = &entity->pivot;
     
     
@@ -571,43 +575,37 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         }
     else
     {
-        
+        // TODO: has bug
         IVec2 offset = targetPos - old.tilePos;
-        if (offset.SqrMagnitude() == 1)
-        {
+        IVec2 moveDir = IVec2 { Sign(offset.x), Sign(offset.y) };
+            IVec2 mid_tile = old.tilePos + moveDir;
             StretchEntity(entity, 
-                          offset, 
+                          moveDir, 
                           IVec2 { 0, 0 }, 
                           old.tilePos,
-                          entity->tilePos,
+                          mid_tile,
                           0.8f, MoveFunc, speed, true);
-        }
-        else
-        {
-        float dist = Vector2Distance(startPivot, endPivot);
-        float tileDist = dist / MAP_TILE_SIZE;
-        
-        TweenParams param = {};
-        param.paramType = PARAM_TYPE_VECTOR2;
-        param.startVec2 = startPivot;
-        param.endVec2 = endPivot;
-        param.realVec2  = &entity->pivot;
-        
-        int32 channel = entity->tweenController.FindChannelByParamType(PARAM_TYPE_VECTOR2);
-        
-        if (channel < 0)
-        {
-            AddTweenUnique(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist));
-        }
-        else
-        {
-            AddTween(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist), channel);
             
-        }
+            if (offset != moveDir)
+            {
+                
+                int32 ch1 = entity->tweenController.FindChannelByTweenProperty(PARAM_TYPE_VECTOR2, &entity->pivot);
+                
+                Vector2 midPivot = GetTilePivot(mid_tile, entity->tileSize);
+                
+                float dist = Vector2Distance(midPivot, endPivot);
+                float tileDist = dist / MAP_TILE_SIZE;
+                TweenParams param = {};
+                param.paramType = PARAM_TYPE_VECTOR2;
+                param.startVec2 = midPivot;
+                param.endVec2 = endPivot;
+                param.realVec2  = &entity->pivot;
+                AddTween(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist), ch1);
+                
+                SM_TRACE("channel: %d", ch1);
+                SM_TRACE("end tile pos: %d", targetPos.x);
+            }
         
-        SM_TRACE("channel: %d", channel);
-        SM_TRACE("end tile pos: %d", targetPos.x);
-    }
         }
     
     if (!entity->tweenController.NoTweens())
