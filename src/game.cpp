@@ -248,7 +248,7 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
             if (!c.NoTweens()) 
             {
                 int32 channel = c.FindChannelByParamType(PARAM_TYPE_VECTOR2);
-                Tween & ani = c.channels[channel].back();
+                Tween & ani = c.channels[channel].last();
                 
                 int32 index = ani.endEvents.Add(TweenEvent{0});
                 playEvent = &ani.endEvents[index];
@@ -290,7 +290,7 @@ TweenEvent * GetPlayEventFromCheckThings(CheckThings * thing)
         if (!ent->tweenController.NoTweens())
         {
             int32 channel = ent->tweenController.FindChannelByParamType(PARAM_TYPE_VECTOR2);
-            Tween & current = ent->tweenController.channels[channel].back();
+            Tween & current = ent->tweenController.channels[channel].last();
             
             int32 index = current.endEvents.Add(TweenEvent{ 0 });
             playEvent = &current.endEvents[index];
@@ -1414,7 +1414,9 @@ inline bool8 SelectNextAsPlayer(Entity * player = nullptr)
 
 void GameplayUpdateAndRender()
 {
-    
+    bool8 noPlayer = false;
+    if (!gameState->switching)
+    {
     // NOTE: Recored if State Changes
     bool8 stateChanged = false;
     bool8 isPressed = false;
@@ -1736,10 +1738,6 @@ void GameplayUpdateAndRender()
         }
     
     
-    static float contrast = 0.0f;
-    static float saturation = 0.0f;
-    static float brightness = 1.3f;
-    
     // NOTE: Debug Cheats
     {
         
@@ -1804,7 +1802,6 @@ void GameplayUpdateAndRender()
     }
     }
     
-    bool8 noPlayer = false;
     if (!GetPlayer() && !SelectNextAsPlayer())
     {
         noPlayer = true;
@@ -1847,17 +1844,6 @@ void GameplayUpdateAndRender()
             portal->type = ENTITY_TYPE_BLOCK;
             portal->color = WHITE;
                 gameState->lastTutBlockIndex = portal->entityIndex;
-            
-            CleanUpGame();
-            
-             char * currentMapID = gameState->tileMaps[gameState->currentMapIndex].mapID;
-                const char * levelPath = GetDirectoryPath(MAIN_PATH);
-                
-            char worldPath[100];
-            sprintf(worldPath, "%s/%s_Tutorial.world", levelPath, currentMapID);
-            
-                LoadTileMapsAndEntities(*gameState, worldPath);
-                
                 ChangeScreen(GAME_TUT_SCREEN);
                 return;
         }
@@ -1921,30 +1907,17 @@ void GameplayUpdateAndRender()
         
         if (end)
         {
-            Entity player = *GetPlayer();
-            CleanUpGame();
-            LoadTileMapsAndEntities(*gameState, MAIN_PATH);
-            
-            SetGameState(gameState->lastState);
-            
-            // NOTE: Reset electric door sprite
-            for (uint32 i = 0; i < Source_Indices.count; i++)
-            {
-                Entity * source = GetEntity(Source_Indices[i]);
-                source->sourceLit = source->conductive = false;
-            }
-            UpdateElectricDoor();
-            
-            // Setup Play attach
-            Entity * attachBlock = GetEntity(gameState->lastTutBlockIndex);
-            SM_ASSERT(attachBlock, "attach block gone");
-            SetEntityPosition(GetPlayer(), attachBlock, attachBlock->tilePos - player.attachDir);
             
             ChangeScreen(GAME_MAIN_SCREEN);
             return;
             }
         
     }
+}
+    
+    static float contrast = 0.0f;
+    static float saturation = 0.0f;
+    static float brightness = 1.3f;
     
     // NOTE: Render
     {
@@ -2486,7 +2459,41 @@ UPDATE_AND_RENDER(UpdateAndRender)
         
         if (FloatEquals(alpha, 1.0f))
         {
-             fadeIn = false;
+                fadeIn = false;
+                
+                if (gameState->currentScreen == GAME_MAIN_SCREEN &&
+                    gameState->nextScreen == GAME_TUT_SCREEN)
+                {
+                    // NOTE: Load Level
+                    CleanUpGame();
+                    char * currentMapID = gameState->tileMaps[gameState->currentMapIndex].mapID;
+                    const char * levelPath = GetDirectoryPath(MAIN_PATH);
+                    
+                    char worldPath[100];
+                    sprintf(worldPath, "%s/%s_Tutorial.world", levelPath, currentMapID);
+                    LoadTileMapsAndEntities(*gameState, worldPath);
+                    
+                }
+                else if (gameState->currentScreen == GAME_TUT_SCREEN &&
+                         gameState->nextScreen == GAME_MAIN_SCREEN)
+                {
+                    Entity player = *GetPlayer();
+                    CleanUpGame();
+                    LoadTileMapsAndEntities(*gameState, MAIN_PATH);
+                    SetGameState(gameState->lastState);
+                    // NOTE: Reset electric door sprite
+                    for (uint32 i = 0; i < Source_Indices.count; i++)
+                    {
+                        Entity * source = GetEntity(Source_Indices[i]);
+                        source->sourceLit = source->conductive = false;
+                    }
+                    UpdateElectricDoor();
+                    // Setup Play attach
+                    Entity * attachBlock = GetEntity(gameState->lastTutBlockIndex);
+                    SM_ASSERT(attachBlock, "attach block gone");
+                    SetEntityPosition(GetPlayer(), attachBlock, attachBlock->tilePos - player.attachDir);
+                    
+                }
                 gameState->currentScreen = gameState->nextScreen;
                 }
         }

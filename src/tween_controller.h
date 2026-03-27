@@ -17,7 +17,7 @@ struct TweenController
     bool8 start   = false;
     bool8 playing = false;
     
-    std::vector<Tween> channels[MAX_CHANNEL];
+    Array<Tween, 10> channels[MAX_CHANNEL];
 
     Array<TweenEvent, MAX_EVENT> startEvents;
     Array<TweenEvent, MAX_EVENT> endEvents;
@@ -40,7 +40,7 @@ struct TweenController
         for (int32 channel = 0; channel < MAX_CHANNEL; channel++)
         {
              auto & queue = channels[channel];
-            if (!queue.empty())
+            if (!queue.IsEmpty())
             {
                 result = false;
             }

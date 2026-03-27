@@ -13,7 +13,7 @@ int32 TweenController::FindChannelByParamType(ParamType type)
     int32 result = -1;
     for (int32 i = 0; i < MAX_CHANNEL; i++)
     {
-        if (!channels[i].empty() && channels[i].back().params.paramType == type)
+        if (!channels[i].IsEmpty() && channels[i].last().params.paramType == type)
         {
             result = i;
         }
@@ -27,7 +27,7 @@ Tween * TweenController::FindTweenByParamType(ParamType type)
     int32 ch = FindChannelByParamType(type);
     if (ch >= 0)
     {
-        result = &channels[ch].front();
+        result = &channels[ch].first();
     }
     return result;
 }
@@ -37,9 +37,9 @@ int32 TweenController::FindChannelByTweenProperty(ParamType type, void * propert
      int32 result = -1;
     for (int32 i = 0; i < MAX_CHANNEL; i++)
     {
-            if (!channels[i].empty())
+            if (!channels[i].IsEmpty())
         {
-            Tween & tween = channels[i].back();
+            Tween & tween = channels[i].last();
             if (tween.params.paramType == type)
             {
                 if (property == tween.GetTweeningValue())
@@ -59,7 +59,7 @@ Tween * TweenController::FindTweenByTweenProperty(ParamType type, void * propert
     int32 ch = FindChannelByTweenProperty(type, property);
     if (ch >= 0)
     {
-        result = &channels[ch].front();
+        result = &channels[ch].first();
     }
     
     return result;
@@ -72,11 +72,11 @@ void TweenController::Reset()
     {
         auto & queue = channels[i];
         
-        for (uint32 idx = 0; idx < queue.size(); idx++)
+        for (uint32 idx = 0; idx < queue.count; idx++)
         {
             queue[idx].Reset();
         }
-        channels[i].clear();
+        channels[i].Clear();
     }
     
     ResetEvents(endEvents);
@@ -89,7 +89,7 @@ void TweenController::EnableAddedTweens()
     for (uint32 ch = 0; ch < MAX_CHANNEL; ch++)
     {
         auto & queue = channels[ch];
-        for (uint32 queueIdx = 0; queueIdx < queue.size(); queueIdx++)
+        for (uint32 queueIdx = 0; queueIdx < queue.count; queueIdx++)
         {
             queue[queueIdx].play = true;
         }
@@ -114,7 +114,7 @@ void TweenController::Update()
             {
             auto & queue = channels[channel];
             
-            if (!queue.empty())
+            if (!queue.IsEmpty())
             {
                 Tween & tween = queue[0];
                 if (tween.play)
@@ -126,7 +126,7 @@ void TweenController::Update()
                     }
                     else
                     {
-                        queue.erase(queue.begin());
+                        queue.RemoveFront();
                         channel--;
                         continue;
                     }
@@ -146,7 +146,7 @@ void TweenController::Update()
 void AddTween(TweenController & controller, Tween tween, int32 channel)
 {
      auto & ch = controller.channels[channel];
-    ch.push_back(tween);
+    ch.Add(tween);
 }
 
  uint32 AddTweenUnique(TweenController & controller, Tween tween)
@@ -155,7 +155,7 @@ void AddTween(TweenController & controller, Tween tween, int32 channel)
     for (int32 channel = 0; channel < MAX_CHANNEL; channel++)
     {
          auto & queue = controller.channels[channel];
-        if (queue.empty())
+        if (queue.IsEmpty())
         {
             added = true;
             AddTween(controller, tween, channel);
