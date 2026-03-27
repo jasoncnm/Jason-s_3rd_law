@@ -311,6 +311,9 @@ inline void ProjectAndCheck(Entity * projectedEnt,
     
     bool8 defered = checkList.last().parent->pushResult.state == PROJECT_DEFERRED;
     
+    IVec2 finalPos = projectedEnt->tilePos;
+    Entity * attach = nullptr;
+    
     for (IVec2 pos = projectedEnt->tilePos + pushDir; ; pos += pushDir)
     {
         auto entList = FindAllEntitiesFromLocationAndLayers(pos, checkLayers, layerCount); 
@@ -328,11 +331,10 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     targetPos = blockedEntity->tilePos;
                 }
                 
-                Entity * attach = defered ? pushEnt : blockedEntity;
+                attach = defered ? pushEnt : blockedEntity;
+                finalPos = targetPos;
                 
-                MoveEntity(projectedEnt, attach, playEvent, targetPos,  
-                           BLOCK_MOVE_FUNC, BOUNCE_SPEED);
-                return;
+                goto MoveAndStop;
             }
             
             switch(target->type)
@@ -345,8 +347,6 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         MergeSlimes(target, projectedEnt);
                         return;
                     }
-                    
-                    Entity * attach = nullptr;
                     
                     if (!target->attach || target->attachDir == -pushDir)
                     {
@@ -364,10 +364,10 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         attach = target;
                         
                     }
-                    MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,
-                               BLOCK_MOVE_FUNC, BOUNCE_SPEED);
-                        
-                        return;
+                    
+                    finalPos = pos - pushDir;
+                    
+                        goto MoveAndStop;
                     }
                 case ENTITY_TYPE_BLOCK:
                 {
@@ -380,49 +380,34 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     newThings.parent = &checkList.last();
                     checkList.Add(newThings);
                     
-                    Entity * attach = target;
-                    
+                    attach = target;
                     if (defered)
                     {
                         attach = pushEnt;
-                        }
+                    }
+                    finalPos = pos - pushDir;
                     
-                    MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,  
-                               BLOCK_MOVE_FUNC, BOUNCE_SPEED);
-                        return;
+                    goto MoveAndStop;
                 }
                 case ENTITY_TYPE_GLASS:
                 {
                     if (!target->broken && IsSlime(projectedEnt))
                     {
-                        Entity * attach = target;
+                        attach = target;
                         if (defered)
                         {
                             attach = pushEnt;
                         }
-                        
-                        MoveEntity(projectedEnt, attach, playEvent, pos - pushDir,  
-                                   BLOCK_MOVE_FUNC, BOUNCE_SPEED); 
-                        return;
+                        finalPos = pos - pushDir;
+                        goto MoveAndStop;
                     }
                     else if (!target->broken)
                     {
-                        MoveEntity(projectedEnt, nullptr, playEvent, pos - pushDir,
-                                   BLOCK_MOVE_FUNC, BOUNCE_SPEED);
-                    
-                    int32 channel = projectedEnt->tweenController.FindChannelByParamType(PARAM_TYPE_VECTOR2);
-                    
-                    Tween & current = projectedEnt->tweenController.channels[channel].last();
-                    
-                        int32 index = current.endEvents.Add(TweenEvent{0});
-                        current.endEvents[index].breakEntity = target;
-                    
-                    
-                    target->broken = true;
-                    // SetGlassBeBroken(target);
-                    Entity * attachSlime = FindAttachSlime(target);
-                    if (attachSlime) attachSlime->attach = false;
-                    }
+                        // NOTE setup glass sprite after entity updates
+                        target->broken = true;
+                        Entity * attachSlime = FindAttachSlime(target);
+                        if (attachSlime) attachSlime->attach = false;
+                        }
                     
                     break;
                 }
@@ -448,31 +433,30 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         targetPos = blockedEntity->tilePos;
                     }
                     
-                    Entity * attach = blockedEntity;
-                    
+                    attach = blockedEntity;
                     if (defered)
                     {
                         attach = pushEnt;
                         }
-                    
-                    MoveEntity(projectedEnt, attach, playEvent, targetPos,  
-                               BLOCK_MOVE_FUNC, BOUNCE_SPEED);
-                    return;
+                    finalPos = targetPos;
+                    goto MoveAndStop;
                 }
             }
         }
         
         if (CheckOutOfBound(pos))
         {
-            MoveEntity(projectedEnt, nullptr, playEvent, pos + pushDir * 2, 
-                       BLOCK_MOVE_FUNC, BOUNCE_SPEED);
-            // DeleteEntity(projectedEnt);
-            return;
+            finalPos = pos + pushDir * 2;
+            goto MoveAndStop;
         }
         
     }
     
-}
+    
+    MoveAndStop:;
+    MoveEntity(projectedEnt, attach, playEvent, finalPos, 
+               BLOCK_MOVE_FUNC, BOUNCE_SPEED);
+    }
 
 inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMass, 
                                  int32 startMass, EntityLayer * checkLayers, uint32 layerCount)
@@ -1032,6 +1016,12 @@ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
     for (int32 i = 0; i < undoEntities.size(); i++)
     {
         Entity & e = undoEntities[i];
+        
+        if (e.type == ENTITY_TYPE_GLASS && e.broken)
+        {
+            SetGlassBeBroken(&e);
+        }
+        
         gameState->entities[e.entityIndex] = e;
         gameState->entities[e.entityIndex].tweenController.Reset();
         gameState->entities[e.entityIndex].pivot = GetTilePivot(&e);
@@ -1660,7 +1650,18 @@ void GameplayUpdateAndRender()
                             gameState->camera.followEntityIndex = entity->entityIndex;
                             }
                         }
-                    
+                        
+                        if (layer == LAYER_BLOCK)
+                        {
+                            IVec2 pos = PivotToTilePos(entity->pivot, entity->tileSize);
+                            EntityLayer glassLayer[] = { LAYER_GLASS };
+                            Entity * glass = FindEntityByLocationAndLayers(pos, glassLayer, 1);
+                            if (glass)
+                            {
+                                SetGlassBeBroken(glass);
+                            }
+                        }
+                        
                         }
                 else
                 {
