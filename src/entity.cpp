@@ -370,17 +370,17 @@ AddConnection(IVec2 tilePos, TileID tileID)
 inline void StretchEntity(Entity * entity,
                           IVec2 moveDir, IVec2 attachDir,
                           IVec2 startPos, IVec2 endPos,
-                          real32 stretch, float (*MoveFunc)(float), float speed,
+                          real32 stretch, real32 (*MoveFunc)(real32), real32 speed,
                           bool8 invert = false)
 {
     
     Vector2 startPivot = GetTilePivot(startPos, entity->tileSize, attachDir);
     Vector2 endPivot = GetTilePivot(endPos, entity->tileSize, attachDir);
     
-    Vector2 size_mid = entity->tileSize * Vector2 { stretch, 1 / stretch };
-    if (Abs(moveDir.x) == 1)
+    Vector2 size_mid = entity->tileSize * Vector2 { 1 / stretch, stretch };
+    if (Abs(moveDir.y) == 1)
     {
-        size_mid = entity->tileSize * Vector2 { 1 / stretch, stretch };
+        size_mid = entity->tileSize * Vector2 { stretch, 1 / stretch };
     }
     
     if (invert)
@@ -575,7 +575,6 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         }
     else
     {
-        // TODO: has bug
         IVec2 offset = targetPos - old.tilePos;
         IVec2 moveDir = IVec2 { Sign(offset.x), Sign(offset.y) };
             IVec2 mid_tile = old.tilePos + moveDir;
@@ -905,7 +904,6 @@ inline void UpdateSlimes()
                     
                     if (blockedEnt)
                     {
-                        
                         if ((blockedEnt->type == ENTITY_TYPE_GLASS &&
                                  blockedEnt->broken) ||
                             (blockedEnt->type == ENTITY_TYPE_ELECTRIC_DOOR &&
