@@ -87,7 +87,7 @@ void TweenController::Reset()
 // NOTE: Every frame
 void TweenController::Update()
 {
-    // TODO: BUG, tweens that are waiting for event will play immediatley if it is playing
+    // TODO: BUG, tweens that are waiting for event will play immediatley if the tweencontroller is playing
     if (start)
     {
         HandleEvents(startEvents);

@@ -17,8 +17,8 @@
 /*
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Fix weird animation bugs 
- - tweens that are waiting for event will play immediatley if the it is playing
-    
+ - tweens that are waiting for event will play immediatley if the tweencontroller is playing
+- screen transition between main and tutorial visual bug
   TODO: Things that I can do beside arts and design I guess
 3. collectable: show in ui
 5. Sound effect
