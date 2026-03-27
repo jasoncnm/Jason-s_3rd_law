@@ -17,9 +17,10 @@
 /*
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Fix weird animation bugs 
- - tweens that are waiting for event will play immediatley if the tweencontroller is playing
-- screen transition between main and tutorial visual bug
-  TODO: Things that I can do beside arts and design I guess
+- Camera bug shown in bug folder
+ - screen transition between main and tutorial visual bug
+  
+TODO: Things that I can do beside arts and design I guess
 3. collectable: show in ui
 5. Sound effect
 6. bug fixes, improve post effect
@@ -27,7 +28,6 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 // NOTE: done but need testing
 1. background
 -  reset system
-1. tutorial logic: this week
 2. key and door
 */
 
