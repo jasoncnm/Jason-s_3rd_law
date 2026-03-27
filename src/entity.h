@@ -127,7 +127,11 @@ inline Vector2 GetSlimeSize(Entity * slime);
 inline Entity * GetEntity(int32 i);
 inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * playEvent,
                        IVec2 targetPos, real32 (*MoveFunc)(real32), real32 speed);
-inline Array<Entity *, LAYER_COUNT> FindAllEntitiesFromLocationAndLayers(IVec2 pos, EntityLayer * layers, uint32 layerCount);
+
+inline Array<Entity *, LAYER_COUNT>
+FindAllEntitiesFromLocationAndLayers(IVec2 pos,
+                                     EntityLayer * layers, 
+                                     uint32 layerCount);
 
 
 #define ENTITY_H

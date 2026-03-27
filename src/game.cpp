@@ -18,13 +18,12 @@
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Fix weird animation bugs 
 - Camera bug shown in bug folder
- - screen transition between main and tutorial visual bug
-  
+ 
 TODO: Things that I can do beside arts and design I guess
 3. collectable: show in ui
 5. Sound effect
-6. bug fixes, improve post effect
 2. saves and loads
+
 // NOTE: done but need testing
 1. background
 -  reset system
