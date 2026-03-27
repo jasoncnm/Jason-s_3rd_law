@@ -58,13 +58,19 @@ struct Array
         SM_ASSERT(idx < count, "Idx out of bounds!");
         return elements[idx];
     }
-
+    
+    T & first()
+    {
+        SM_ASSERT(!IsEmpty(), "Array is empty!");
+        return elements[0];
+    }
+    
     T & last()
     {
         SM_ASSERT(!IsEmpty(), "Array is empty!");
         return elements[count - 1];
     }
-
+    
     void RemoveLast()
     {
         if (!IsEmpty())
@@ -97,6 +103,15 @@ struct Array
         SM_ASSERT(idx >= 0, "Idx negative!");
         SM_ASSERT(idx < count, "Idx out of bounds!");
         elements[idx] = elements[--count];
+    }
+    
+    void RemoveFront()
+    {
+        for (uint32 i = 1; i < count; i++)
+        {
+            elements[i - 1] = elements[i];
+        }
+        count--;
     }
 
     void ReverseElements()

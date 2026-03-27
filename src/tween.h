@@ -73,7 +73,7 @@ struct Tween
 {
 
     TweenParams params;
-    
+    bool8 play;
      real32 t = 0;
     real32  target_t = 1;
     real32 dt;

@@ -487,11 +487,14 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 params2.endVec2 = endPivot;
                 params2.realVec2  = &entity->pivot;
                 
-                float dist = Vector2Distance(startPivot, middlePivot);
-                float tileDist = dist / MAP_TILE_SIZE;
+                 real32 dist = Vector2Distance(startPivot, middlePivot);
+                 real32 tileDist = dist / MAP_TILE_SIZE;
+                
+                real32 dist2 = Vector2Distance(middlePivot, endPivot) / MAP_TILE_SIZE;
+                
                 
                 uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed, tileDist));
-                AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed * 2), channel);
+                AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed, dist2), channel);
                 
                 }
             else
@@ -568,8 +571,11 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
             params2.endVec2 = endPivot;
             params2.realVec2  = &entity->pivot;
             
-            uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed * 1.5f));
-            AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed * 1.5f), channel);
+            real32 dist1 = Vector2Distance(startPivot, middlePivot) / MAP_TILE_SIZE;
+            real32 dist2 = Vector2Distance(middlePivot, endPivot) / MAP_TILE_SIZE;
+            
+            uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed, dist1));
+            AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed, dist2), channel);
             
         }
         }

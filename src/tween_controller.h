@@ -10,15 +10,14 @@
 #include "tween.h"
 
 #define MAX_CHANNEL 5
+
 struct TweenController
 {
     
     bool8 start   = false;
     bool8 playing = false;
     
-    using TweeningQueue = Array<Tween, 15>;
-    
-      TweeningQueue channels[MAX_CHANNEL];
+    std::vector<Tween> channels[MAX_CHANNEL];
 
     Array<TweenEvent, MAX_EVENT> startEvents;
     Array<TweenEvent, MAX_EVENT> endEvents;
@@ -40,8 +39,8 @@ struct TweenController
 
         for (int32 channel = 0; channel < MAX_CHANNEL; channel++)
         {
-            TweeningQueue & queue = channels[channel];
-            if (!queue.IsEmpty())
+             auto & queue = channels[channel];
+            if (!queue.empty())
             {
                 result = false;
             }
@@ -49,6 +48,8 @@ struct TweenController
 
         return result;
     }
+    
+    void EnableAddedTweens(); 
     
 };
 

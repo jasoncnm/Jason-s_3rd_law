@@ -15,6 +15,7 @@ Tween CreateTween(TweenParams params, float (*Easing)(float), float animateSpeed
     tween.target_t = target_t;
     tween.dt = animateSpeed;
     tween.Easing = Easing;
+    tween.play = false;
 
     return tween;
 }
@@ -148,7 +149,9 @@ void ResetEvents(Array<TweenEvent, MAX_EVENT> & events)
 void OnPlayEvent(TweenController * controller)
 {
     SM_ASSERT(controller, "controller is null");
-    controller->start   = true;
+    controller->EnableAddedTweens();
+    controller->start = true;
+    
     }
 
 

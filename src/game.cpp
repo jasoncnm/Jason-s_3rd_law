@@ -248,7 +248,7 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
             if (!c.NoTweens()) 
             {
                 int32 channel = c.FindChannelByParamType(PARAM_TYPE_VECTOR2);
-                Tween & ani = c.channels[channel].last();
+                Tween & ani = c.channels[channel].back();
                 
                 int32 index = ani.endEvents.Add(TweenEvent{0});
                 playEvent = &ani.endEvents[index];
@@ -280,6 +280,27 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
         }
 }
 
+TweenEvent * GetPlayEventFromCheckThings(CheckThings * thing)
+{
+    TweenEvent * playEvent = nullptr;
+    while(thing->parent != thing)
+    {
+        Entity * ent = thing->pushEnt;
+        
+        if (!ent->tweenController.NoTweens())
+        {
+            int32 channel = ent->tweenController.FindChannelByParamType(PARAM_TYPE_VECTOR2);
+            Tween & current = ent->tweenController.channels[channel].back();
+            
+            int32 index = current.endEvents.Add(TweenEvent{ 0 });
+            playEvent = &current.endEvents[index];
+            break;
+        }
+        thing = thing->parent;
+    }
+    return playEvent;
+}
+
 inline void ProjectAndCheck(Entity * projectedEnt, 
                             Array<CheckThings, 100> & checkList,
                             IVec2 pushDir, 
@@ -289,26 +310,9 @@ inline void ProjectAndCheck(Entity * projectedEnt,
 {
     Entity * pushEnt = checkList.last().parent->pushEnt;
     
-    TweenEvent * playEvent = nullptr;
     
     CheckThings * thing = checkList.last().parent;
-    while(thing->parent != thing)
-    {
-        Entity * ent = thing->pushEnt;
-        
-        if (!ent->tweenController.NoTweens())
-        {
-            int32 channel = ent->tweenController.FindChannelByParamType(PARAM_TYPE_VECTOR2);
-            Tween & current = ent->tweenController.channels[channel].last();
-            
-            int32 index = current.endEvents.Add(TweenEvent{ 0 });
-            playEvent = &current.endEvents[index];
-            
-            // playEvent = &ent->tweenController.endEvent;
-            break;
-        }
-        thing = thing->parent;
-    }
+    TweenEvent * playEvent = GetPlayEventFromCheckThings(thing);
     
     bool8 defered = checkList.last().parent->pushResult.state == PROJECT_DEFERRED;
     
@@ -361,9 +365,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         second.checkType = CHECK_PROJECT;
                         second.parent = &checkList.last();
                         checkList.Add(second);
-                        
                         attach = target;
-                        
                     }
                     
                     finalPos = pos - pushDir;
@@ -698,7 +700,6 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
                         int32 index = parent->parent->pushEnt->tweenController.endEvents.Add(TweenEvent{0});
                         playEvent = &parent->parent->pushEnt->tweenController.endEvents[index];
                     }
-                    
                     IVec2 pos = current.pushEnt->tilePos - current.pushDir;
                     MoveEntity(parent->pushEnt, nullptr, playEvent, pos, BLOCK_MOVE_FUNC, BOUNCE_SPEED);
                     
