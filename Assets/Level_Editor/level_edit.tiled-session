@@ -6,8 +6,8 @@
     "activeFile": "TestLevels/test_4.tmj",
     "expandedProjectPaths": [
         "TestLevels",
-        "TileMap",
-        "."
+        ".",
+        "TileMap"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -59,8 +59,8 @@
             "scale": 1.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 441.3333333333333,
-                "y": 356.33333333333326
+                "x": 175.66666666666669,
+                "y": 175.66666666666669
             }
         },
         "TestLevels/Test_3.tmj": {
@@ -78,8 +78,8 @@
             "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 89.33333333333331,
-                "y": 356.33333333333326
+                "x": 175.66666666666669,
+                "y": 175.66666666666669
             }
         },
         "TileMap/BRoom_1.tmj": {
@@ -862,8 +862,8 @@
             "scale": 0.5,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 126,
-                "y": 229
+                "x": 175,
+                "y": 175
             }
         },
         "TileMap/Path_88.tmj": {
@@ -902,8 +902,8 @@
             "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 704,
-                "y": 481
+                "x": 175,
+                "y": 175
             }
         },
         "TileMap/Room_10.tmj": {

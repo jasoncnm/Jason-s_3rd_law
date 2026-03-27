@@ -1,11 +1,4 @@
 #if !defined(GAME_H)
-/* ========================================================================
-   $File: $
-   $Date: $
-   $Revision: $
-   $Creator: Junjie Mao $
-   $Notice: $
-   ======================================================================== */
 
 /*
   NOTE:
@@ -23,7 +16,7 @@
 #define DEFAULT_TILE_SIZE Vector2 { MAP_TILE_SIZE, MAP_TILE_SIZE }
 
 #define BOUNCE_SPEED 9.0f
-#define MOVE_SPEED 3.9f
+#define MOVE_SPEED 3.3f
 
 #define CAMERA_MOVE_SPEED 1.8f
 #define CAMERA_ZOOM_SPEED 1.7f
