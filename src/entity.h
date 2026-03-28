@@ -59,19 +59,16 @@ enum SpriteType
     SPRITE_TYPE_ANIMATED,
 };
 
+
 struct Entity
 {
-    
     EntityType type;
     CableType cableType;
     
     SpriteType spriteType;
-    AnimatedSprite animatedSprite;
-        Sprite sprite;
+    Sprite sprite;
         
     ActionState actionState = MOVE_STATE;
-    
-    TweenController tweenController;
     
     TileID tileID;
     Color color;
@@ -81,18 +78,17 @@ struct Entity
     
     Vector2 pivot;
      Vector2 tileSize;
-     // real32 tileSize = 32.0f;
-    
-    uint16 entityIndex;
-    
-    int32 attachedEntityIndex;
-    int32 unlockEntityIndex;
+     
     int32 sourceIndex = -1;
     int32 rightIndex = -1, leftIndex = -1, upIndex = -1, downIndex = -1;
-    int32 mass = 1;
-    int32 maxMass = 2;
-    int32 unlockCount = 0;
     
+    uint32 attachedEntityIndex;
+    uint32 unlockEntityIndex;
+    uint32 unlockCount = 0;
+    uint32 entityIndex;
+    
+    int8 mass = 1;
+    int8 maxMass = 2;
     bool8 movable = false;
     bool8 attach = false;
     bool8 broken = false;
@@ -105,7 +101,11 @@ struct Entity
     bool8 changed = false;
     bool8 active = false;
     
-};
+    // TODO: These are too big for it to store upfront,
+    // Allocate it whenever you need this
+    TweenController tweenController;
+    AnimatedSprite animatedSprite;
+    };
 
 struct AddEntityResult
 {
@@ -126,7 +126,7 @@ inline bool8 IsDoor(Entity * door);
 inline Vector2 GetSlimeSize(Entity * slime);
 inline Entity * GetEntity(int32 i);
 inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * playEvent,
-                       IVec2 targetPos, real32 (*MoveFunc)(real32), real32 speed);
+                       IVec2 targetPos, real32 (*MoveFunc)(real32), real32 speed, bool8 isStretch = true);
 
 inline Array<Entity *, LAYER_COUNT>
 FindAllEntitiesFromLocationAndLayers(IVec2 pos,

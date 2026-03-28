@@ -17,7 +17,7 @@
 /*
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Fix weird animation bugs 
-- Camera bug shown in bug folder
+- Undo should update the maps reset states
  
 TODO: Things that I can do beside arts and design I guess
 3. collectable: show in ui
@@ -34,7 +34,7 @@ TODO: Things that I can do beside arts and design I guess
 //              NOTE: Internal Functions (internal)
 //  ========================================================================
 
-Entity * UndoState::GetByEntityIndex(int32 entityIndex)
+Entity * UndoState::GetByEntityIndex(uint32 entityIndex)
 {
     for (uint32 i = 0; i < undoEntities.size(); i++)
     {
@@ -53,13 +53,14 @@ UndoState & UndoStack::back()
 }
 
 void UndoStack::push_back(uint32 playerIndex, uint32 starCount, 
-                          UndoState::EntityArray & ea)
+                          DynamicArray<Entity> & entityArray,
+                          DynamicArray<UndoState::MapUndoInfo> & undoMapInfos)
 {
     last++;
     count++;
     if (last > MAX_UNDO) last = 1;
     if (count > MAX_UNDO) count = MAX_UNDO;
-    InitUndoState(&undoStack[last - 1], playerIndex, starCount, ea);
+    InitUndoState(&undoStack[last - 1], playerIndex, starCount, entityArray, undoMapInfos);
     }
 
 void UndoStack::pop_back()
@@ -89,7 +90,7 @@ void ChangeScreen(GameScreen screen)
     for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
     }
 
- DA FindAllMapsWithStarCount(int32 starCount)
+  DynamicArray<int32> FindAllMapsWithStarCount(uint32 starCount)
 {
     uint32 count = 0;
     int32 * indices = (int32 *)BumpAllocArray(gameMemory->transientStorage, starCount, sizeof(int32));
@@ -101,19 +102,30 @@ void ChangeScreen(GameScreen screen)
         }
     }
     
-    return DA { count, (void *)indices };
+    DynamicArray<int32> result = { 0 };
+    result.count = count;
+    result.elements = indices;
+    
+    return result;
     
 }
 
 void InitUndoState(UndoState * undoState, 
-                   uint32 playerIndex, uint32 starCount, UndoState::EntityArray & ea)
+                   uint32 playerIndex, uint32 starCount,
+                    DynamicArray<Entity> & ea,
+                   DynamicArray<UndoState::MapUndoInfo> & mapUndoInfo)
 {
     if (undoState)
     {
         undoState->playerIndex = playerIndex;
         undoState->starCount = starCount;
         undoState->undoEntities.clear();
-        undoState->undoEntities.insert(undoState->undoEntities.begin(), &ea.entities[0], &ea.entities[ea.entityCount]);
+        undoState->undoEntities.insert(undoState->undoEntities.begin(), 
+                                       ea.elements, 
+                                       ea.elements + ea.count);
+        undoState->undoMapInfos.insert(undoState->undoMapInfos.begin(),
+                                       mapUndoInfo.elements,
+                                       mapUndoInfo.elements + mapUndoInfo.count);
     }
 }
 
@@ -182,9 +194,28 @@ void SetShake(float duration)
     gameState->shake = true;
     gameState->time = (real32)GetTime();
     gameState->shakeTime = duration;
-    }
+}
 
-inline UndoState::EntityArray GetCurrentStateEntities()
+DynamicArray<UndoState::MapUndoInfo> GetCurrentMapUndoInfos()
+{
+    uint32 count = gameState->tileMapCount;
+    UndoState::MapUndoInfo * infos =
+    (UndoState::MapUndoInfo *)BumpAllocArray(gameMemory->transientStorage, count, sizeof(UndoState::MapUndoInfo));
+    
+    for (uint32 i = 0; i < count; i++)
+    {
+        Map & map = gameState->tileMaps[i];
+        infos[i].mapIndex = i;
+        infos[i].initilized = map.stateInitilized;
+    }
+    
+    DynamicArray<UndoState::MapUndoInfo> result = { 0 };
+    result.count = count;
+    result.elements = infos;
+    return result;
+}
+
+DynamicArray<Entity> GetCurrentStateEntities()
 {
     EntityLayer pushLayers[] = {
         LAYER_DOOR,
@@ -221,8 +252,11 @@ inline UndoState::EntityArray GetCurrentStateEntities()
             }
     }
     
+    DynamicArray<Entity> result = { 0 };
+    result.count = i;
+    result.elements = entities;
     
-    return { i, entities };
+    return result;
     }
 
 inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & current)
@@ -457,7 +491,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
     
     MoveAndStop:;
     MoveEntity(projectedEnt, attach, playEvent, finalPos, 
-               BLOCK_MOVE_FUNC, BOUNCE_SPEED);
+               BLOCK_MOVE_FUNC, BOUNCE_SPEED, !defered);
     }
 
 inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMass, 
@@ -700,7 +734,7 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
                         playEvent = &parent->parent->pushEnt->tweenController.endEvents[index];
                     }
                     IVec2 pos = current.pushEnt->tilePos - current.pushDir;
-                    MoveEntity(parent->pushEnt, nullptr, playEvent, pos, BLOCK_MOVE_FUNC, BOUNCE_SPEED);
+                    MoveEntity(parent->pushEnt, nullptr, playEvent, pos, BLOCK_MOVE_FUNC, BOUNCE_SPEED, false);
                     
                 }
             }
@@ -802,29 +836,6 @@ inline void UpdateCameraToTileMapSmooth(Map & map, real32 (*MoveFunc)(real32), r
     return result;
 }
 
-bool8 IsNeighbour(Map & prevMap, Map & currentMap)
-{
-    bool8 result = false;
-    
-    IVec2 mapTileDiff = currentMap.tilePos - prevMap.tilePos;
-    SM_TRACE("map diff (%d, %d), prev map (x: %d, y: %d, w: %d, h: %d), cur map (x: %d, y: %d, w: %d, h: %d)",
-             mapTileDiff.x, mapTileDiff.y,
-             prevMap.tilePos.x, prevMap.tilePos.y, prevMap.width, prevMap.height,
-             currentMap.tilePos.x, currentMap.tilePos.y, currentMap.width, currentMap.height);
-    
-    if ((mapTileDiff.x == 0 || mapTileDiff.y == 0))
-    {
-        if (mapTileDiff.x > 0) result = (mapTileDiff.x == prevMap.width);
-        else if (mapTileDiff.x < 0) result = (mapTileDiff.x == -currentMap.width);
-        else if (mapTileDiff.y > 0) result = (mapTileDiff.y == prevMap.height);
-        else if (mapTileDiff.y < 0) result = (mapTileDiff.y == -currentMap.height);
-        else if (mapTileDiff.x == 0 && mapTileDiff.y == 0) result = true;
-    }
-    
-    return result;
-    
-}
-
  void SetCamFollowState(MyCamera & cam, Entity * followEnt)
 {
     if (followEnt->type == ENTITY_TYPE_LOCK)
@@ -919,7 +930,6 @@ inline bool8 UpdateCamera(bool refocus = false)
                 SM_ASSERT(followEnt->type == ENTITY_TYPE_LOCK, "camera behaviour for lock only!");
                 if (!followEnt->tweenController.NoTweens() && !followEnt->tweenController.playing)
                 {
-                
                 TweenEvent playEvent;
                 playEvent.controller = &followEnt->tweenController;
                 cam.tweenController.endEvents.Add(playEvent);
@@ -944,17 +954,18 @@ inline bool8 UpdateCamera(bool refocus = false)
             
             if (followEnt->tweenController.NoTweens())
             {
-                // nextPos = Vector2Lerp(cam.base.target, finalPos, speed * GetFrameTime());
+                  
+                
                 if (cam.tweenController.NoTweens()) UpdateCameraToTileMapSmooth(*currentMap, 
                                                                                 CAMERA_MOVE_FUNC, CAMERA_ZOOM_FUNC,
                                                                                 CAMERA_MOVE_SPEED, CAMERA_ZOOM_SPEED);
+
                 break;
             }
             
+            IVec2 moveDir = PivotToTilePos(GetTilePivot(followEnt), followEnt->tileSize) - PivotToTilePos(followEnt->pivot, followEnt->tileSize);
             
-            Vector2 moveDir = GetTilePivot(followEnt) - followEnt->pivot;
-            Vector2 center = followEnt->pivot + 
-                Vector2 { followEnt->tileSize.x * 0.5f, followEnt->tileSize.y * 0.5f };
+            Vector2 center = followEnt->pivot + followEnt->tileSize * 0.5f;
             Vector2 nextPos = cam.base.target;
             
             
@@ -962,18 +973,39 @@ inline bool8 UpdateCamera(bool refocus = false)
             Vector2 initPos = TilePositionToPixelPosition(prevMap->width * 0.5f + prevMap->tilePos.x + 0.5f, 
                                                            prevMap->height * 0.5f + prevMap->tilePos.y + 0.5f);
             
+            bool8 moveX = Abs(moveDir.x) > 0 &&
+            (Sign(center.x - cam.base.target.x) == Sign(moveDir.x));
             
-            if (Abs(moveDir.x) > 0 && (Sign(center.x - cam.base.target.x) == Sign(moveDir.x)))
+            bool8 moveY = Abs(moveDir.y) > 0 && 
+            (Sign(center.y - cam.base.target.y) == Sign(moveDir.y));
+            
+            
+            if (moveX)
             {
-                nextPos.x = Lerp(nextPos.x, center.x, speed * GetFrameTime());
                 nextPos.y = Lerp(nextPos.y, initPos.y, speed * GetFrameTime());
+                
+                if (Sign(finalPos.x - nextPos.x) != Sign(moveDir.x))
+                {
+                    nextPos.x = Lerp(nextPos.x, finalPos.x, 0.1f * speed * GetFrameTime());
+                }
+                else
+                {
+                    nextPos.x = Lerp(nextPos.x, center.x, speed * GetFrameTime());
+                }
             }
-            else if ((Sign(center.y - cam.base.target.y) == Sign(moveDir.y)))
+            else if (moveY)
             {
                 nextPos.x = Lerp(nextPos.x, initPos.x, speed * GetFrameTime());
-                nextPos.y = Lerp(nextPos.y, center.y, speed * GetFrameTime());
+                
+                if (Sign(finalPos.y - nextPos.y) != Sign(moveDir.y))
+                {
+                    nextPos.y = Lerp(nextPos.y, finalPos.y, 0.1f * speed * GetFrameTime());
+                }
+                else
+                {
+                    nextPos.y = Lerp(nextPos.y, center.y, speed * GetFrameTime());
+                }
             }
-            
             cam.base.target = nextPos;
             
             break;
@@ -1009,7 +1041,7 @@ inline bool8 UpdateCamera(bool refocus = false)
 }
 
 
-inline void SetUndoEntities(std::vector<Entity> & undoEntities)
+void SetUndoEntities(std::vector<Entity> & undoEntities)
 {
     if (gameState->entities.count < (uint32)undoEntities.size())
         gameState->entities.count = (uint32)undoEntities.size();
@@ -1035,13 +1067,23 @@ inline void SetUndoEntities(std::vector<Entity> & undoEntities)
     }
     }
 
+void SetUndoMapInfos(std::vector<UndoState::MapUndoInfo> & undoMapInfos)
+{
+    for (auto info : undoMapInfos)
+    {
+        gameState->tileMaps[info.mapIndex].stateInitilized = info.initilized;
+    }
+}
+
+
 inline void SetGameState(UndoState & undoState)
 {
     gameState->playerEntityIndex = undoState.playerIndex;
     gameState->camera.followEntityIndex = gameState->playerEntityIndex;
-    gameState->starCount = undoState.starCount;
+    gameState->starCount = (uint16)undoState.starCount;
     std::vector<Entity> & undoEntities = undoState.undoEntities;
-    SetUndoEntities(undoEntities);        
+    SetUndoEntities(undoEntities);
+    SetUndoMapInfos(undoState.undoMapInfos);
     }
 
 inline void Undo()
@@ -1053,10 +1095,12 @@ inline void Undo()
 
 inline void Restart()
 {
-    UndoState::EntityArray ea = GetCurrentStateEntities();
+    DynamicArray<Entity> ea = GetCurrentStateEntities();
+    DynamicArray<UndoState::MapUndoInfo> mapUndoInfos = GetCurrentMapUndoInfos();
+    
     gameState->undoStack.push_back(gameState->playerEntityIndex, 
                                    gameState->starCount, 
-                                   ea);
+                                   ea, mapUndoInfos);
     Map & currentMap = gameState->tileMaps[gameState->playerMapIndex];
     SetGameState(currentMap.resetState);
     }
@@ -1245,7 +1289,7 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
     player->tileSize = GetSlimeSize(player);
     
     Entity * clone = CreateSlimeClone(player);
-    player->attach = false;
+    // player->attach = false;
     player->pivot = GetTilePivot(player);
     
     bool8 playerProjectable = true;
@@ -1315,15 +1359,6 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                 Texture2D drawTexture = gameState->texture;
                 Sprite drawSprite = entity->sprite;
                 Vector2 drawPivot = entity->pivot;
-                
-                // TODO temcode
-                if (IsSlime(entity) && entity->spriteType == SPRITE_TYPE_ANIMATED)
-                {
-                    drawTexture = gameState->playerTexture;
-                    drawSprite = GetCurrentSpriteFrame(&entity->animatedSprite);
-                    drawPivot += 
-                        Vector2 { (real32)entity->attachDir.x, (real32) entity->attachDir.y } * entity->tileSize * 0.25f;
-                }
                 
                 if (IsSlime(entity))
                 {
@@ -1425,7 +1460,9 @@ void GameplayUpdateAndRender()
         
         Entity * player = GetEntity(gameState->playerEntityIndex);
         
-        UndoState::EntityArray prevState = GetCurrentStateEntities();
+            DynamicArray<Entity> prevEntState = GetCurrentStateEntities();
+            DynamicArray<UndoState::MapUndoInfo> prevMapInfos = GetCurrentMapUndoInfos();
+            
         uint32 prevPlayerIndex = gameState->playerEntityIndex;
         
         // NOTE SlimeSelection
@@ -1503,7 +1540,7 @@ void GameplayUpdateAndRender()
         {
             gameState->undoStack.push_back(prevPlayerIndex,
                                            gameState->starCount,
-                                           prevState);
+                                           prevEntState, prevMapInfos);
             }
         
     }
@@ -1580,9 +1617,9 @@ void GameplayUpdateAndRender()
                 lock->tweenController.endEvents.Add(deleteEvent2);
                 // OnPlayEvent(&lock->tweenController);
                 
-                DA da = FindAllMapsWithStarCount(gameState->starCount);
+                 DynamicArray<int32> da = FindAllMapsWithStarCount(gameState->starCount);
                 uint32 unlockedMapCount = da.count;
-                int32 * unlockedMaps = (int32 *)da.elements;
+                int32 * unlockedMaps = da.elements;
                 
                 // NOTE: sort the map by their ids?
                 
@@ -1721,12 +1758,14 @@ void GameplayUpdateAndRender()
                     
                     if (!result.map->stateInitilized)
                     {
-                        result.map->stateInitilized = true;
-                        UndoState::EntityArray ea = GetCurrentStateEntities();
+                            result.map->stateInitilized = true;
+                            DynamicArray<UndoState::MapUndoInfo> mapInfos = GetCurrentMapUndoInfos();
+                            
+                         DynamicArray<Entity> ea = GetCurrentStateEntities();
                         InitUndoState(&result.map->resetState,
                                       gameState->playerEntityIndex,
                                       gameState->starCount,
-                                      ea);
+                                      ea, mapInfos);
                         
                     }
                 }
@@ -1737,25 +1776,6 @@ void GameplayUpdateAndRender()
         }
     
     
-    // NOTE: Debug Cheats
-    {
-        
-        if (IsKeyPressed(KEY_EQUAL))
-        {
-            gameState->starCount++;
-        }
-        
-        
-        if (IsKeyPressed(KEY_NINE))
-        {
-            UnloadTexture(gameState->texture);    // Unload render texture
-            gameState->texture = LoadTexture(TEXTURE_PATH);
-            SetShake(0.05f);
-            
-        }
-        
-    }
-    
     // NOTE: Camera Updates
     {
         Vector2 oldTarget = gameState->camera.base.target;
@@ -1763,7 +1783,8 @@ void GameplayUpdateAndRender()
         bool8 freeForm = IsKeyDown(KEY_T);
         
     // NOTE: Debug Camera Control
-        {
+            if (freeForm)
+            {
         // NOTE: CameraZoom
         // Camera zoom controls
         // Uses log scaling to provide consistent zoom speed
@@ -1913,6 +1934,26 @@ void GameplayUpdateAndRender()
         
     }
 }
+    
+    
+    // NOTE: Debug Cheats
+    {
+        
+        if (IsKeyPressed(KEY_EQUAL))
+        {
+            gameState->starCount++;
+        }
+        
+        
+        if (IsKeyPressed(KEY_NINE))
+        {
+            UnloadTexture(gameState->texture);    // Unload render texture
+            gameState->texture = LoadTexture(TEXTURE_PATH);
+            SetShake(0.05f);
+            
+        }
+        
+    }
     
     static float contrast = 0.0f;
     static float saturation = 0.0f;

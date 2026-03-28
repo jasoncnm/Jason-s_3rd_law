@@ -68,34 +68,22 @@ struct Memory
     BumpAllocator * persistentStorage;
 };
 
-
 struct UndoState
 {
-    struct EntityArray
+    
+    struct MapUndoInfo
     {
-        uint32 entityCount;
-        Entity * entities;
+        uint32 mapIndex;
+        bool8 initilized;
     };
     
     int32 playerIndex;
     int32 starCount;
     // NOTE: using vector for dynamic heap allocations
     std::vector<Entity> undoEntities;
+    std::vector<MapUndoInfo> undoMapInfos; 
     
-    Entity * GetByEntityIndex(int32 entityIndex);
-    };
-
-struct Map
-{
-    char mapID[100];
-    UndoState resetState;
-    
-    IVec2 tilePos;            // Top left tile position of the map
-    int32   width;              // Number of tiles in X axis
-    int32   height;             // Number of tiles in Y axis
-    int32 visibleStarCount = 0;
-    
-    bool8 stateInitilized = false;
+    Entity * GetByEntityIndex(uint32 entityIndex);
     };
 
 struct UndoStack
@@ -109,7 +97,9 @@ struct UndoStack
     
     void pop_back();
     
-    void push_back(uint32 playerIndex, uint32 starCount, UndoState::EntityArray & ea);
+    void push_back(uint32 playerIndex, uint32 starCount,
+                   DynamicArray<Entity> & ea,
+                   DynamicArray<UndoState::MapUndoInfo> & undoMapInfos);
         
     bool empty()
     {
@@ -122,6 +112,19 @@ struct UndoStack
         last = 1;
     }
     
+};
+
+struct Map
+{
+    char mapID[100];
+    UndoState resetState;
+    
+    IVec2 tilePos;            // Top left tile position of the map
+    int32   width;              // Number of tiles in X axis
+    int32   height;             // Number of tiles in Y axis
+    uint16 visibleStarCount = 0;
+    
+    bool8 stateInitilized = false;
 };
 
 struct MyCamera
@@ -167,7 +170,7 @@ struct GameState
     ShaderInfo postShader;
     ShaderInfo movableShader;
     
-    Array<uint16, MAX_ENTITIES> entityTable[LAYER_COUNT];
+    Array<uint32, MAX_ENTITIES> entityTable[LAYER_COUNT];
     Array<Entity, MAX_ENTITIES> entities;
     
     uint32 tileMapCount;
@@ -179,7 +182,7 @@ struct GameState
     
     IVec2 tileMin, tileMax;
     
-    int32 playerEntityIndex;
+    uint32 playerEntityIndex;
     
     // NOTE: map index of the map containing camera follow entity current tilePos
     int32 currentMapIndex;
@@ -188,12 +191,13 @@ struct GameState
     // NOTE: map index of the map containing player tilePos
     int32 playerMapIndex;
     int32 lastTutBlockIndex;
-    int32 starCount = 0;
-    
     int32 screenWidth = SCREEN_WIDTH;
     int32 screenHeight = SCREEN_HEIGHT;
+    
     GameScreen currentScreen = TITLE_SCREEN;
     UndoState lastState;
+    
+    uint16 starCount = 0;
     
     bool8 initialized;
     bool8 simulating = false;
@@ -260,13 +264,16 @@ static Memory * gameMemory;
 //  ========================================================================
 //              NOTE: Game Functions 
 //  ========================================================================
-MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, int32 accumulatedMass);
+MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, uint32 accumulatedMass);
 PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState);
 void CleanUpGame();
 void SetShake(float duration);
 FindTileMapResult FindTileMap(IVec2 tilePos);
 void InitUndoState(UndoState * undoState, 
-                   uint32 playerIndex, uint32 starCount, UndoState::EntityArray & ea);
+                   uint32 playerIndex, 
+                   uint32 starCount,
+                    DynamicArray<Entity> & entityArray,
+                   DynamicArray<UndoState::MapUndoInfo> & undoMapInfos);
 
 
 

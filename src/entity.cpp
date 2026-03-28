@@ -370,18 +370,14 @@ inline void StretchEntity(Entity * entity,
     Vector2 startPivot = GetTilePivot(startPos, entity->tileSize, startAttach);
     Vector2 endPivot = GetTilePivot(endPos, entity->tileSize, endAttach);
     
-    Vector2 size_mid = entity->tileSize * Vector2 { 1 / stretch, stretch };
+    Vector2 stretchV = Vector2 { 1 / stretch, stretch };
+    if (invert) stretchV = Vector2Invert(stretchV);
     if (Abs(moveDir.y) == 1)
     {
-        size_mid = entity->tileSize * Vector2 { stretch, 1 / stretch };
+        stretchV = Vector2Invert(stretchV);
     }
     
-    if (invert)
-    {
-        real32 tmp = size_mid.x;
-        size_mid.x = size_mid.y;
-        size_mid.y = tmp;
-    }
+    Vector2 size_mid = entity->tileSize * stretchV;
     
     Vector2 end_mid = (GetTilePivot(endPos, size_mid, endAttach) + 
                        GetTilePivot(startPos, size_mid, startAttach)) / 2;
@@ -435,7 +431,8 @@ inline void StretchEntity(Entity * entity,
 }
 
 inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * playEvent,
-                       IVec2 targetPos, float (*MoveFunc)(float), float speed)
+                       IVec2 targetPos, float (*MoveFunc)(float), float speed,
+                       bool8 isStretch)
 {
     SM_ASSERT(entity->active, "entity does not exist");
     SM_ASSERT(entity->movable, "entity cannot be moved");
@@ -504,11 +501,18 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                     
                 }
                 
+                if (isStretch)
+                {
                 float stretch = 0.8f;
                 StretchEntity(entity, idir, old.attachDir, entity->attachDir, 
                               old.tilePos, mid_tile, stretch, MoveFunc, speed);
+                }
+                else
+                {
+                    mid_tile = old.tilePos;
+                }
                 
-                if (offset.SqrMagnitude() > 1)
+                if ((targetPos - mid_tile).SqrMagnitude() > 0)
                 {
                     int32 ch1 = entity->tweenController.FindChannelByTweenProperty(PARAM_TYPE_VECTOR2, &entity->pivot);
                     
@@ -523,8 +527,17 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 param.endVec2 = endPivot;
                 param.realVec2  = &entity->pivot;
                     
+                    
+                    if (ch1 < 0)
+                    {
+                        AddTweenUnique(entity->tweenController, 
+                                 CreateTween(param, MoveFunc, speed, tileDist));
+                        }
+                    else
+                    {
                     AddTween(entity->tweenController, 
-                             CreateTween(param, MoveFunc, speed, tileDist), ch1);
+                                 CreateTween(param, MoveFunc, speed, tileDist), ch1);
+                    }
                 }
             }
         }
@@ -574,9 +587,13 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         }
     else
     {
+        
         IVec2 offset = targetPos - old.tilePos;
         IVec2 moveDir = IVec2 { Sign(offset.x), Sign(offset.y) };
-            IVec2 mid_tile = old.tilePos + moveDir;
+        IVec2 mid_tile = old.tilePos + moveDir;
+        
+        if (isStretch)
+        {
             StretchEntity(entity, 
                       moveDir, 
                       IVec2 { 0, 0 },
@@ -584,7 +601,12 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                           old.tilePos,
                           mid_tile,
                           0.8f, MoveFunc, speed, true);
-            
+        }
+        else
+        {
+            mid_tile = old.tilePos;
+        }
+        
             if (offset != moveDir)
             {
                 
@@ -598,9 +620,17 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 param.paramType = PARAM_TYPE_VECTOR2;
                 param.startVec2 = midPivot;
                 param.endVec2 = endPivot;
-                param.realVec2  = &entity->pivot;
+            param.realVec2  = &entity->pivot;
+            
+            if (ch1 < 0)
+            {
+                AddTweenUnique(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist));
+                }
+            else
+            {
                 AddTween(entity->tweenController, CreateTween(param, MoveFunc, speed, tileDist), ch1);
-                
+            }
+            
                 SM_TRACE("channel: %d", ch1);
                 SM_TRACE("end tile pos: %d", targetPos.x);
             }

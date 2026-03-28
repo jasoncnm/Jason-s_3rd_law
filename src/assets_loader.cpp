@@ -375,7 +375,7 @@ state.currentMapIndex = -1;
                             if ((prop["name"] == "visible_star_count") &&
                                 (prop["type"] == "int"))
                             {
-                                 tileMap.visibleStarCount = (int32)prop["value"];
+                                 tileMap.visibleStarCount = (int16)prop["value"];
                                 break;
                             }
                         }

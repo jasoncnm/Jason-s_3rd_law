@@ -5,9 +5,9 @@
     },
     "activeFile": "TestLevels/test_4.tmj",
     "expandedProjectPaths": [
+        "TileMap",
         "TestLevels",
-        ".",
-        "TileMap"
+        "."
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -48,8 +48,8 @@
             "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 603.6666666666666,
-                "y": 238.33333333333331
+                "x": 862,
+                "y": -27.66666666666663
             }
         },
         "TestLevels/Test_2.tmj": {
@@ -67,19 +67,19 @@
             "expandedObjectLayers": [
                 3
             ],
-            "scale": 3,
+            "scale": 2,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.16666666666666,
-                "y": 176.16666666666663
+                "x": 252.5,
+                "y": -194.75
             }
         },
         "TestLevels/test_4.tmj": {
             "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 175.33333333333331,
-                "y": 175.66666666666669
+                "x": 357.33333333333337,
+                "y": 388.33333333333326
             }
         },
         "TileMap/BRoom_1.tmj": {

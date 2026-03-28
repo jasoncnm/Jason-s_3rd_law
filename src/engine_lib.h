@@ -42,6 +42,21 @@ typedef double real64;
 #include "memory.h"
 #include "file.h"
 
+
+//  ========================================================================
+// NOTE: Dynamic Array
+//  ========================================================================
+
+// IMPORTANT NOTE: This data structure does not allocate memory upfront
+// update count and  allocate memory Manually!!!
+
+template<typename T>
+struct DynamicArray
+{
+    uint32 count;
+    T * elements;
+    };
+
 //  ========================================================================
 // NOTE: Array
 //  ========================================================================
