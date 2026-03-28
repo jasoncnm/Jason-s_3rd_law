@@ -12,6 +12,7 @@
 #define GB(x) (1024LL * MB(x))
 #define TB(x) (1024LL * GB(x))
 
+
 //  ========================================================================
 // NOTE: Bump Allocator
 //  ========================================================================
@@ -20,9 +21,9 @@ struct BumpAllocator
     size_t capacity;
     size_t used;
     char *memory;
-    
-};
+    };
 
+// TODO: Extend BumpAllocator funtionality
 
 #define ArrayCount(arr) (sizeof(arr) / sizeof((arr)[0]))
 
