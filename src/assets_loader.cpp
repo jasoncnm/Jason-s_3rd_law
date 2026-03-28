@@ -41,16 +41,12 @@ inline AddEntityResult LoadGameObject(GameState & state, TileID id, IVec2 tilePo
     {
         entityResult = AddEntity(ENTITY_TYPE_BLOCK, tilePos, id);
         entityResult.entity->mass = 2;
-        entityResult.entity->movable = true;
-
-    }
+        }
     else if (id == BLOCK)
     {
         entityResult = AddEntity(ENTITY_TYPE_BLOCK, tilePos, id);
         entityResult.entity->mass = 1;
-        entityResult.entity->movable = true;
-
-    }
+        }
     else if (id == GLASS)
     {
         entityResult = AddEntity(ENTITY_TYPE_GLASS, tilePos, id);
@@ -61,8 +57,7 @@ inline AddEntityResult LoadGameObject(GameState & state, TileID id, IVec2 tilePo
         entityResult.entity->mass = 1;
         entityResult.entity->tileSize = GetSlimeSize(entityResult.entity);
         entityResult.entity->color = GRAY;
-entityResult.entity->movable = true;
-                                
+
     }
     else if (id >= DOOR_LEFT && id <= DOOR_DOWN)
     {
@@ -409,7 +404,6 @@ state.currentMapIndex = -1;
                                         result = AddEntity(ENTITY_TYPE_PLAYER, tilePos, PLAYER_IDLE);
                                         result.entity->mass = 1;
                                         result.entity->tileSize = GetSlimeSize(result.entity); 
-                                        result.entity->movable = true;
                                         
                                         
                                         state.playerEntityIndex = result.entityIndex;

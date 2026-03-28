@@ -688,8 +688,6 @@ else if (IsSlime(ent) && GetEntity(ent->attachedEntityIndex) == target)
 
 PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
 {
-    SM_ASSERT(startEnt->movable, "Static entity cannot be pushing blocks!");
-    
     // IMPORTANT: the order of the layers are important, for example, we don't want to check blocks before checking doors in the same tile
     EntityLayer checkLayers[] = { LAYER_WALL, LAYER_DOOR, LAYER_GLASS, LAYER_SLIME, LAYER_BLOCK, LAYER_LOCK };
     uint32 layerCount = ArrayCount(checkLayers);
@@ -1859,8 +1857,6 @@ void GameplayUpdateAndRender()
                 portal->mass = 2;
                     SetEntitySprite(portal, BLOCK_2);
             }
-            
-            portal->movable = true;
             portal->type = ENTITY_TYPE_BLOCK;
             portal->color = WHITE;
                 gameState->lastTutBlockIndex = portal->entityIndex;

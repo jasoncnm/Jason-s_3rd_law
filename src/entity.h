@@ -89,7 +89,6 @@ struct Entity
     
     int8 mass = 1;
     int8 maxMass = 2;
-    bool8 movable = false;
     bool8 attach = false;
     bool8 broken = false;
     bool8 isVisible = false;
@@ -118,6 +117,16 @@ struct FindAttachableResult
     Entity * entity;
     bool8 has;
 };
+
+inline bool8 IsMovable(Entity * entity)
+{
+    bool8 result = 
+        entity->type == ENTITY_TYPE_PLAYER || 
+        entity->type == ENTITY_TYPE_CLONE  || 
+        entity->type == ENTITY_TYPE_BLOCK;
+    
+    return result;
+}
 
 inline IVec2 GetDoorDirection(Entity * door);
 inline bool8 DoorBlocked(Entity * door, IVec2 reachDir);

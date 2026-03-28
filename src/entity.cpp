@@ -78,7 +78,6 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
 inline void SetEntityPosition(Entity * entity, Entity * attachedEntity, IVec2 tilePos)
 {
     SM_ASSERT(entity->active, "entity does not exist");
-    SM_ASSERT(entity->movable, "entity cannot be moved");
     
     entity->changed = true;
     entity->tilePos = tilePos;
@@ -314,7 +313,6 @@ AddDoor(IVec2 tilePos, TileID tileID, bool8 left, bool8 right, bool8 up, bool8 d
 {
     AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, tileID);
 
-    entityResult.entity->movable = true;
     entityResult.entity->mass = 100;
     
     entityResult.entity->conductive = false;
@@ -435,7 +433,6 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                        bool8 isStretch)
 {
     SM_ASSERT(entity->active, "entity does not exist");
-    SM_ASSERT(entity->movable, "entity cannot be moved");
     Entity old = *entity;
     Vector2 startPivot = GetTilePivot(entity);
     SetEntityPosition(entity, attachedEntity, targetPos);
@@ -663,14 +660,14 @@ inline void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir)
     SM_ASSERT((attacher->type == ENTITY_TYPE_PLAYER || attacher->type == ENTITY_TYPE_CLONE), "entity is not attachable");
     SM_ASSERT(attacher->active && attachee->active, "entity does not exist");
 
-    if (attacher->movable)
+    if (IsSlime(attacher))
     {
         attacher->attach = true;
         attacher->attachedEntityIndex = attachee->entityIndex;
         attacher->attachDir = dir;
     }
 
-    if (attachee->movable)
+    if (IsSlime(attachee))
     {
         attachee->attach = true;
         attachee->attachedEntityIndex = attachee->entityIndex;
@@ -970,7 +967,7 @@ void ShiftEntities(IVec2 startPos, IVec2 bounceDir)
         for (uint32 i = 0; i < gameState->entities.count; i++)
         {
             Entity * entity = GetEntity(i);
-            if (entity && entity != last && entity->movable && entity->tilePos == pos)
+             if (entity && entity != last && IsMovable(entity) && entity->tilePos == pos)
             {
                 last = entity;
                 // entity->tilePos += bounceDir;
