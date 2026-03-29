@@ -1159,8 +1159,16 @@ bool8 MoveAction(IVec2 actionDir)
             {
                 if (pushResult.pushing)
                 {
-                    if (!door) ActionCheck(player, player->attachDir, CHECK_MOVE);
-                    
+                    if (!door) 
+                    {
+                        PushResult reversePushResult = ActionCheck(player, player->attachDir, CHECK_MOVE);
+                        if (reversePushResult.state == PUSH_BLOCKED)
+                        {
+                            StretchEntity(player, actionDir, player->attachDir, player->attachDir,
+                                          player->tilePos, player->tilePos, 0.7f, PLAYER_MOVE_FUNC, MOVE_SPEED * 0.7f);
+                            OnPlayEvent(&player->tweenController);
+                        }
+                    }
                     SetSlimeSprite(player, actionDir);
                     
                 return true;
@@ -1513,8 +1521,41 @@ void GameplayUpdateAndRender()
                     }
 
                     if (isPressed)
-                    {
-                        stateChanged = stateChanged || MoveAction(actionDir);
+                            {
+                                bool8 moved = MoveAction(actionDir);
+                                if (!moved && actionDir != player->attachDir)
+                                {
+                                    SetSlimeSprite(player, actionDir);
+                                    
+                                    real32 speed = 0.0f;
+                                    
+                                    if (player->attachDir.x > 0)
+                                    {
+                                    speed = MOVE_SPEED * 0.3f; 
+                                    }
+                                        else if (player->attachDir.y < 0)
+                                    {
+                                    speed = MOVE_SPEED * 0.1f;
+                                    }
+                                    else if (player->attachDir.x < 0)
+                                    {
+                                        speed = MOVE_SPEED * 0.1f;
+                                    }
+                                    else if (player->attachDir.y > 0)
+                                    {
+                                        speed = MOVE_SPEED * 0.3f;
+                                    }
+                                    
+                                    if (player->mass == 2)
+                                    {
+                                        speed *= 1.2f;
+                                    }
+                                    
+                                    StretchEntity(player, actionDir, player->attachDir, player->attachDir,
+                                                  player->tilePos, player->tilePos, 0.8f, PLAYER_MOVE_FUNC, speed);
+                                    OnPlayEvent(&player->tweenController);
+                                }
+                                    stateChanged = stateChanged || moved;
                         }
                     }
                     if (stateChanged) 

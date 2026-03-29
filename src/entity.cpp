@@ -415,6 +415,7 @@ inline void StretchEntity(Entity * entity,
     
     int32 channel = entity->tweenController.FindChannelByTweenProperty(PARAM_TYPE_VECTOR2, &entity->pivot);
     
+    
     if (channel < 0)
     {
         int ch1 = AddTweenUnique(entity->tweenController, CreateTween(param, MoveFunc, speed, dist1));
@@ -425,8 +426,7 @@ inline void StretchEntity(Entity * entity,
         AddTween(entity->tweenController, CreateTween(param, MoveFunc, speed, dist1), channel);
         AddTween(entity->tweenController, CreateTween(param2, MoveFunc, speed, dist2), channel);
     }
-    
-}
+    }
 
 inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * playEvent,
                        IVec2 targetPos, float (*MoveFunc)(float), float speed,
