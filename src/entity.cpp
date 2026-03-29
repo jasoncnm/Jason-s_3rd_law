@@ -509,6 +509,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                     mid_tile = old.tilePos;
                 }
                 
+                
                 if ((targetPos - mid_tile).SqrMagnitude() > 0)
                 {
                     int32 ch1 = entity->tweenController.FindChannelByTweenProperty(PARAM_TYPE_VECTOR2, &entity->pivot);
@@ -604,7 +605,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
             mid_tile = old.tilePos;
         }
         
-            if (offset != moveDir)
+        if ((targetPos - mid_tile).SqrMagnitude() > 0)
             {
                 
                 int32 ch1 = entity->tweenController.FindChannelByTweenProperty(PARAM_TYPE_VECTOR2, &entity->pivot);

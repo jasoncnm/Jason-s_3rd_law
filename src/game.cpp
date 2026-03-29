@@ -17,8 +17,7 @@
 /*
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Fix weird animation bugs 
-- Undo should update the maps reset states
- 
+
 TODO: Things that I can do beside arts and design I guess
 3. collectable: show in ui
 5. Sound effect
@@ -28,7 +27,8 @@ TODO: Things that I can do beside arts and design I guess
 1. background
 -  reset system
 2. key and door
-*/
+- Undo should update the maps reset states
+ */
 
 //  ========================================================================
 //              NOTE: Internal Functions (internal)
@@ -84,7 +84,6 @@ void UndoStack::pop_back()
 
 void ChangeScreen(GameScreen screen)
 {
-    // TODO: make a scene transitions
     gameState->switching = true;
     gameState->nextScreen = screen;
     for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
@@ -725,12 +724,14 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
                 CheckThings * parent = current.parent;
                 if (parent->pushEnt != current.pushEnt && parent->pushResult.state == PROJECT_DEFERRED)
                 {
-                    TweenEvent * playEvent = nullptr;
+                    TweenEvent * playEvent = GetPlayEventFromCheckThings(parent->parent);
+                    #if 0
                     if (!parent->parent->pushEnt->tweenController.NoTweens())
                     {
                         int32 index = parent->parent->pushEnt->tweenController.endEvents.Add(TweenEvent{0});
                         playEvent = &parent->parent->pushEnt->tweenController.endEvents[index];
                     }
+                    #endif
                     IVec2 pos = current.pushEnt->tilePos - current.pushDir;
                     MoveEntity(parent->pushEnt, nullptr, playEvent, pos, BLOCK_MOVE_FUNC, BOUNCE_SPEED, false);
                     
