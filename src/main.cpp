@@ -8,6 +8,15 @@
 
 
 
+#if TEST
+#include "test/test.cpp"
+int main(void)
+{
+    test();
+    return 0;
+}
+#else
+
 #if GAME_INTERNAL
 #include "game.h"
 
@@ -35,7 +44,6 @@
 
 
 #define PATH_SIZE 260
-
 // NOTE: This file should be cross-compatible, one thing you need to provide
 // if you want to do a linux version of this is providing a "Sleep(time)" function
 
@@ -223,3 +231,4 @@ int main(int argumentCount, char *argumentArray[])
         UnloadShaderInfo(&gameState->movableShader);
         } 
 }
+#endif

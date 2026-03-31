@@ -2043,6 +2043,34 @@ void GameplayUpdateAndRender()
     
     // NOTE: Render
     {
+        BeginMode2D(gameState->camera.base);
+        ClearBackground(BLANK);
+        
+Fog & fog = gameState->fog;
+        IVec2 fogDim = fog.tileMax - fog.tileMin;
+        
+        // NOTE: Draw Fog of War
+        SM_ASSERT(IsRenderTextureValid(fog.fogTexture), "render texture not valid");
+        SM_ASSERT(fog.fogTexture.texture.width == fogDim.x, "texture width not valid");
+        SM_ASSERT(fog.fogTexture.texture.height == fogDim.y, "texture height not valid");
+        BeginTextureMode(fog.fogTexture);
+        for (uint32 idx = 0; idx < fog.fogTile.count; idx++)
+        {
+            // TODO
+            if (fog.fogTile.elements[idx] == 0)
+            {
+                int32 row = (idx) / fogDim.x;
+                int32 col = (idx) % fogDim.x;
+                IVec2 pos = { fog.tileMin.x + col, fog.tileMin.y + row };
+                
+                Vector2 pivot = GetTilePivot(pos, DEFAULT_TILE_SIZE);
+                Rectangle rect = { pivot.x, pivot.y, 1, 1, };
+                DrawRectangleRec(rect, BLACK);
+            }
+        }
+        
+        EndTextureMode();
+        EndMode2D();
         
         UpdateShaderInfo(gameState->movableShader);
         UpdateShaderInfo(gameState->postShader);
@@ -2079,7 +2107,6 @@ void GameplayUpdateAndRender()
         DrawSpriteLayers(orderedDrawLayers, count);
         Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
         
-#if 1
         if (debugView)
         {
         Color colors[] = {
@@ -2137,24 +2164,12 @@ void GameplayUpdateAndRender()
             
         }
         
-#endif
+        DrawTexturePro(fog.fogTexture.texture, 
+                       Rectangle { 0, 0, 1, 1 },
+                       Rectangle { 50, 6, MAP_TILE_SIZE, MAP_TILE_SIZE },
+                       Vector2 { 0, 0 }, 0, WHITE);
         
-        // NOTE: Draw Fog of War
-        Fog & fog = gameState->fog;
-        IVec2 fogDim = fog.tileMax - fog.tileMin;
-        for (uint32 idx = 0; idx < fog.fogTile.count; idx++)
-        {
-            // TODO
-            if (fog.fogTile.elements[idx] == 0)
-            {
-                int32 row = (idx) / fogDim.x;
-                int32 col = (idx) % fogDim.x;
-                IVec2 pos = { fog.tileMin.x + col, fog.tileMin.y + row };
-                
-                DrawTile(pos, BLACK);
-                }
-        }
-        
+        DrawTile(IVec2{50,6}, RED);
         
         // NOTE: Draw Screen Edge
         Rectangle source = GetCameraRect(gameState->camera.base);

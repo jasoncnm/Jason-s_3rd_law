@@ -3,11 +3,11 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TestLevels/test_4.tmj",
+    "activeFile": "TileMap/Room_29.tmj",
     "expandedProjectPaths": [
         "TestLevels",
-        "TileMap",
-        "."
+        ".",
+        "TileMap"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -1078,8 +1078,8 @@
             "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 175,
-                "y": 175
+                "x": -337,
+                "y": -49
             }
         },
         "TileMap/Room_3.tmj": {
@@ -1690,7 +1690,11 @@
         "TileMap/Path_87.tmj",
         "TestLevels/Test_2.tmj",
         "TestLevels/test_4.tmj",
-        "TestLevels/Test_3.tmj"
+        "TestLevels/Test_3.tmj",
+        "TileMap/Room_40.tmj",
+        "TileMap/Path_86.tmj",
+        "TileMap/Path_82.tmj",
+        "TileMap/Room_29.tmj"
     ],
     "project": "level_edit.tiled-project",
     "property.type": "file",
@@ -1699,13 +1703,13 @@
         "TileMap/Room_17.tmj",
         "TileMap/Path_87.tmj",
         "TestLevels/Test_2.tmj",
-        "TestLevels/Test_3.tmj",
         "TestLevels/test_4.tmj",
+        "TestLevels/Test_3.tmj",
+        "TileMap/Room_40.tmj",
+        "TileMap/Path_86.tmj",
+        "TileMap/Path_82.tmj",
+        "TileMap/Room_29.tmj",
         "TileMap/Path_69.tmj",
-        "TileMap/Path_89.tmj",
-        "TileMap/Room_60.tmj",
-        "TileMap/Room_53.tmj",
-        "TileMap/Room_13.tmj",
-        "TestLevels/Test.tmj"
+        "TileMap/Path_89.tmj"
     ]
 }

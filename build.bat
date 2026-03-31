@@ -8,5 +8,9 @@ if "%1" == "release" (
 	call scripts\msvc-build-release.bat
 ) else  (
 	call scripts\msvc-build-raylib.bat
-	call scripts\msvc-build-debug.bat
+	if "%1" == "test" (
+		call scripts\msvc-build-debug.bat test
+	) else (
+		call scripts\msvc-build-debug.bat
+	)
 )

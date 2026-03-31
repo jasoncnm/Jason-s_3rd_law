@@ -8,12 +8,18 @@ set EXE_NAME=game.exe
 set DLL_NAME=game_code.dll
 set INCLUDES=-I..\src\vendor\raylib\ -I..\src\vendor\raygui\src\
 
+if "%1" == "test" (
+	set TEST_DEFINE=/DTEST=1
+) else (
+	set TEST_DEFINE=/DTEST=0
+)
+
 cd bin
 
 echo LOCKFILE IN AID OF HOTLOADING > lock.file
-cl %INCLUDES% ..\src\game.cpp /LD /Fe:%DLL_NAME% %COMMON_FLAGS% %LINKER_FLAGS% %EXPORTED_FUNCTIONS% %WARNINGS% 
+cl %INCLUDES% ..\src\game.cpp /LD /Fe:%DLL_NAME% %COMMON_FLAGS% %TEST_DEFINE% %LINKER_FLAGS% %EXPORTED_FUNCTIONS% %WARNINGS% 
 del lock.file
-cl %INCLUDES% ..\src\main.cpp /D_AMD64_ /Fe:%EXE_NAME% %COMMON_FLAGS% %LINKER_FLAGS% %WARNINGS% 
+cl %INCLUDES% ..\src\main.cpp /D_AMD64_ /Fe:%EXE_NAME% %TEST_DEFINE% %COMMON_FLAGS% %LINKER_FLAGS% %WARNINGS% 
 
 cd ..
 
