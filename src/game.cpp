@@ -1,12 +1,12 @@
 
 #include "game.h"
 #include "game_util.h"
-#include "render_interface.h"
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
 
+#include "render_interface.cpp"
 #include "assets.cpp"
 #include "entity.cpp"
 #include "electric_door.cpp"
@@ -17,6 +17,7 @@
 /*
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Fix weird animation bugs 
+- Unlock map transitions
 
 TODO: Things that I can do beside arts and design I guess
 3. collectable: show in ui
@@ -160,6 +161,35 @@ bool8 IsDisappearing(Entity * entity)
         !entity->tweenController.NoTweens()  && !MapIsVisible(*mapResult.map);
     
     return result;
+}
+
+uint32 TilePosToFogIndex(IVec2 pos)
+{
+    IVec2 fogDim = gameState->fog.tileMax - gameState->fog.tileMin;
+    pos = pos - gameState->fog.tileMin;
+    
+    // NOTE: tilePos to fog index
+    // pos = { col, row } = { idx / fogDim.x, idx % fogDim.x }
+    uint32 idx = pos.x + pos.y * fogDim.x;
+    
+    return idx;
+}
+
+void RevealMap(Map & map)
+{
+    IVec2 fogDim = gameState->fog.tileMax - gameState->fog.tileMin;
+    for (int32 x = 0; x < map.width; x++)
+    {
+        for (int32 y = 0; y < map.height; y++)
+        {
+            IVec2 pos = map.tilePos + IVec2 {x + 1, y + 1};
+            pos = pos - gameState->fog.tileMin;
+            // NOTE: tilePos to fog index
+            // pos = { col, row } = { idx / fogDim.x, idx % fogDim.x }
+            uint32 idx = pos.x + pos.y * fogDim.x;
+            gameState->fog.fogTile.elements[idx] = 1;
+        }
+    }
 }
 
 void SetDrawingEntities()
@@ -768,6 +798,8 @@ inline float GetCameraZoom(Map & currentMap)
     
     float zoom = (zoom_per_tile / camMax);
     (newWidth < newHeight) ? zoom *= newWidth : zoom *= newHeight;
+    
+    if (zoom > 5) zoom = 5;
     
     return zoom;
 }
@@ -1696,8 +1728,11 @@ void GameplayUpdateAndRender()
                     {
                         if (entity->actionState == MOVE_STATE) SetActionState(entity, ANIMATE_STATE);
                     }
-                        entity->tweenController.Update();
-                        
+                            entity->tweenController.Update();
+                            
+                            uint32 fogIndex = TilePosToFogIndex(PivotToTilePos(entity->pivot, entity->tileSize));
+                            gameState->fog.fogTile.elements[fogIndex] = 1;
+                            
                         if (!IsDisappearing(entity))
                         {
                         gameState->simulating = true;
@@ -1789,8 +1824,10 @@ void GameplayUpdateAndRender()
                 gameState->prevMapIndex = gameState->currentMapIndex;
             }
             
-            if (GetPlayer())
-            {
+                if (Entity * player = GetPlayer(); player)
+                {
+                    
+                    
                 result = FindTileMap(GetPlayer()->tilePos);
                 if (result.map)
                 {
@@ -1811,9 +1848,10 @@ void GameplayUpdateAndRender()
                 }
                 
             }
-        }
-        
-        }
+            }
+            
+             RevealMap(gameState->tileMaps[gameState->playerMapIndex]);
+            }
     
     
     // NOTE: Camera Updates
@@ -1974,6 +2012,11 @@ void GameplayUpdateAndRender()
 }
     
     
+    static float contrast = 0.0f;
+    static float saturation = 0.0f;
+    static float brightness = 1.3f;
+    static bool8 debugView = false;
+    
     // NOTE: Debug Cheats
     {
         
@@ -1991,11 +2034,12 @@ void GameplayUpdateAndRender()
             
         }
         
+        if (IsKeyPressed(KEY_RIGHT_BRACKET))
+        {
+            debugView = !debugView;
+        }
+        
     }
-    
-    static float contrast = 0.0f;
-    static float saturation = 0.0f;
-    static float brightness = 1.3f;
     
     // NOTE: Render
     {
@@ -2033,10 +2077,13 @@ void GameplayUpdateAndRender()
         
         int32 count = ArrayCount(orderedDrawLayers);
         DrawSpriteLayers(orderedDrawLayers, count);
+        Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
         
-#if 0
+#if 1
+        if (debugView)
+        {
         Color colors[] = {
-            LIGHTGRAY, GRAY, DARKGRAY, YELLOW, GOLD, ORANGE, PINK, RED, MAROON, GREEN, LIME, DARKGREEN, SKYBLUE, BLUE, DARKBLUE, PURPLE, VIOLET, DARKPURPLE, BEIGE, BROWN, DARKBROWN, WHITE, BLACK, BLANK, MAGENTA, RAYWHITE,
+            LIGHTGRAY, GRAY, DARKGRAY, YELLOW, GOLD, ORANGE, PINK, RED, MAROON, GREEN, LIME, DARKGREEN, SKYBLUE, BLUE, DARKBLUE, PURPLE, VIOLET, DARKPURPLE, BEIGE, BROWN, DARKBROWN, WHITE, BLACK, MAGENTA, RAYWHITE,
         };
         
         int32 colorCount = ArrayCount(colors);
@@ -2049,8 +2096,9 @@ void GameplayUpdateAndRender()
                                                    gameState->tileMapCount,
                                                    sizeof(bool));
         
-        for (int32 mapIndex = 0; mapIndex < gameState->tileMapCount; mapIndex++)
+        for (uint32 mapIndex = 0; mapIndex < gameState->tileMapCount; mapIndex++)
         {
+            Map * tileMap = gameState->tileMaps + mapIndex;
             
             if (!set[mapIndex])
             {
@@ -2061,8 +2109,8 @@ void GameplayUpdateAndRender()
             
             
             // NOTE: Could be a setting
-            DrawTileMap(gameState->camera, tileMap.tilePos, 
-                        IVec2{ tileMap.width, tileMap.height },
+            DrawTileMap(gameState->camera.base, tileMap->tilePos, 
+                        IVec2{ tileMap->width, tileMap->height },
                         mColors[mapIndex], mColors[mapIndex]);
             Map & map = gameState->tileMaps[mapIndex];
             Rectangle mapRect = 
@@ -2074,23 +2122,41 @@ void GameplayUpdateAndRender()
             DrawRectangleLinesEx(mapRect, 5, BLUE);
             
             
+            }
+            
+            // Draw rectangle outline with extended parameters
+            Rectangle cameraRect = GetCameraRect(gameState->camera.base);
+            DrawRectangleLinesEx(cameraRect, 1, RED);
+            
+            if (followEnt)
+            {
+                Vector2 center = followEnt->pivot + Vector2 { followEnt->tileSize.x * 0.5f, followEnt->tileSize.y * 0.5f };
+                DrawCircleV(center, 5,  RED);
+                DrawCircleV(gameState->camera.base.target, 5, YELLOW);
+            }
+            
         }
+        
 #endif
         
-        // Draw rectangle outline with extended parameters
-        // Rectangle cameraRect = GetCameraRect(gameState->camera);
-        // DrawRectangleLinesEx(cameraRect, 1, RED);
-        
-        Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
-        
-        if (followEnt)
+        // NOTE: Draw Fog of War
+        Fog & fog = gameState->fog;
+        IVec2 fogDim = fog.tileMax - fog.tileMin;
+        for (uint32 idx = 0; idx < fog.fogTile.count; idx++)
         {
-        Vector2 center = followEnt->pivot + Vector2 { followEnt->tileSize.x * 0.5f, followEnt->tileSize.y * 0.5f };
-        
-        //DrawCircleV(center, 5,  RED);
-        //DrawCircleV(gameState->camera.base.target, 5, YELLOW);
+            // TODO
+            if (fog.fogTile.elements[idx] == 0)
+            {
+                int32 row = (idx) / fogDim.x;
+                int32 col = (idx) % fogDim.x;
+                IVec2 pos = { fog.tileMin.x + col, fog.tileMin.y + row };
+                
+                DrawTile(pos, BLACK);
+                }
         }
         
+        
+        // NOTE: Draw Screen Edge
         Rectangle source = GetCameraRect(gameState->camera.base);
         if (source.width > source.height) 
         {
@@ -2102,8 +2168,9 @@ void GameplayUpdateAndRender()
             source.y += (source.height - source.width) * 0.5f;
             source.height = source.width;
         }
-        
         DrawRectangleLinesEx(source, 5, RAYWHITE);
+        
+        
         
         EndMode2D();
         EndTextureMode();
@@ -2226,9 +2293,7 @@ void GameplayUpdateAndRender()
 #endif
         
         DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
-        
-        ;
-    }    
+        }    
 }
 
 void InitializeGame()
@@ -2310,6 +2375,8 @@ void CleanUpGame()
     }
     gameState->entities.Clear();
     
+    // NOTE: CleanUpFog
+    UnloadRenderTexture(gameState->fog.fogTexture);
 }
 
 //  ========================================================================

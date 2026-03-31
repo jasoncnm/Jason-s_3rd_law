@@ -16,6 +16,7 @@
 #include "platform.h"
 
 #if defined _WIN32
+
 #include "win32_hot_reload.cpp"
 #elif defined __linux__
 #error Linux build not supported
@@ -24,9 +25,7 @@
 #endif
 
 #else
-
 #include "game.cpp"
-
 #endif
 
 

@@ -127,6 +127,14 @@ struct Map
     bool8 stateInitilized = false;
 };
 
+struct Fog
+{
+    IVec2 tileMin;
+    IVec2 tileMax;
+     RenderTexture2D fogTexture;
+    DynamicArray<uint8> fogTile;
+};
+
 struct MyCamera
 {
     enum FollowState
@@ -176,6 +184,8 @@ struct GameState
     uint32 tileMapCount;
     Map tileMaps[500];
     Map * lv2Map;
+    
+    Fog fog;
     
     Input input;
     Color bgColor;

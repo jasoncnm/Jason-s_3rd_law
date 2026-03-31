@@ -144,6 +144,7 @@ void ResetEvents(Array<TweenEvent, MAX_EVENT> & events)
     {
         events[i].Reset();
     }
+    events.Clear();
 }
 
 void OnPlayEvent(TweenController * controller)

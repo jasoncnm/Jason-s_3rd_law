@@ -103,14 +103,6 @@ Vector2 GetTilePivot(Entity * entity)
 }
 
 
-void DrawTile(IVec2 tilePos, Color color)
-{
-    Vector2 tileSize = Vector2 { MAP_TILE_SIZE, MAP_TILE_SIZE };
-    Vector2 pivot = GetTilePivot(tilePos, tileSize);
-    Rectangle rect = { pivot.x, pivot.y, MAP_TILE_SIZE, MAP_TILE_SIZE };
-    DrawRectangleRec(rect, color);
-}
-
 
 IVec2 PivotToTilePos(Vector2 pivot, Vector2 tileSize)
 {

@@ -438,7 +438,6 @@ state.currentMapIndex = -1;
                 
                 SM_TRACE("Level width: %i, Level height: %i", mapWidth, mapHeight);
             }
-            state.tileMaps[index] = tileMap;
             
             if (min.x > startPos.x) min.x = startPos.x;
             if (min.y > startPos.y) min.y = startPos.y;
@@ -449,12 +448,15 @@ state.currentMapIndex = -1;
             
             if (max.x < endPos.x) max.x = endPos.x;
             if (max.y < endPos.y) max.y = endPos.y;
-
+            
+            state.tileMaps[index] = tileMap;
+            
             index++;
         }
 
     }
-
+    
+    // NOTE(Jason): 
     //animationPlaying = false;
     //animateSlimeCount = 0;
 
@@ -463,6 +465,22 @@ state.currentMapIndex = -1;
         state.tileMax = max;
         state.starCount = 0;
     }
+    
+    // Render texture to render fog of war
+    // NOTE: To get an automatic smooth-fog effect we use a render texture to render fog
+    // at a smaller size (one pixel per tile) and scale it on drawing with bilinear filtering
+    Fog & fog = state.fog;
+    fog.tileMin = state.tileMin;
+    fog.tileMax = state.tileMax;
+    
+    IVec2 dim = fog.tileMax - fog.tileMin;
+    
+    fog.fogTexture = LoadRenderTexture(dim.x, dim.y);
+    SetTextureFilter(fog.fogTexture.texture, TEXTURE_FILTER_BILINEAR);
+    SetTextureWrap(fog.fogTexture.texture, TEXTURE_WRAP_CLAMP);
+    fog.fogTile.count = (dim.x) * (dim.y);
+    fog.fogTile.elements = (uint8 *)BumpAllocArray(gameMemory->persistentStorage, fog.fogTile.count, sizeof(uint8));
+    memset(fog.fogTile.elements, 0, fog.fogTile.count * sizeof(*fog.fogTile.elements));
     
     SetupEntityTable(state);
     SetUpElectricDoor();
