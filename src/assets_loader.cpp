@@ -461,8 +461,8 @@ state.currentMapIndex = -1;
     //animateSlimeCount = 0;
 
     {
-        state.tileMin = min;
-        state.tileMax = max;
+        state.tileMin = min - IVec2 { 1, 1 };
+        state.tileMax = max + IVec2 { 1, 1 };
         state.starCount = 0;
     }
     
@@ -470,18 +470,29 @@ state.currentMapIndex = -1;
     // NOTE: To get an automatic smooth-fog effect we use a render texture to render fog
     // at a smaller size (one pixel per tile) and scale it on drawing with bilinear filtering
     Fog & fog = state.fog;
+    if (!fog.initialized)
+    {
+        fog.initialized = true;
     fog.tileMin = state.tileMin;
     fog.tileMax = state.tileMax;
+        fog.dim = fog.tileMax - fog.tileMin;
+        
+        fog.fogTex = LoadRenderTexture(1, 1);
+        SetTextureFilter(fog.fogTex.texture, TEXTURE_FILTER_BILINEAR);
+        SetTextureWrap(fog.fogTex.texture, TEXTURE_WRAP_CLAMP);
+        BeginTextureMode(fog.fogTex);
+        DrawRectangle(0, 0, 1, 1, BLACK);
+        EndTextureMode();
     
-    IVec2 dim = fog.tileMax - fog.tileMin;
-    
-    fog.fogTexture = LoadRenderTexture(dim.x, dim.y);
-    SetTextureFilter(fog.fogTexture.texture, TEXTURE_FILTER_BILINEAR);
-    SetTextureWrap(fog.fogTexture.texture, TEXTURE_WRAP_CLAMP);
-    fog.fogTile.count = (dim.x) * (dim.y);
-    fog.fogTile.elements = (uint8 *)BumpAllocArray(gameMemory->persistentStorage, fog.fogTile.count, sizeof(uint8));
-    memset(fog.fogTile.elements, 0, fog.fogTile.count * sizeof(*fog.fogTile.elements));
-    
+    fog.fogRenderTex = LoadRenderTexture(fog.dim.x, fog.dim.y);
+    SetTextureFilter(fog.fogRenderTex.texture, TEXTURE_FILTER_BILINEAR);
+    SetTextureWrap(fog.fogRenderTex.texture, TEXTURE_WRAP_CLAMP);
+    uint32 count = (fog.dim.x) * (fog.dim.y);
+        fog.fogTiles = (uint8 *)BumpAllocArray(gameMemory->persistentStorage, count, sizeof(uint8));
+        memset(fog.fogTiles, 0, count * sizeof(*fog.fogTiles));
+        
+        
+    }
     SetupEntityTable(state);
     SetUpElectricDoor();
 }

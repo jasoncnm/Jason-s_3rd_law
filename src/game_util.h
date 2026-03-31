@@ -28,9 +28,9 @@ inline bool8 CheckOutOfBound(int32 tileX, int32 tileY)
 {
     bool8 result =
     (tileX < gameState->tileMin.x)
-        || (tileX > gameState->tileMax.x)
+        || (tileX >= gameState->tileMax.x)
         || (tileY < gameState->tileMin.y)
-        || (tileY > gameState->tileMax.y);
+        || (tileY >= gameState->tileMax.y);
     
     return result;
 }

@@ -189,6 +189,7 @@ int main(int argumentCount, char *argumentArray[])
         DrawCircle(12, 12, 10, WHITE);
         EndTextureMode();
         
+        
         gameState->currentScreen = TITLE_SCREEN;
         
     }
@@ -222,13 +223,17 @@ int main(int argumentCount, char *argumentArray[])
     // NOTE: De-Initialization
     //--------------------------------------------------------------------------------------
     {
-        CloseAudioDevice();
         CloseWindow();
-        UnloadTexture(gameState->texture);
-        UnloadTexture(gameState->playerTexture);
-        UnloadRenderTexture(gameState->starFields.starTexture);
+        
+        CloseAudioDevice();
         UnloadShaderInfo(&gameState->postShader);
         UnloadShaderInfo(&gameState->movableShader);
-        } 
+        
+        UnloadTexture(gameState->texture);
+        UnloadTexture(gameState->playerTexture);
+        UnloadRenderTexture(gameState->fog.fogTex);
+        UnloadRenderTexture(gameState->starFields.starTexture);
+        UnloadRenderTexture(gameState->fog.fogRenderTex);
+    } 
 }
 #endif

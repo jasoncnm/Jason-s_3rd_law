@@ -1,5 +1,6 @@
 #include "raylib.h"
 
+#include <cmath>
 #include <stdlib.h>                 // Required for: calloc(), free()
 #define MAP_TILE_SIZE    32         // Tiles size 32x32 pixels
 #define PLAYER_SIZE      16         // Player size
@@ -28,6 +29,11 @@ void test()
     
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - fog of war");
     
+    Camera2D camera = { 0 };
+    camera.target = Vector2 { (float)screenWidth / 2, (float)screenHeight / 2 };
+    camera.offset = Vector2 { (float)screenWidth / 2, (float)screenHeight / 2 };
+    camera.zoom = 1.0f;
+    
     Map map = { 0 };
     map.tilesX = 25;
     map.tilesY = 15;
@@ -46,6 +52,8 @@ void test()
     Vector2 playerPosition = { 180, 130 };
     int playerTileX = 0;
     int playerTileY = 0;
+    
+    RenderTexture2D renderTarget = LoadRenderTexture(screenWidth, screenHeight);
     
     // Render texture to render fog of war
     // NOTE: To get an automatic smooth-fog effect we use a render texture to render fog
@@ -74,6 +82,8 @@ void test()
         if (playerPosition.y < 0) playerPosition.y = 0;
         else if ((playerPosition.y + PLAYER_SIZE) > (map.tilesY*MAP_TILE_SIZE)) playerPosition.y = (float)map.tilesY*MAP_TILE_SIZE - PLAYER_SIZE;
         
+        camera.target = playerPosition;
+        
         // Previous visited tiles are set to partial fog
         for (unsigned int i = 0; i < map.tilesX*map.tilesY; i++) if (map.tileFog[i] == 1) map.tileFog[i] = 2;
         
@@ -99,10 +109,9 @@ void test()
         else if (map.tileFog[y*map.tilesX + x] == 2) DrawRectangle(x, y, 1, 1, Fade(BLACK, 0.8f));
         EndTextureMode();
         
-        BeginDrawing();
-        
+        BeginTextureMode(renderTarget);
+        BeginMode2D(camera);
         ClearBackground(RAYWHITE);
-        
         for (unsigned int y = 0; y < map.tilesY; y++)
         {
             for (unsigned int x = 0; x < map.tilesX; x++)
@@ -117,11 +126,22 @@ void test()
         // Draw player
         DrawRectangleV(playerPosition, Vector2{ PLAYER_SIZE, PLAYER_SIZE }, RED);
         
-        
+#if 1
         // Draw fog of war (scaled to full map, bilinear filtering)
         DrawTexturePro(fogOfWar.texture, Rectangle{ 0, 0, (float)fogOfWar.texture.width, (float)-fogOfWar.texture.height },
                        Rectangle{ 0, 0, (float)map.tilesX*MAP_TILE_SIZE, (float)map.tilesY*MAP_TILE_SIZE },
                        Vector2{ 0, 0 }, 0.0f, WHITE);
+#endif
+        EndMode2D();
+        EndTextureMode();
+        
+        BeginDrawing();
+        
+        ClearBackground(RAYWHITE);
+        
+        DrawTextureRec(renderTarget.texture,
+                       Rectangle { 0, 0, (float)screenWidth, -(float)screenHeight },
+                       Vector2 { 0, 0 }, WHITE);
         
         // Draw player current tile
         DrawText(TextFormat("Current tile: [%i,%i]", playerTileX, playerTileY), 10, 10, 20, RAYWHITE);
@@ -137,6 +157,7 @@ void test()
     RL_FREE(map.tileFog);   // Free allocated map tile fog state
     
     UnloadRenderTexture(fogOfWar);  // Unload render texture
+    UnloadRenderTexture(renderTarget);
     
     CloseWindow();          // Close window and OpenGL context
     //--------------------------------------------------------------------------------------

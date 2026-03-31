@@ -10,6 +10,8 @@
 #define SCREEN_WIDTH  1000
 #define SCREEN_HEIGHT 1000
 
+#define ENTITY_TILE_VISIBILITY  3   // Player can see 2 tiles around its position
+
 #define MAP_TILE_SIZE 32       // Tiles size
 #define DIST_ONE_TILE MAP_TILE_SIZE
 
@@ -129,10 +131,16 @@ struct Map
 
 struct Fog
 {
+    bool8 initialized = false;
     IVec2 tileMin;
     IVec2 tileMax;
-     RenderTexture2D fogTexture;
-    DynamicArray<uint8> fogTile;
+    IVec2 dim;
+    // NOTE: Render texture of Fog of War
+    RenderTexture2D fogRenderTex;
+    // NOTE: Render texture of one tile of Fog
+    RenderTexture2D fogTex;
+    
+      uint8 * fogTiles;
 };
 
 struct MyCamera
@@ -151,12 +159,6 @@ struct MyCamera
     int32 followEntityIndex;
     FollowState followState;
 };
-
-struct SceneData
-{
-    char * levelPath;
-    UndoState entityState;
-    };
 
 // NOTE: GameState
 struct GameState

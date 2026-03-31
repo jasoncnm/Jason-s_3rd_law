@@ -163,16 +163,54 @@ bool8 IsDisappearing(Entity * entity)
     return result;
 }
 
-uint32 TilePosToFogIndex(IVec2 pos)
+uint32 TilePosToFogIndex(Fog & fog, IVec2 pos)
 {
-    IVec2 fogDim = gameState->fog.tileMax - gameState->fog.tileMin;
-    pos = pos - gameState->fog.tileMin;
+    int32 x = pos.x - fog.tileMin.x;
+    int32 y = fog.tileMax.y - pos.y - 1;
+    SM_ASSERT(x >= 0, "invalid tile position");
+    SM_ASSERT(y >= 0, "invalid tile position");
     
-    // NOTE: tilePos to fog index
-    // pos = { col, row } = { idx / fogDim.x, idx % fogDim.x }
-    uint32 idx = pos.x + pos.y * fogDim.x;
+    
+    uint32 idx = y * fog.dim.x + x;
     
     return idx;
+}
+
+IVec2 FogCoordToTilePos(Fog & fog, int32 x, int32 y)
+{
+    IVec2 pos;
+    
+    pos.x = x + fog.tileMin.x;
+    pos.y = fog.tileMin.y - y - 1;
+    return pos;
+}
+
+void SetFogTiles(Fog & fog, int32 idx, uint8 value)
+{
+    fog.fogTiles[idx] = value;
+}
+
+void RevealEntity(Entity * entity)
+{
+    
+    IVec2 renderTilePos = PivotToTilePos(entity->pivot, entity->tileSize);
+    
+    for (int y = renderTilePos.y - ENTITY_TILE_VISIBILITY;
+         y <= renderTilePos.y + ENTITY_TILE_VISIBILITY;
+         y++)
+    {
+        for (int x = renderTilePos.x - ENTITY_TILE_VISIBILITY;
+             x <= renderTilePos.x + ENTITY_TILE_VISIBILITY;
+             x++)
+        {
+            if (!CheckOutOfBound(x, y))
+            {
+                uint32 fogIndex = TilePosToFogIndex(gameState->fog, IVec2{x,y});
+                SetFogTiles(gameState->fog, fogIndex, 1);
+            }
+        }
+    }
+    
 }
 
 void RevealMap(Map & map)
@@ -183,11 +221,8 @@ void RevealMap(Map & map)
         for (int32 y = 0; y < map.height; y++)
         {
             IVec2 pos = map.tilePos + IVec2 {x + 1, y + 1};
-            pos = pos - gameState->fog.tileMin;
-            // NOTE: tilePos to fog index
-            // pos = { col, row } = { idx / fogDim.x, idx % fogDim.x }
-            uint32 idx = pos.x + pos.y * fogDim.x;
-            gameState->fog.fogTile.elements[idx] = 1;
+            uint32 idx = TilePosToFogIndex(gameState->fog, pos);
+            SetFogTiles(gameState->fog, idx, 1);
         }
     }
 }
@@ -925,16 +960,21 @@ inline bool8 UpdateCamera(bool refocus = false)
                 cam.base.target = pos;
                 cam.base.zoom = GetCameraZoom(*result.map);
                 cam.base.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+                
                 break;
             }
             
             if (gameState->camera.tweenController.NoTweens())
             {
                 FindTileMapResult result = FindTileMap(followEnt->tilePos);
-                if (result.map) UpdateCameraToTileMapSmooth(*result.map,
+                if (result.map) 
+                {
+                    UpdateCameraToTileMapSmooth(*result.map,
                                                             CAMERA_MOVE_FUNC, CAMERA_ZOOM_FUNC,
                                                             CAMERA_MOVE_SPEED, CAMERA_ZOOM_SPEED);
+                }
             }
+            
             
             break;
             }
@@ -1730,8 +1770,7 @@ void GameplayUpdateAndRender()
                     }
                             entity->tweenController.Update();
                             
-                            uint32 fogIndex = TilePosToFogIndex(PivotToTilePos(entity->pivot, entity->tileSize));
-                            gameState->fog.fogTile.elements[fogIndex] = 1;
+                            RevealEntity(entity);
                             
                         if (!IsDisappearing(entity))
                         {
@@ -1850,7 +1889,7 @@ void GameplayUpdateAndRender()
             }
             }
             
-             RevealMap(gameState->tileMaps[gameState->playerMapIndex]);
+             // RevealMap(gameState->tileMaps[gameState->playerMapIndex]);
             }
     
     
@@ -1896,7 +1935,7 @@ void GameplayUpdateAndRender()
     gameState->camera.moveDir = { 0 };
     if (!Vector2Equals(oldTarget, newTarget))
     {
-            gameState->camera.moveDir = (oldTarget - newTarget) * gameState->camera.base.zoom;
+                gameState->camera.moveDir = (oldTarget - newTarget) * 0.1f * gameState->camera.base.zoom;
     }
     }
     
@@ -2043,34 +2082,36 @@ void GameplayUpdateAndRender()
     
     // NOTE: Render
     {
-        BeginMode2D(gameState->camera.base);
-        ClearBackground(BLANK);
         
 Fog & fog = gameState->fog;
         IVec2 fogDim = fog.tileMax - fog.tileMin;
         
         // NOTE: Draw Fog of War
-        SM_ASSERT(IsRenderTextureValid(fog.fogTexture), "render texture not valid");
-        SM_ASSERT(fog.fogTexture.texture.width == fogDim.x, "texture width not valid");
-        SM_ASSERT(fog.fogTexture.texture.height == fogDim.y, "texture height not valid");
-        BeginTextureMode(fog.fogTexture);
-        for (uint32 idx = 0; idx < fog.fogTile.count; idx++)
+        SM_ASSERT(IsRenderTextureValid(fog.fogRenderTex), "render texture not valid");
+        SM_ASSERT(fog.fogRenderTex.texture.width == fogDim.x, "texture width not valid");
+        SM_ASSERT(fog.fogRenderTex.texture.height == fogDim.y, "texture height not valid");
+        
+        if (gameState->currentScreen == GAME_MAIN_SCREEN)
         {
-            // TODO
-            if (fog.fogTile.elements[idx] == 0)
-            {
-                int32 row = (idx) / fogDim.x;
-                int32 col = (idx) % fogDim.x;
-                IVec2 pos = { fog.tileMin.x + col, fog.tileMin.y + row };
-                
-                Vector2 pivot = GetTilePivot(pos, DEFAULT_TILE_SIZE);
-                Rectangle rect = { pivot.x, pivot.y, 1, 1, };
-                DrawRectangleRec(rect, BLACK);
+            BeginTextureMode(fog.fogRenderTex);
+            ClearBackground(BLANK);
+            
+        for (int32 y = 0; y < fog.dim.y; y++)
+        {
+            for (int32 x = 0; x < fog.dim.x; x++)
+                {
+                    int32 idx = y * fog.dim.x + x;
+                    if (fog.fogTiles[idx] == 0)
+                    {
+                    DrawTexture(fog.fogTex.texture, x, y, WHITE);
+                        // DrawRectangle(x, y, 1, 1, BLACK);
+                    }
+                        }
             }
+            EndTextureMode();
+            
         }
         
-        EndTextureMode();
-        EndMode2D();
         
         UpdateShaderInfo(gameState->movableShader);
         UpdateShaderInfo(gameState->postShader);
@@ -2164,12 +2205,19 @@ Fog & fog = gameState->fog;
             
         }
         
-        DrawTexturePro(fog.fogTexture.texture, 
-                       Rectangle { 0, 0, 1, 1 },
-                       Rectangle { 50, 6, MAP_TILE_SIZE, MAP_TILE_SIZE },
+        if (gameState->currentScreen == GAME_MAIN_SCREEN)
+        {
+        Vector2 pivot = GetTilePivot(fog.tileMin, DEFAULT_TILE_SIZE);
+        DrawTexturePro(fog.fogRenderTex.texture, 
+                       Rectangle { 0, 0, (real32)fog.fogRenderTex.texture.width, (real32)fog.fogRenderTex.texture.height },
+                       Rectangle {
+                           pivot.x,
+                           pivot.y, 
+                           (float)MAP_TILE_SIZE * fog.dim.x,
+                           (float)MAP_TILE_SIZE * fog.dim.y
+                       },
                        Vector2 { 0, 0 }, 0, WHITE);
-        
-        DrawTile(IVec2{50,6}, RED);
+        }
         
         // NOTE: Draw Screen Edge
         Rectangle source = GetCameraRect(gameState->camera.base);
@@ -2337,7 +2385,8 @@ void InitializeGame()
             }
             
             slimeA->pivot = GetTilePivot(slimeA);
-        }
+            RevealEntity(slimeA);
+            }
         
         if (slimeB)
         {
@@ -2349,7 +2398,8 @@ void InitializeGame()
             }
             
             slimeB->pivot = GetTilePivot(slimeB);
-        }
+            RevealEntity(slimeB);
+            }
         
         if (slimeA && slimeB && slimeA->tilePos == slimeB->tilePos) 
         {
@@ -2389,10 +2439,7 @@ void CleanUpGame()
         gameState->entityTable[i].Clear();
     }
     gameState->entities.Clear();
-    
-    // NOTE: CleanUpFog
-    UnloadRenderTexture(gameState->fog.fogTexture);
-}
+    }
 
 //  ========================================================================
 //              NOTE: Game Functions (exposed)
@@ -2449,8 +2496,6 @@ UPDATE_AND_RENDER(UpdateAndRender)
             int32 instX = (GetScreenWidth() - MeasureText(Instructions, 20)) / 2;
             int32 instY = (GetScreenHeight()) / 2;
             DrawText(Instructions, instX, instY, 20, DARKGREEN);
-            
-            ;
             
             if (gameState->switching || JustPressed(gameState->input.keyMappings, SPLIT_KEY))
             {
@@ -2540,8 +2585,6 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 *running = false;   
             }
             
-            ;
-            
             break;            
         }
         case PAUSE_MENU_SCREEN:
@@ -2584,7 +2627,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             {
                 CleanUpGame();
                 ChangeScreen(MENU_SCREEN);
-            };
+            }
             
             break;
         }
