@@ -115,6 +115,8 @@ int main(int argumentCount, char *argumentArray[])
         return -1;
     }
     
+    memset(gameState, 0, sizeof(GameState));
+    
     Memory memory = { &transientStorage,  &persistentStorage };
     //--------------------------------------------------------------------------------------
     // NOTE: Initialization
@@ -189,7 +191,7 @@ int main(int argumentCount, char *argumentArray[])
         DrawCircle(12, 12, 10, WHITE);
         EndTextureMode();
         
-        
+        gameState->fog = { 0 };
         gameState->currentScreen = TITLE_SCREEN;
         
     }
@@ -231,9 +233,8 @@ int main(int argumentCount, char *argumentArray[])
         
         UnloadTexture(gameState->texture);
         UnloadTexture(gameState->playerTexture);
-        UnloadRenderTexture(gameState->fog.fogTex);
         UnloadRenderTexture(gameState->starFields.starTexture);
         UnloadRenderTexture(gameState->fog.fogRenderTex);
-    } 
+    }
 }
 #endif

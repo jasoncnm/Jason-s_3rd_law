@@ -472,24 +472,28 @@ state.currentMapIndex = -1;
     Fog & fog = state.fog;
     if (!fog.initialized)
     {
+        uint32 old_count = fog.dim.x * fog.dim.y;
+        
         fog.initialized = true;
     fog.tileMin = state.tileMin;
     fog.tileMax = state.tileMax;
         fog.dim = fog.tileMax - fog.tileMin;
         
-        fog.fogTex = LoadRenderTexture(1, 1);
-        SetTextureFilter(fog.fogTex.texture, TEXTURE_FILTER_BILINEAR);
-        SetTextureWrap(fog.fogTex.texture, TEXTURE_WRAP_CLAMP);
-        BeginTextureMode(fog.fogTex);
-        DrawRectangle(0, 0, 1, 1, BLACK);
-        EndTextureMode();
-    
     fog.fogRenderTex = LoadRenderTexture(fog.dim.x, fog.dim.y);
     SetTextureFilter(fog.fogRenderTex.texture, TEXTURE_FILTER_BILINEAR);
-    SetTextureWrap(fog.fogRenderTex.texture, TEXTURE_WRAP_CLAMP);
-    uint32 count = (fog.dim.x) * (fog.dim.y);
-        fog.fogTiles = (uint8 *)BumpAllocArray(gameMemory->persistentStorage, count, sizeof(uint8));
-        memset(fog.fogTiles, 0, count * sizeof(*fog.fogTiles));
+        SetTextureWrap(fog.fogRenderTex.texture, TEXTURE_WRAP_CLAMP);
+        
+        uint32 count = (fog.dim.x) * (fog.dim.y);
+        if (!fog.fogPixels || count > old_count)
+        {
+        fog.fogPixels = (Color *)BumpAllocArray(gameMemory->persistentStorage, count, sizeof(Color));
+        }
+        
+        for (uint32 i = 0; i < count; i++)
+        {
+            fog.fogPixels[i] = BLACK;
+        }
+        // memset(fog.fogPixels, BLANK, count * sizeof(*fog.fogPixels));
         
         
     }

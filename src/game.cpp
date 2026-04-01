@@ -166,28 +166,18 @@ bool8 IsDisappearing(Entity * entity)
 uint32 TilePosToFogIndex(Fog & fog, IVec2 pos)
 {
     int32 x = pos.x - fog.tileMin.x;
-    int32 y = fog.tileMax.y - pos.y - 1;
+    int32 y = pos.y - fog.tileMin.y;
     SM_ASSERT(x >= 0, "invalid tile position");
     SM_ASSERT(y >= 0, "invalid tile position");
-    
     
     uint32 idx = y * fog.dim.x + x;
     
     return idx;
 }
 
-IVec2 FogCoordToTilePos(Fog & fog, int32 x, int32 y)
+void SetFogTiles(Fog & fog, int32 idx, Color value)
 {
-    IVec2 pos;
-    
-    pos.x = x + fog.tileMin.x;
-    pos.y = fog.tileMin.y - y - 1;
-    return pos;
-}
-
-void SetFogTiles(Fog & fog, int32 idx, uint8 value)
-{
-    fog.fogTiles[idx] = value;
+    fog.fogPixels[idx] = value;
 }
 
 void RevealEntity(Entity * entity)
@@ -206,7 +196,7 @@ void RevealEntity(Entity * entity)
             if (!CheckOutOfBound(x, y))
             {
                 uint32 fogIndex = TilePosToFogIndex(gameState->fog, IVec2{x,y});
-                SetFogTiles(gameState->fog, fogIndex, 1);
+                SetFogTiles(gameState->fog, fogIndex, BLANK);
             }
         }
     }
@@ -222,7 +212,7 @@ void RevealMap(Map & map)
         {
             IVec2 pos = map.tilePos + IVec2 {x + 1, y + 1};
             uint32 idx = TilePosToFogIndex(gameState->fog, pos);
-            SetFogTiles(gameState->fog, idx, 1);
+            SetFogTiles(gameState->fog, idx, BLANK);
         }
     }
 }
@@ -2093,23 +2083,7 @@ Fog & fog = gameState->fog;
         
         if (gameState->currentScreen == GAME_MAIN_SCREEN)
         {
-            BeginTextureMode(fog.fogRenderTex);
-            ClearBackground(BLANK);
-            
-        for (int32 y = 0; y < fog.dim.y; y++)
-        {
-            for (int32 x = 0; x < fog.dim.x; x++)
-                {
-                    int32 idx = y * fog.dim.x + x;
-                    if (fog.fogTiles[idx] == 0)
-                    {
-                    DrawTexture(fog.fogTex.texture, x, y, WHITE);
-                        // DrawRectangle(x, y, 1, 1, BLACK);
-                    }
-                        }
-            }
-            EndTextureMode();
-            
+            UpdateTexture(fog.fogRenderTex.texture, fog.fogPixels);
         }
         
         
@@ -2627,7 +2601,10 @@ UPDATE_AND_RENDER(UpdateAndRender)
             {
                 CleanUpGame();
                 ChangeScreen(MENU_SCREEN);
-            }
+                gameState->fog.initialized = false;
+                UnloadRenderTexture(gameState->fog.fogRenderTex);
+                // NOTE: check memory leak!
+                }
             
             break;
         }

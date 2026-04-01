@@ -135,12 +135,9 @@ struct Fog
     IVec2 tileMin;
     IVec2 tileMax;
     IVec2 dim;
-    // NOTE: Render texture of Fog of War
-    RenderTexture2D fogRenderTex;
-    // NOTE: Render texture of one tile of Fog
-    RenderTexture2D fogTex;
     
-      uint8 * fogTiles;
+    RenderTexture2D fogRenderTex;
+    Color * fogPixels;
 };
 
 struct MyCamera

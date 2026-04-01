@@ -100,11 +100,7 @@ void DrawSprite(Camera2D camera, Texture2D texture, Sprite & sprite, Vector2 top
         tileSize.x, tileSize.y
     };
     
-    // Draw a part of a texture defined by a rectangle with 'pro' parameters
-    if (CheckCollisionRecs(dest, GetCameraRect(camera)))
-    {
-        DrawTexturePro(texture,  source,  dest, { 0, 0 }, 0, color);
-    }
+    DrawTexturePro(texture,  source,  dest, { 0, 0 }, 0, color);
 }
 
 
@@ -197,9 +193,25 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields, int32 offsetX = 0, int32 
     
     for (uint32 i = 0; i < STAR_COUNT; i++)
     {
-        float radius = Lerp(5.5f, 1.2f, stars[i].z);
+        float radius = Lerp(15, 5, stars[i].z);
         Color color = ColorLerp(DARKPURPLE, SKYBLUE, stars[i].z);
-        DrawCircleV(starsScreenPos[i], radius * 1.5f, color);
+        DrawTexturePro(starFields->starTexture.texture,
+                       Rectangle 
+                       {
+                           0,
+                           0,
+                           (float)starFields->starTexture.texture.width,
+                           -(float)starFields->starTexture.texture.height
+                       },
+                       Rectangle
+                       {
+                           starsScreenPos[i].x,
+                           starsScreenPos[i].y,
+                           radius, radius
+                       },
+                       Vector2 { 0, 0 }, 0, color);
+        
+        // DrawCircleV(starsScreenPos[i], radius * 1.5f, color);
     }
     
 }
