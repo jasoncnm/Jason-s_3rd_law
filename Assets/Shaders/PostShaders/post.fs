@@ -23,6 +23,9 @@ float numColors = 10.0;
 uniform vec2 u_frameSize;
 uniform float offset = 0.0;
 uniform float brightness = 1.3;
+uniform float contrast = -10.0;
+uniform float saturation = -10.0;
+
 uniform bool shake;
 
 vec4 applyBloom(vec4 color, vec2 uv)
@@ -197,13 +200,22 @@ void main()
     // Texel color fetching from texture sampler
     // color = vfx;
     // color = applyPixelizer(uv);
+    
     color = applyPosterization(color);
     color = applyBloom(color, uv);
     color = applyScanline(color, uv);
     color = applyVignette(color, uv, miny, maxy);
     // color = mix(color, vfx, 1);  
+
+    // Apply contrast
+    color.rgb = (color.rgb - 0.5f)*(contrast/100.0f + 1.0f) + 0.5f;
+
     color.rgb = pow(color.rgb, vec3(1.0/brightness));
  
+    // Apply saturation
+    float intensity = dot(color.rgb, vec3(0.299f, 0.587f, 0.114f));
+    color.rgb = (color.rgb - intensity)*saturation/100.0f + color.rgb;
+
     // clipped unwanted uvs only render square
     if (uv.x < minx || uv.x > maxx)
         color *= 0.0;
