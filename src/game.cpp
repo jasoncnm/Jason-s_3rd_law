@@ -1879,7 +1879,7 @@ void GameplayUpdateAndRender()
             }
             }
             
-             // RevealMap(gameState->tileMaps[gameState->playerMapIndex]);
+             RevealMap(gameState->tileMaps[gameState->playerMapIndex]);
             }
     
     
