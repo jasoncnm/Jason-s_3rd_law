@@ -16,7 +16,7 @@ Tween CreateTween(TweenParams params, float (*Easing)(float), float animateSpeed
     tween.dt = animateSpeed;
     tween.Easing = Easing;
     tween.play = false;
-
+    
     return tween;
 }
 
@@ -55,13 +55,16 @@ void Tween::Reset()
     }
 
     // A + (B - A) * t
+    
     switch (params.paramType)
     {
         case PARAM_TYPE_FLOAT: 
         {
             SM_ASSERT(params.realF, "want to change realF but is null");
             float value = params.startF + (params.endF - params.startF) * current_t;
-            *params.realF = (value);
+            
+            *params.realF = value;
+            
             break;
         }
         case PARAM_TYPE_VECTOR2:
@@ -77,7 +80,9 @@ void Tween::Reset()
         {
             SM_ASSERT(params.realColor, "want to change realColor but is null");
             Color color = ColorLerp(params.startColor, params.endColor, current_t);
+            
             *params.realColor = color;
+            
             break;
         }
         case PARAM_TYPE_INT:
@@ -86,7 +91,7 @@ void Tween::Reset()
         }
     }
     
-}
+    }
 
 
 void * Tween::GetTweeningValue()

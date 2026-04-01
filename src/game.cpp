@@ -5,7 +5,6 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
-
 #include "render_interface.cpp"
 #include "assets.cpp"
 #include "entity.cpp"
@@ -14,6 +13,7 @@
 #include "tween.cpp"
 #include "tween_controller.cpp"
 #include "save_game.cpp"
+
 /*
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Fix weird animation bugs 
@@ -175,29 +175,30 @@ uint32 TilePosToFogIndex(Fog & fog, IVec2 pos)
     return idx;
 }
 
-void SetFogTiles(Fog & fog, int32 idx, Color value)
+void RevealTile(Fog & fog, IVec2 tilePos, Color value = BLANK)
 {
-    fog.fogPixels[idx] = value;
+    uint32 fogIndex = TilePosToFogIndex(fog, tilePos);
+    // TODO fade this value
+    fog.fogPixels[fogIndex] = value;
 }
 
-void RevealEntity(Entity * entity)
+void RevealEntity(Entity * entity, int32 visibility)
 {
-    
+    if (gameState->currentScreen == GAME_TUT_SCREEN) return;
     IVec2 renderTilePos = PivotToTilePos(entity->pivot, entity->tileSize);
     
-    for (int y = renderTilePos.y - ENTITY_TILE_VISIBILITY;
-         y <= renderTilePos.y + ENTITY_TILE_VISIBILITY;
+    for (int32 y = renderTilePos.y - visibility;
+         y <= renderTilePos.y + visibility;
          y++)
     {
-        for (int x = renderTilePos.x - ENTITY_TILE_VISIBILITY;
-             x <= renderTilePos.x + ENTITY_TILE_VISIBILITY;
+        for (int32 x = renderTilePos.x - visibility;
+             x <= renderTilePos.x + visibility;
              x++)
         {
             if (!CheckOutOfBound(x, y))
             {
-                uint32 fogIndex = TilePosToFogIndex(gameState->fog, IVec2{x,y});
-                SetFogTiles(gameState->fog, fogIndex, BLANK);
-            }
+                RevealTile(gameState->fog, IVec2{x, y});
+                }
         }
     }
     
@@ -205,14 +206,14 @@ void RevealEntity(Entity * entity)
 
 void RevealMap(Map & map)
 {
+    if (gameState->currentScreen == GAME_TUT_SCREEN) return;
     IVec2 fogDim = gameState->fog.tileMax - gameState->fog.tileMin;
     for (int32 x = 0; x < map.width; x++)
     {
         for (int32 y = 0; y < map.height; y++)
         {
             IVec2 pos = map.tilePos + IVec2 {x + 1, y + 1};
-            uint32 idx = TilePosToFogIndex(gameState->fog, pos);
-            SetFogTiles(gameState->fog, idx, BLANK);
+            RevealTile(gameState->fog, pos);
         }
     }
 }
@@ -1156,14 +1157,17 @@ inline void Undo()
 
 inline void Restart()
 {
+    Map & currentMap = gameState->tileMaps[gameState->playerMapIndex];
+    if (currentMap.stateInitilized)
+    {
     DynamicArray<Entity> ea = GetCurrentStateEntities();
     DynamicArray<UndoState::MapUndoInfo> mapUndoInfos = GetCurrentMapUndoInfos();
     
     gameState->undoStack.push_back(gameState->playerEntityIndex, 
                                    gameState->starCount, 
                                    ea, mapUndoInfos);
-    Map & currentMap = gameState->tileMaps[gameState->playerMapIndex];
-    SetGameState(currentMap.resetState);
+        SetGameState(currentMap.resetState);
+    }
     }
 
 bool8 MoveAction(IVec2 actionDir)
@@ -1760,7 +1764,7 @@ void GameplayUpdateAndRender()
                     }
                             entity->tweenController.Update();
                             
-                            RevealEntity(entity);
+                            RevealEntity(entity, ENTITY_TILE_VISIBILITY);
                             
                         if (!IsDisappearing(entity))
                         {
@@ -1855,9 +1859,7 @@ void GameplayUpdateAndRender()
             
                 if (Entity * player = GetPlayer(); player)
                 {
-                    
-                    
-                result = FindTileMap(GetPlayer()->tilePos);
+                    result = FindTileMap(GetPlayer()->tilePos);
                 if (result.map)
                 {
                     gameState->playerMapIndex = result.mapIndex;
@@ -2359,7 +2361,7 @@ void InitializeGame()
             }
             
             slimeA->pivot = GetTilePivot(slimeA);
-            RevealEntity(slimeA);
+            RevealEntity(slimeA, ENTITY_TILE_VISIBILITY);
             }
         
         if (slimeB)
@@ -2372,7 +2374,7 @@ void InitializeGame()
             }
             
             slimeB->pivot = GetTilePivot(slimeB);
-            RevealEntity(slimeB);
+            RevealEntity(slimeB, ENTITY_TILE_VISIBILITY);
             }
         
         if (slimeA && slimeB && slimeA->tilePos == slimeB->tilePos) 
@@ -2385,7 +2387,7 @@ void InitializeGame()
             gameState->playerEntityIndex = slimeA->entityIndex;
             DeleteEntity(slimeB);
             }
-        }
+    }
     
     // NOTE: Initalize gameState->undoStack record
     gameState->undoStack.reset();
@@ -2399,6 +2401,7 @@ void InitializeGame()
     gameState->shakeTime = 0.0f;
     
     UpdateCamera();
+    ResetResetStates();
     
 }
 

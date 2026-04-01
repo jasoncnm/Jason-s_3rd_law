@@ -494,9 +494,7 @@ state.currentMapIndex = -1;
             fog.fogPixels[i] = BLACK;
         }
         // memset(fog.fogPixels, BLANK, count * sizeof(*fog.fogPixels));
-        
-        
-    }
+        }
     SetupEntityTable(state);
     SetUpElectricDoor();
 }

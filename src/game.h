@@ -135,10 +135,10 @@ struct Fog
     IVec2 tileMin;
     IVec2 tileMax;
     IVec2 dim;
-    
     RenderTexture2D fogRenderTex;
     Color * fogPixels;
-};
+    Array<uint32, 500> updatingIndices;
+    };
 
 struct MyCamera
 {
