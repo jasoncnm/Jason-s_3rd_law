@@ -175,11 +175,33 @@ uint32 TilePosToFogIndex(Fog & fog, IVec2 pos)
     return idx;
 }
 
-void RevealTile(Fog & fog, IVec2 tilePos, Color value = BLANK)
+void RevealTile(Fog & fog, IVec2 tilePos)
 {
     uint32 fogIndex = TilePosToFogIndex(fog, tilePos);
     // TODO fade this value
-    fog.fogPixels[fogIndex] = value;
+    bool8 add = true;
+    
+    if (ColorIsEqual(fog.fogPixels[fogIndex], BLANK))
+    {
+        add = false;
+    }
+    else
+    {
+    for (uint32 i = 0; i < fog.updatingIndices.count; i++)
+    {
+        uint32 index = fog.updatingIndices[i];
+        if (index == fogIndex)
+        {
+            add = false;
+        }
+    }
+    }
+    
+    if (add)
+    fog.updatingIndices.Add(fogIndex);
+    
+    //fog.fogPixels[fogIndex] = value;
+    
 }
 
 void RevealEntity(Entity * entity, int32 visibility)
@@ -216,6 +238,23 @@ void RevealMap(Map & map)
             RevealTile(gameState->fog, pos);
         }
     }
+}
+
+void UpdateFog()
+{
+    Fog & fog = gameState->fog;
+    real32 updateSpeed = 0.5f;
+    for (uint32 i = 0; i < fog.updatingIndices.count; i++)
+    {
+        uint32 updateIndex = fog.updatingIndices[i];
+        fog.fogPixels[updateIndex] = ColorLerp(fog.fogPixels[updateIndex], BLANK, GetFrameTime() * updateSpeed);
+        if (ColorIsEqual(fog.fogPixels[updateIndex], BLANK))
+        {
+            fog.updatingIndices.RemoveIdxAndSwap(i);
+            i--;
+        }
+    }
+    
 }
 
 void SetDrawingEntities()
@@ -1881,7 +1920,7 @@ void GameplayUpdateAndRender()
             }
             }
             
-             RevealMap(gameState->tileMaps[gameState->playerMapIndex]);
+            if (Entity * player = GetPlayer(); player && player->tweenController.NoTweens()) RevealMap(gameState->tileMaps[gameState->playerMapIndex]);
             }
     
     
@@ -1935,7 +1974,9 @@ void GameplayUpdateAndRender()
     {
         noPlayer = true;
     }
-    
+        
+        // NOTE: UpdateFog
+        UpdateFog();
     
     // NOTE: tutorials
     if (gameState->currentScreen == GAME_MAIN_SCREEN)

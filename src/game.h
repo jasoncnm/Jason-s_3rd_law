@@ -10,7 +10,7 @@
 #define SCREEN_WIDTH  1000
 #define SCREEN_HEIGHT 1000
 
-#define ENTITY_TILE_VISIBILITY  3   // Player can see 2 tiles around its position
+#define ENTITY_TILE_VISIBILITY  2   // Player can see 2 tiles around its position
 
 #define MAP_TILE_SIZE 32       // Tiles size
 #define DIST_ONE_TILE MAP_TILE_SIZE
