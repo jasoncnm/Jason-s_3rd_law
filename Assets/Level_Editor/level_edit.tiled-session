@@ -56,11 +56,11 @@
             "expandedObjectLayers": [
                 7
             ],
-            "scale": 1.5,
+            "scale": 2,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 176.33333333333331,
-                "y": 176
+                "x": 637.75,
+                "y": 435.25
             }
         },
         "TestLevels/Test_3.tmj": {
@@ -1331,11 +1331,14 @@
             }
         },
         "TileMap/Room_59.tmj": {
-            "scale": 0.75,
+            "expandedObjectLayers": [
+                2
+            ],
+            "scale": 0.25,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -851.3333333333333,
-                "y": -1345.9999999999998
+                "x": 1054,
+                "y": -90
             }
         },
         "TileMap/Room_6.tmj": {

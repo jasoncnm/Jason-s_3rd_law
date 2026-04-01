@@ -1264,7 +1264,7 @@ bool8 MoveAction(IVec2 actionDir)
             {
                 if (pushResult.pushing)
                 {
-                    if (!door) 
+                    if (!IsDoor(GetEntity(player->attachedEntityIndex))) 
                     {
                         PushResult reversePushResult = ActionCheck(player, player->attachDir, CHECK_MOVE);
                         if (reversePushResult.state == PUSH_BLOCKED)
@@ -1356,7 +1356,7 @@ bool8 MoveAction(IVec2 actionDir)
                 return false;
             }
             
-            if (!door && player->attachDir == -actionDir)
+            if (!IsDoor(GetEntity(player->attachedEntityIndex)) && player->attachDir == -actionDir)
             {
                 PushResult rResult = ActionCheck(player, player->attachDir, CHECK_MOVE);
                 if (rResult.state == PUSH_BLOCKED)
