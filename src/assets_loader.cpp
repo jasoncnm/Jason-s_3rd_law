@@ -420,10 +420,9 @@ state.currentMapIndex = -1;
                                     if (name == "Player")
                                     {
                                         
-                                        result = AddEntity(ENTITY_TYPE_PLAYER, tilePos, PLAYER_IDLE);
+                                        result = AddEntity(ENTITY_TYPE_PLAYER, tilePos, tileId);
                                         result.entity->mass = 1;
                                         result.entity->tileSize = GetSlimeSize(result.entity); 
-                                        
                                         
                                         state.playerEntityIndex = result.entityIndex;
                                         

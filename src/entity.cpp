@@ -656,6 +656,12 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
     
 }
 
+inline void DettachSlime(Entity * slime)
+{
+    slime->attach = false;
+    slime->attachDir = IVec2 { 0, 0 };
+    }
+
 inline void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir)
 {
     SM_ASSERT((attacher->type == ENTITY_TYPE_PLAYER || attacher->type == ENTITY_TYPE_CLONE), "entity is not attachable");

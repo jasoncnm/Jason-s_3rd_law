@@ -547,7 +547,10 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         // NOTE setup glass sprite after entity updates
                         target->broken = true;
                         Entity * attachSlime = FindAttachSlime(target);
-                        if (attachSlime) attachSlime->attach = false;
+                        if (attachSlime) 
+                        {
+                            DettachSlime(attachSlime);
+                        }
                         }
                     
                     break;
@@ -579,7 +582,12 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     if (defered)
                     {
                         attach = pushEnt;
-                        }
+                    }
+                    else if (target->type == ENTITY_TYPE_BRIDGE && !BridgeBlocked(target, pushDir))
+                    {
+                        attach = nullptr;
+                    }
+                    
                     finalPos = targetPos;
                     goto MoveAndStop;
                 }
@@ -1229,14 +1237,16 @@ bool8 MoveAction(IVec2 actionDir)
 {
     Entity * player = GetEntity(gameState->playerEntityIndex);
     SM_ASSERT(player, "player is not active");
-    if (!player->attach) return false;
-    float moveSpeed = 4.0f;
-    IVec2 currentPos = player->tilePos;
-    IVec2 actionTilePos = currentPos + actionDir;
-    if (player->attachDir == actionDir)
+    
+    if (!player->attach || player->attachDir == actionDir)
     {
         return false;
     }
+    
+    
+    float moveSpeed = 4.0f;
+    IVec2 currentPos = player->tilePos;
+    IVec2 actionTilePos = currentPos + actionDir;
     
     EntityLayer doorLayer[] = { LAYER_DOOR };
         Entity * door = FindEntityByLocationAndLayers(currentPos, doorLayer, ArrayCount(doorLayer));
@@ -1680,6 +1690,10 @@ void GameplayUpdateAndRender()
                                     else if (player->attachDir.y > 0)
                                     {
                                         speed = MOVE_SPEED * 0.3f;
+                                    }
+                                    else 
+                                    {
+                                        speed = MOVE_SPEED * 0.2f;
                                     }
                                     
                                     if (player->mass == 2)
