@@ -36,7 +36,7 @@
          "source":"..\/TlieSet\/tileSet.tsx"
         }, 
         {
-         "firstgid":201,
+         "firstgid":101,
          "source":":\/automap-tiles.tsx"
         }],
  "tilewidth":32,

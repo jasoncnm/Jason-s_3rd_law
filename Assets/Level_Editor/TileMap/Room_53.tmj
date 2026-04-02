@@ -3,31 +3,14 @@
  "infinite":false,
  "layers":[
         {
-         "draworder":"topdown",
-         "id":3,
-         "name":"level_info",
-         "objects":[],
-         "opacity":1,
-         "properties":[
-                {
-                 "name":"visible_star_count",
-                 "type":"int",
-                 "value":1
-                }],
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "data":[0, 34, 0, 34, 0, 0, 0, 0, 0,
+         "data":[0, 107, 0, 108, 0, 0, 0, 0, 0,
             0, 34, 0, 34, 0, 0, 0, 0, 0,
-            0, 34, 0, 34, 108, 0, 0, 0, 0,
-            34, 34, 0, 34, 34, 34, 0, 0, 0,
-            34, 0, 0, 0, 0, 0, 0, 109, 34,
+            107, 34, 0, 34, 108, 0, 0, 0, 0,
+            34, 34, 0, 34, 34, 110, 0, 0, 107,
+            118, 0, 0, 0, 0, 0, 0, 109, 34,
             0, 0, 0, 34, 33, 0, 0, 0, 0,
             0, 0, 0, 34, 0, 119, 34, 34, 34,
-            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 117, 34,
             0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -42,24 +25,30 @@
          "y":0
         }, 
         {
-         "data":[0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 32, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0],
-         "height":11,
-         "id":4,
-         "name":"Player",
+         "draworder":"topdown",
+         "id":3,
+         "name":"level_info",
+         "objects":[
+                {
+                 "height":0,
+                 "id":1,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":425.333333333333,
+                 "y":153.333333333333
+                }],
          "opacity":1,
-         "type":"tilelayer",
-         "visible":false,
-         "width":9,
+         "properties":[
+                {
+                 "name":"visible_star_count",
+                 "type":"int",
+                 "value":1
+                }],
+         "type":"objectgroup",
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -85,8 +74,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":5,
- "nextobjectid":1,
+ "nextlayerid":4,
+ "nextobjectid":2,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
