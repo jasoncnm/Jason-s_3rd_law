@@ -34,6 +34,7 @@ enum EntityType
     ENTITY_TYPE_CLONE,
     ENTITY_TYPE_WALL,
     ENTITY_TYPE_BLOCK,
+    ENTITY_TYPE_BRIDGE,
     ENTITY_TYPE_GLASS,
     ENTITY_TYPE_ELECTRIC_DOOR,
     ENTITY_TYPE_PIT,
@@ -129,6 +130,7 @@ inline bool8 IsMovable(Entity * entity)
 }
 
 inline IVec2 GetDoorDirection(Entity * door);
+inline bool8 BridgeBlocked(Entity * bridge, IVec2 dir);
 inline bool8 DoorBlocked(Entity * door, IVec2 reachDir);
 inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir);
 inline bool8 IsDoor(Entity * door);

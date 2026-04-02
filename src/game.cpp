@@ -83,6 +83,17 @@ void UndoStack::pop_back()
 //              NOTE: Game Functions (internal)
 //  ========================================================================
 
+inline bool8 BridgeBlocked(Entity * bridge, IVec2 dir)
+{
+    bool8 result = 
+        dir == DIR_LEFT && bridge->left || 
+        dir == DIR_RIGHT && bridge->right ||
+        dir == DIR_UP && bridge->up ||
+        dir == DIR_DOWN && bridge->down;
+    
+    return result;
+}
+
 void ChangeScreen(GameScreen screen)
 {
     gameState->switching = true;
@@ -547,6 +558,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                 }
                 case ENTITY_TYPE_ELECTRIC_DOOR:
                 case ENTITY_TYPE_WALL:
+                case ENTITY_TYPE_BRIDGE:
                 case ENTITY_TYPE_PIT:
                 {
                     if (target->type == ENTITY_TYPE_ELECTRIC_DOOR && target->cableType == CABLE_TYPE_DOOR)
@@ -662,6 +674,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 if (target->open) break;
             }
             case ENTITY_TYPE_PIT:
+            case ENTITY_TYPE_BRIDGE:
             case ENTITY_TYPE_WALL:
             {
                 current.pushResult.state = PUSH_BLOCKED;
@@ -700,10 +713,13 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                             (ent->type == ENTITY_TYPE_GLASS && ent->broken) ||
                             (IsSlime(ent) && (!ent->attach || dirs[i] != current.pushDir)))
                         {
-                            
                             continue;
-                        }
-else if (IsSlime(ent) && GetEntity(ent->attachedEntityIndex) == target)
+                            }
+                            else if (ent->type == ENTITY_TYPE_BRIDGE && !BridgeBlocked(ent, dirs[i]))
+                            {
+                                continue;
+                            }
+                            else if (IsSlime(ent) && GetEntity(ent->attachedEntityIndex) == target)
                         {
                                 if (dirs[i] == current.pushDir)
                                 {
@@ -1282,9 +1298,10 @@ bool8 MoveAction(IVec2 actionDir)
             }
             
             IVec2 actionTilePos = player->tilePos + actionDir;
-            
             // NOTE: no obsticale, move player
             IVec2 standingPlatformPos = actionTilePos + player->attachDir;
+            
+            
             
             if (Entity * door = FindEntityByLocationAndLayers(actionTilePos, doorLayer, ArrayCount(doorLayer));
                 door && DoorBlocked(door, -player->attachDir))
@@ -1301,6 +1318,12 @@ bool8 MoveAction(IVec2 actionDir)
                 {
                     return false;
                 }
+                else if (resultEntity->type == ENTITY_TYPE_BRIDGE &&
+                         !BridgeBlocked(resultEntity, player->attachDir))
+                {
+                    return false;
+                }
+                
                 SetSlimeSprite(player, actionDir);
                 MoveEntity(player, findResult.entity, nullptr, actionTilePos, PLAYER_MOVE_FUNC, MOVE_SPEED);
             }
@@ -1311,7 +1334,7 @@ bool8 MoveAction(IVec2 actionDir)
             }
             else
             {
-                EntityLayer layers[] = { LAYER_SLIME  };
+                EntityLayer layers[] = { LAYER_SLIME };
                 Entity * ent = FindEntityByLocationAndLayers(standingPlatformPos, layers, ArrayCount(layers));
                 
                 if (ent)
@@ -1328,6 +1351,10 @@ bool8 MoveAction(IVec2 actionDir)
                     if (attachedEntity && attachedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
                         attachedEntity->cableType == CABLE_TYPE_DOOR &&
                         !SameSide(attachedEntity, newTile, newAttach))
+                    {
+                        return false;
+                    }
+                    else if (attachedEntity->type == ENTITY_TYPE_BRIDGE && !BridgeBlocked(attachedEntity, newAttach))
                     {
                         return false;
                     }
@@ -1351,7 +1378,11 @@ bool8 MoveAction(IVec2 actionDir)
                 pushResult.blockedEntity->cableType == CABLE_TYPE_DOOR &&
                 !SameSide(pushResult.blockedEntity, player->tilePos + actionDir, actionDir);
             
-            if (blockedByPit || blockedByDoor)
+            bool8 blockedByBridgeWrongSide = 
+                pushResult.blockedEntity->type == ENTITY_TYPE_BRIDGE &&
+                !BridgeBlocked(pushResult.blockedEntity, actionDir);
+            
+            if (blockedByPit || blockedByDoor || blockedByBridgeWrongSide)
             {
                 return false;
             }

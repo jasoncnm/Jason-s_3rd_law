@@ -754,7 +754,7 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
     bool8 has = false;
     Entity * entity = nullptr;
     
-    EntityLayer layers[] = { LAYER_WALL, LAYER_BLOCK, LAYER_GLASS, LAYER_LOCK, LAYER_DOOR,  };
+    EntityLayer layers[] = { LAYER_WALL, LAYER_BLOCK, LAYER_GLASS, LAYER_LOCK, LAYER_DOOR, };
     
     auto entList = FindAllEntitiesFromLocationAndLayers(tilePos, layers, ArrayCount(layers));
     
@@ -769,6 +769,7 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
                 {
                     if (entity->open) break;
                 }
+                case ENTITY_TYPE_BRIDGE:
                 case ENTITY_TYPE_BLOCK:
                 case ENTITY_TYPE_WALL:
                 {
@@ -792,12 +793,12 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
                 case ENTITY_TYPE_PIT:
                 {
                     has = false;
-                    goto EndLoop;     
+                    break;
                 }
             }
             if (has) break;
         }
-    }EndLoop:;
+    }
     
     result.has = has; 
     result.entity = entity;

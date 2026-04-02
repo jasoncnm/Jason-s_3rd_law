@@ -29,13 +29,31 @@ inline AddEntityResult LoadGameObject(GameState & state, TileID id, IVec2 tilePo
     {
         entityResult = AddEntity(ENTITY_TYPE_WALL, tilePos, id);
         }
-    else if (id == BRIDGE_RIGHT_A || id == BRIDGE_RIGHT_B || id == BRIDGE_LEFT_A || id == BRIDGE_LEFT_B)
+    else if (id == BRIDGE_LEFT_DOWN)
     {
-        entityResult = AddDoor(tilePos, id, true, true, false, false);
+        entityResult = AddEntity(ENTITY_TYPE_BRIDGE, tilePos, id);
+        entityResult.entity->left = true;
+        entityResult.entity->down = true;
     }
-    else if (id == BRIDGE_UP_A || id == BRIDGE_UP_B || id == BRIDGE_DOWN_A || id == BRIDGE_DOWN_B)
+    else if (id == BRIDGE_LEFT_UP)
     {
-        entityResult = AddDoor(tilePos, id, false, false, true, true);
+        entityResult = AddEntity(ENTITY_TYPE_BRIDGE, tilePos, id);
+        entityResult.entity->left = true;
+        entityResult.entity->up = true;
+        
+    }
+    else if (id == BRIDGE_RIGHT_UP)
+    {
+        entityResult = AddEntity(ENTITY_TYPE_BRIDGE, tilePos, id);
+        entityResult.entity->right = true;
+        entityResult.entity->up = true;
+        
+    }
+    else if (id == BRIDGE_RIGHT_DOWN)
+    {
+        entityResult = AddEntity(ENTITY_TYPE_BRIDGE, tilePos, id);
+        entityResult.entity->right = true;
+        entityResult.entity->down = true;
         }
     else if (id == BLOCK_2)
     {
@@ -220,6 +238,7 @@ void SetupEntityTable(GameState & state)
                     
                     break;
                 }
+                case ENTITY_TYPE_BRIDGE:
                 case ENTITY_TYPE_WALL:
                 {
                     state.entityTable[LAYER_WALL].Add(entity->entityIndex);

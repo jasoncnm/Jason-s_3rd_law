@@ -46,14 +46,10 @@ enum TileID
     KEY = 21,
     LOCK = 31,
     
-    BRIDGE_LEFT_A = 107,
-    BRIDGE_LEFT_B = 117,
-    BRIDGE_RIGHT_A = 108,
-    BRIDGE_RIGHT_B = 118,
-    BRIDGE_UP_A = 109,
-    BRIDGE_UP_B = 110,
-    BRIDGE_DOWN_A = 119,
-    BRIDGE_DOWN_B = 120,
+    BRIDGE_LEFT_UP = 107,
+    BRIDGE_LEFT_DOWN = 117,
+    BRIDGE_RIGHT_UP = 108,
+    BRIDGE_RIGHT_DOWN = 118,
     
     
     DOOR_LEFT  = 82,
