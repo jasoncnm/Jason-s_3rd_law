@@ -1703,43 +1703,29 @@ void GameplayUpdateAndRender()
                         stateChanged = stateChanged || SplitAction(player, actionDir);
                         }
                     else
-                    {
+                        {
+                            IVec2 dirs[] = { DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN };
+                            
+                            GameInputType downedKey = GetDownedMoveKey(gameState->input.keyMappings);
+                            
                             if (IsDown(gameState->input.keyMappings, gameState->lastMoveKey))
                             {
-                                IVec2 dirs[] = { DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN };
-                                uint32 index = gameState->lastMoveKey - LEFT_KEY;
+                                downedKey = gameState->lastMoveKey;
+                                }
+                            
+                            if (downedKey != NO_INPUT)
+                            {
+                                uint32 index = downedKey - LEFT_KEY;
                                 actionDir = dirs[index];
                                 isPressed = true;
                             }
-                            else if (gameState->moveBufferTimer > 0 &&
-                                gameState->lastMoveKey == LEFT_KEY ||
-                                IsDown(gameState->input.keyMappings, LEFT_KEY))
-                                {
-                        actionDir = { -1 , 0};                    
-                        isPressed = true;
-                    }
-                    else if (gameState->moveBufferTimer > 0 &&
-                                gameState->lastMoveKey == RIGHT_KEY ||
-                                IsDown(gameState->input.keyMappings, RIGHT_KEY))
-                    {
-                        actionDir = {1, 0};
-                        isPressed = true;
-                    }
-                    else if (gameState->moveBufferTimer > 0 &&
-                                gameState->lastMoveKey == UP_KEY ||
-                                IsDown(gameState->input.keyMappings, UP_KEY))
-                    {
-                        actionDir = {0, -1};
-                        isPressed = true;
-                    }
-                    else if (gameState->moveBufferTimer > 0 &&
-                                gameState->lastMoveKey == DOWN_KEY ||
-                                IsDown(gameState->input.keyMappings, DOWN_KEY))
-                    {
-                        actionDir = {0, 1};
-                        isPressed = true;
-                    }
-
+                            else if (gameState->moveBufferTimer > 0)
+                            {
+                                uint32 index = gameState->lastMoveKey - LEFT_KEY;
+                                actionDir = dirs[index];
+                                isPressed = true;
+                                }
+                            
                     if (isPressed)
                             {
                                 bool8 moved = MoveAction(actionDir);
