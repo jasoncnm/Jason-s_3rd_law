@@ -2528,7 +2528,8 @@ UPDATE_AND_RENDER(UpdateAndRender)
     {
         init = true;
         GuiLoadStyle(RAYLIB_GUI_STYLE_PATH);
-    }
+        GuiSetStyle(DEFAULT, TEXT_SIZE, 50);
+        }
     
     if (!gameState->input.initialized)
     {
@@ -2576,14 +2577,21 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
             float width = GetScreenWidth() - 600.0f;
             float height = 100.0f;
-            width = Clamp(width, 16.0f, 1000.0f);
+            width = Clamp(width, 300.0f, 400.0f);
             height = Clamp(height, 9.0f, 150.0f);
             
-            const char * NewGameText = "new game";
+            float padding = 10.0f;
+            float x = (GetScreenWidth() - width) * 0.5f;
+            float y = (GetScreenHeight() - 40) * 0.5f - 400;
+            
+            if (x < padding) x = padding;
+            if (y < padding) y = padding;
+            
+            const char * NewGameText = "New Game";
             Rectangle bounds =
             {
-                (GetScreenWidth() - width) * 0.5f,
-                (GetScreenHeight() - 40) * 0.5f - 400,
+                x,
+                y,
                 width,
                 height
             };
@@ -2594,7 +2602,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 ChangeScreen(GAME_MAIN_SCREEN);
                 }
             
-            #if 1
+            #if 0
             // TODO: Experimental features, Very breakable!!!
             const char * LoadGameText = "load game";
             bounds.y += 200;
@@ -2631,7 +2639,6 @@ UPDATE_AND_RENDER(UpdateAndRender)
                     SM_ERROR("faile to open file %s", fileName);                    
                 }
             };
-#endif
             
             const char * TestLevel = "test level";
             bounds.y += 200;
@@ -2640,8 +2647,8 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 LoadTileMapsAndEntities(*gameState, TEST_PATH);
                 ChangeScreen(GAME_MAIN_SCREEN);
                 }
-            
-            const char * QuitGame = "quit game";
+#endif
+            const char * QuitGame = "Quit Game";
             bounds.y += 200;
             if (GuiButton(bounds, QuitGame))
             {
@@ -2657,14 +2664,23 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
             UpdateAndDrawStarFieldBG(&gameState->starFields);
             
-            float width = 1000.0f;
+            float width = GetScreenWidth() - 600.0f;
             float height = 100.0f;
+            width = Clamp(width, 300.0f, 400.0f);
+            height = Clamp(height, 9.0f, 150.0f);
             
-            const char * ContinueGameText = "continue";
+            float padding = 10.0f;
+            float x = (GetScreenWidth() - width) * 0.5f;
+            float y = (GetScreenHeight() - 40) * 0.5f - 400;
+            
+            if (x < padding) x = padding;
+            if (y < padding) y = padding;
+            
+            const char * ContinueGameText = "Continue";
             Rectangle bounds =
             {
-                (GetScreenWidth() - width) * 0.5f,
-                (GetScreenHeight() - 40) * 0.5f - 250,
+                x,
+                y,
                 width,
                 height
             };
@@ -2674,7 +2690,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 ChangeScreen(GAME_MAIN_SCREEN);
             }
             
-            #if 1
+            #if 0
             // TODO: Experimental features, Very breakable!!!
             const char * SaveGameText = "save game";
             bounds.y += 200;
@@ -2684,7 +2700,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             }
 #endif
             
-            const char * QuitMenuText = "quit to main menu";
+            const char * QuitMenuText = "Quit To Main Menu";
             bounds.y += 200;
             if (GuiButton(bounds, QuitMenuText))
             {

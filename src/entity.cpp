@@ -410,11 +410,11 @@ inline void StretchEntity(Entity * entity,
     int ch2 = AddTweenUnique(entity->tweenController, 
                              CreateTween(squash, MoveFunc,
                                          speed, dist1));
+    
     AddTween(entity->tweenController,
              CreateTween(squash2, MoveFunc, speed, dist2), ch2);
     
     int32 channel = entity->tweenController.FindChannelByTweenProperty(PARAM_TYPE_VECTOR2, &entity->pivot);
-    
     
     if (channel < 0)
     {
@@ -426,6 +426,7 @@ inline void StretchEntity(Entity * entity,
         AddTween(entity->tweenController, CreateTween(param, MoveFunc, speed, dist1), channel);
         AddTween(entity->tweenController, CreateTween(param2, MoveFunc, speed, dist2), channel);
     }
+    
     }
 
 inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * playEvent,
@@ -481,7 +482,6 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 
                 real32 dist2 = Vector2Distance(middlePivot, endPivot) / MAP_TILE_SIZE;
                 
-                
                 uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed, tileDist));
                 AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed, dist2), channel);
                 
@@ -509,7 +509,6 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                     mid_tile = old.tilePos;
                 }
                 
-                
                 if ((targetPos - mid_tile).SqrMagnitude() > 0)
                 {
                     int32 ch1 = entity->tweenController.FindChannelByTweenProperty(PARAM_TYPE_VECTOR2, &entity->pivot);
@@ -524,7 +523,6 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 param.startVec2 = midPivot;
                 param.endVec2 = endPivot;
                 param.realVec2  = &entity->pivot;
-                    
                     
                     if (ch1 < 0)
                     {
