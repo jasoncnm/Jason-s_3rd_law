@@ -38,6 +38,8 @@
 
 #define MOVE_BUFFER 0.2f;
 
+#define STAR_COLLECTOR_POS Vector2 { 0, 0 }
+
 constexpr float zoom_per_tile = 15.5f / 600.0f;
 constexpr float press_freq = 0.2f;
 

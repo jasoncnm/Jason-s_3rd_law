@@ -78,7 +78,10 @@ struct Entity
     IVec2 attachDir = {0,0};
     
     Vector2 pivot;
-     Vector2 tileSize;
+    Vector2 tileSize;
+    
+    Vector2 screenStart;
+    Vector2 screenEnd;
      
     int32 sourceIndex = -1;
     int32 rightIndex = -1, leftIndex = -1, upIndex = -1, downIndex = -1;
@@ -100,6 +103,7 @@ struct Entity
     bool8 hasPower = false;
     bool8 changed = false;
     bool8 active = false;
+    bool8 starCollecting = false;
     
     // TODO: These are too big for it to store upfront,
     // Allocate it whenever you need this

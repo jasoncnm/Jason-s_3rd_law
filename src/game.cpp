@@ -286,13 +286,54 @@ void UpdateFog()
 
 void UpdateStars()
 {
+    // TODO tem code, move updating spline in screen space
+    static bool8 first = true;
     auto & keyTable = gameState->entityTable[LAYER_KEY];
+    static real32 * star_t = (real32 *)BumpAllocArray(gameMemory->persistentStorage, 
+                                                       keyTable.count, sizeof(real32));
+    
+    if (first) 
+    {
+        first = false;
+        memset(star_t, 0, keyTable.count * sizeof(real32));
+    }
+    
     for (uint32 keyIndex = 0; keyIndex < keyTable.count; keyIndex++)
     {
         if (Entity * key = GetEntity(keyTable[keyIndex]); key)
         {
             
+            if (key->starCollecting)
+            {
+                real32 dist = Vector2Distance(key->screenStart, key->screenEnd);
+                if (dist <= 0 || star_t[keyIndex] > 1)
+                {
+                    DeleteEntity(key);
+                }
+                else
+                {
+                    Vector2 start = key->screenStart;
+                    Vector2 end = key->screenEnd;
+                    Vector2 mid = Vector2 { end.x, start.y };
+                    
+                    real32 t = EaseInSine(star_t[keyIndex]);
+                    
+                    Vector2 screen_cur = GetSplinePointBezierQuad(start, mid, end, t);
+                    
+                    key->pivot = GetScreenToWorld2D(screen_cur, gameState->camera.base);
+                    
+                    real32 step = 1 / dist;
+                    real32 dt = step * GetFrameTime() * 700;
+                    star_t[keyIndex] += dt;
+                }
+                
+                
+                continue;
+            }
+            
             Vector2 keyPos = GetTilePivot(key);
+            
+            star_t[keyIndex] = 0;
             
             real32 posy = keyPos.y + 3 * cosf(2 * (real32)GetTime() + keyPos.x);
             real32 posx = keyPos.x + 3 * sinf(2 * (real32)GetTime() + keyPos.y);
@@ -1816,10 +1857,14 @@ void GameplayUpdateAndRender()
                 for (uint32 keyIndex = 0; keyIndex < keyTable.count; keyIndex++)
                 {
                     Entity * key = GetEntity(keyTable[keyIndex]);
-                    if (key && (key->tilePos == PivotToTilePos(slime->pivot, slime->tileSize)))
+                    if (key && !key->starCollecting &&  (key->tilePos == PivotToTilePos(slime->pivot, slime->tileSize)))
                     {
                         ResetResetStates();
-                        DeleteEntity(key);
+                            // DeleteEntity(key);
+                            key->starCollecting = true;
+                            key->screenStart = GetWorldToScreen2D(key->pivot, gameState->camera.base);
+                            key->screenEnd =
+                                Vector2 { (real32)GetScreenWidth() * 0.5f, 0 };
                         gameState->starCount++;
                         break;
                     }
@@ -2293,8 +2338,14 @@ Fog & fog = gameState->fog;
             };
             
             DrawRectangleLinesEx(mapRect, 5, BLUE);
-            
-            
+                
+                // NOTE: draw mouse tilePos
+                Vector2 mousePos = GetMousePosition();
+                Vector2 mouseWorld = GetScreenToWorld2D(mousePos, gameState->camera.base);
+                
+                IVec2 tilePos = PivotToTilePos(mouseWorld, Vector2{ 0 });
+                DrawTile(tilePos, RED);
+                DrawLineBezier(GetPlayer()->pivot, GetTilePivot(tilePos, DEFAULT_TILE_SIZE), 2, GREEN);
             }
             
             // Draw rectangle outline with extended parameters

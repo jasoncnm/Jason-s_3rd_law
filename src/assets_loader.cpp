@@ -208,6 +208,7 @@ inline AddEntityResult LoadGameObject(GameState & state, TileID id, IVec2 tilePo
     else if (id == KEY)
     {
         entityResult = AddEntity(ENTITY_TYPE_KEY, tilePos, id);
+        
     }
     else if (id != LOCK)
     {
