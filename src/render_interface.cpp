@@ -217,15 +217,15 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields, int32 offsetX = 0, int32 
 }
 
 void PostProcessing(RenderTexture2D & renderTarget, ShaderInfo & shader, 
-                    int32 screenWidth, int32 screenHeight,
                     int32 shake, float time)
 {
     
-    float mn = (float)Min(screenWidth, screenHeight);
+    int32 tWidth = renderTarget.texture.width;
+    int32 tHeight = renderTarget.texture.height;
     
     float size[2] =
     { 
-        (float)screenWidth, (float)screenHeight
+        (float)GetScreenWidth(), (float)GetScreenHeight()
     };
     
     int32 shakeLoc = GetShaderLocation(shader.shader, "shake");
@@ -244,7 +244,7 @@ void PostProcessing(RenderTexture2D & renderTarget, ShaderInfo & shader,
     
     Rectangle source =
     {
-        0, 0, (real32)screenWidth, -(real32)screenHeight
+        0,0, (real32)tWidth, -(real32)tHeight
             //(screenWidth - mn) / 2, (screenHeight - mn) / 2, (float)mn, (float)-mn
     };
     
@@ -288,7 +288,7 @@ void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vecto
         if (dy < dest.height)
         {
             DrawTexturePro(texture, Rectangle{source.x, source.y, ((float)dest.width/tileWidth)*source.width, ((float)(dest.height - dy)/tileHeight)*source.height},
-                           Rectangle{dest.x, dest.y + dy, dest.width, dest.height - dy}, origin, rotation, tint);
+                           Rectangle{dest.x, dest.y + dy, dest.width,  dest.height - dy}, origin, rotation, tint);
         }
     }
     else if (dest.height <= tileHeight)
@@ -346,3 +346,58 @@ void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vecto
     }
 }
 
+
+void DrawScrollingBackGround(Texture2D bgTexture, Color tint = WHITE)
+{
+    
+    static Vector2 offset = { 0, 0 };
+    offset += Vector2 { 1, -1 } * GetFrameTime() * 10;
+    
+    int32 tWidth = bgTexture.width;
+    int32 tHeight = bgTexture.height;
+    
+    Rectangle bgSrc = { 
+        0,
+        0,
+        (real32)tWidth, 
+        (real32)tHeight
+    };
+    
+    int32 divW = GetScreenWidth() / tWidth;
+    int32 divH = GetScreenHeight() / tHeight;
+    int32 remW = GetScreenWidth() % tWidth;
+    int32 remH = GetScreenHeight() % tHeight;
+    
+    int32 size = 2;
+    int32 w = size * tWidth * (divW + 1);
+    int32 h = size * tWidth * (divH + 1);
+    
+    if (offset.x >= w) offset.x = 0;
+    if (offset.y <= -h) offset.y = 0;
+    
+    Rectangle bgDst = {
+        0, 
+        0,
+        (real32)(w), 
+        (real32)(h),
+    };
+    
+    
+    DrawTextureTiled(bgTexture, bgSrc, bgDst,
+                     offset, 
+                     0, (real32)size, tint);
+    
+    DrawTextureTiled(bgTexture, bgSrc, bgDst, 
+                     offset + Vector2{ -(real32)w, 0 },
+                     0, (real32)size, tint);
+    
+    DrawTextureTiled(bgTexture, bgSrc, bgDst, 
+                     offset + Vector2{ 0, (real32)h  },
+                     0, (real32)size, tint);
+    
+    DrawTextureTiled(bgTexture, bgSrc, bgDst, 
+                     offset + Vector2{ -(real32)w, (real32)h  },
+                     0, (real32)size, tint);
+    
+}
+    

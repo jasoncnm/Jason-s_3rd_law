@@ -13,7 +13,7 @@
 
 #define STAR_COUNT 100
 
-#define FG_PATH "Assets/Texture/Backgrounds/5.png"
+#define BACKGROUND_PATH "Assets/Texture/background.png"
 
 #define BASE_VS_PATH "Assets/Shaders/base.vs"
 #define BASE_FS_PATH "Assets/Shaders/base.fs"

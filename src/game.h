@@ -34,7 +34,7 @@
 
 #define MAX_UNDO 500
 
-constexpr float zoom_per_tile = 18.5f / 600.0f;
+constexpr float zoom_per_tile = 15.5f / 600.0f;
 constexpr float press_freq = 0.2f;
 
 
@@ -163,8 +163,8 @@ struct GameState
     UndoStack undoStack;
     
     MyCamera camera;
-    Texture2D texture;
-    Texture2D playerTexture;
+    Texture2D textureAltas;
+    Texture2D bgTexture;
     
     RenderTexture2D renderTarget;
     

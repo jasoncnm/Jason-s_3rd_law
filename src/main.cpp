@@ -149,22 +149,23 @@ int main(int argumentCount, char *argumentArray[])
             return -1;
         }
         
-        gameState->playerTexture = LoadTexture(ANIMATED_PLAYER_PATH);
-        if (!IsTextureValid(gameState->playerTexture))
-        {
-            SM_ERROR("Unable to load file (%s) to texture", ANIMATED_PLAYER_PATH);
-            return -1;
-        }
-        SetTextureFilter(gameState->playerTexture, TEXTURE_FILTER_POINT);
         
-        
-        gameState->texture = LoadTexture(TEXTURE_PATH); // Initialize Texture
-        if (!IsTextureValid(gameState->texture))
+        gameState->textureAltas = LoadTexture(TEXTURE_PATH); // Initialize Texture
+        if (!IsTextureValid(gameState->textureAltas))
         {
             SM_ERROR("Unable to load file (%s) to texture", TEXTURE_PATH);
             return -1;
         }
-        SetTextureFilter(gameState->texture, TEXTURE_FILTER_POINT);
+        SetTextureFilter(gameState->textureAltas, TEXTURE_FILTER_BILINEAR);
+        
+        gameState->bgTexture = LoadTexture(BACKGROUND_PATH);
+        if (!IsTextureValid(gameState->bgTexture))
+        {
+            SM_ERROR("Unable to load file (%s) to texture", BACKGROUND_PATH);
+            return -1;
+        }
+        SetTextureFilter(gameState->bgTexture, TEXTURE_FILTER_BILINEAR);
+        SetTextureWrap(gameState->bgTexture, TEXTURE_WRAP_REPEAT);
         
         if (!LoadShaderInfo(&gameState->postShader, POST_VS_PATH, POST_FS_PATH))
         {
@@ -231,8 +232,7 @@ int main(int argumentCount, char *argumentArray[])
         UnloadShaderInfo(&gameState->postShader);
         UnloadShaderInfo(&gameState->movableShader);
         
-        UnloadTexture(gameState->texture);
-        UnloadTexture(gameState->playerTexture);
+        UnloadTexture(gameState->textureAltas);
         UnloadRenderTexture(gameState->starFields.starTexture);
         UnloadRenderTexture(gameState->fog.fogRenderTex);
     }
