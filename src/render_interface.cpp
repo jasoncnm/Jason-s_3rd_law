@@ -19,6 +19,18 @@ void UpdateShaderInfo(ShaderInfo & shaderInfo)
         }
     }
     
+    float size[2] =
+    { 
+        (float)GetScreenWidth(), (float)GetScreenHeight()
+    };
+    
+    int32 timeLoc = GetShaderLocation(shaderInfo.shader, "time");
+    int32 frameBufferSizeLoc = GetShaderLocation(shaderInfo.shader, "u_frameSize");
+    
+    SetShaderValue(shaderInfo.shader, frameBufferSizeLoc, size, SHADER_UNIFORM_VEC2);
+    SetShaderValue(shaderInfo.shader, timeLoc, &gameState->time, SHADER_UNIFORM_FLOAT);
+    
+    
 }
 
 Rectangle GetCameraRect(Camera2D camera)
@@ -83,7 +95,7 @@ void DrawSprite(Camera2D camera, Texture2D texture, Sprite & sprite, Vector2 top
     
     SM_ASSERT(IsTextureValid(texture), "Texture is not valid");
     
-    float offset = 0.0f;
+    float offset = 0.01f;
     
     Rectangle source =
     {
@@ -217,34 +229,32 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields, int32 offsetX = 0, int32 
 }
 
 void PostProcessing(RenderTexture2D & renderTarget, ShaderInfo & shader, 
-                    int32 screenWidth, int32 screenHeight,
-                    int32 shake, float time)
+                    int32 shake, real32 shakeStrength, float time)
 {
     
-    float mn = (float)Min(screenWidth, screenHeight);
+    int32 tWidth = renderTarget.texture.width;
+    int32 tHeight = renderTarget.texture.height;
     
     float size[2] =
     { 
-        (float)screenWidth, (float)screenHeight
+        (float)GetScreenWidth(), (float)GetScreenHeight()
     };
     
+    int32 shakeStrengthLoc = GetShaderLocation(shader.shader, "strength");
     int32 shakeLoc = GetShaderLocation(shader.shader, "shake");
-    int32 timeLoc = GetShaderLocation(shader.shader, "time");
-    int32 frameBufferSizeLoc = GetShaderLocation(shader.shader, "u_frameSize");
     int32 offsetLoc = GetShaderLocation(shader.shader, "offset");
     static float val = 0; 
     val -= GetFrameTime() * 0.0015f;
     
-    SetShaderValue(shader.shader, frameBufferSizeLoc, size, SHADER_UNIFORM_VEC2);
     SetShaderValue(shader.shader, offsetLoc, &val, SHADER_UNIFORM_FLOAT);
+    SetShaderValue(shader.shader, shakeStrengthLoc, &shakeStrength, SHADER_UNIFORM_FLOAT);
     SetShaderValue(shader.shader, shakeLoc, &shake, SHADER_UNIFORM_INT);
-    SetShaderValue(shader.shader, timeLoc, &time, SHADER_UNIFORM_FLOAT);
     
     BeginShaderMode(shader.shader);
     
     Rectangle source =
     {
-        0, 0, (real32)screenWidth, -(real32)screenHeight
+        0,0, (real32)tWidth, -(real32)tHeight
             //(screenWidth - mn) / 2, (screenHeight - mn) / 2, (float)mn, (float)-mn
     };
     
@@ -288,7 +298,7 @@ void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vecto
         if (dy < dest.height)
         {
             DrawTexturePro(texture, Rectangle{source.x, source.y, ((float)dest.width/tileWidth)*source.width, ((float)(dest.height - dy)/tileHeight)*source.height},
-                           Rectangle{dest.x, dest.y + dy, dest.width, dest.height - dy}, origin, rotation, tint);
+                           Rectangle{dest.x, dest.y + dy, dest.width,  dest.height - dy}, origin, rotation, tint);
         }
     }
     else if (dest.height <= tileHeight)
@@ -346,3 +356,58 @@ void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vecto
     }
 }
 
+
+void DrawScrollingBackGround(Texture2D bgTexture, Color tint = WHITE)
+{
+    
+    static Vector2 offset = { 0, 0 };
+    offset += Vector2 { 1, -1 } * GetFrameTime() * 10;
+    
+    int32 tWidth = bgTexture.width;
+    int32 tHeight = bgTexture.height;
+    
+    Rectangle bgSrc = { 
+        0,
+        0,
+        (real32)tWidth, 
+        (real32)tHeight
+    };
+    
+    int32 divW = GetScreenWidth() / tWidth;
+    int32 divH = GetScreenHeight() / tHeight;
+    int32 remW = GetScreenWidth() % tWidth;
+    int32 remH = GetScreenHeight() % tHeight;
+    
+    int32 size = 2;
+    int32 w = size * tWidth * (divW + 1);
+    int32 h = size * tWidth * (divH + 1);
+    
+    if (offset.x >= w) offset.x = 0;
+    if (offset.y <= -h) offset.y = 0;
+    
+    Rectangle bgDst = {
+        0, 
+        0,
+        (real32)(w), 
+        (real32)(h),
+    };
+    
+    
+    DrawTextureTiled(bgTexture, bgSrc, bgDst,
+                     offset, 
+                     0, (real32)size, tint);
+    
+    DrawTextureTiled(bgTexture, bgSrc, bgDst, 
+                     offset + Vector2{ -(real32)w, 0 },
+                     0, (real32)size, tint);
+    
+    DrawTextureTiled(bgTexture, bgSrc, bgDst, 
+                     offset + Vector2{ 0, (real32)h  },
+                     0, (real32)size, tint);
+    
+    DrawTextureTiled(bgTexture, bgSrc, bgDst, 
+                     offset + Vector2{ -(real32)w, (real32)h  },
+                     0, (real32)size, tint);
+    
+}
+    

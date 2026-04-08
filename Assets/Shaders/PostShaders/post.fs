@@ -25,6 +25,8 @@ uniform float offset = 0.0;
 uniform float brightness = 1.3;
 uniform float contrast = -10.0;
 uniform float saturation = -10.0;
+uniform float padding = 100;
+uniform float time;
 
 uniform bool shake;
 
@@ -167,27 +169,35 @@ vec4 applyBlur(vec4 color, vec2 uv)
     return vec4(texelColor, 1.0);
 }
 
+// Source - https://stackoverflow.com/a/4275343
+// Posted by appas, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-04-07, License - CC BY-SA 4.0
+
+float rand(vec2 co){
+    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+
 void main()
 {
     // vec2 uv = fragTexCoord;
     float dim = min(u_frameSize.x, u_frameSize.y);
-    float minx = (u_frameSize.x - u_frameSize.y) / (2.0 * u_frameSize.x);
-    float maxx = (u_frameSize.x + u_frameSize.y) / (2.0 * u_frameSize.x);
-    float miny = (u_frameSize.y - u_frameSize.x) / (2.0 * u_frameSize.y);
-    float maxy = (u_frameSize.y + u_frameSize.x) / (2.0 * u_frameSize.y);
+    float minx = (u_frameSize.x - u_frameSize.y + padding) / (2.0 * u_frameSize.x);
+    float maxx = (u_frameSize.x + u_frameSize.y - padding) / (2.0 * u_frameSize.x);
+    float miny = (u_frameSize.y - u_frameSize.x + padding) / (2.0 * u_frameSize.y);
+    float maxy = (u_frameSize.y + u_frameSize.x - padding) / (2.0 * u_frameSize.y);
 
     if (u_frameSize.x > u_frameSize.y)
     {
-        miny = 0.0;
-        maxy = 1.0;
+        miny = padding / (2.0 * u_frameSize.y);
+        maxy = 1 - miny;
     }
     else
     {
-        minx = 0.0;
-        maxx = 1.0;
+        minx = padding / (2.0 * u_frameSize.x);
+        maxx = 1 - minx;
     }
-
-
+    
     vec2 uv = fragTexCoord;
     uv = curve(uv);
     vec4 color = texture(texture0, uv);
@@ -207,10 +217,14 @@ void main()
     color = applyVignette(color, uv, miny, maxy);
     // color = mix(color, vfx, 1);  
 
+    
+    float out_brightness = mix(brightness - 0.1, brightness + 0.1, abs(0.5 * sin(3 * cos(time))));
+
+
     // Apply contrast
     color.rgb = (color.rgb - 0.5f)*(contrast/100.0f + 1.0f) + 0.5f;
 
-    color.rgb = pow(color.rgb, vec3(1.0/brightness));
+    color.rgb = pow(color.rgb, vec3(1.0/out_brightness));
  
     // Apply saturation
     float intensity = dot(color.rgb, vec3(0.299f, 0.587f, 0.114f));
@@ -221,6 +235,32 @@ void main()
         color *= 0.0;
     if (uv.y < miny || uv.y > maxy)
         color *= 0.0;
+    
+    // DrawEdge
+    float ratio = 25 * (dim / 900);
+    float widthx = ratio / (2.0 * u_frameSize.x);
+    float widthy = ratio / (2.0 * u_frameSize.y);
+    
+    if (uv.x < minx && uv.x >= minx - widthx && 
+        uv.y >= miny - widthy && uv.y <= maxy + widthy)
+    {
+        color = vec4(1);
+    }
+    else if (uv.x > maxx && uv.x <= maxx + widthx && 
+             uv.y >= miny - widthy && uv.y <= maxy + widthy)
+    {
+        color = vec4(1);
+    }
+    else if (uv.y < miny && uv.y >= miny - widthy && 
+             uv.x >= minx && uv.x <= maxx)
+    {
+        color = vec4(1);
+    }
+    else if (uv.y > maxy && uv.y <= maxy + widthy &&
+             uv.x >= minx && uv.x <= maxx)
+    {
+        color = vec4(1);
+    }
 
     finalColor = color; 
 }

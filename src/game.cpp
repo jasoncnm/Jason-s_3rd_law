@@ -17,7 +17,25 @@
 /*
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Fix weird animation bugs 
-- Unlock map transitions
+- Redo shake shader with the godot implementation (See Below)
+
+uniform float ShakeStrength = 0;
+uniform vec2 FactorA  = vec2(100.0,100.0);
+uniform vec2 FactorB  = vec2(1.0,1.0);
+uniform vec2 magnitude = vec2(0.01,0.01);
+uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
+
+void fragment() {
+    vec2 uv = SCREEN_UV;
+	uv -= 0.5;
+    uv *= 1.0 - 2.0 * magnitude.x;
+    uv += 0.5;
+	vec2 dt = vec2(0.0, 0.0);
+	dt.x = sin(TIME * FactorA.x+FactorB.x) * magnitude.x;
+	dt.y = cos(TIME *FactorA.y+ FactorB.y) * magnitude.y;
+	COLOR = texture(SCREEN_TEXTURE, SCREEN_UV + dt * ShakeStrength);
+}
+
 
 TODO: Things that I can do beside arts and design I guess
 3. collectable: show in ui
@@ -186,10 +204,10 @@ uint32 TilePosToFogIndex(Fog & fog, IVec2 pos)
     return idx;
 }
 
+// NOTE: Add fog index that's to be revealed
 void RevealTile(Fog & fog, IVec2 tilePos)
 {
     uint32 fogIndex = TilePosToFogIndex(fog, tilePos);
-    // TODO fade this value
     bool8 add = true;
     
     if (ColorIsEqual(fog.fogPixels[fogIndex], BLANK))
@@ -210,10 +228,7 @@ void RevealTile(Fog & fog, IVec2 tilePos)
     
     if (add)
     fog.updatingIndices.Add(fogIndex);
-    
-    //fog.fogPixels[fogIndex] = value;
-    
-}
+    }
 
 void RevealEntity(Entity * entity, int32 visibility)
 {
@@ -254,7 +269,7 @@ void RevealMap(Map & map)
 void UpdateFog()
 {
     Fog & fog = gameState->fog;
-    real32 updateSpeed = 0.5f;
+    real32 updateSpeed = 0.01f;
     for (uint32 i = 0; i < fog.updatingIndices.count; i++)
     {
         uint32 updateIndex = fog.updatingIndices[i];
@@ -266,6 +281,26 @@ void UpdateFog()
         }
     }
     
+}
+
+
+void UpdateStars()
+{
+    auto & keyTable = gameState->entityTable[LAYER_KEY];
+    for (uint32 keyIndex = 0; keyIndex < keyTable.count; keyIndex++)
+    {
+        if (Entity * key = GetEntity(keyTable[keyIndex]); key)
+        {
+            
+            Vector2 keyPos = GetTilePivot(key);
+            
+            real32 posy = keyPos.y + 3 * cosf(2 * (real32)GetTime() + keyPos.x);
+            real32 posx = keyPos.x + 3 * sinf(2 * (real32)GetTime() + keyPos.y);
+            
+            key->pivot.y = posy;
+            key->pivot.x = posx;
+        }
+    }
 }
 
 void SetDrawingEntities()
@@ -294,11 +329,11 @@ void SetDrawingEntities()
     }
 }
 
-void SetShake(float duration)
+void SetShake(real32 duration, real32 strength)
 {
     gameState->shake = true;
-    gameState->time = (real32)GetTime();
     gameState->shakeTime = duration;
+    gameState->shakeStrength = strength;
 }
 
 DynamicArray<UndoState::MapUndoInfo> GetCurrentMapUndoInfos()
@@ -605,7 +640,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
     
     MoveAndStop:;
     MoveEntity(projectedEnt, attach, playEvent, finalPos, 
-               BLOCK_MOVE_FUNC, BOUNCE_SPEED, !defered);
+               BLOCK_PROJ_FUNC, BOUNCE_SPEED, !defered);
     }
 
 inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMass, 
@@ -1208,7 +1243,8 @@ inline void SetGameState(UndoState & undoState)
     gameState->starCount = (uint16)undoState.starCount;
     std::vector<Entity> & undoEntities = undoState.undoEntities;
     SetUndoEntities(undoEntities);
-    SetUndoMapInfos(undoState.undoMapInfos);
+    
+    // TODO : SetUndoMapInfos(undoState.undoMapInfos);
     }
 
 inline void Undo()
@@ -1509,7 +1545,13 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                     color = ColorAlpha(color, 0.6f);
                 }
                 
-                Texture2D drawTexture = gameState->texture;
+                if (entity->type == ENTITY_TYPE_SLIME_PORTAL)
+                {
+                    entity->tileSize = GetSlimeSize(GetPlayer());
+                    entity->pivot = GetTilePivot(entity->tilePos, entity->tileSize, entity->attachDir);
+                }
+                
+                Texture2D drawTexture = gameState->textureAltas;
                 Sprite drawSprite = entity->sprite;
                 Vector2 drawPivot = entity->pivot;
                 
@@ -1519,6 +1561,12 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                 
                 DrawSprite(gameState->camera.base, drawTexture, drawSprite, drawPivot, entity->tileSize, color);
                 EndShaderMode();
+                }
+                else if (entity->type == ENTITY_TYPE_TUT_PORTAL)
+                {
+                    BeginShaderMode(gameState->portalShader.shader);
+                    DrawSprite(gameState->camera.base, drawTexture, drawSprite, drawPivot, entity->tileSize, color);
+                    EndShaderMode();
                 }
                 else
                 {
@@ -1763,7 +1811,10 @@ void GameplayUpdateAndRender()
                 Restart();
         }
         }
-    
+        
+        
+        UpdateStars();
+        
     // NOTE: Keys and Locks
     {
         auto & slimeIndexTable = gameState->entityTable[LAYER_SLIME];
@@ -1818,8 +1869,8 @@ void GameplayUpdateAndRender()
         
     }
     
-    // NOTE: Simulate
-    Entity * lastFollowEnt = gameState->simulating ? nullptr : GetEntity(gameState->camera.followEntityIndex);
+        // NOTE: Simulate
+        Entity * lastFollowEnt = gameState->simulating ? nullptr : GetEntity(gameState->camera.followEntityIndex);
     {
         gameState->simulating = false;
         // NOTE: Update: Entity
@@ -1890,7 +1941,8 @@ void GameplayUpdateAndRender()
                             Entity * glass = FindEntityByLocationAndLayers(pos, glassLayer, 1);
                             if (glass)
                             {
-                                SetGlassBeBroken(glass);
+                                    SetGlassBeBroken(glass);
+                                    SetShake(0.005f, 0.001f);
                             }
                         }
                         
@@ -2139,17 +2191,18 @@ void GameplayUpdateAndRender()
         
         if (IsKeyPressed(KEY_EQUAL))
         {
+            SetShake(0.05f, 0.001f);
             gameState->starCount++;
         }
         
         
         if (IsKeyPressed(KEY_NINE))
         {
-            UnloadTexture(gameState->texture);    // Unload render texture
-            gameState->texture = LoadTexture(TEXTURE_PATH);
-            SetShake(0.05f);
-            
-        }
+            UnloadTexture(gameState->bgTexture);
+            UnloadTexture(gameState->textureAltas);    // Unload render texture
+            gameState->textureAltas = LoadTexture(TEXTURE_PATH);
+            gameState->bgTexture = LoadTexture(BACKGROUND_PATH);
+            }
         
         if (IsKeyPressed(KEY_RIGHT_BRACKET))
         {
@@ -2177,6 +2230,7 @@ Fog & fog = gameState->fog;
         
         UpdateShaderInfo(gameState->movableShader);
         UpdateShaderInfo(gameState->postShader);
+        UpdateShaderInfo(gameState->portalShader);
         
         BeginTextureMode(gameState->renderTarget);
         ClearBackground(gameState->bgColor);
@@ -2281,34 +2335,20 @@ Fog & fog = gameState->fog;
                        Vector2 { 0, 0 }, 0, WHITE);
         }
         
-        // NOTE: Draw Screen Edge
-        Rectangle source = GetCameraRect(gameState->camera.base);
-        if (source.width > source.height) 
-        {
-            source.x += (source.width - source.height) * 0.5f;
-            source.width = source.height;
-            }
-        if (source.height > source.width) 
-        {
-            source.y += (source.height - source.width) * 0.5f;
-            source.height = source.width;
-        }
-        DrawRectangleLinesEx(source, 5, RAYWHITE);
-        
-        
-        
         EndMode2D();
         EndTextureMode();
-        
         // NOTE: Draw
+        
         BeginDrawing();
         ClearBackground(IntToRGBA(0x465a6f));
         
+        DrawScrollingBackGround(gameState->bgTexture, BLUE);
+        
+        gameState->time = (real32)GetTime();
         gameState->shakeTime -= GetFrameTime();
         if (gameState->shakeTime < 0)
         {
             gameState->shake = false;
-            gameState->time = 0;
             }
         
         {
@@ -2319,6 +2359,7 @@ Fog & fog = gameState->fog;
             int32 brightnessLoc = 
                 GetShaderLocation(gameState->postShader.shader, "brightness");
             
+            
             SetShaderValue(gameState->postShader.shader, contrastLoc, &contrast, SHADER_UNIFORM_FLOAT);
             
             SetShaderValue(gameState->postShader.shader, saturationLoc, &saturation, SHADER_UNIFORM_FLOAT);
@@ -2326,8 +2367,7 @@ Fog & fog = gameState->fog;
             SetShaderValue(gameState->postShader.shader, brightnessLoc, &brightness, SHADER_UNIFORM_FLOAT);
             
             PostProcessing(gameState->renderTarget, gameState->postShader, 
-                                      gameState->screenWidth, gameState->screenHeight,
-                                      gameState->shake, gameState->time);
+                                      gameState->shake, gameState->shakeStrength, gameState->time);
             }
         
         
@@ -2425,6 +2465,35 @@ void InitializeGame()
 {
     // NOTE: Initialization
     gameState->initialized = true;
+    IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} }; 
+    
+    // NOTE: Initilize silme portal
+    {
+        auto & portals = gameState->entityTable[LAYER_PORTAL];
+        for (uint32 i = 0; i < portals.count; i++)
+        {
+            if (Entity * portal = GetEntity(portals[i]); 
+                portal && portal->type == ENTITY_TYPE_SLIME_PORTAL)
+            {
+                for (int32 j = 0; j < 4; j++)
+                {
+                    IVec2 dir = directions[j];
+                    
+                    EntityLayer layers[] = { LAYER_PORTAL };
+                    Entity * attach = FindEntityByLocationAndLayers(portal->tilePos + dir, layers, 1);
+                    
+                    if (attach && attach->type == ENTITY_TYPE_MAIN_PORTAL)
+                    {
+                        portal->attach = true;
+                        portal->attachDir = dir;
+                        break;
+                        }
+                    
+                    }
+                }
+            
+        }
+    }
     
     // NOTE: Initiaize slimes
     {
@@ -2439,7 +2508,6 @@ void InitializeGame()
         
         if (slimeA)
         {
-            IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} }; 
             
             for (int32 j = 0; j < 4; j++)
             {
@@ -2452,8 +2520,6 @@ void InitializeGame()
         
         if (slimeB)
         {
-            IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} }; 
-            
             for (int32 j = 0; j < 4; j++)
             {
                 if (!slimeB->attach && AttachSlime(slimeB, directions[j])) break;
@@ -2461,7 +2527,7 @@ void InitializeGame()
             
             slimeB->pivot = GetTilePivot(slimeB);
             RevealEntity(slimeB, ENTITY_TILE_VISIBILITY);
-            }
+        }
         
         if (slimeA && slimeB && slimeA->tilePos == slimeB->tilePos) 
         {
@@ -2472,8 +2538,8 @@ void InitializeGame()
             slimeA->pivot = GetTilePivot(slimeA);
             gameState->playerEntityIndex = slimeA->entityIndex;
             DeleteEntity(slimeB);
-            }
-    }
+        }
+        }
     
     // NOTE: Initalize gameState->undoStack record
     gameState->undoStack.reset();
@@ -2549,17 +2615,17 @@ UPDATE_AND_RENDER(UpdateAndRender)
             BeginDrawing();
             ClearBackground(gameState->bgColor);
             
-            UpdateAndDrawStarFieldBG(&gameState->starFields);
+            DrawScrollingBackGround(gameState->bgTexture, DARKGREEN);
             
             const char * Title = "TITLE SCREEN";
             int32 TitleTextX = (GetScreenWidth() - MeasureText(Title, 40)) / 2;
             int32 TitleTextY = (GetScreenHeight() - 40) / 2 - 100;
-            DrawText(Title, TitleTextX, TitleTextY, 40, DARKGREEN);
+            DrawText(Title, TitleTextX, TitleTextY, 40, WHITE);
             
             const char * Instructions = "PRESS SPACE";
             int32 instX = (GetScreenWidth() - MeasureText(Instructions, 20)) / 2;
             int32 instY = (GetScreenHeight()) / 2;
-            DrawText(Instructions, instX, instY, 20, DARKGREEN);
+            DrawText(Instructions, instX, instY, 20, WHITE);
             
             if (gameState->switching || JustPressed(gameState->input.keyMappings, SPLIT_KEY))
             {
@@ -2573,7 +2639,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             BeginDrawing();
             ClearBackground(gameState->bgColor);
             
-            UpdateAndDrawStarFieldBG(&gameState->starFields);
+            DrawScrollingBackGround(gameState->bgTexture, PINK);
             
             float width = GetScreenWidth() - 600.0f;
             float height = 100.0f;
@@ -2662,7 +2728,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             BeginDrawing();
             ClearBackground(gameState->bgColor);
             
-            UpdateAndDrawStarFieldBG(&gameState->starFields);
+            DrawScrollingBackGround(gameState->bgTexture, PURPLE);
             
             float width = GetScreenWidth() - 600.0f;
             float height = 100.0f;

@@ -13,7 +13,7 @@
 
 #define STAR_COUNT 100
 
-#define FG_PATH "Assets/Texture/Backgrounds/5.png"
+#define BACKGROUND_PATH "Assets/Texture/background.png"
 
 #define BASE_VS_PATH "Assets/Shaders/base.vs"
 #define BASE_FS_PATH "Assets/Shaders/base.fs"
@@ -21,6 +21,7 @@
 #define POST_FS_PATH "Assets/Shaders/PostShaders/post.fs"
 #define MOVE_VS_PATH "Assets/Shaders/EntityShaders/moveable.vs"
 #define MOVE_FS_PATH "Assets/Shaders/EntityShaders/moveable.fs"
+#define PORTAL_FS_PATH "Assets/Shaders/EntityShaders/portal.fs"
 
 //  ========================================================================
 //              NOTE: Render Structs
