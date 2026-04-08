@@ -185,6 +185,27 @@ inline bool8 IsDown(KeyMapping * keyMappings, GameInputType type)
     return false;
 }
 
+inline GameInputType GetPressedMoveKey(KeyMapping * keyMappings)
+{
+    GameInputType result = NO_INPUT;
+    if (JustPressed(keyMappings, LEFT_KEY)) result = LEFT_KEY;
+    if (JustPressed(keyMappings, RIGHT_KEY)) result = RIGHT_KEY;
+    if (JustPressed(keyMappings, UP_KEY)) result = UP_KEY;
+    if (JustPressed(keyMappings, DOWN_KEY)) result = DOWN_KEY;
+        
+    return result;
+}
+
+inline GameInputType GetDownedMoveKey(KeyMapping * keyMappings)
+{
+    GameInputType result = NO_INPUT;
+    if (IsDown(keyMappings, LEFT_KEY)) result = LEFT_KEY;
+    if (IsDown(keyMappings, RIGHT_KEY)) result = RIGHT_KEY;
+    if (IsDown(keyMappings, UP_KEY)) result = UP_KEY;
+    if (IsDown(keyMappings, DOWN_KEY)) result = DOWN_KEY;
+    
+    return result;
+}
 
 #define ACTION_INPUT_H
 #endif

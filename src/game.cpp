@@ -1655,7 +1655,22 @@ void GameplayUpdateAndRender()
     // NOTE: Recored if State Changes
     bool8 stateChanged = false;
     bool8 isPressed = false;
-    bool8 slimeSwitched = false;
+        bool8 slimeSwitched = false;
+        
+        GameInputType lastMoveKey = GetPressedMoveKey(gameState->input.keyMappings);
+        
+        if (lastMoveKey != NO_INPUT)
+        {
+            gameState->lastMoveKey = lastMoveKey;
+            gameState->moveBufferTimer = MOVE_BUFFER;
+            
+            if (Entity * player = GetPlayer(); gameState->simulating && player && gameState->aniSpeedAdjustable)
+            {
+                gameState->aniSpeedAdjustable = false;
+                player->tweenController.AdjustSpeed(2.0f);
+            }
+        }
+        
     // NOTE: Actions
     if (GetPlayer() && !gameState->simulating) {
         
@@ -1689,26 +1704,37 @@ void GameplayUpdateAndRender()
                         }
                     else
                     {
-                    
-                        if (IsDown(gameState->input.keyMappings, LEFT_KEY))
-                    {
+                            if (IsDown(gameState->input.keyMappings, gameState->lastMoveKey))
+                            {
+                                IVec2 dirs[] = { DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN };
+                                uint32 index = gameState->lastMoveKey - LEFT_KEY;
+                                actionDir = dirs[index];
+                                isPressed = true;
+                            }
+                            else if (gameState->moveBufferTimer > 0 &&
+                                gameState->lastMoveKey == LEFT_KEY ||
+                                IsDown(gameState->input.keyMappings, LEFT_KEY))
+                                {
                         actionDir = { -1 , 0};                    
                         isPressed = true;
                     }
-                    
-                        if (IsDown(gameState->input.keyMappings, RIGHT_KEY))
+                    else if (gameState->moveBufferTimer > 0 &&
+                                gameState->lastMoveKey == RIGHT_KEY ||
+                                IsDown(gameState->input.keyMappings, RIGHT_KEY))
                     {
                         actionDir = {1, 0};
                         isPressed = true;
                     }
-                    
-                        if (IsDown(gameState->input.keyMappings, UP_KEY))
+                    else if (gameState->moveBufferTimer > 0 &&
+                                gameState->lastMoveKey == UP_KEY ||
+                                IsDown(gameState->input.keyMappings, UP_KEY))
                     {
                         actionDir = {0, -1};
                         isPressed = true;
                     }
-                    
-                        if (IsDown(gameState->input.keyMappings, DOWN_KEY))
+                    else if (gameState->moveBufferTimer > 0 &&
+                                gameState->lastMoveKey == DOWN_KEY ||
+                                IsDown(gameState->input.keyMappings, DOWN_KEY))
                     {
                         actionDir = {0, 1};
                         isPressed = true;
@@ -1752,12 +1778,16 @@ void GameplayUpdateAndRender()
                                     StretchEntity(player, actionDir, player->attachDir, player->attachDir,
                                                   player->tilePos, player->tilePos, 0.8f, PLAYER_MOVE_FUNC, speed);
                                     OnPlayEvent(&player->tweenController);
+                                    
+                                    gameState->aniSpeedAdjustable = true;
+                                    
                                 }
                                     stateChanged = stateChanged || moved;
                         }
                     }
                     if (stateChanged) 
-                    {
+                        {
+                            gameState->aniSpeedAdjustable = false;
                         if (player->spriteType == SPRITE_TYPE_SPRITE)
                         {
                             SetSlimeSprite(player, actionDir);
@@ -1788,7 +1818,10 @@ void GameplayUpdateAndRender()
     
     SetFreeze();
         UpdateSlimes();
-    
+        UpdateStars();
+        
+        gameState->moveBufferTimer -= GetFrameTime();
+        
         // NOTE: Undo and Restart
         {
             static bool8 repeat = false;
@@ -1812,8 +1845,6 @@ void GameplayUpdateAndRender()
         }
         }
         
-        
-        UpdateStars();
         
     // NOTE: Keys and Locks
     {
@@ -2405,6 +2436,11 @@ Fog & fog = gameState->fog;
         DrawText(TextFormat("Stars Collected: %d",
                                      gameState->starCount),
                  10, 250, 25, ORANGE);
+        
+        
+        DrawText(TextFormat("Move Buffer Timer: %f, Last Move Key: %d",
+                            gameState->moveBufferTimer, gameState->lastMoveKey),
+                 10, 300, 25, ORANGE);
         
         
         if (player)

@@ -142,6 +142,17 @@ void TweenController::Update()
     }
     }
 
+void TweenController::AdjustSpeed(real32 rate)
+{
+    for (uint32 channel = 0; channel < MAX_CHANNEL; channel++)
+    {
+        auto & queue = channels[channel];
+        for (uint32 i = 0; i < queue.count; i++)
+        {
+            queue[i].dt *= rate;
+        }
+    }
+}
 
 void AddTween(TweenController & controller, Tween tween, int32 channel)
 {

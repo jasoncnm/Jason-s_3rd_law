@@ -36,6 +36,8 @@
 
 #define MAX_UNDO 500
 
+#define MOVE_BUFFER 0.2f;
+
 constexpr float zoom_per_tile = 15.5f / 600.0f;
 constexpr float press_freq = 0.2f;
 
@@ -177,6 +179,9 @@ struct GameState
     real32 time = 0.0f;
     real32 shakeStrength;
     
+    real32 moveBufferTimer = 0;
+    GameInputType lastMoveKey;
+    
     //PostFX postFX[FX_COUNT];
     ShaderInfo postShader;
     ShaderInfo movableShader;
@@ -216,6 +221,8 @@ struct GameState
     
     bool8 initialized;
     bool8 simulating = false;
+    
+    bool8 aniSpeedAdjustable = false;
     
     bool8 switching = false;
     GameScreen nextScreen;

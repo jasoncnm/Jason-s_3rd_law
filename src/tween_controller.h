@@ -27,6 +27,8 @@ struct TweenController
     // NOTE: Update Every frame
     void Update();
     
+    void AdjustSpeed(real32 rate);
+    
     int32 FindChannelByParamType(ParamType type);
     Tween * FindTweenByParamType(ParamType type);
     
