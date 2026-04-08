@@ -19,7 +19,7 @@ TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Fix weird animation bugs 
 - Redo shake shader with the godot implementation (See Below)
 
-uniform float ShakeStrength = 0;
+uniform real32 ShakeStrength = 0;
 uniform vec2 FactorA  = vec2(100.0,100.0);
 uniform vec2 FactorB  = vec2(1.0,1.0);
 uniform vec2 magnitude = vec2(0.01,0.01);
@@ -911,7 +911,7 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
     return checkList.last().pushResult;
     }
 
-inline float GetCameraZoom(Map & currentMap)
+inline real32 GetCameraZoom(Map & currentMap)
 {
     int32 newWidth = GetScreenWidth();
     int32 newHeight = GetScreenHeight();
@@ -920,7 +920,7 @@ inline float GetCameraZoom(Map & currentMap)
     
     // int32 camMax = 11; 
     
-    float zoom = (zoom_per_tile / camMax);
+    real32 zoom = (zoom_per_tile / camMax);
     (newWidth < newHeight) ? zoom *= newWidth : zoom *= newHeight;
     
     if (zoom > 5) zoom = 5;
@@ -953,8 +953,8 @@ inline void UpdateCameraToTileMapSmooth(Map & map, real32 (*MoveFunc)(real32), r
     AddTweenUnique(gameState->camera.tweenController, CreateTween(params, MoveFunc, moveSpeed));
     }
     
-    float oldZoom = gameState->camera.base.zoom;
-    float newZoom = GetCameraZoom(map);
+    real32 oldZoom = gameState->camera.base.zoom;
+    real32 newZoom = GetCameraZoom(map);
     if (!FloatEquals(oldZoom, newZoom))
     {
         TweenParams params = {};
@@ -1280,7 +1280,7 @@ bool8 MoveAction(IVec2 actionDir)
     }
     
     
-    float moveSpeed = 4.0f;
+    real32 moveSpeed = 4.0f;
     IVec2 currentPos = player->tilePos;
     IVec2 actionTilePos = currentPos + actionDir;
     
@@ -1332,7 +1332,7 @@ bool8 MoveAction(IVec2 actionDir)
                         if (reversePushResult.state == PUSH_BLOCKED)
                         {
                             StretchEntity(player, actionDir, player->attachDir, player->attachDir,
-                                          player->tilePos, player->tilePos, 0.7f, PLAYER_MOVE_FUNC, MOVE_SPEED * 0.7f);
+                                          player->tilePos, player->tilePos, 0.7f, PLAYER_MOVE_FUNC, GetStretchSpeed(player));
                             OnPlayEvent(&player->tweenController);
                         }
                     }
@@ -1733,36 +1733,8 @@ void GameplayUpdateAndRender()
                                 {
                                     SetSlimeSprite(player, actionDir);
                                     
-                                    real32 speed = 0.0f;
-                                    
-                                    if (player->attachDir.x > 0)
-                                    {
-                                    speed = MOVE_SPEED * 0.3f; 
-                                    }
-                                        else if (player->attachDir.y < 0)
-                                    {
-                                    speed = MOVE_SPEED * 0.1f;
-                                    }
-                                    else if (player->attachDir.x < 0)
-                                    {
-                                        speed = MOVE_SPEED * 0.1f;
-                                    }
-                                    else if (player->attachDir.y > 0)
-                                    {
-                                        speed = MOVE_SPEED * 0.3f;
-                                    }
-                                    else 
-                                    {
-                                        speed = MOVE_SPEED * 0.2f;
-                                    }
-                                    
-                                    if (player->mass == 2)
-                                    {
-                                        speed *= 1.2f;
-                                    }
-                                    
                                     StretchEntity(player, actionDir, player->attachDir, player->attachDir,
-                                                  player->tilePos, player->tilePos, 0.8f, PLAYER_MOVE_FUNC, speed);
+                                                  player->tilePos, player->tilePos, 0.8f, PLAYER_MOVE_FUNC, GetStretchSpeed(player));
                                     OnPlayEvent(&player->tweenController);
                                     
                                     gameState->aniSpeedAdjustable = true;
@@ -1811,7 +1783,7 @@ void GameplayUpdateAndRender()
         // NOTE: Undo and Restart
         {
             static bool8 repeat = false;
-            static float timeSinceLastPress = 0;
+            static real32 timeSinceLastPress = 0;
             
             timeSinceLastPress -= GetFrameTime();
             
@@ -1863,7 +1835,7 @@ void GameplayUpdateAndRender()
             {
                 SM_ASSERT(lock->unlockCount == gameState->starCount, "this lock should be unlocked earlier");
                 lock->open = true;
-                float delayTime = 1.0f;
+                real32 delayTime = 1.0f;
                 TweenParams params = { 0 };
                 params.paramType = PARAM_TYPE_COLOR;
                 params.startColor = WHITE;
@@ -2050,7 +2022,7 @@ void GameplayUpdateAndRender()
         // NOTE: CameraZoom
         // Camera zoom controls
         // Uses log scaling to provide consistent zoom speed
-        real32 wheelDelta = (float)GetMouseWheelMove();
+        real32 wheelDelta = (real32)GetMouseWheelMove();
         
         gameState->camera.base.zoom = expf(logf(gameState->camera.base.zoom) + (wheelDelta*0.1f));
         // NOTE: Camera Drag
@@ -2198,9 +2170,9 @@ void GameplayUpdateAndRender()
 }
     
     
-    static float contrast = 0.0f;
-    static float saturation = 0.0f;
-    static float brightness = 1.3f;
+    static real32 contrast = 0.0f;
+    static real32 saturation = 0.0f;
+    static real32 brightness = 1.3f;
     static bool8 debugView = false;
     
     // NOTE: Debug Cheats
@@ -2346,8 +2318,8 @@ Fog & fog = gameState->fog;
                        Rectangle {
                            pivot.x,
                            pivot.y, 
-                           (float)MAP_TILE_SIZE * fog.dim.x,
-                           (float)MAP_TILE_SIZE * fog.dim.y
+                           (real32)MAP_TILE_SIZE * fog.dim.x,
+                           (real32)MAP_TILE_SIZE * fog.dim.y
                        },
                        Vector2 { 0, 0 }, 0, WHITE);
         }
@@ -2359,7 +2331,7 @@ Fog & fog = gameState->fog;
         BeginDrawing();
         ClearBackground(IntToRGBA(0x465a6f));
         
-        DrawScrollingBackGround(gameState->bgTexture, BLUE);
+        DrawScrollingBackGround(gameState->bgTexture, BLUE, 2);
         
         gameState->time = (real32)GetTime();
         gameState->shakeTime -= GetFrameTime();
@@ -2663,19 +2635,26 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
             DrawScrollingBackGround(gameState->bgTexture, PINK);
             
-            float width = GetScreenWidth() - 600.0f;
-            float height = 100.0f;
+            uint32 numButtons = 3;
+            real32 margin = 200.0f;
+            
+            real32 width = GetScreenWidth() - 600.0f;
+            real32 height = 100.0f;
             width = Clamp(width, 300.0f, 400.0f);
             height = Clamp(height, 9.0f, 150.0f);
             
-            float padding = 10.0f;
-            float x = (GetScreenWidth() - width) * 0.5f;
-            float y = (GetScreenHeight() - 40) * 0.5f - 400;
+            real32 totalHeight = height + (numButtons - 1) * margin;
             
+            real32 x = (GetScreenWidth() - width) * 0.5f;
+            real32 y = (GetScreenHeight() - totalHeight) * 0.5f;
+            
+            real32 padding = 10.0f;
             if (x < padding) x = padding;
             if (y < padding) y = padding;
             
             const char * NewGameText = "New Game";
+            
+            
             Rectangle bounds =
             {
                 x,
@@ -2693,7 +2672,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             #if 0
             // TODO: Experimental features, Very breakable!!!
             const char * LoadGameText = "load game";
-            bounds.y += 200;
+            bounds.y += margin;
             if (GuiButton(bounds, LoadGameText))
             {
                 
@@ -2728,16 +2707,18 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 }
             };
             
+#endif
+            
+            bounds.y += margin;
             const char * TestLevel = "test level";
-            bounds.y += 200;
             if (GuiButton(bounds, TestLevel))
             {
                 LoadTileMapsAndEntities(*gameState, TEST_PATH);
                 ChangeScreen(GAME_MAIN_SCREEN);
-                }
-#endif
+            }
+            
+            bounds.y += margin;
             const char * QuitGame = "Quit Game";
-            bounds.y += 200;
             if (GuiButton(bounds, QuitGame))
             {
                 *running = false;   
@@ -2747,20 +2728,30 @@ UPDATE_AND_RENDER(UpdateAndRender)
         }
         case PAUSE_MENU_SCREEN:
         {
+            if (IsKeyPressed(KEY_ESCAPE))
+            {
+                ChangeScreen(GAME_MAIN_SCREEN);
+            }
+            
             BeginDrawing();
             ClearBackground(gameState->bgColor);
             
             DrawScrollingBackGround(gameState->bgTexture, PURPLE);
             
-            float width = GetScreenWidth() - 600.0f;
-            float height = 100.0f;
+            uint32 numButtons = 2;
+            real32 margin = 200.0f;
+            
+            real32 width = GetScreenWidth() - 600.0f;
+            real32 height = 100.0f;
             width = Clamp(width, 300.0f, 400.0f);
             height = Clamp(height, 9.0f, 150.0f);
             
-            float padding = 10.0f;
-            float x = (GetScreenWidth() - width) * 0.5f;
-            float y = (GetScreenHeight() - 40) * 0.5f - 400;
+            real32 totalHeight = height + (numButtons - 1) * margin;
             
+            real32 x = (GetScreenWidth() - width) * 0.5f;
+            real32 y = (GetScreenHeight() - totalHeight) * 0.5f;
+            
+            real32 padding = 10.0f;
             if (x < padding) x = padding;
             if (y < padding) y = padding;
             
@@ -2781,7 +2772,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             #if 0
             // TODO: Experimental features, Very breakable!!!
             const char * SaveGameText = "save game";
-            bounds.y += 200;
+            bounds.y += margin;
             if (GuiButton(bounds, SaveGameText))
             {
                 SaveGame(*gameState, GAME_SAVE_PATH);
@@ -2789,7 +2780,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
 #endif
             
             const char * QuitMenuText = "Quit To Main Menu";
-            bounds.y += 200;
+            bounds.y += margin;
             if (GuiButton(bounds, QuitMenuText))
             {
                 CleanUpGame();

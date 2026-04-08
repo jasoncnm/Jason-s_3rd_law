@@ -357,14 +357,47 @@ AddConnection(IVec2 tilePos, TileID tileID)
     return entityResult;
 }
 
+inline real32 GetStretchSpeed(Entity * player)
+{
+    // TODO hacky code
+    
+    real32 speed = 0.0f;
+    
+    if (player->attachDir.x > 0)
+    {
+        speed = MOVE_SPEED * 0.3f; 
+    }
+    else if (player->attachDir.y < 0)
+    {
+        speed = MOVE_SPEED * 0.1f;
+    }
+    else if (player->attachDir.x < 0)
+    {
+        speed = MOVE_SPEED * 0.1f;
+    }
+    else if (player->attachDir.y > 0)
+    {
+        speed = MOVE_SPEED * 0.3f;
+    }
+    else 
+    {
+        speed = MOVE_SPEED * 0.2f;
+    }
+    
+    if (player->mass == 2)
+    {
+        speed *= 1.2f;
+    }
+    
+    return speed;
+}
 
 inline void StretchEntity(Entity * entity,
                           IVec2 moveDir, IVec2 startAttach, IVec2 endAttach,
                           IVec2 startPos, IVec2 endPos,
-                          real32 stretch, real32 (*MoveFunc)(real32), real32 speed,
-                          bool8 invert = false)
+                          real32 stretch, real32 (*MoveFunc)(real32),
+                          real32 speed = MOVE_SPEED, bool8 invert = false)
 {
-    
     Vector2 startPivot = GetTilePivot(startPos, entity->tileSize, startAttach);
     Vector2 endPivot = GetTilePivot(endPos, entity->tileSize, endAttach);
     
@@ -483,6 +516,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 real32 dist2 = Vector2Distance(middlePivot, endPivot) / MAP_TILE_SIZE;
                 
                 uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed, tileDist));
+                
                 AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed, dist2), channel);
                 
                 }
@@ -522,7 +556,9 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 param.paramType = PARAM_TYPE_VECTOR2;
                 param.startVec2 = midPivot;
                 param.endVec2 = endPivot;
-                param.realVec2  = &entity->pivot;
+                    param.realVec2  = &entity->pivot;
+                    
+                    
                     
                     if (ch1 < 0)
                     {
@@ -596,7 +632,10 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                           IVec2 { 0, 0 }, 
                           old.tilePos,
                           mid_tile,
-                          0.8f, MoveFunc, speed, true);
+                          0.8f,
+                          MoveFunc,
+                          speed,
+                          true);
         }
         else
         {

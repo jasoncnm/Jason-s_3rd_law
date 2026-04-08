@@ -357,7 +357,8 @@ void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vecto
 }
 
 
-void DrawScrollingBackGround(Texture2D bgTexture, Color tint = WHITE)
+void DrawScrollingBackGround(Texture2D bgTexture,
+                             Color tint = WHITE, uint32 size = 2)
 {
     
     static Vector2 offset = { 0, 0 };
@@ -378,7 +379,6 @@ void DrawScrollingBackGround(Texture2D bgTexture, Color tint = WHITE)
     int32 remW = GetScreenWidth() % tWidth;
     int32 remH = GetScreenHeight() % tHeight;
     
-    int32 size = 2;
     int32 w = size * tWidth * (divW + 1);
     int32 h = size * tWidth * (divH + 1);
     
