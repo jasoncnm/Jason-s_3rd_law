@@ -156,7 +156,7 @@ int main(int argumentCount, char *argumentArray[])
             SM_ERROR("Unable to load file (%s) to texture", TEXTURE_PATH);
             return -1;
         }
-        SetTextureFilter(gameState->textureAltas, TEXTURE_FILTER_BILINEAR);
+        SetTextureFilter(gameState->textureAltas, TEXTURE_FILTER_POINT);
         
         gameState->bgTexture = LoadTexture(BACKGROUND_PATH);
         if (!IsTextureValid(gameState->bgTexture))
@@ -176,6 +176,12 @@ int main(int argumentCount, char *argumentArray[])
         {
             SM_ERROR(false, "Unable to load player shader");
         }
+        
+        if (!LoadShaderInfo(&gameState->portalShader, BASE_VS_PATH, PORTAL_FS_PATH))
+        {
+            SM_ERROR(false, "Unable to load portal shader");
+        }
+        
         
         gameState->renderTarget = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
         if (!IsRenderTextureValid(gameState->renderTarget))
@@ -231,6 +237,7 @@ int main(int argumentCount, char *argumentArray[])
         CloseAudioDevice();
         UnloadShaderInfo(&gameState->postShader);
         UnloadShaderInfo(&gameState->movableShader);
+        UnloadShaderInfo(&gameState->portalShader);
         
         UnloadTexture(gameState->textureAltas);
         UnloadRenderTexture(gameState->starFields.starTexture);

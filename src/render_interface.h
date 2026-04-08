@@ -21,6 +21,7 @@
 #define POST_FS_PATH "Assets/Shaders/PostShaders/post.fs"
 #define MOVE_VS_PATH "Assets/Shaders/EntityShaders/moveable.vs"
 #define MOVE_FS_PATH "Assets/Shaders/EntityShaders/moveable.fs"
+#define PORTAL_FS_PATH "Assets/Shaders/EntityShaders/portal.fs"
 
 //  ========================================================================
 //              NOTE: Render Structs

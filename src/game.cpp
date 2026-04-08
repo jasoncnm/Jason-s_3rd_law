@@ -17,7 +17,25 @@
 /*
 TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
 - Fix weird animation bugs 
-- Unlock map transitions
+- Redo shake shader with the godot implementation (See Below)
+
+uniform float ShakeStrength = 0;
+uniform vec2 FactorA  = vec2(100.0,100.0);
+uniform vec2 FactorB  = vec2(1.0,1.0);
+uniform vec2 magnitude = vec2(0.01,0.01);
+uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
+
+void fragment() {
+    vec2 uv = SCREEN_UV;
+	uv -= 0.5;
+    uv *= 1.0 - 2.0 * magnitude.x;
+    uv += 0.5;
+	vec2 dt = vec2(0.0, 0.0);
+	dt.x = sin(TIME * FactorA.x+FactorB.x) * magnitude.x;
+	dt.y = cos(TIME *FactorA.y+ FactorB.y) * magnitude.y;
+	COLOR = texture(SCREEN_TEXTURE, SCREEN_UV + dt * ShakeStrength);
+}
+
 
 TODO: Things that I can do beside arts and design I guess
 3. collectable: show in ui
@@ -186,10 +204,10 @@ uint32 TilePosToFogIndex(Fog & fog, IVec2 pos)
     return idx;
 }
 
+// NOTE: Add fog index that's to be revealed
 void RevealTile(Fog & fog, IVec2 tilePos)
 {
     uint32 fogIndex = TilePosToFogIndex(fog, tilePos);
-    // TODO fade this value
     bool8 add = true;
     
     if (ColorIsEqual(fog.fogPixels[fogIndex], BLANK))
@@ -210,10 +228,7 @@ void RevealTile(Fog & fog, IVec2 tilePos)
     
     if (add)
     fog.updatingIndices.Add(fogIndex);
-    
-    //fog.fogPixels[fogIndex] = value;
-    
-}
+    }
 
 void RevealEntity(Entity * entity, int32 visibility)
 {
@@ -254,7 +269,7 @@ void RevealMap(Map & map)
 void UpdateFog()
 {
     Fog & fog = gameState->fog;
-    real32 updateSpeed = 1.0f;
+    real32 updateSpeed = 0.01f;
     for (uint32 i = 0; i < fog.updatingIndices.count; i++)
     {
         uint32 updateIndex = fog.updatingIndices[i];
@@ -314,10 +329,11 @@ void SetDrawingEntities()
     }
 }
 
-void SetShake(float duration)
+void SetShake(real32 duration, real32 strength)
 {
     gameState->shake = true;
     gameState->shakeTime = duration;
+    gameState->shakeStrength = strength;
 }
 
 DynamicArray<UndoState::MapUndoInfo> GetCurrentMapUndoInfos()
@@ -624,7 +640,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
     
     MoveAndStop:;
     MoveEntity(projectedEnt, attach, playEvent, finalPos, 
-               BLOCK_MOVE_FUNC, BOUNCE_SPEED, !defered);
+               BLOCK_PROJ_FUNC, BOUNCE_SPEED, !defered);
     }
 
 inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMass, 
@@ -1227,7 +1243,8 @@ inline void SetGameState(UndoState & undoState)
     gameState->starCount = (uint16)undoState.starCount;
     std::vector<Entity> & undoEntities = undoState.undoEntities;
     SetUndoEntities(undoEntities);
-    SetUndoMapInfos(undoState.undoMapInfos);
+    
+    // TODO : SetUndoMapInfos(undoState.undoMapInfos);
     }
 
 inline void Undo()
@@ -1544,6 +1561,12 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                 
                 DrawSprite(gameState->camera.base, drawTexture, drawSprite, drawPivot, entity->tileSize, color);
                 EndShaderMode();
+                }
+                else if (entity->type == ENTITY_TYPE_TUT_PORTAL)
+                {
+                    BeginShaderMode(gameState->portalShader.shader);
+                    DrawSprite(gameState->camera.base, drawTexture, drawSprite, drawPivot, entity->tileSize, color);
+                    EndShaderMode();
                 }
                 else
                 {
@@ -1918,7 +1941,8 @@ void GameplayUpdateAndRender()
                             Entity * glass = FindEntityByLocationAndLayers(pos, glassLayer, 1);
                             if (glass)
                             {
-                                SetGlassBeBroken(glass);
+                                    SetGlassBeBroken(glass);
+                                    SetShake(0.005f, 0.001f);
                             }
                         }
                         
@@ -2167,6 +2191,7 @@ void GameplayUpdateAndRender()
         
         if (IsKeyPressed(KEY_EQUAL))
         {
+            SetShake(0.05f, 0.001f);
             gameState->starCount++;
         }
         
@@ -2177,9 +2202,7 @@ void GameplayUpdateAndRender()
             UnloadTexture(gameState->textureAltas);    // Unload render texture
             gameState->textureAltas = LoadTexture(TEXTURE_PATH);
             gameState->bgTexture = LoadTexture(BACKGROUND_PATH);
-            SetShake(0.05f);
-            
-        }
+            }
         
         if (IsKeyPressed(KEY_RIGHT_BRACKET))
         {
@@ -2207,6 +2230,7 @@ Fog & fog = gameState->fog;
         
         UpdateShaderInfo(gameState->movableShader);
         UpdateShaderInfo(gameState->postShader);
+        UpdateShaderInfo(gameState->portalShader);
         
         BeginTextureMode(gameState->renderTarget);
         ClearBackground(gameState->bgColor);
@@ -2343,7 +2367,7 @@ Fog & fog = gameState->fog;
             SetShaderValue(gameState->postShader.shader, brightnessLoc, &brightness, SHADER_UNIFORM_FLOAT);
             
             PostProcessing(gameState->renderTarget, gameState->postShader, 
-                                      gameState->shake, gameState->time);
+                                      gameState->shake, gameState->shakeStrength, gameState->time);
             }
         
         

@@ -578,8 +578,8 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
             real32 dist1 = Vector2Distance(startPivot, middlePivot) / MAP_TILE_SIZE;
             real32 dist2 = Vector2Distance(middlePivot, endPivot) / MAP_TILE_SIZE;
             
-            uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, MoveFunc, speed, dist1 * 0.7f));
-            AddTween(entity->tweenController, CreateTween(params2, MoveFunc, speed, dist2 * 0.7f), channel);
+            uint32 channel = AddTweenUnique(entity->tweenController, CreateTween(params1, EaseInSine, speed, dist1 * 0.7f));
+            AddTween(entity->tweenController, CreateTween(params2, EaseInSine, speed, dist2 * 0.7f), channel);
             
         }
         }
@@ -928,11 +928,17 @@ inline void UpdateSlimes()
                     
                     Entity * blockedEnt = FindBlockEntityFromTo(oldPos + dir, newPos, dir);
                     
+                    real32 (*MoveFunc)(float) = PLAYER_PROJ_FUNC;
                     float aniSpeed = BOUNCE_SPEED;
                     if (!attach->tweenController.NoTweens())
                     {
                         Tween * moveTween = attach->tweenController.FindTweenByTweenProperty(PARAM_TYPE_VECTOR2, &attach->pivot);
-                        aniSpeed = moveTween->dt; 
+                        
+                        if (!FloatEquals(aniSpeed, moveTween->dt))
+                        {
+                            aniSpeed = moveTween->dt;
+                            MoveFunc = moveTween->Easing;
+                        }
                     }
                     
                     IVec2 targetPos = newPos;
@@ -956,8 +962,10 @@ inline void UpdateSlimes()
                         }
                         targetPos = blockedEnt->tilePos - dir;
                         attach = blockedEnt;
-                        }
-                    MoveEntity(slime, attach, playEvent, targetPos, BLOCK_MOVE_FUNC, aniSpeed);
+                    }
+                    
+                    
+                    MoveEntity(slime, attach, playEvent, targetPos, MoveFunc, aniSpeed);
                     
                     }
                 }

@@ -197,7 +197,7 @@ void main()
         minx = padding / (2.0 * u_frameSize.x);
         maxx = 1 - minx;
     }
-
+    
     vec2 uv = fragTexCoord;
     uv = curve(uv);
     vec4 color = texture(texture0, uv);
@@ -219,6 +219,7 @@ void main()
 
     
     float out_brightness = mix(brightness - 0.1, brightness + 0.1, abs(0.5 * sin(3 * cos(time))));
+
 
     // Apply contrast
     color.rgb = (color.rgb - 0.5f)*(contrast/100.0f + 1.0f) + 0.5f;

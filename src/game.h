@@ -17,7 +17,7 @@
 
 #define DEFAULT_TILE_SIZE Vector2 { MAP_TILE_SIZE, MAP_TILE_SIZE }
 
-#define BOUNCE_SPEED 9.0f
+#define BOUNCE_SPEED 6.6f
 #define MOVE_SPEED 3.3f
 
 #define CAMERA_MOVE_SPEED 1.8f
@@ -27,6 +27,8 @@
 
 #define GAME_SAVE_PATH "data/save_data/"
 
+#define BLOCK_PROJ_FUNC  nullptr
+#define PLAYER_PROJ_FUNC nullptr
 #define BLOCK_MOVE_FUNC  nullptr
 #define PLAYER_MOVE_FUNC nullptr
 #define CAMERA_MOVE_FUNC EaseInOutCubic
@@ -173,9 +175,12 @@ struct GameState
     bool8 shake = false;
     real32 shakeTime = 0;
     real32 time = 0.0f;
+    real32 shakeStrength;
+    
     //PostFX postFX[FX_COUNT];
     ShaderInfo postShader;
     ShaderInfo movableShader;
+    ShaderInfo portalShader;
     
     Array<uint32, MAX_ENTITIES> entityTable[LAYER_COUNT];
     Array<Entity, MAX_ENTITIES> entities;
@@ -199,6 +204,7 @@ struct GameState
     int32 prevMapIndex;
     // NOTE: map index of the map containing player tilePos
     int32 playerMapIndex;
+    
     int32 lastTutBlockIndex;
     int32 screenWidth = SCREEN_WIDTH;
     int32 screenHeight = SCREEN_HEIGHT;
@@ -276,7 +282,7 @@ static Memory * gameMemory;
 MoveActionResult MoveActionCheck(Entity * startEntity, Entity * pushEntity, IVec2 blockNextPos, IVec2 pushDir, uint32 accumulatedMass);
 PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState);
 void CleanUpGame();
-void SetShake(float duration);
+void SetShake(real32 duration, real32 strength = 0.01f);
 FindTileMapResult FindTileMap(IVec2 tilePos);
 void InitUndoState(UndoState * undoState, 
                    uint32 playerIndex, 

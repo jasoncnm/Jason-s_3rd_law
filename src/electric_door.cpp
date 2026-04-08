@@ -247,12 +247,6 @@ inline bool8 PowerOnCable(Entity * cable, bool8 & end)
             IVec2 oldPos = cable->tilePos;
             UnfreezeSlimes(cable);
             
-            Entity * attachSlime = FindAttachSlime(cable);
-            if (attachSlime)
-            {
-                DettachSlime(attachSlime);
-            }
-            
             IVec2 bounceDir = SetDoorOpen(cable);
             
             EntityLayer layers[] = { LAYER_BLOCK, LAYER_SLIME };
@@ -271,7 +265,7 @@ inline bool8 PowerOnCable(Entity * cable, bool8 & end)
             }
         
         
-        SetShake(0.05f);
+        SetShake(0.05f, 0.001f);
         GetEntity(cable->sourceIndex)->sourceLit = true;
         end = true;
     }
