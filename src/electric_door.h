@@ -7,6 +7,11 @@
    $Notice: $
    ======================================================================== */
 
+
+/*
+
+*/
+
 #define Cable_Indices gameState->entityTable[LAYER_CABLE]
 #define Source_Indices gameState->entityTable[LAYER_SOURCE]
 #define Connection_Indices gameState->entityTable[LAYER_CONNECTION]
