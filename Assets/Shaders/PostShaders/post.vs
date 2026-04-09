@@ -18,6 +18,7 @@ out vec4 fragColor;
 // Custom uniforms
 uniform bool shake;
 uniform float time;
+uniform float strength = 0.001;
 
 void main()
 {
@@ -30,9 +31,8 @@ void main()
 
     if (shake)
     {
-        float strength = 0.001;
-        gl_Position.x += cos(time * 10) * strength;        
-        gl_Position.y += cos(time * 15) * strength;      
+        gl_Position.x += cos(time * 10 * strength) * strength;        
+        gl_Position.y += cos(time * 15 * strength) * strength;      
         //gl_Position.x += -1 * strength;        
         //gl_Position.y += 0 * strength;    
     }
