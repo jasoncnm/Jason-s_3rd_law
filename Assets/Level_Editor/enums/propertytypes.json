@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "name": "Entity_Type",
+        "storageType": "int",
+        "type": "enum",
+        "values": [
+            "Entity_Type_1",
+            "Entity_Type_2",
+            "Entity_Type_3",
+            "Entity_Type_4",
+            "Entity_Type_5"
+        ],
+        "valuesAsFlags": false
+    }
+]

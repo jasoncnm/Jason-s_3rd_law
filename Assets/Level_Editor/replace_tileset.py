@@ -15,4 +15,5 @@ for tileMapFile in tileMapFiles:
                 print(tileset['source'])
         
         file.seek(0)
-        json.dump(data, file)
+        json.dump(data, file, indent=4)
+        file.truncate()
