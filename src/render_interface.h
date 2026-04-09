@@ -44,6 +44,22 @@ struct StarFields
     float flySpeed = 0.1f;    
 };
 
+struct Particle
+{
+    Vector2 position;       // Particle position on screen
+    Vector2 velocity;       // Particle current speed and direction
+     real32 radius;           // Particle radius
+    Color color;            // Particle color
+    
+     real32 lifeTime;         // Particle life time
+    bool8 alive;             // Particle alive: inside screen and life time
+};
+
+struct CircularBuffer {
+     real32 head;               // Index for the next write
+     real32 tail;               // Index for the next read
+    Particle *buffer;       // Particle buffer array
+};
 //  ========================================================================
 //              NOTE: Render Globals
 //  ========================================================================

@@ -286,17 +286,7 @@ void UpdateFog()
 
 void UpdateStars()
 {
-    // TODO tem code, move updating spline in screen space
-    static bool8 first = true;
     auto & keyTable = gameState->entityTable[LAYER_KEY];
-    static real32 * star_t = (real32 *)BumpAllocArray(gameMemory->persistentStorage, 
-                                                       keyTable.count, sizeof(real32));
-    
-    if (first) 
-    {
-        first = false;
-        memset(star_t, 0, keyTable.count * sizeof(real32));
-    }
     
     for (uint32 keyIndex = 0; keyIndex < keyTable.count; keyIndex++)
     {
@@ -306,7 +296,7 @@ void UpdateStars()
             if (key->starCollecting)
             {
                 real32 dist = Vector2Distance(key->screenStart, key->screenEnd);
-                if (dist <= 0 || star_t[keyIndex] > 1)
+                if (dist <= 0 || gameState->starT[keyIndex] > 1)
                 {
                     DeleteEntity(key);
                 }
@@ -316,15 +306,17 @@ void UpdateStars()
                     Vector2 end = key->screenEnd;
                     Vector2 mid = Vector2 { end.x, start.y };
                     
-                    real32 t = EaseInSine(star_t[keyIndex]);
+                    real32 t = EaseInSine(gameState->starT[keyIndex]);
                     
                     Vector2 screen_cur = GetSplinePointBezierQuad(start, mid, end, t);
+                    
+                     key->tileSize = Vector2Lerp(DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE * 1.5f, t);
                     
                     key->pivot = GetScreenToWorld2D(screen_cur, gameState->camera.base);
                     
                     real32 step = 1 / dist;
                     real32 dt = step * GetFrameTime() * 700;
-                    star_t[keyIndex] += dt;
+                    gameState->starT[keyIndex] += dt;
                 }
                 
                 
@@ -333,7 +325,7 @@ void UpdateStars()
             
             Vector2 keyPos = GetTilePivot(key);
             
-            star_t[keyIndex] = 0;
+            gameState->starT[keyIndex] = 0;
             
             real32 posy = keyPos.y + 3 * cosf(2 * (real32)GetTime() + keyPos.x);
             real32 posx = keyPos.x + 3 * sinf(2 * (real32)GetTime() + keyPos.y);
@@ -1373,7 +1365,7 @@ bool8 MoveAction(IVec2 actionDir)
                         if (reversePushResult.state == PUSH_BLOCKED)
                         {
                             StretchEntity(player, actionDir, player->attachDir, player->attachDir,
-                                          player->tilePos, player->tilePos, 0.7f, PLAYER_MOVE_FUNC, GetStretchSpeed(player));
+                                          player->tilePos, player->tilePos, 0.8f, PLAYER_MOVE_FUNC, GetStretchSpeed(player));
                             OnPlayEvent(&player->tweenController);
                         }
                     }
@@ -1720,8 +1712,8 @@ void GameplayUpdateAndRender()
             DynamicArray<Entity> prevEntState = GetCurrentStateEntities();
             DynamicArray<UndoState::MapUndoInfo> prevMapInfos = GetCurrentMapUndoInfos();
             
-        uint32 prevPlayerIndex = gameState->playerEntityIndex;
-        
+            uint32 prevPlayerIndex = gameState->playerEntityIndex;
+            
         // NOTE SlimeSelection
         if (!UpdateElectricDoor())
         {
@@ -1864,7 +1856,7 @@ void GameplayUpdateAndRender()
                             key->starCollecting = true;
                             key->screenStart = GetWorldToScreen2D(key->pivot, gameState->camera.base);
                             key->screenEnd =
-                                Vector2 { (real32)GetScreenWidth() * 0.5f, 0 };
+                                Vector2 { (real32)GetScreenWidth() * 0.5f, -100 };
                         gameState->starCount++;
                         break;
                     }
@@ -2292,6 +2284,7 @@ Fog & fog = gameState->fog;
             LAYER_DOOR,
             LAYER_KEY,
             LAYER_LOCK,
+            LAYER_NULL,
          };
         
         int32 count = ArrayCount(orderedDrawLayers);
@@ -2446,10 +2439,6 @@ Fog & fog = gameState->fog;
                                      gameState->starCount),
                  10, 250, 25, ORANGE);
         
-        
-        DrawText(TextFormat("Move Buffer Timer: %f, Last Move Key: %d",
-                            gameState->moveBufferTimer, gameState->lastMoveKey),
-                 10, 300, 25, ORANGE);
         
         
         if (player)

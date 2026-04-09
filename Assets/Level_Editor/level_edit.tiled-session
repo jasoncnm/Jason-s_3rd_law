@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TileMap/Path_87.tmj",
+    "activeFile": "TestLevels/Test_2.tmj",
     "expandedProjectPaths": [
         ".",
         "TileMap",
@@ -45,22 +45,22 @@
             "scaleInDock": 1
         },
         "TestLevels/Test.tmj": {
-            "scale": 0.75,
-            "selectedLayer": 0,
+            "scale": 8,
+            "selectedLayer": 5,
             "viewCenter": {
-                "x": 557.3333333333333,
-                "y": 367.33333333333337
+                "x": 519.4375,
+                "y": -195.5625
             }
         },
         "TestLevels/Test_2.tmj": {
             "expandedObjectLayers": [
                 7
             ],
-            "scale": 0.75,
+            "scale": 3,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 269.33333333333326,
-                "y": 719.3333333333334
+                "x": 171.16666666666669,
+                "y": 197.83333333333334
             }
         },
         "TestLevels/Test_3.tmj": {
@@ -1707,7 +1707,7 @@
             "scaleInEditor": 1
         },
         "TlieSet/tileSet.tsx": {
-            "scaleInDock": 1,
+            "scaleInDock": 2,
             "scaleInEditor": 1
         }
     },
@@ -1784,22 +1784,26 @@
         "TileMap/Room_18.tmj",
         "TileMap/Room_32.tmj",
         "TileMap/Room_19.tmj",
-        "TileMap/Room_60.tmj"
+        "TileMap/Room_60.tmj",
+        "TileMap/Froom_1.tmj",
+        "TileMap/Room_24.tmj",
+        "TileMap/Path_88.tmj",
+        "TestLevels/Test_3.tmj"
     ],
     "project": "level_edit.tiled-project",
     "property.type": "file",
     "recentFiles": [
         "TileMap/Path_89.tmj",
+        "TileMap/Path_87.tmj",
+        "TileMap/Broom_4.tmj",
+        "TileMap/Room_73.tmj",
+        "TestLevels/Test_3.tmj",
+        "TileMap/Path_88.tmj",
+        "TileMap/Room_24.tmj",
+        "TileMap/Froom_1.tmj",
         "TileMap/Room_60.tmj",
         "TileMap/Room_19.tmj",
         "TileMap/Room_32.tmj",
-        "TileMap/Room_18.tmj",
-        "TileMap/Room_23.tmj",
-        "TileMap/Room_59.tmj",
-        "TileMap/Room_58.tmj",
-        "TileMap/Room_65.tmj",
-        "TileMap/Room_74.tmj",
-        "TileMap/room_43.tmj",
-        "TileMap/Room_72.tmj"
+        "TileMap/Room_18.tmj"
     ]
 }

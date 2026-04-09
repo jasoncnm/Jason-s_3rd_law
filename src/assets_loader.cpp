@@ -213,6 +213,7 @@ inline AddEntityResult LoadGameObject(GameState & state, TileID id, IVec2 tilePo
     else if (id != LOCK)
     {
         SM_WARN("Unknown ID (%d)", id);
+        entityResult = AddEntity(ENTITY_TYPE_NULL, tilePos, id);
     }
     return entityResult;
 }
@@ -304,6 +305,11 @@ void SetupEntityTable(GameState & state)
                 {
                     state.entityTable[LAYER_LOCK].Add(entity->entityIndex);
                     break;
+                }
+                
+                default:
+                {
+                    state.entityTable[LAYER_NULL].Add(entity->entityIndex);
                 }
                 }
         }
@@ -516,6 +522,16 @@ state.currentMapIndex = -1;
         }
     SetupEntityTable(state);
     SetUpElectricDoor();
+    // NOTE: init stars
+    auto starTable = gameState->entityTable[LAYER_KEY];
+    if (!state.starT || starTable.count > state.starTCount)
+    {
+        state.starTCount = starTable.count;
+        state.starT = (real32 *)BumpAllocArray(gameMemory->persistentStorage, starTable.count, sizeof(real32));
+        }
+    
+    memset(state.starT, 0, starTable.count * sizeof(real32));
+    
 }
 
 

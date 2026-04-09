@@ -9,7 +9,7 @@ set DLL_NAME=game_code.dll
 set INCLUDES=-I..\src\vendor\raylib\ -I..\src\vendor\raygui\src\
 
 if "%1" == "test" (
-	set TEST_DEFINE=/DTEST=1
+	set TEST_DEFINE=/DTEST=1 -wd4838 -wd4244 -wd4305
 ) else (
 	set TEST_DEFINE=/DTEST=0
 )

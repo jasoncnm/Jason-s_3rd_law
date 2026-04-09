@@ -398,6 +398,16 @@ inline void StretchEntity(Entity * entity,
                           real32 stretch, real32 (*MoveFunc)(real32),
                           real32 speed = MOVE_SPEED, bool8 invert = false)
 {
+    // NOTE: if using hermit spline to stretch
+    //       p#.x == time, p#.y == stretch value
+    //       p0 = { 0, 1 }
+    //       p1 = { 0.5, 1 }
+    //       p2 = { 1, 1 }
+    //       t0 = { 1, 0 }
+    //       t1 = { 1, 3 }
+    //       t2 = { 2, -1 }
+    //       total_t = 2
+    //       dt = 2 * value/second
     Vector2 startPivot = GetTilePivot(startPos, entity->tileSize, startAttach);
     Vector2 endPivot = GetTilePivot(endPos, entity->tileSize, endAttach);
     

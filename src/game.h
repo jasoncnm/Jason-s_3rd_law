@@ -221,6 +221,9 @@ struct GameState
     
     uint16 starCount = 0;
     
+    uint32 starTCount;
+    real32 * starT;
+    
     bool8 initialized;
     bool8 simulating = false;
     

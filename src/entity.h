@@ -12,6 +12,7 @@
 
 enum EntityLayer
 {
+    LAYER_NULL,
     LAYER_WALL,
     LAYER_DOOR,
     LAYER_CABLE,
