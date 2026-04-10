@@ -174,7 +174,7 @@ inline bool8 IsSlime(Entity * entity)
 inline void SetSlimeSprite(Entity * slime, IVec2 dir)
 {
     
-    slime->sprite = slimeSpriteTable[dir];
+    slime->sprite = GetSlimeSprite(dir);
     }
 
 inline void SetSlimeAnimatedSprite(Entity * slime, IVec2 dir)

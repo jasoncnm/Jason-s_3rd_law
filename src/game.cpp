@@ -286,52 +286,52 @@ void UpdateFog()
 
 void UpdateStars()
 {
-    auto & keyTable = gameState->entityTable[LAYER_KEY];
+    auto & starTable  = gameState->entityTable[LAYER_STAR];
     
-    for (uint32 keyIndex = 0; keyIndex < keyTable.count; keyIndex++)
+    for (uint32 starIndex = 0; starIndex < starTable.count; starIndex++)
     {
-        if (Entity * key = GetEntity(keyTable[keyIndex]); key)
+        if (Entity * star = GetEntity(starTable[starIndex]); star)
         {
             
-            if (key->starCollecting)
+            if (star->starCollecting)
             {
-                real32 dist = Vector2Distance(key->screenStart, key->screenEnd);
-                if (dist <= 0 || gameState->starT[keyIndex] > 1)
+                real32 dist = Vector2Distance(star->screenStart, star->screenEnd);
+                if (dist <= 0 || gameState->starT[starIndex] > 1)
                 {
-                    DeleteEntity(key);
+                    DeleteEntity(star);
                 }
                 else
                 {
-                    Vector2 start = key->screenStart;
-                    Vector2 end = key->screenEnd;
+                    Vector2 start = star->screenStart;
+                    Vector2 end = star->screenEnd;
                     Vector2 mid = Vector2 { end.x, start.y };
                     
-                    real32 t = EaseInSine(gameState->starT[keyIndex]);
+                    real32 t = EaseInSine(gameState->starT[starIndex]);
                     
                     Vector2 screen_cur = GetSplinePointBezierQuad(start, mid, end, t);
                     
-                     key->tileSize = Vector2Lerp(DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE * 1.5f, t);
+                     star->tileSize = Vector2Lerp(DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE * 1.5f, t);
                     
-                    key->pivot = GetScreenToWorld2D(screen_cur, gameState->camera.base);
+                    star->pivot = GetScreenToWorld2D(screen_cur, gameState->camera.base);
                     
                     real32 step = 1 / dist;
                     real32 dt = step * GetFrameTime() * 700;
-                    gameState->starT[keyIndex] += dt;
+                    gameState->starT[starIndex] += dt;
                 }
                 
                 
                 continue;
             }
             
-            Vector2 keyPos = GetTilePivot(key);
+            Vector2 starPos = GetTilePivot(star);
             
-            gameState->starT[keyIndex] = 0;
+            gameState->starT[starIndex] = 0;
             
-            real32 posy = keyPos.y + 3 * cosf(2 * (real32)GetTime() + keyPos.x);
-            real32 posx = keyPos.x + 3 * sinf(2 * (real32)GetTime() + keyPos.y);
+            real32 posy = starPos.y + 3 * cosf(2 * (real32)GetTime() + starPos.x);
+            real32 posx = starPos.x + 3 * sinf(2 * (real32)GetTime() + starPos.y);
             
-            key->pivot.y = posy;
-            key->pivot.x = posx;
+            star->pivot.y = posy;
+            star->pivot.x = posx;
         }
     }
 }
@@ -398,7 +398,7 @@ DynamicArray<Entity> GetCurrentStateEntities()
         LAYER_GLASS,
         LAYER_SLIME,
         LAYER_BLOCK,
-        LAYER_KEY,
+        LAYER_STAR,
         LAYER_LOCK,
     };
     uint32 layerCount = ArrayCount(pushLayers);
@@ -550,8 +550,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
             
             switch(target->type)
             {
-                case ENTITY_TYPE_PLAYER:
-                case ENTITY_TYPE_CLONE:
+                case ENTITY_TYPE_SLIME:
                 {
                     if (IsSlime(projectedEnt))
                     {
@@ -717,8 +716,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 }
                 break;
             }
-            case ENTITY_TYPE_PLAYER:
-            case ENTITY_TYPE_CLONE:
+            case ENTITY_TYPE_SLIME:
             {
                 if (IsSlime(current.pushEnt))
                 {
@@ -1845,17 +1843,17 @@ void GameplayUpdateAndRender()
             Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
             if (slime)
             {
-                auto & keyTable = gameState->entityTable[LAYER_KEY];
-                for (uint32 keyIndex = 0; keyIndex < keyTable.count; keyIndex++)
+                auto & starTable = gameState->entityTable[LAYER_STAR];
+                for (uint32 starIndex = 0; starIndex < starTable.count; starIndex++)
                 {
-                    Entity * key = GetEntity(keyTable[keyIndex]);
-                    if (key && !key->starCollecting &&  (key->tilePos == PivotToTilePos(slime->pivot, slime->tileSize)))
+                    Entity * star = GetEntity(starTable[starIndex]);
+                    if (star && !star->starCollecting &&  (star->tilePos == PivotToTilePos(slime->pivot, slime->tileSize)))
                     {
                         ResetResetStates();
-                            // DeleteEntity(key);
-                            key->starCollecting = true;
-                            key->screenStart = GetWorldToScreen2D(key->pivot, gameState->camera.base);
-                            key->screenEnd =
+                            // DeleteEntity(star);
+                            star->starCollecting = true;
+                            star->screenStart = GetWorldToScreen2D(star->pivot, gameState->camera.base);
+                            star->screenEnd =
                                 Vector2 { (real32)GetScreenWidth() * 0.5f, -100 };
                         gameState->starCount++;
                         break;
@@ -2121,17 +2119,9 @@ void GameplayUpdateAndRender()
                     portal = e;
                 }
                 }
-            
-            if (portal->tileID == TUT_1)
-            {
-                    portal->mass = 1;
-                    SetEntitySprite(portal, BLOCK);
-                }
-            else if (portal->tileID == TUT_2)
-            {
-                portal->mass = 2;
-                    SetEntitySprite(portal, BLOCK_2);
-            }
+                    
+                    portal->sprite = GetBlockSprite(portal->mass);
+                    
             portal->type = ENTITY_TYPE_BLOCK;
             portal->color = WHITE;
                 gameState->lastTutBlockIndex = portal->entityIndex;
@@ -2282,7 +2272,7 @@ Fog & fog = gameState->fog;
             LAYER_BLOCK,
             LAYER_GLASS,  
             LAYER_DOOR,
-            LAYER_KEY,
+            LAYER_STAR,
             LAYER_LOCK,
             LAYER_NULL,
          };
@@ -2565,7 +2555,6 @@ void InitializeGame()
         
         if (slimeA && slimeB && slimeA->tilePos == slimeB->tilePos) 
         {
-            slimeA->type = ENTITY_TYPE_PLAYER;
             slimeA->color = WHITE;
             slimeA->mass++;
             slimeA->tileSize = GetSlimeSize(slimeA);

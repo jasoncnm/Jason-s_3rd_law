@@ -17,7 +17,7 @@ using json = nlohmann::json;
 
 #define TILESET_PATH "Assets/Level_Editor/TileSet/game_tilesets.tsj"
 
-#define MAIN_PA0TH "Assets/Level_Editor/main.world"
+#define MAIN_PATH "Assets/Level_Editor/main.world"
 #define TEST_PATH "Assets/Level_Editor/TestLevels/test.world"
 #define LEVEL_2_ROOM_NAME "TileMap/Room_59.tmj"
 

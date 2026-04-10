@@ -14,6 +14,8 @@
 
 Entity * AddEntityToMap(json & tileData, IVec2 tilePos, uint32 tileID)
 {
+    uint32 dataID = tileData["id"];
+    SM_ASSERT(dataID == tileID - 1, "unmatched tileID");
     
     Entity addEntity = {};
     auto & tileProperties = tileData["properties"];
@@ -22,6 +24,7 @@ Entity * AddEntityToMap(json & tileData, IVec2 tilePos, uint32 tileID)
     {
         auto & prop = tileProperties[pIdx];
         std::string propName = prop["name"];
+        
         if (propName == "type")
         {
             std::string typeName = prop["value"];
@@ -29,32 +32,50 @@ Entity * AddEntityToMap(json & tileData, IVec2 tilePos, uint32 tileID)
             }
         else if (propName == "cable_type")
         {
-            addEntity.cableType = cableTypeMap[prop["value"]];
+            std::string name = prop["value"];
+            addEntity.cableType = cableTypeMap[name];
         }
         else if (propName == "mass")
         {
-            addEntity.mass = (int8)prop["value"];
+            int8 mass = prop["value"];
+            addEntity.mass = mass;
         }
         else if (propName == "left")
         {
-            addEntity.left = prop["value"];
+            bool8 value = prop["value"];
+            addEntity.left = value;
         }
         else if (propName == "right")
         {
-            addEntity.right = prop["value"];
+            bool8 value = prop["value"];
+            addEntity.right = value;
         }
         else if (propName == "up")
         {
-            addEntity.up = prop["value"];
+            bool8 value = prop["value"];
+            addEntity.up = value;
         }
         else if (propName == "down")
         {
-            addEntity.down = prop["value"];
+            bool8 value = prop["value"];
+            addEntity.down = value;
         }
         else if (propName == "main")
         {
-            addEntity.mainCable = prop["value"];
+            bool8 value = prop["value"];
+            addEntity.mainCable = value;
         }
+        else if (propName == "open_dir_x")
+        {
+             int32 value = prop["value"];
+            addEntity.openDir.x = value;
+        }
+        else if (propName == "open_dir_y")
+        {
+             int32 value = prop["value"];
+            addEntity.openDir.y = value;
+        }
+        
     }
     
     Entity * result = nullptr;
@@ -62,15 +83,15 @@ Entity * AddEntityToMap(json & tileData, IVec2 tilePos, uint32 tileID)
     if (addEntity.type != ENTITY_TYPE_NULL)
     {
     addEntity.tilePos = tilePos;
-    addEntity.tileID = tileID;
     addEntity.sprite = GetSprite(tileID);
         addEntity.active = true;
         addEntity.tileSize = DEFAULT_TILE_SIZE;
+        addEntity.pivot = GetTilePivot(tilePos, DEFAULT_TILE_SIZE);
         
         addEntity.color = WHITE;
         
-        if (entity.type == ENTITY_TYPE_ELECTRIC_DOOR &&
-            (entity.cableType == CABLE_TYPE_SOURCE || entity.cableType == CABLE_TYPE_CONNECT))
+        if (addEntity.type == ENTITY_TYPE_ELECTRIC_DOOR &&
+            (addEntity.cableType == CABLE_TYPE_SOURCE || addEntity.cableType == CABLE_TYPE_CONNECT))
         {
             addEntity.color = GRAY;
         }
@@ -102,19 +123,27 @@ void GenerateTileMap(json & tilesData, json & layerData,
             {
                 json & tileData = tilesData[tileId - 1];
                 
+                uint32 dataID = tileData["id"];
+                SM_TRACE("dataID: %d, tileId %d", dataID, tileId - 1);
+                
                 IVec2 tilePos = startPos + IVec2 { (int32)col, (int32)row };
-                 Entity * addEntity = AddEntityToMap(tileData, tilePos, tileId);
+                Entity * addEntity = AddEntityToMap(tileData, tilePos, tileId);
+                
+                if (!addEntity) continue;
+                
                 if (addEntity->type == ENTITY_TYPE_SLIME)
                 {
                     if (layerName == "Player")
                     {
                         gameState->playerEntityIndex = addEntity->entityIndex;
+                        SM_TRACE("Player generated at tile pos (%d, %d)", addEntity->tilePos.x, addEntity->tilePos.y);
                     }
                     else
                     {
                         addEntity->color = GRAY;
                     }
                     addEntity->tileSize = GetSlimeSize(addEntity->mass);
+                    addEntity->pivot = GetTilePivot(addEntity);
                 }
                 else if (addEntity->type == ENTITY_TYPE_LOCK && layerName == "Lock")
                 {

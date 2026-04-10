@@ -122,6 +122,103 @@ Sprite GetBrokenGlassSprite()
     Sprite sprite = { 0 };
     sprite.altasOffset = {192,128};
     sprite.spriteSize = {32, 32};
+    
+    return sprite;
+}
+
+Sprite GetOpenDoorSprite(IVec2 openDir, bool8 isH)
+{
+    Sprite sprite = { 0 };
+    sprite.spriteSize = { 32, 32 };
+    if (isH)
+    {
+        if (openDir == IVec2 { 1, -1 })
+        {
+            sprite.altasOffset = { 96, 256 };
+        }
+        else if (openDir == IVec2 { -1, 1 })
+        {
+            sprite.altasOffset = { 128, 256 };
+        }
+        else if (openDir == IVec2 { 1, 1 })
+        {
+            sprite.altasOffset = { 128, 288 };
+        }
+        else if (openDir == IVec2 { -1, -1 })
+        {
+            sprite.altasOffset = { 96, 288 };
+        }
+        }
+    else
+    {
+        if (openDir == IVec2 { 1, -1 })
+        {
+            sprite.altasOffset = { 64, 256 };
+        }
+        else if (openDir == IVec2 { -1, 1 })
+        {
+            sprite.altasOffset = { 32, 256 };
+        }
+        else if (openDir == IVec2 { 1, 1 })
+        {
+            sprite.altasOffset = { 64, 288 };
+        }
+        else if (openDir == IVec2 { -1, -1 })
+        {
+            sprite.altasOffset = { 32, 288 };
+        }
+        }
+    
+    return sprite;
+}
+
+Sprite GetBlockSprite(uint32 mass)
+{
+    Sprite sprite = { 0 };
+    if (mass == 1)
+    {
+        sprite.altasOffset = { 64, 96 };
+    }
+    else 
+    {
+        sprite.altasOffset = { 32, 32 };
+    }
+    
+    sprite.spriteSize = { 32, 32 };
+    
+    return sprite;
+}
+
+Sprite GetSlimeSprite(IVec2 dir)
+{
+    Sprite sprite = { 0 };
+    sprite.spriteSize = { 32, 32 };
+    if (dir == IVec2 { 0, 0 })
+        {
+        sprite.altasOffset = { 32, 320 };
+    }
+    
+    if (dir == IVec2 { -1, 0 })
+        {
+        sprite.altasOffset = { 128, 320 };
+    }
+    
+    if (dir == IVec2 { 1, 0 })
+        {
+        sprite.altasOffset = { 160, 320 };
+    }
+    
+    if (dir == IVec2 { 0, -1 })
+        {
+        sprite.altasOffset = { 64, 320 };
+    }
+    
+    if (dir == IVec2 { 0, 1 })
+        {
+        sprite.altasOffset = { 96, 320 };
+    }
+    
+    return sprite;
 }
 
 Sprite GetSprite(uint32 tileID)

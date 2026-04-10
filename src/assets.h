@@ -17,74 +17,6 @@
 //  ========================================================================
 //              NOTE: Assets Constants
 //  ========================================================================
-#if 0
-enum TileID
-{
-    PLAYER_1 = 32,
-    
-    PLAYER_IDLE  = 102,
-    PLAYER_UP    = 103,
-    PLAYER_DOWN  = 104,
-    PLAYER_LEFT  = 105,
-    PLAYER_RIGHT = 106,
-    
-    WALL_1   = 34,
-    WALL_2   = 35,
-    
-    BACKGROUND_1 = 141,
-    
-    BLOCK    = 33,
-    BLOCK_2  = 12,
-    GLASS    = 46,
-    GLASS_BROKEN = 47,
-    
-    PIT      = 41,
-    TUT_1    = 13,
-    TUT_2    = 14,
-    MAIN_PORTAL = 15,
-    SLIME_PORTAL = 11,
-    KEY = 21,
-    LOCK = 31,
-    
-    BRIDGE_LEFT_UP = 107,
-    BRIDGE_LEFT_DOWN = 117,
-    BRIDGE_RIGHT_UP = 108,
-    BRIDGE_RIGHT_DOWN = 118,
-    
-    
-    DOOR_LEFT  = 82,
-    DOOR_RIGHT = 83,
-    DOOR_UP    = 84,
-    DOOR_DOWN  = 85,
-    
-    DOOR_LEFT_R  = 92,
-    DOOR_RIGHT_R = 93,
-    DOOR_UP_R    = 94,
-    DOOR_DOWN_R  = 95,
-    
-    CABLE_DOWN_RIGHT = 6,
-    CABLE_H          = 7,
-    CABLE_DOWN_LEFT  = 8,
-    SOURCE_DOWN_RIGHT = 9,
-    SOURCE_DOWN_LEFT  = 10,
-    
-    CABLE_V          = 16,
-    SOURCE_UP_RIGHT   = 19,
-    SOURCE_UP_LEFT     = 20,
-    CABLE_UP_RIGHT   = 26,
-    CABLE_UP_LEFT    = 28,
-    SOURCE_V          = 29,
-    SOURCE_H          = 30,
-    SOURCE_RIGHT = 36,
-    SOURCE_LEFT  = 37,
-    SOURCE_DOWN  = 38,
-    SOURCE_UP    = 48,
-    CABLE_CONNECTION = 72,
-    
-    ERROR = 201,
-    
-};
-#endif
 
 //  ========================================================================
 //              NOTE: Assets Structs
@@ -125,50 +57,6 @@ struct CreateAnimatedSpriteParam
 //  ========================================================================
 //              NOTE: Assets Globals
 //  ========================================================================
-
-static std::unordered_map<IVec2, Sprite> slimeSpriteTable
-{
-    {
-        { 0, 0 },
-        {
-            { 32, 320 },
-            { 32, 32 }
-        },
-        
-    },
-    {
-        { -1, 0 },
-        {
-            { 128, 320 },
-            { 32, 32 }
-        },
-        
-    },
-    {
-        { 1, 0 },
-        {
-            { 160, 320 },
-            { 32, 32 }
-        },
-        
-    },
-    {
-        { 0, -1 },
-        {
-            { 64, 320 },
-            { 32, 32 }
-        },
-        
-    },
-    {
-        { 0, 1 },
-        {
-            { 96, 320 },
-            { 32, 32 }
-        },
-        
-    },
-    };
 
 #define ASSETS_H
 #endif

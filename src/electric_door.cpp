@@ -10,101 +10,32 @@
 
  IVec2 SetDoorOpen(Entity * door)
 {
+    SM_ASSERT(!door->open, "door is opened");
     IVec2 bounceDir = { 0 };
     
-    IVec2 offset = { 0 };
     door->open = true;
-    switch(door->tileID)
+    
+    IVec2 openDir = door->openDir;
+    SM_ASSERT(openDir.SqrMagnitude() > 1, "invalid open dir");
+    SM_ASSERT(door->left && door->right || door->up && door->down, "invalid connect direction");
+    
+    door->sprite = GetOpenDoorSprite(openDir, door->left && door->right);
+    
+    if (door->left)
     {
-        case DOOR_LEFT:
-        {
-            offset = { 1, -1 };
-            bounceDir = { 1, 0 };
-            door->left = door->right = false;
-            door->up = door->down = true;
-            SetEntitySprite(door, DOOR_UP);
-            break;
-        }
-        case DOOR_RIGHT:
-        {
-            offset = { -1, 1 };
-            bounceDir = { -1, 0 };
-            SetEntitySprite(door, DOOR_DOWN);
-            door->left = door->right = false;
-            door->up = door->down = true;
-            
-            break;
-        }
-        case DOOR_UP:
-        {
-            offset = { -1, 1 };
-            bounceDir = { 0, 1 };
-            SetEntitySprite(door, DOOR_LEFT);
-            door->left = door->right = true;
-            door->up = door->down = false;
-            
-            break;
-        }
-        case DOOR_DOWN:
-        {
-            offset = { 1, -1 };
-            bounceDir = { 0, -1 };
-            SetEntitySprite(door, DOOR_RIGHT);
-            door->left = door->right = true;
-            door->up = door->down = false;
-            
-            break;
-        }
-        
-        case DOOR_LEFT_R:
-        {
-            offset = { 1, 1 };
-            bounceDir = { 1, 0 };
-            SetEntitySprite(door, DOOR_DOWN_R);
-            door->left = door->right = false;
-            door->up = door->down = true;
-            break;
-        }
-        case DOOR_RIGHT_R:
-        {
-            offset = { -1, -1 };
-            bounceDir = { -1, 0 };
-            SetEntitySprite(door, DOOR_UP_R);
-            door->left = door->right = false;
-            door->up = door->down = true;
-            
-            break;
-        }
-        case DOOR_UP_R:
-        {
-            offset = { 1, 1 };
-            bounceDir = { 0, 1 };
-            SetEntitySprite(door, DOOR_RIGHT_R);
-            door->left = door->right = true;
-            door->up = door->down = false;
-            
-            break;
-        }
-        case DOOR_DOWN_R:
-        {
-            offset = { -1, -1 };
-            bounceDir = { 0, -1 };
-            SetEntitySprite(door, DOOR_LEFT_R);
-            door->left = door->right = true;
-            door->up = door->down = false;
-            
-            break;
-        }
-        
-        default:
-        {
-            SM_ASSERT(false, "door has no sprite");
-        }
-        }
+        bounceDir = { openDir.x, 0 };
+    }
+    else
+    {
+        bounceDir = { 0, openDir.y };
+    }
     
+    bool8 newLR = door->up;
+    bool8 newUD = door->left;
+    door->left = door->right = newLR;
+    door->up = door->down = newUD;
     
-    
-    door->tilePos = door->tilePos + offset;
+    door->tilePos = door->tilePos + openDir;
     door->pivot = GetTilePivot(door);
     
     return bounceDir;
@@ -112,9 +43,17 @@
 
 void SetDoorClose(Entity * door)
 {
-    SetDoorOpen(door);
     door->open = false;
-}
+    door->sprite = GetOpenDoorSprite(-door->openDir, door->left && door->right);
+    
+    bool8 newLR = door->up;
+    bool8 newUD = door->left;
+    door->left = door->right = newLR;
+    door->up = door->down = newUD;
+    
+    door->tilePos = door->tilePos - door->openDir;
+    door->pivot = GetTilePivot(door);
+    }
 
 void SetFreeze()
 {
@@ -271,8 +210,8 @@ end = true;
     else
     {
         cable->conductive = true;
-        SetEntitySprite(cable, GetCablePowerOnID(cable->tileID));
-        
+        // SetEntitySprite(cable, GetCablePowerOnID(cable->tileID));
+        cable->color = WHITE;
         end = false;
     }
 
@@ -349,7 +288,7 @@ void ShutDownPower(int32 sourceIndex)
         }
         else
         {
-            SetEntitySprite(cable, GetCablePowerOffID(cable->tileID));
+            cable->color = GRAY;// SetEntitySprite(cable, GetCablePowerOffID(cable->tileID));
             }
     
         int32 indexes[4] =
@@ -374,21 +313,14 @@ void ShutDownPower(int32 sourceIndex)
 inline IVec2 GetDoorDirection(Entity * door)
 {
     IVec2 dir = { 0 };
-    if (door->tileID == DOOR_RIGHT || door->tileID == DOOR_RIGHT_R)
+    
+    if (door->left && door->right)
     {
-        dir = IVec2 { 1, 0 };
+        dir = door->open ? IVec2 { door->openDir.x, 0 } : IVec2 { -door->openDir.x, 0 };
     }
-    else if (door->tileID == DOOR_LEFT || door->tileID == DOOR_LEFT_R)
+    else if (door->up && door->down)
     {
-        dir = IVec2 { -1, 0 };
-    }
-    else if(door->tileID == DOOR_DOWN || door->tileID == DOOR_DOWN_R)
-    {
-        dir = IVec2 { 0, 1 };
-    }
-    else if (door->tileID == DOOR_UP || door->tileID == DOOR_UP_R)
-    {
-        dir = IVec2 { 0, -1 };
+        dir = door->open ? IVec2 { 0, door->openDir.y } : IVec2 { 0, - door->openDir.y };
     }
     
     return dir;
@@ -426,9 +358,15 @@ inline bool8 CheckDoor(IVec2 tilePos)
 
 void SetUpElectricDoor()
 {
-    auto Visited = [](Entity * ent) {
+    auto Visited = [](Entity * ent) 
+    {
         bool8 result = ent && (ent->leftIndex >= 0 || ent->rightIndex >= 0 || ent->upIndex >= 0 || ent->downIndex >= 0);
         return result;
+    };
+    
+     auto IsCable = [](Entity * ent)
+    {
+        return ent && ent->type == ENTITY_TYPE_ELECTRIC_DOOR;
     };
     
     EntityLayer findLayers[] = { 

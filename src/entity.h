@@ -71,11 +71,12 @@ struct Entity
         
     ActionState actionState = MOVE_STATE;
     
-     uint32 tileID;
-    Color color;
+     Color color;
     
     IVec2 tilePos;
     IVec2 attachDir = {0,0};
+    
+    IVec2 openDir;
     
     Vector2 pivot;
     Vector2 tileSize;

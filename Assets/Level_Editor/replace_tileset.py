@@ -1,19 +1,23 @@
 import os
 import json
 
-tileMapDir = 'Level_Editor/TileMap/'
+def ReplaceTileSet(mapDir):
+    tileMapFiles = os.listdir(mapDir)
+    for tileMapFile in tileMapFiles:
+        filePath = mapDir + tileMapFile
+        with open(filePath, '+r') as file:
+            data = json.load(file)
+            if 'tilesets' in data:
+                for tileset in data['tilesets']:
+                    tileset['source'] = '../TileSet/game_tilesets.tsj'
+                    print(tileset['source'])
+            
+            file.seek(0)
+            json.dump(data, file, indent=4)
+            file.truncate()
 
-tileMapFiles = os.listdir(tileMapDir)
 
-for tileMapFile in tileMapFiles:
-    filePath = tileMapDir + tileMapFile
-    with open(filePath, '+r') as file:
-        data = json.load(file)
-        if 'tilesets' in data:
-            for tileset in data['tilesets']:
-                tileset['source'] = '../TileSet/game_tilesets.tsj'
-                print(tileset['source'])
-        
-        file.seek(0)
-        json.dump(data, file, indent=4)
-        file.truncate()
+print(os.getcwd());
+
+ReplaceTileSet('Assets/Level_Editor/TileMap/')
+ReplaceTileSet('Assets/Level_Editor/TestLevels/')
