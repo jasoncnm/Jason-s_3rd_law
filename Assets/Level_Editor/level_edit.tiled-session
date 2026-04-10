@@ -119,11 +119,11 @@
             }
         },
         "TileMap/Broom_7.tmj": {
-            "scale": 1,
+            "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 158,
-                "y": 176.5
+                "x": 1164,
+                "y": 2759
             }
         },
         "TileMap/Broon_1.tmj": {
@@ -146,7 +146,7 @@
             "scale": 2,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.25,
+                "x": 176,
                 "y": 175.75
             }
         },
@@ -784,10 +784,10 @@
         },
         "TileMap/Path_80.tmj": {
             "scale": 1,
-            "selectedLayer": -1,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 9,
-                "y": 369.5
+                "x": -154,
+                "y": -310.5
             }
         },
         "TileMap/Path_81.tmj": {
@@ -879,11 +879,11 @@
             }
         },
         "TileMap/Room_1.tmj": {
-            "scale": 1,
-            "selectedLayer": -1,
+            "scale": 2,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 351,
-                "y": 210.5
+                "x": 1156,
+                "y": -85.75
             }
         },
         "TileMap/Room_10.tmj": {
@@ -903,19 +903,19 @@
             }
         },
         "TileMap/Room_12.tmj": {
-            "scale": 1,
-            "selectedLayer": -1,
+            "scale": 1.5,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 548,
-                "y": 166.5
+                "x": 34,
+                "y": 258.33333333333326
             }
         },
         "TileMap/Room_13.tmj": {
-            "scale": 1.5,
-            "selectedLayer": 2,
+            "scale": 1,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": -26.66666666666663,
-                "y": -83.66666666666663
+                "x": 159,
+                "y": 269.5
             }
         },
         "TileMap/Room_14.tmj": {
@@ -975,11 +975,11 @@
             }
         },
         "TileMap/Room_20.tmj": {
-            "scale": 1,
-            "selectedLayer": 1,
+            "scale": 3,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": -114,
-                "y": 365.5
+                "x": -412.66666666666663,
+                "y": 541.5
             }
         },
         "TileMap/Room_21.tmj": {
@@ -999,11 +999,11 @@
             }
         },
         "TileMap/Room_23.tmj": {
-            "scale": 1,
-            "selectedLayer": 1,
+            "scale": 1.5,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 195,
-                "y": 560.5
+                "x": 609.3333333333333,
+                "y": -864.3333333333333
             }
         },
         "TileMap/Room_24.tmj": {
@@ -1023,11 +1023,11 @@
             }
         },
         "TileMap/Room_26.tmj": {
-            "scale": 2,
+            "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 158.5,
-                "y": -27.75
+                "x": -874,
+                "y": 863
             }
         },
         "TileMap/Room_26.tmx": {
@@ -1039,11 +1039,11 @@
             }
         },
         "TileMap/Room_27.tmj": {
-            "scale": 1,
+            "scale": 2,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 564,
-                "y": 334.5
+                "x": -142,
+                "y": -143.25
             }
         },
         "TileMap/Room_28.tmj": {
@@ -1152,10 +1152,10 @@
         },
         "TileMap/Room_4.tmj": {
             "scale": 1,
-            "selectedLayer": -1,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 94,
-                "y": 292.5
+                "x": -1041,
+                "y": -224.5
             }
         },
         "TileMap/Room_40.tmj": {
@@ -1311,11 +1311,11 @@
             }
         },
         "TileMap/Room_59.tmj": {
-            "scale": 1,
-            "selectedLayer": -1,
+            "scale": 3,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 195,
-                "y": 208.5
+                "x": 239.66666666666663,
+                "y": -40.16666666666666
             }
         },
         "TileMap/Room_6.tmj": {
@@ -1336,10 +1336,10 @@
         },
         "TileMap/Room_61.tmj": {
             "scale": 1.5,
-            "selectedLayer": 0,
+            "selectedLayer": 3,
             "viewCenter": {
-                "x": 142,
-                "y": -29.66666666666663
+                "x": 1186,
+                "y": -93.66666666666663
             }
         },
         "TileMap/Room_62.tmj": {
@@ -1384,10 +1384,10 @@
         },
         "TileMap/Room_67.tmj": {
             "scale": 1,
-            "selectedLayer": 0,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 323,
-                "y": 334.5
+                "x": -459,
+                "y": 253.5
             }
         },
         "TileMap/Room_68.tmj": {
@@ -1455,11 +1455,11 @@
             }
         },
         "TileMap/Room_75.tmj": {
-            "scale": 1,
-            "selectedLayer": 0,
+            "scale": 2,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 261,
-                "y": -21.5
+                "x": 1983.5,
+                "y": -527.75
             }
         },
         "TileMap/Room_76.tmj": {
@@ -1506,24 +1506,24 @@
             "scale": 0.75,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 1596,
-                "y": 1308.6666666666665
+                "x": 1730.6666666666665,
+                "y": 1279.3333333333333
             }
         },
         "TileMap/Room_81.tmj": {
             "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 457,
-                "y": 148.5
+                "x": 138,
+                "y": 241.5
             }
         },
         "TileMap/Room_9.tmj": {
-            "scale": 1,
+            "scale": 2,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": -2449,
-                "y": 188.5
+                "x": 113,
+                "y": 564.25
             }
         },
         "TileMap/Test.tmj": {
@@ -1602,7 +1602,7 @@
             "scale": 1,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 175.5,
+                "x": 175,
                 "y": 175.5
             }
         },
@@ -1618,7 +1618,7 @@
             "scale": 2,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 176.25,
+                "x": 176,
                 "y": 175.75
             }
         },
@@ -1642,7 +1642,7 @@
             "scale": 2,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.25,
+                "x": 176,
                 "y": 175.75
             }
         },
@@ -1650,7 +1650,7 @@
             "scale": 3.219744318181818,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 175.94564785811974,
+                "x": 175.7903560241761,
                 "y": 175.94564785811974
             }
         },
@@ -1658,7 +1658,7 @@
             "scale": 3.219744318181818,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 175.94564785811974,
+                "x": 175.7903560241761,
                 "y": 175.94564785811974
             }
         },
@@ -1666,7 +1666,7 @@
             "scale": 1.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 175.66666666666669,
+                "x": 175.3333333333333,
                 "y": 175.66666666666669
             }
         },
@@ -1674,7 +1674,7 @@
             "scale": 3,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 176.16666666666666,
+                "x": 176,
                 "y": 176.16666666666663
             }
         },
@@ -1682,7 +1682,7 @@
             "scale": 2,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 176.25,
+                "x": 176,
                 "y": 175.75
             }
         },
@@ -1690,7 +1690,7 @@
             "scale": 3,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 176.16666666666666,
+                "x": 176,
                 "y": 176.16666666666663
             }
         },
@@ -1698,7 +1698,7 @@
             "scale": 3,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176.16666666666666,
+                "x": 176,
                 "y": 176.16666666666663
             }
         },
@@ -1757,10 +1757,9 @@
         "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_17_Tutorial.world",
         "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_4_Tutorial (2).world",
         "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Tutorial_1_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_71_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_71_Tutorial.world",
         "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Toturial_2_Tutorial.world",
-        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_26_Tutorial.world"
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_26_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Path_37_Tutorial.world"
     ],
     "map.height": 11,
     "map.lastUsedFormat": "json",
