@@ -15,6 +15,7 @@
 #include <vector>
 #include <thread>
 #include <string>
+#include <unordered_map>
 
 //  ========================================================================
 // NOTE: Defines

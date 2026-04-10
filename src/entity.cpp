@@ -23,7 +23,6 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
     
     if (mergedSlime->entityIndex == gameState->playerEntityIndex)
     {
-        mergeSlime->type = ENTITY_TYPE_PLAYER;
         gameState->playerEntityIndex = mergeSlime->entityIndex;
         mergeSlime->color = WHITE;
     }
@@ -134,7 +133,6 @@ inline Entity * CreateSlimeClone(Entity * ent)
             freeEntity->entityIndex = slimeEntityIndices[i];
             freeEntity->active = true;
             freeEntity->tilePos = tilePos;
-            freeEntity->type = ENTITY_TYPE_CLONE;
             freeEntity->mass = 1;
             freeEntity->tileSize = GetSlimeSize(freeEntity);
             freeEntity->color = GRAY;  
@@ -170,65 +168,14 @@ inline Rectangle GetEntityRect(Entity * entity)
 
 inline bool8 IsSlime(Entity * entity)
 {
-    return entity->type == ENTITY_TYPE_CLONE || entity->type == ENTITY_TYPE_PLAYER;
-}
-
-#if 0
-inline bool8 BridgeBlocked(Entity * bridge, IVec2 reachDir)
-{
-    SM_ASSERT(reachDir.SqrMagnitude() <= 1, "Directional Vector should be a unit vector");
-    
-    bool8 result = false;
-    if (reachDir.x == 1)
-    {
-        result = (bridge->tileID == BRIDGE_RIGHT_A || bridge->tileID == BRIDGE_RIGHT_B);
-    }
-    else if (reachDir.x == -1)
-    {
-        result = (bridge->tileID == BRIDGE_LEFT_A || bridge->tileID == BRIDGE_LEFT_B);
-    }
-    else if (reachDir.y == 1)
-    {
-        result = (bridge->tileID == BRIDGE_DOWN_A || bridge->tileID == BRIDGE_DOWN_B);
-    }
-    else if (reachDir.y == -1)
-    {
-        result = (bridge->tileID == BRIDGE_UP_A || bridge->tileID == BRIDGE_UP_B);
-    }
-    
-    return result;
-}
-#endif
-
-inline void SetEntitySprite(Entity * entity, TileID tileID)
-{
-    entity->tileID = tileID;
-    entity->sprite = GetSprite(tileID);
+    return entity->type == ENTITY_TYPE_SLIME;
 }
 
 inline void SetSlimeSprite(Entity * slime, IVec2 dir)
 {
-    if (dir == IVec2 { -1, 0 })
-    {
-        SetEntitySprite(slime, PLAYER_LEFT);
+    
+    slime->sprite = slimeSpriteTable[dir];
     }
-    else if (dir == IVec2 { 1, 0 })
-    {
-        SetEntitySprite(slime, PLAYER_RIGHT);
-    }
-    else if (dir == IVec2 { 0, -1 })
-    {
-        SetEntitySprite(slime, PLAYER_UP);
-    }
-    else if (dir == IVec2 { 0, 1 })
-    {
-        SetEntitySprite(slime, PLAYER_DOWN);
-    }
-    else
-    {
-        SetEntitySprite(slime, PLAYER_IDLE);
-    }
-}
 
 inline void SetSlimeAnimatedSprite(Entity * slime, IVec2 dir)
 {
@@ -262,99 +209,6 @@ inline void SetSlimeAnimatedSprite(Entity * slime, IVec2 dir)
         // DOWN
         BeginAnimation(&slime->animatedSprite, SLIME_ANI_DOWN, ani_seconds_per_frame, false, false);
     }
-}
-
-inline AddEntityResult
-AddEntity(EntityType type, IVec2 tilePos, TileID tileID,
-          Color color = WHITE,
-          Vector2 tileSize = DEFAULT_TILE_SIZE)
-{
-    AddEntityResult result;
-
-    Entity entity = {};
-    entity.type = type;
-    entity.tilePos = tilePos;
-    entity.tileID = tileID;
-    entity.sprite = GetSprite(tileID);
-    entity.color = color;
-    entity.active = true;
-    entity.tileSize = tileSize;
-    entity.pivot = GetTilePivot(tilePos, tileSize);    
-        
-    result.entityIndex = (uint16)gameState->entities.Add(entity);
-    result.entity = &gameState->entities[result.entityIndex];
-
-    result.entity->entityIndex = result.entityIndex;
-
-    return result;
-    }
-
-
-inline AddEntityResult
-AddCable(IVec2 tilePos, TileID tileID, bool8 left, bool8 right, bool8 up, bool8 down)
-{
-    AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, tileID);
-    
-    entityResult.entity->conductive = false;
-    entityResult.entity->cableType = CABLE_TYPE_CONNECT;
-    entityResult.entity->left = left;
-    entityResult.entity->right = right;
-    entityResult.entity->up = up;
-    entityResult.entity->down = down;
-
-    Cable_Indices.Add(entityResult.entityIndex);
-
-    return entityResult;
-}
-
-
-inline AddEntityResult
-AddDoor(IVec2 tilePos, TileID tileID, bool8 left, bool8 right, bool8 up, bool8 down)
-{
-    AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, tileID);
-
-    entityResult.entity->mass = 100;
-    
-    entityResult.entity->conductive = false;
-    entityResult.entity->open = false;
-    entityResult.entity->cableType = CABLE_TYPE_DOOR;
-
-    entityResult.entity->left = left;
-    entityResult.entity->right = right;
-    entityResult.entity->up = up;
-    entityResult.entity->down = down;
-
-    return entityResult;
-}
-
-inline AddEntityResult
-AddSource(IVec2 tilePos, TileID tileID, bool8 left, bool8 right, bool8 up, bool8 down)
-{
-    AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, tileID);
-    
-    entityResult.entity->conductive = false;
-    entityResult.entity->cableType = CABLE_TYPE_SOURCE;
-    entityResult.entity->left = left;
-    entityResult.entity->right = right;
-    entityResult.entity->up = up;
-    entityResult.entity->down = down;
-
-    return entityResult;
-}
-
-inline AddEntityResult
-AddConnection(IVec2 tilePos, TileID tileID)
-{
-    AddEntityResult entityResult = AddEntity(ENTITY_TYPE_ELECTRIC_DOOR, tilePos, tileID);
-    
-    entityResult.entity->conductive = false;
-    entityResult.entity->cableType = CABLE_TYPE_CONNECTION_POINT;
-    entityResult.entity->left = true;
-    entityResult.entity->right = true;
-    entityResult.entity->up = true;
-    entityResult.entity->down = true;
-
-    return entityResult;
 }
 
 inline real32 GetStretchSpeed(Entity * player)
@@ -711,7 +565,7 @@ inline void DettachSlime(Entity * slime)
 
 inline void SetAttach(Entity * attacher, Entity * attachee, IVec2 dir)
 {
-    SM_ASSERT((attacher->type == ENTITY_TYPE_PLAYER || attacher->type == ENTITY_TYPE_CLONE), "entity is not attachable");
+    SM_ASSERT((attacher->type == ENTITY_TYPE_SLIME), "entity is not attachable");
     SM_ASSERT(attacher->active && attachee->active, "entity does not exist");
 
     if (IsSlime(attacher))
@@ -739,7 +593,7 @@ inline void SetGlassBeBroken(Entity * glass)
 {
     SM_ASSERT(glass && glass->active, "entity does not exist");
     
-    glass->sprite = GetSprite(GLASS_BROKEN);
+    glass->sprite = GetBrokenGlassSprite();
 }
 
 inline Vector2 GetSlimeSize(int32 mass)
@@ -755,7 +609,7 @@ inline Vector2 GetSlimeSize(Entity * slime)
 
 inline bool8 AttachSlime(Entity * slime, IVec2 dir)
 {
-    SM_ASSERT((slime->type == ENTITY_TYPE_PLAYER || slime->type == ENTITY_TYPE_CLONE), "entity is not attachable");
+    SM_ASSERT((slime->type == ENTITY_TYPE_SLIME), "entity is not attachable");
 
     IVec2 pos = slime->tilePos + dir;
 

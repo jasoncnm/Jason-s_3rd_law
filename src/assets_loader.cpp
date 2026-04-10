@@ -12,210 +12,125 @@
 //              NOTE: Level Functions
 //  ========================================================================
 
-inline AddEntityResult LoadGameObject(GameState & state, TileID id, IVec2 tilePos)
+Entity * AddEntityToMap(json & tileData, IVec2 tilePos, uint32 tileID)
 {
-    AddEntityResult entityResult = { 0 };
-    if (id == PIT)
+    
+    Entity addEntity = {};
+    auto & tileProperties = tileData["properties"];
+    
+    for (uint32 pIdx = 0; pIdx < tileProperties.size(); pIdx++)
     {
-        entityResult = AddEntity(ENTITY_TYPE_PIT, tilePos, id);
-
-        }
-    else if (id == WALL_1)
-    {
-        entityResult = AddEntity(ENTITY_TYPE_WALL, tilePos, id);
-
-        }
-    else if (id == WALL_2)
-    {
-        entityResult = AddEntity(ENTITY_TYPE_WALL, tilePos, id);
-        }
-    else if (id == BRIDGE_LEFT_DOWN)
-    {
-        entityResult = AddEntity(ENTITY_TYPE_BRIDGE, tilePos, id);
-        entityResult.entity->left = true;
-        entityResult.entity->down = true;
-    }
-    else if (id == BRIDGE_LEFT_UP)
-    {
-        entityResult = AddEntity(ENTITY_TYPE_BRIDGE, tilePos, id);
-        entityResult.entity->left = true;
-        entityResult.entity->up = true;
-        
-    }
-    else if (id == BRIDGE_RIGHT_UP)
-    {
-        entityResult = AddEntity(ENTITY_TYPE_BRIDGE, tilePos, id);
-        entityResult.entity->right = true;
-        entityResult.entity->up = true;
-        
-    }
-    else if (id == BRIDGE_RIGHT_DOWN)
-    {
-        entityResult = AddEntity(ENTITY_TYPE_BRIDGE, tilePos, id);
-        entityResult.entity->right = true;
-        entityResult.entity->down = true;
-        }
-    else if (id == BLOCK_2)
-    {
-        entityResult = AddEntity(ENTITY_TYPE_BLOCK, tilePos, id);
-        entityResult.entity->mass = 2;
-        }
-    else if (id == BLOCK)
-    {
-        entityResult = AddEntity(ENTITY_TYPE_BLOCK, tilePos, id);
-        entityResult.entity->mass = 1;
-        }
-    else if (id == GLASS)
-    {
-        entityResult = AddEntity(ENTITY_TYPE_GLASS, tilePos, id);
-}
-    else if (id == PLAYER_1)
-    {
-        entityResult = AddEntity(ENTITY_TYPE_CLONE, tilePos, PLAYER_IDLE);
-        entityResult.entity->mass = 1;
-        entityResult.entity->tileSize = GetSlimeSize(entityResult.entity);
-        entityResult.entity->color = GRAY;
-
-    }
-    else if (id >= DOOR_LEFT && id <= DOOR_DOWN)
-    {
-        if (id == DOOR_LEFT || id == DOOR_RIGHT)
+        auto & prop = tileProperties[pIdx];
+        std::string propName = prop["name"];
+        if (propName == "type")
         {
-            entityResult = AddDoor(tilePos, id, true, true, false, false);
-        }
-        else if (id == DOOR_UP || id == DOOR_DOWN)
+            std::string typeName = prop["value"];
+            addEntity.type = entityTypeMap[typeName];
+            }
+        else if (propName == "cable_type")
         {
-            entityResult = AddDoor(tilePos, id, false, false, true, true);
+            addEntity.cableType = cableTypeMap[prop["value"]];
         }
-        else
+        else if (propName == "mass")
         {
-            SM_ASSERT(false, "Possible Door id miss match (id %d)", id);
+            addEntity.mass = (int8)prop["value"];
         }
+        else if (propName == "left")
+        {
+            addEntity.left = prop["value"];
+        }
+        else if (propName == "right")
+        {
+            addEntity.right = prop["value"];
+        }
+        else if (propName == "up")
+        {
+            addEntity.up = prop["value"];
+        }
+        else if (propName == "down")
+        {
+            addEntity.down = prop["value"];
+        }
+        else if (propName == "main")
+        {
+            addEntity.mainCable = prop["value"];
+        }
+    }
+    
+    Entity * result = nullptr;
+    
+    if (addEntity.type != ENTITY_TYPE_NULL)
+    {
+    addEntity.tilePos = tilePos;
+    addEntity.tileID = tileID;
+    addEntity.sprite = GetSprite(tileID);
+        addEntity.active = true;
+        addEntity.tileSize = DEFAULT_TILE_SIZE;
         
-        }
-    else if (id >= DOOR_LEFT_R && id <= DOOR_DOWN_R)
-    {
-        if (id == DOOR_LEFT_R || id == DOOR_RIGHT_R)
+        addEntity.color = WHITE;
+        
+        if (entity.type == ENTITY_TYPE_ELECTRIC_DOOR &&
+            (entity.cableType == CABLE_TYPE_SOURCE || entity.cableType == CABLE_TYPE_CONNECT))
         {
-            entityResult = AddDoor(tilePos, id, true, true, false, false);
+            addEntity.color = GRAY;
         }
-        else if (id == DOOR_UP_R || id == DOOR_DOWN_R)
-        {
-            entityResult = AddDoor(tilePos, id, false, false, true, true);
-        }
-        else
-        {
-            SM_ASSERT(false, "Possible Door id miss match (id %d)", id);
-        }
-        }
-    else if (id == CABLE_DOWN_RIGHT || (id - 50) == CABLE_DOWN_RIGHT)
-    {
-        entityResult = AddCable(tilePos, (TileID)(CABLE_DOWN_RIGHT + 50), false, true, false, true);
+    
+        uint32 entityIndex = gameState->entities.Add(addEntity);
+        result = &gameState->entities[entityIndex];
+        result->entityIndex = entityIndex;
+    }
+    
+    return result;
 }
-    else if (id == CABLE_H || (id - 50) == CABLE_H)
-    {
-        entityResult = AddCable(tilePos,(TileID)(CABLE_H + 50), true, true, false, false);
-}
-    else if (id == CABLE_DOWN_LEFT || (id - 50) == CABLE_DOWN_LEFT)
-    {
-        entityResult = AddCable(tilePos,(TileID)(CABLE_DOWN_LEFT + 50), true, false, false, true);
-}
-    else if (id == CABLE_V || (id - 50) == CABLE_V)
-    {
-        entityResult = AddCable(tilePos,(TileID)(CABLE_V + 50), false, false, true, true);
-}
-    else if (id == CABLE_UP_RIGHT || (id - 50) == CABLE_UP_RIGHT)
-    {
-        entityResult = AddCable(tilePos,(TileID)(CABLE_UP_RIGHT + 50), false, true, true, false);
-}
-    else if (id == CABLE_UP_LEFT || (id - 50) == CABLE_UP_LEFT)
-    {
-        entityResult = AddCable(tilePos,(TileID)(CABLE_UP_LEFT + 50), true, false, true, false);
 
+void GenerateTileMap(json & tilesData, json & layerData, 
+                     IVec2 startPos, uint32 width, uint32 height)
+{
+    SM_ASSERT(layerData["type"] == "tilelayer", 
+              "cannot generate tile map from non tile layer");
+    
+    std::string layerName = layerData["name"];
+    std::vector<int32> mapData = layerData["data"];
+    
+    for (uint32 row = 0; row < height; row++)
+    {
+        for (uint32 col = 0; col < width; col++)
+        {
+            uint32 tileId = (uint32)mapData[col + row * width];
+            
+            if (tileId > 0)
+            {
+                json & tileData = tilesData[tileId - 1];
+                
+                IVec2 tilePos = startPos + IVec2 { (int32)col, (int32)row };
+                 Entity * addEntity = AddEntityToMap(tileData, tilePos, tileId);
+                if (addEntity->type == ENTITY_TYPE_SLIME)
+                {
+                    if (layerName == "Player")
+                    {
+                        gameState->playerEntityIndex = addEntity->entityIndex;
+                    }
+                    else
+                    {
+                        addEntity->color = GRAY;
+                    }
+                    addEntity->tileSize = GetSlimeSize(addEntity->mass);
+                }
+                else if (addEntity->type == ENTITY_TYPE_LOCK && layerName == "Lock")
+                {
+                    auto & mapProps = layerData["properties"];
+                    for (auto & prop : mapProps)
+                    {
+                        if (prop["type"] == "int")
+                        {
+                            addEntity->unlockCount = prop["value"];
+                        }
+                    }
+                }
+            }
+            
+            }
     }
-    else if (id == SOURCE_RIGHT || (id - 50) == SOURCE_RIGHT)
-    {
-        entityResult = AddSource(tilePos, (TileID)(SOURCE_RIGHT + 50), false, true, false, false);
-
-    }
-    else if (id == SOURCE_LEFT || (id - 50) == SOURCE_LEFT)
-    {
-        entityResult = AddSource(tilePos, (TileID)(SOURCE_LEFT + 50), true, false, false, false);
-
-    }
-    else if (id == SOURCE_DOWN || (id - 50) == SOURCE_DOWN)
-    {
-        entityResult = AddSource(tilePos, (TileID)(SOURCE_DOWN + 50), false, false, false, true);
-
-    }
-    else if (id == SOURCE_UP || (id - 50) == SOURCE_UP)
-    {
-        entityResult = AddSource(tilePos, (TileID)(SOURCE_UP + 50), false, false, true, false);
-        
-    }
-    else if (id == SOURCE_H || (id - 50) == SOURCE_H)
-    {
-        entityResult = AddSource(tilePos, (TileID)(SOURCE_H + 50), true, true, false, false);
-        
-    }
-    else if (id == SOURCE_V || (id - 50) == SOURCE_V)
-    {
-        entityResult = AddSource(tilePos, (TileID)(SOURCE_V + 50), false, false, true, true);
-        
-    }
-    else if (id == SOURCE_UP_RIGHT || (id - 50) == SOURCE_UP_RIGHT)
-    {
-        entityResult = AddSource(tilePos, (TileID)(SOURCE_UP_RIGHT + 50), false, true, true, false);
-        
-    }
-    else if (id == SOURCE_UP_LEFT || (id - 50) == SOURCE_UP_LEFT)
-    {
-        entityResult = AddSource(tilePos, (TileID)(SOURCE_UP_LEFT + 50), true, false, true, false);
-        
-        
-        
-    }
-    else if (id == SOURCE_DOWN_RIGHT || (id - 50) == SOURCE_DOWN_RIGHT)
-    {
-        entityResult = AddSource(tilePos, (TileID)(SOURCE_DOWN_RIGHT + 50), false, true, false, true);
-        
-        
-    }
-    else if (id == SOURCE_DOWN_LEFT || (id - 50) == SOURCE_DOWN_LEFT)
-    {
-        entityResult = AddSource(tilePos, (TileID)(SOURCE_DOWN_LEFT + 50), true, false, false, true);
-        }
-    else if (id == CABLE_CONNECTION)
-    {
-        entityResult = AddConnection(tilePos, CABLE_CONNECTION);
-        }
-    else if (id == TUT_1)
-    {
-        entityResult = AddEntity(ENTITY_TYPE_TUT_PORTAL, tilePos, TUT_1);
-    }
-    else if (id == TUT_2)
-    {
-        entityResult = AddEntity(ENTITY_TYPE_TUT_PORTAL, tilePos, TUT_2);
-    }
-    else if (id == MAIN_PORTAL)
-    {
-        entityResult = AddEntity(ENTITY_TYPE_MAIN_PORTAL, tilePos, MAIN_PORTAL);
-    }
-    else if (id == SLIME_PORTAL)
-    {
-        entityResult = AddEntity(ENTITY_TYPE_SLIME_PORTAL, tilePos, SLIME_PORTAL);
-    }
-    else if (id == KEY)
-    {
-        entityResult = AddEntity(ENTITY_TYPE_KEY, tilePos, id);
-        
-    }
-    else if (id != LOCK)
-    {
-        SM_WARN("Unknown ID (%d)", id);
-        entityResult = AddEntity(ENTITY_TYPE_NULL, tilePos, id);
-    }
-    return entityResult;
 }
 
 void SetupEntityTable(GameState & state)
@@ -233,11 +148,9 @@ void SetupEntityTable(GameState & state)
         {
             switch(entity->type)
             {
-                case ENTITY_TYPE_PLAYER:
-                case ENTITY_TYPE_CLONE:
+                case ENTITY_TYPE_SLIME:
                 {
                     state.entityTable[LAYER_SLIME].Add(entity->entityIndex);
-                    
                     break;
                 }
                 case ENTITY_TYPE_BRIDGE:
@@ -296,9 +209,9 @@ void SetupEntityTable(GameState & state)
                     state.entityTable[LAYER_PORTAL].Add(entity->entityIndex);
                     break;
                 }
-                case ENTITY_TYPE_KEY:
+                case ENTITY_TYPE_STAR:
                 {
-                    state.entityTable[LAYER_KEY].Add(entity->entityIndex);
+                    state.entityTable[LAYER_STAR].Add(entity->entityIndex);
                     break;
                 }
                 case ENTITY_TYPE_LOCK:
@@ -327,19 +240,20 @@ void LoadTileMapsAndEntities(GameState & state, char * worldPath)
 
     IVec2 min = { INT_MAX, INT_MAX };
     IVec2 max = { INT_MIN, INT_MIN };
+    state.currentMapIndex = -1;
     
-    // NOTE: Retrive TileMaps from world
-    {
-state.currentMapIndex = -1;
-        
+    // NOTE: Load world
         std::ifstream f(worldPath);
-        json worldData = json::parse(f);
-
-        auto tileMaps = worldData["maps"];
-        
-        state.tileMapCount = (int32)tileMaps.size();
-
-        int32 index = 0;
+    json worldData = json::parse(f);
+    
+    // NOTE: Load TileSet
+    std::ifstream ts(TILESET_PATH);
+    json tileSetData = json::parse(ts);
+    auto tilesData = tileSetData["tiles"];
+    
+    auto tileMaps = worldData["maps"];
+    state.tileMapCount = (int32)tileMaps.size();
+int32 index = 0;
         for (uint32 i = 0; i < state.tileMapCount; i++)
         {
             
@@ -375,7 +289,6 @@ state.currentMapIndex = -1;
                 state.lv2Map = &state.tileMaps[index];
             }
             
-            
              IVec2 startPos = { startPosX, startPosY };
             
             // NOTE: Generate tile map    
@@ -386,9 +299,9 @@ state.currentMapIndex = -1;
                     json & layer = *it;
                     if (!layer["visible"]) continue;
                     
-                    std::string name = layer["name"];
+                    std::string layerName = layer["name"];
                     
-                    if (name == "level_info")
+                    if (layerName == "level_info")
                     {
                         json properties = layer["properties"];
                         for (auto & prop : properties)
@@ -406,61 +319,14 @@ state.currentMapIndex = -1;
                     if (layer["type"] == "tilelayer")
                     {
                         // tileCountX = width;
-                        // tileCountY = height;
-                        
-                        std::vector<int32> a = layer["data"];
-                        
-                        SM_TRACE("Loading Layer: %s", name.data());
-                        
-                        for (int32 row = 0; row < mapHeight; row++)
-                        {
-                            for (int32 col = 0; col < mapWidth; col++)
-                            {
-                                TileID tileId = (TileID)a[col + row * mapWidth];
-                                
-                                if (tileId > 0)
-                                {
-                                    AddEntityResult result;
-                                    IVec2 offset = { col, row };
-                                    IVec2 tilePos = startPos + offset;
-                                    
-                                    if (name == "Player")
-                                    {
-                                        
-                                        result = AddEntity(ENTITY_TYPE_PLAYER, tilePos, tileId);
-                                        result.entity->mass = 1;
-                                        result.entity->tileSize = GetSlimeSize(result.entity); 
-                                        
-                                        state.playerEntityIndex = result.entityIndex;
-                                        
-                                        SM_TRACE("Player generated (tile location: %i, %i)", result.entity->tilePos.x, result.entity->tilePos.y);
-                                    }
-                                    else if (name == "Lock")
-                                    {
-                                        result = AddEntity(ENTITY_TYPE_LOCK, tilePos, tileId);
-                                        json properties = layer["properties"];
-                                        for (auto & prop : properties)
-                                        {
-                                            if (prop["type"] == "int")
-                                            {
-                                                result.entity->unlockCount = (int32)prop["value"];
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        result = LoadGameObject(state, tileId, tilePos);
-                                    }
-                                }
-                            }
-                        }
-                        
-                    }
-                    SM_TRACE("%s layer loading done", name.data());
+                    // tileCountY = height;
                     
+                    GenerateTileMap(tilesData, layer, 
+                                    startPos, mapWidth, mapHeight);
                 }
                 
+                    SM_TRACE("%s layer loading done", layerName.data());
+                    }
                 SM_TRACE("Level width: %i, Level height: %i", mapWidth, mapHeight);
             }
             
@@ -479,8 +345,6 @@ state.currentMapIndex = -1;
             index++;
         }
 
-    }
-    
     // NOTE(Jason): 
     //animationPlaying = false;
     //animateSlimeCount = 0;
@@ -523,7 +387,7 @@ state.currentMapIndex = -1;
     SetupEntityTable(state);
     SetUpElectricDoor();
     // NOTE: init stars
-    auto starTable = gameState->entityTable[LAYER_KEY];
+    auto starTable = gameState->entityTable[LAYER_STAR];
     if (!state.starT || starTable.count > state.starTCount)
     {
         state.starTCount = starTable.count;

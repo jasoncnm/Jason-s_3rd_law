@@ -269,7 +269,7 @@ void RevealMap(Map & map)
 void UpdateFog()
 {
     Fog & fog = gameState->fog;
-    real32 updateSpeed = 0.01f;
+    real32 updateSpeed = 5.0f;
     for (uint32 i = 0; i < fog.updatingIndices.count; i++)
     {
         uint32 updateIndex = fog.updatingIndices[i];

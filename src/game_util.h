@@ -156,13 +156,9 @@ const char * GetEntityType(Entity * entity)
     {
     switch (entity->type)
     {
-        case ENTITY_TYPE_PLAYER:
+        case ENTITY_TYPE_SLIME:
         {
-            return "ENTITY_TYPE_PLAYER";
-        }
-        case ENTITY_TYPE_CLONE:
-        {
-            return "ENTITY_TYPE_CLONE";
+            return "ENTITY_TYPE_SLIME";
         }
         case ENTITY_TYPE_WALL:
         {
@@ -196,9 +192,9 @@ const char * GetEntityType(Entity * entity)
         {
             return "ENTITY_TYPE_SLIME_PORTAL";
         }
-        case ENTITY_TYPE_KEY:
+        case ENTITY_TYPE_STAR:
         {
-            return "ENTITY_TYPE_KEY";
+            return "ENTITY_TYPE_STAR";
         }
         case ENTITY_TYPE_LOCK:
         {

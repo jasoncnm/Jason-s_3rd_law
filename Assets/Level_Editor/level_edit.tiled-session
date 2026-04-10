@@ -3,9 +3,9 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TileMap/Path_69.tmj",
+    "activeFile": "TileSet/game_tilesets.tsj",
     "expandedProjectPaths": [
-        "TileMap",
+        "enums",
         "."
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
@@ -109,8 +109,8 @@
             "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 95.33333333333326,
-                "y": -620.6666666666666
+                "x": 129.33333333333326,
+                "y": -539.3333333333333
             }
         },
         "TileMap/Broom_4.tmj": {
@@ -154,11 +154,11 @@
             }
         },
         "TileMap/Froom_1.tmj": {
-            "scale": 0.5,
+            "scale": 0.75,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 175,
-                "y": 175
+                "x": 175.33333333333331,
+                "y": 175.33333333333337
             }
         },
         "TileMap/Hard_1.tmj": {
@@ -1703,7 +1703,8 @@
         },
         "TileSet/game_tilesets.tsj": {
             "dynamicWrapping": false,
-            "scaleInDock": 1
+            "scaleInDock": 1,
+            "scaleInEditor": 2
         },
         "TlieSet/tileSet.tsj": {
             "scaleInDock": 0.75,
@@ -1724,72 +1725,16 @@
     "map.lastUsedFormat": "json",
     "map.width": 11,
     "openFiles": [
-        "TileMap/Path_89.tmj",
-        "TileMap/Path_87.tmj",
-        "TileMap/Broom_4.tmj",
-        "TileMap/Room_73.tmj",
-        "TestLevels/Test_2.tmj",
-        "TestLevels/Test.tmj",
-        "TileMap/Room_1.tmj",
-        "TileMap/Room_22.tmj",
-        "TileMap/Tutorial_5.tmj",
-        "TileMap/Tutorial_10.tmj",
-        "TileMap/Tutorial_6.tmj",
-        "TileMap/Tutorial_8.tmj",
-        "TileMap/Toturial_2.tmj",
-        "TileMap/Tutorial_9.tmj",
-        "TileMap/Tutorial_7.tmj",
-        "TileMap/Tutorial_4.tmj",
-        "TileMap/Room_71.tmj",
-        "TileMap/Path_86.tmj",
-        "TileMap/Room_4.tmj",
-        "TileMap/Room_50.tmj",
-        "TileMap/Room_31.tmj",
-        "TileMap/Room_70.tmj",
-        "TileMap/Room_42.tmj",
         "TileMap/Broom_3.tmj",
-        "TileMap/Room_47.tmj",
-        "TileMap/Room_40.tmj",
-        "TileMap/Room_61.tmj",
-        "TileMap/Room_53.tmj",
-        "TileMap/Path_80.tmj",
-        "TileMap/Room_0.tmj",
-        "TileMap/Room_11.tmj",
-        "TileMap/Room_41.tmj",
-        "TileMap/Room_33.tmj",
-        "TileMap/Room_6.tmj",
-        "TileMap/Room_9.tmj",
-        "TileMap/Room_5.tmj",
-        "TileMap/Room_2.tmj",
-        "TileMap/Path_82.tmj",
-        "TileMap/Broom_2.tmj",
-        "TileMap/Room_39.tmj",
-        "TileMap/Room_46.tmj",
-        "TileMap/Broon_1.tmj",
-        "TileMap/Room_36.tmj",
-        "TileMap/Room_72.tmj",
-        "TileMap/room_43.tmj",
-        "TileMap/Room_74.tmj",
-        "TileMap/Room_65.tmj",
-        "TileMap/Room_58.tmj",
-        "TileMap/Room_59.tmj",
-        "TileMap/Room_23.tmj",
-        "TileMap/Room_18.tmj",
-        "TileMap/Room_32.tmj",
-        "TileMap/Room_19.tmj",
-        "TileMap/Room_60.tmj",
         "TileMap/Froom_1.tmj",
-        "TileMap/Room_24.tmj",
-        "TileMap/Path_88.tmj",
-        "TestLevels/Test_3.tmj",
-        "TileMap/Path_61.tmj",
-        "TileMap/Path_63.tmj",
-        "TileMap/Path_65.tmj",
-        "TileMap/Path_69.tmj"
+        "TileSet/game_tilesets.tsj"
     ],
     "project": "level_edit.tiled-project",
     "property.type": "int",
     "recentFiles": [
+        "TileMap/Broom_3.tmj",
+        "TileMap/Froom_1.tmj",
+        "TileSet/game_tilesets.tsj",
         "TileMap/Path_89.tmj",
         "TileMap/Path_87.tmj",
         "TileMap/Broom_4.tmj",
@@ -1798,9 +1743,6 @@
         "TestLevels/Test.tmj",
         "TileMap/Room_1.tmj",
         "TileMap/Room_22.tmj",
-        "TileMap/Tutorial_5.tmj",
-        "TileMap/Tutorial_10.tmj",
-        "TileMap/Tutorial_6.tmj",
-        "TileMap/Tutorial_8.tmj"
+        "TileMap/Tutorial_5.tmj"
     ]
 }

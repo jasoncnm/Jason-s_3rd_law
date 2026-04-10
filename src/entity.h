@@ -23,7 +23,7 @@ enum EntityLayer
     LAYER_BLOCK,
     LAYER_PIT,
     LAYER_PORTAL,
-    LAYER_KEY,
+    LAYER_STAR,
     LAYER_LOCK,
     LAYER_COUNT,
 };
@@ -31,8 +31,7 @@ enum EntityLayer
 enum EntityType
 {
     ENTITY_TYPE_NULL,
-    ENTITY_TYPE_PLAYER,
-    ENTITY_TYPE_CLONE,
+    ENTITY_TYPE_SLIME,
     ENTITY_TYPE_WALL,
     ENTITY_TYPE_BLOCK,
     ENTITY_TYPE_BRIDGE,
@@ -42,7 +41,7 @@ enum EntityType
     ENTITY_TYPE_TUT_PORTAL,
     ENTITY_TYPE_MAIN_PORTAL,
     ENTITY_TYPE_SLIME_PORTAL,
-    ENTITY_TYPE_KEY,
+    ENTITY_TYPE_STAR,
     ENTITY_TYPE_LOCK,
     ENTITY_TYPE_COUNT,
 };
@@ -64,15 +63,15 @@ enum SpriteType
 
 struct Entity
 {
-    EntityType type;
-    CableType cableType;
+    EntityType type = ENTITY_TYPE_NULL;
+    CableType cableType = CABLE_TYPE_NULL;
     
     SpriteType spriteType;
     Sprite sprite;
         
     ActionState actionState = MOVE_STATE;
     
-    TileID tileID;
+     uint32 tileID;
     Color color;
     
     IVec2 tilePos;
@@ -106,17 +105,13 @@ struct Entity
     bool8 active = false;
     bool8 starCollecting = false;
     
+    bool8 mainCable = false;
+    
     // TODO: These are too big for it to store upfront,
     // Allocate it whenever you need this
     TweenController tweenController;
     AnimatedSprite animatedSprite;
     };
-
-struct AddEntityResult
-{
-    Entity *entity;
-     uint16 entityIndex;
-};
 
 struct FindAttachableResult
 {
@@ -127,8 +122,7 @@ struct FindAttachableResult
 inline bool8 IsMovable(Entity * entity)
 {
     bool8 result = 
-        entity->type == ENTITY_TYPE_PLAYER || 
-        entity->type == ENTITY_TYPE_CLONE  || 
+        entity->type == ENTITY_TYPE_SLIME ||  
         entity->type == ENTITY_TYPE_BLOCK;
     
     return result;

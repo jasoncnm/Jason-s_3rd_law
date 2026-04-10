@@ -117,25 +117,14 @@ AnimatedSprite CreateAnimatedSprite(CreateAnimatedSpriteParam param)
     return animatedSprite;
 }
 
-TileID GetCablePowerOnID(TileID tileID)
+Sprite GetBrokenGlassSprite()
 {
-    if (tileID >= (50 + CABLE_DOWN_RIGHT))
-    {
-        return (TileID)(tileID - 50);
-    }
-    return tileID;
+    Sprite sprite = { 0 };
+    sprite.altasOffset = {192,128};
+    sprite.spriteSize = {32, 32};
 }
 
-TileID GetCablePowerOffID(TileID tileID)
-{
-    if ((tileID) <= SOURCE_UP)
-    {
-        return (TileID)(tileID + 50);
-    }
-    return tileID;
-}
-
-Sprite GetSprite(TileID tileID)
+Sprite GetSprite(uint32 tileID)
 {
     int id = tileID - 1;
     int32 row = id / TileSetCols;
