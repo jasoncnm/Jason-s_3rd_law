@@ -38,29 +38,25 @@ enum LoadOption
 static std::unordered_map<std::string, EntityType> 
 entityTypeMap
 {
+    
     {"slime", ENTITY_TYPE_SLIME},
     {"wall", ENTITY_TYPE_WALL},
     {"block", ENTITY_TYPE_BLOCK},
     {"bridge", ENTITY_TYPE_BRIDGE},
     {"glass", ENTITY_TYPE_GLASS},
-    {"cable", ENTITY_TYPE_ELECTRIC_DOOR},
     {"tut_portal", ENTITY_TYPE_TUT_PORTAL},
     {"main_portal", ENTITY_TYPE_MAIN_PORTAL},
     {"slime_portal", ENTITY_TYPE_SLIME_PORTAL},
     {"star", ENTITY_TYPE_STAR},
     {"lock", ENTITY_TYPE_LOCK},
+    {"door", ENTITY_TYPE_DOOR},
+    {"cable_wire", ENTITY_TYPE_CABLE_WIRE},
+    {"cable_connect", ENTITY_TYPE_CABLE_CONNECT},
+    {"cable_source", ENTITY_TYPE_CABLE_SOURCE},
+    {"cable_link", ENTITY_TYPE_CABLE_LINK},
     
     {"null", ENTITY_TYPE_NULL},
     {"error", ENTITY_TYPE_NULL},
-    };
-
-static std::unordered_map<std::string, CableType>
-cableTypeMap
-{
-    {"source", CABLE_TYPE_SOURCE},
-    {"wire", CABLE_TYPE_CONNECT},
-    {"connect", CABLE_TYPE_CONNECTION_POINT},
-    {"door", CABLE_TYPE_DOOR},
     };
 
 

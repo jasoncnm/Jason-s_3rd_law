@@ -400,6 +400,7 @@ DynamicArray<Entity> GetCurrentStateEntities()
         LAYER_BLOCK,
         LAYER_STAR,
         LAYER_LOCK,
+        LAYER_LINK,
     };
     uint32 layerCount = ArrayCount(pushLayers);
     
@@ -537,7 +538,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                 Entity * blockedEntity = target;
                 IVec2 targetPos = blockedEntity->tilePos - pushDir;
                 
-                if (blockedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR && DoorBlocked(blockedEntity, -pushDir))
+                if (blockedEntity->type == ENTITY_TYPE_DOOR && DoorBlocked(blockedEntity, -pushDir))
                 {
                     targetPos = blockedEntity->tilePos;
                 }
@@ -626,12 +627,12 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                 {
                     if (target->open) break;
                 }
-                case ENTITY_TYPE_ELECTRIC_DOOR:
+                case ENTITY_TYPE_DOOR:
                 case ENTITY_TYPE_WALL:
                 case ENTITY_TYPE_BRIDGE:
                 case ENTITY_TYPE_PIT:
                 {
-                    if (target->type == ENTITY_TYPE_ELECTRIC_DOOR && target->cableType == CABLE_TYPE_DOOR)
+                    if (target->type == ENTITY_TYPE_DOOR)
                     {
                     bool8 blocked = DoorBlocked(target, pushDir) || DoorBlocked(target, -pushDir);
                     if (!blocked) break;
@@ -640,7 +641,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     Entity * blockedEntity = target;
                     IVec2 targetPos = blockedEntity->tilePos - pushDir;
                     
-                    if (blockedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR && DoorBlocked(blockedEntity, -pushDir))
+                    if (blockedEntity->type == ENTITY_TYPE_DOOR && DoorBlocked(blockedEntity, -pushDir))
                     {
                         targetPos = blockedEntity->tilePos;
                     }
@@ -694,9 +695,8 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
         
         switch(target->type)
         {
-            case ENTITY_TYPE_ELECTRIC_DOOR:
+            case ENTITY_TYPE_DOOR:
             {
-                SM_ASSERT(target->cableType == CABLE_TYPE_DOOR, "other cable type is not reachble");
                 
                 if (DoorBlocked(target, current.pushDir))
                 {
@@ -781,9 +781,8 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                     if (ent)
                     {
                         // NOTE: slime dose not block the block if it is attach to the block...
-                        if ((ent->type == ENTITY_TYPE_ELECTRIC_DOOR) &&
-                                (ent->cableType != CABLE_TYPE_DOOR || !SameSide(ent, ent->tilePos, dirs[i]) ||
-                                 !DoorBlocked(ent, dirs[i])) ||
+                        if ((ent->type == ENTITY_TYPE_DOOR) &&
+                                (!SameSide(ent, ent->tilePos, dirs[i]) || !DoorBlocked(ent, dirs[i])) ||
                             (ent->type == ENTITY_TYPE_GLASS && ent->broken) ||
                             (IsSlime(ent) && (!ent->attach || dirs[i] != current.pushDir)))
                         {
@@ -1389,8 +1388,7 @@ bool8 MoveAction(IVec2 actionDir)
                 findResult.has)
             {
                 Entity * resultEntity = findResult.entity;
-                if (resultEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
-                    resultEntity->cableType == CABLE_TYPE_DOOR &&
+                if (resultEntity->type == ENTITY_TYPE_DOOR &&
                     !SameSide(resultEntity, standingPlatformPos, player->attachDir))
                 {
                     return false;
@@ -1425,8 +1423,7 @@ bool8 MoveAction(IVec2 actionDir)
                     
                     Entity * attachedEntity = GetEntity(player->attachedEntityIndex);
                     
-                    if (attachedEntity && attachedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
-                        attachedEntity->cableType == CABLE_TYPE_DOOR &&
+                    if (attachedEntity && attachedEntity->type == ENTITY_TYPE_DOOR &&
                         !SameSide(attachedEntity, newTile, newAttach))
                     {
                         return false;
@@ -1451,8 +1448,7 @@ bool8 MoveAction(IVec2 actionDir)
         {
             bool8 blockedByPit = (pushResult.blockedEntity->type == ENTITY_TYPE_PIT);
             bool8 blockedByDoor = 
-                pushResult.blockedEntity->type == ENTITY_TYPE_ELECTRIC_DOOR &&
-                pushResult.blockedEntity->cableType == CABLE_TYPE_DOOR &&
+                pushResult.blockedEntity->type == ENTITY_TYPE_DOOR &&
                 !SameSide(pushResult.blockedEntity, player->tilePos + actionDir, actionDir);
             
             bool8 blockedByBridgeWrongSide = 
@@ -1714,20 +1710,22 @@ void GameplayUpdateAndRender()
             
         // NOTE SlimeSelection
         if (!UpdateElectricDoor())
-        {
+            {
+                
+                // NOTE: read input
+                if (JustPressed(gameState->input.keyMappings, POSSES_KEY))
+                {
+                    stateChanged = SelectNextAsPlayer(player);
+                    slimeSwitched = stateChanged;
+                }
+                
             switch(player->actionState)
             {
                 case MOVE_STATE:
                 {
                     
                     IVec2 actionDir = { 0 };
-                    // NOTE: read input
-                    if (JustPressed(gameState->input.keyMappings, POSSES_KEY))
-                    {
-                        stateChanged = SelectNextAsPlayer(player);
-                        slimeSwitched = stateChanged;
-                        }
-                    else if (JustPressed(gameState->input.keyMappings, SPLIT_KEY))
+                    if (JustPressed(gameState->input.keyMappings, SPLIT_KEY))
                     {
                         isPressed = true;
                          actionDir= -player->attachDir;
@@ -2262,6 +2260,7 @@ Fog & fog = gameState->fog;
         
         EntityLayer orderedDrawLayers[] = 
         {
+            LAYER_LINK,
             LAYER_SOURCE,
             LAYER_CABLE,
             LAYER_CONNECTION,

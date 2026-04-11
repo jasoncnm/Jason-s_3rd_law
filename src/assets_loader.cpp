@@ -30,11 +30,6 @@ Entity * AddEntityToMap(json & tileData, IVec2 tilePos, uint32 tileID)
             std::string typeName = prop["value"];
             addEntity.type = entityTypeMap[typeName];
             }
-        else if (propName == "cable_type")
-        {
-            std::string name = prop["value"];
-            addEntity.cableType = cableTypeMap[name];
-        }
         else if (propName == "mass")
         {
             int8 mass = prop["value"];
@@ -90,8 +85,7 @@ Entity * AddEntityToMap(json & tileData, IVec2 tilePos, uint32 tileID)
         
         addEntity.color = WHITE;
         
-        if (addEntity.type == ENTITY_TYPE_ELECTRIC_DOOR &&
-            (addEntity.cableType == CABLE_TYPE_SOURCE || addEntity.cableType == CABLE_TYPE_CONNECT))
+        if (IsCable(&addEntity))
         {
             addEntity.color = GRAY;
         }
@@ -198,26 +192,26 @@ void SetupEntityTable(GameState & state)
                     state.entityTable[LAYER_GLASS].Add(entity->entityIndex);
                     break;
                 }
-                case ENTITY_TYPE_ELECTRIC_DOOR:
-                {
-                    if (entity->cableType == CABLE_TYPE_DOOR)
+                case ENTITY_TYPE_DOOR:
                     {
-                        state.entityTable[LAYER_DOOR].Add(entity->entityIndex);
-                    }
-                    else if (entity->cableType == CABLE_TYPE_CONNECT)
-                    {
-                        state.entityTable[LAYER_CABLE].Add(entity->entityIndex);
-                    }
-                    else if (entity->cableType == CABLE_TYPE_CONNECTION_POINT)
-                    {
-                        state.entityTable[LAYER_CONNECTION].Add(entity->entityIndex);
-                    }
-                    else
-                    {
-                        state.entityTable[LAYER_SOURCE].Add(entity->entityIndex);
-                    }
+                    state.entityTable[LAYER_DOOR].Add(entity->entityIndex);
                     break;
                 }
+                case ENTITY_TYPE_CABLE_WIRE:
+                    {
+                    state.entityTable[LAYER_CABLE].Add(entity->entityIndex);
+                    break;
+                    }
+                case ENTITY_TYPE_CABLE_CONNECT:
+                    {
+                    state.entityTable[LAYER_CONNECTION].Add(entity->entityIndex);
+                    break;
+                    }
+                case ENTITY_TYPE_CABLE_SOURCE:
+                    {
+                    state.entityTable[LAYER_SOURCE].Add(entity->entityIndex);
+                    break;
+                    }
                 case ENTITY_TYPE_PIT:
                 {
                     state.entityTable[LAYER_PIT].Add(entity->entityIndex);
@@ -248,6 +242,11 @@ void SetupEntityTable(GameState & state)
                     state.entityTable[LAYER_LOCK].Add(entity->entityIndex);
                     break;
                 }
+                case ENTITY_TYPE_CABLE_LINK:
+                {
+                    state.entityTable[LAYER_LINK].Add(entity->entityIndex);
+                    break;
+                }
                 
                 default:
                 {
@@ -256,10 +255,7 @@ void SetupEntityTable(GameState & state)
                 }
         }
     }
-    
-    
-    
-}
+    }
 
 void LoadTileMapsAndEntities(GameState & state, char * worldPath)
 {

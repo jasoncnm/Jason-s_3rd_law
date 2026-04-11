@@ -172,9 +172,9 @@ const char * GetEntityType(Entity * entity)
         {
             return "ENTITY_TYPE_GLASS";
         }
-        case ENTITY_TYPE_ELECTRIC_DOOR:
+        case ENTITY_TYPE_DOOR:
         {
-            return "ENTITY_TYPE_ELECTRIC_DOOR";
+            return "ENTITY_TYPE_DOOR";
         }
         case ENTITY_TYPE_PIT:
         {

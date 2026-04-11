@@ -111,8 +111,7 @@ void SetFreeze()
 
 inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir)
 {
-    SM_ASSERT(door->type == ENTITY_TYPE_ELECTRIC_DOOR && door->cableType == CABLE_TYPE_DOOR,
-              "Entity is not a door");
+    SM_ASSERT(door->type == ENTITY_TYPE_DOOR, "Entity is not a door");
     
     bool8 result = false;
 
@@ -131,10 +130,11 @@ inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir)
     return result;
 }
 
-inline void UnfreezeSlimes(Entity * door)
+
+ inline void UnfreezeSlimes(Entity * door)
 {
     SM_ASSERT(door, "door is inactive");
-    SM_ASSERT(door->cableType == CABLE_TYPE_DOOR, "entity is not a door");
+    SM_ASSERT(door->type == ENTITY_TYPE_DOOR, "entity is not a door");
 
     for (uint32 i = 0; i < Connection_Indices.count; i++)
     {
@@ -154,18 +154,17 @@ inline void UnfreezeSlimes(Entity * door)
     }
 }
 
-inline bool8 PowerOnCable(Entity * cable, bool8 & end)
+inline void PowerOnCable(Entity * cable, bool8 & end)
 {
-    bool8 doorOpened = false;
-    if (cable->cableType == CABLE_TYPE_DOOR)
+    if (cable->doorIndex >= 0)
     {
-        doorOpened = true;
-        if (!cable->open)
+        Entity * door = GetEntity(cable->doorIndex);
+        if (door && !door->open)
         {
-            IVec2 oldPos = cable->tilePos;
-            UnfreezeSlimes(cable);
+            IVec2 oldPos = door->tilePos;
+             UnfreezeSlimes(door);
             
-            IVec2 bounceDir = SetDoorOpen(cable);
+            IVec2 bounceDir = SetDoorOpen(door);
             
             EntityLayer layers[] = { LAYER_BLOCK, LAYER_SLIME };
             Entity * entity = FindEntityByLocationAndLayers(oldPos + bounceDir, layers, ArrayCount(layers));
@@ -184,10 +183,11 @@ inline bool8 PowerOnCable(Entity * cable, bool8 & end)
         
         
         SetShake(0.05f, 0.001f);
-        GetEntity(cable->sourceIndex)->sourceLit = true;
-        end = true;
-    }
-    else if (cable->cableType == CABLE_TYPE_CONNECTION_POINT)
+        GetEntity(door->sourceIndex)->sourceLit = true;
+        false;
+        }
+    
+    if (cable->type == ENTITY_TYPE_CABLE_CONNECT)
     {
         cable->hasPower = true;
             EntityLayer layers[] = { LAYER_SLIME, LAYER_BLOCK };
@@ -196,6 +196,7 @@ inline bool8 PowerOnCable(Entity * cable, bool8 & end)
         {
             has->actionState = FREEZE_STATE;
             cable->conductive = true;
+            cable->color = WHITE;
             end = false;
         }
         else if (!cable->conductive)
@@ -207,6 +208,20 @@ end = true;
             end = false;
         }
     }
+    else if (cable->type == ENTITY_TYPE_CABLE_LINK)
+    {
+        cable->linkCount--;
+        if (cable->linkCount == 0)
+        {
+            cable->conductive = true;
+            cable->color = WHITE;
+            end = false;
+        }
+        else
+        {
+            end = true;
+        }
+    }
     else
     {
         cable->conductive = true;
@@ -214,11 +229,9 @@ end = true;
         cable->color = WHITE;
         end = false;
     }
-
-    return doorOpened;
 }
 
-bool8 OnSourcePowerOn(int32 sourceIndex)
+ void OnSourcePowerOn(int32 sourceIndex)
 {
 
     Array<int32, CABLE_MAX_CALL_STACK> callStack  = {};
@@ -231,14 +244,14 @@ bool8 OnSourcePowerOn(int32 sourceIndex)
         callStack.RemoveLast();
         
         Entity * cable = GetEntity(entityIndex);
-        SM_ASSERT(cable && cable->type == ENTITY_TYPE_ELECTRIC_DOOR, "currentIndex is not an electic door entity");
+        
+        // SM_ASSERT(cable && cable->type == ENTITY_TYPE_ELECTRIC_DOOR, "currentIndex is not an electic door entity");
         
         bool8 end = false;
-        bool _open = PowerOnCable(cable, end);
-        doorOpened = _open || doorOpened;
-        if (!end)
-        {
-            // return doorOpened;
+        PowerOnCable(cable, end);
+        
+        if (end) continue;
+        
             int32 indexes[4] =
                 {
                     cable->leftIndex,
@@ -255,12 +268,9 @@ bool8 OnSourcePowerOn(int32 sourceIndex)
                     callStack.Add(id);
                 }
             }
-            // return doorOpened;
-        }
+            
     }
-
-    return doorOpened;
-}
+    }
 
 void ShutDownPower(int32 sourceIndex)
 {
@@ -273,16 +283,17 @@ void ShutDownPower(int32 sourceIndex)
         callStack.RemoveLast();
         
         Entity * cable = GetEntity(currentIndex);
-        SM_ASSERT(cable && cable->type == ENTITY_TYPE_ELECTRIC_DOOR, "currentIndex is not an electic door entity");
+        // TODO
+        // SM_ASSERT(cable && cable->type == ENTITY_TYPE_ELECTRIC_DOOR, "currentIndex is not an electic door entity");
         
         cable->conductive = false;
         cable->sourceLit = false;
         
-        if (cable->cableType == CABLE_TYPE_CONNECTION_POINT)
+        if (cable->type == ENTITY_TYPE_CABLE_CONNECT)
         {
             cable->hasPower = false;
         }
-        else if (cable->cableType == CABLE_TYPE_DOOR)
+        else if (cable->type == ENTITY_TYPE_DOOR)
         {
             if (cable->open) SetDoorClose(cable);
         }
@@ -337,7 +348,7 @@ inline bool8 DoorBlocked(Entity * door, IVec2 reachDir)
 
 inline bool8 IsDoor(Entity * door)
 {
-    return door && door->active && door->type == ENTITY_TYPE_ELECTRIC_DOOR && door->cableType == CABLE_TYPE_DOOR;
+    return door && door->active && door->type == ENTITY_TYPE_DOOR;
 }
 
 inline bool8 CheckDoor(IVec2 tilePos)
@@ -355,8 +366,7 @@ inline bool8 CheckDoor(IVec2 tilePos)
     return result;
 }
 
-
-void SetUpElectricDoor()
+void SetUpTraverse(uint32 sourceIndex)
 {
     auto Visited = [](Entity * ent) 
     {
@@ -364,91 +374,155 @@ void SetUpElectricDoor()
         return result;
     };
     
-     auto IsCable = [](Entity * ent)
-    {
-        return ent && ent->type == ENTITY_TYPE_ELECTRIC_DOOR;
-    };
-    
     EntityLayer findLayers[] = { 
         LAYER_SOURCE,
-        LAYER_DOOR,
         LAYER_CABLE,
         LAYER_CONNECTION,
+        LAYER_LINK,
     };
     
     uint32 layerCount = ArrayCount(findLayers);
-    IVec2 dirs[] = { IVec2{ 0, -1 }, IVec2{ 0, 1 }, IVec2 { -1, 0 }, IVec2{ 1, 0 }, };
     
+    EntityLayer doorLayer[] = { LAYER_DOOR };
+    
+    
+    Array<int32, CABLE_MAX_CALL_STACK> callStack = {};
+    
+    callStack.Add( sourceIndex );
+    
+    while(!callStack.IsEmpty())
+    {
+        int32 currentIndex = callStack.last();
+        callStack.RemoveLast();
+        
+        Entity * current = GetEntity(currentIndex);
+        
+        current->sourceIndex = sourceIndex;
+        
+        // NOTE: up
+        if (current->up) 
+        {
+            IVec2 nextPos = current->tilePos + IVec2{ 0, -1 };
+            // NOTE: find door
+            Entity * door = FindEntityByLocationAndLayers(nextPos, doorLayer, 1);
+            if (door && door->sourceIndex == -1 && door->down)
+            {
+                door->sourceIndex = sourceIndex;
+                current->doorIndex = door->entityIndex;
+            }
+            
+            Entity * cable = FindEntityByLocationAndLayers(nextPos, findLayers, layerCount);
+            if (cable && cable->type == ENTITY_TYPE_CABLE_LINK && cable->downIndex == -1)
+            {
+                cable->linkCount++;
+                current->upIndex = cable->entityIndex;
+            }
+            else if (cable && !Visited(cable) && cable->down)
+            {
+                
+                current->upIndex = cable->entityIndex;
+                callStack.Add(cable->entityIndex);
+            }
+            
+        }
+        
+        // NOTE: down
+        if (current->down) 
+        {
+            
+            IVec2 nextPos = current->tilePos + IVec2{ 0, 1 };
+            // NOTE: find door
+            Entity * door = FindEntityByLocationAndLayers(nextPos, doorLayer, 1);
+            if (door && door->sourceIndex == -1 && door->up)
+            {
+                door->sourceIndex = sourceIndex;
+                current->doorIndex = door->entityIndex;
+            }
+            
+            Entity * cable = FindEntityByLocationAndLayers(nextPos, findLayers, layerCount);
+            
+            if (cable && cable->type == ENTITY_TYPE_CABLE_LINK && cable->upIndex == -1)
+            {
+                cable->linkCount++;
+                current->downIndex = cable->entityIndex;
+                
+            }
+            else if (cable && !Visited(cable) && cable->up)
+            {
+                current->downIndex = cable->entityIndex;
+                callStack.Add(cable->entityIndex);
+            }
+            
+        }
+        
+        // NOTE: left
+        if (current->left) 
+        {
+            IVec2 nextPos = current->tilePos + IVec2{ -1, 0 };
+            // NOTE: find door
+            Entity * door = FindEntityByLocationAndLayers(nextPos, doorLayer, 1);
+            if (door && door->sourceIndex == -1 && door->right)
+            {
+                door->sourceIndex = sourceIndex;
+                current->doorIndex = door->entityIndex;
+            }
+            
+            Entity * cable = FindEntityByLocationAndLayers(nextPos, findLayers, layerCount);
+            if (cable && cable->type == ENTITY_TYPE_CABLE_LINK && cable->rightIndex == -1)
+            {
+                cable->linkCount++;
+                current->leftIndex = cable->entityIndex;
+                }
+            else if (cable && !Visited(cable) && cable->right)
+            {
+                current->leftIndex = cable->entityIndex;
+                callStack.Add(cable->entityIndex);
+            }
+            
+        }
+        
+        // NOTE: right
+        if (current->right) 
+        {
+            IVec2 nextPos = current->tilePos + IVec2{ 1, 0 };
+            // NOTE: find door
+            Entity * door = FindEntityByLocationAndLayers(nextPos, doorLayer, 1);
+            if (door && door->sourceIndex == -1 && door->left)
+            {
+                door->sourceIndex = sourceIndex;
+                current->doorIndex = door->entityIndex;
+            }
+            
+            Entity * cable = FindEntityByLocationAndLayers(nextPos, findLayers, layerCount);
+            if (cable && cable->type == ENTITY_TYPE_CABLE_LINK && cable->leftIndex == -1)
+            {
+                cable->linkCount++;
+                current->rightIndex = cable->entityIndex;
+                }
+            else if (cable && !Visited(cable) && cable->left)
+            {
+                current->rightIndex = cable->entityIndex;
+                callStack.Add(cable->entityIndex);
+            }
+            
+        }
+        
+        // SM_ASSERT(connected, "cable are not connected");
+    }
+    
+}
+
+void SetUpElectricDoor()
+    
+{
     for (uint32 ind = 0; ind < Source_Indices.count; ind++)
     {
-        Array<int32, CABLE_MAX_CALL_STACK> callStack = {};
-
-        int32 sourceIndex = Source_Indices[ind];
-            callStack.Add( sourceIndex );
-        
-            
-        while(!callStack.IsEmpty())
-        {
-            int32 currentIndex = callStack.last();
-            callStack.RemoveLast();
-            
-            Entity * current = GetEntity(currentIndex);
-            current->sourceIndex = sourceIndex;
-            
-            if (current->cableType == CABLE_TYPE_DOOR) continue;
-            
-            bool connected = false;
-            
-            // NOTE: up
-            if (current->up) 
-            {
-                Entity * cable = FindEntityByLocationAndLayers(current->tilePos + IVec2{ 0, -1 }, findLayers, layerCount);
-                if (cable && IsCable(cable) && !Visited(cable) && cable->down)
-                {
-                    current->upIndex = cable->entityIndex;
-                    callStack.Add(cable->entityIndex);
-                    connected = true;
-                }
-            }
-            // NOTE: down
-            if (current->down) 
-            {
-                Entity * cable = FindEntityByLocationAndLayers(current->tilePos + IVec2{ 0, 1 }, findLayers, layerCount);
-                if (cable && IsCable(cable) && !Visited(cable) && cable->up)
-                {
-                    current->downIndex = cable->entityIndex;
-                    callStack.Add(cable->entityIndex);
-                    connected = true;
-                }
-                
-            }
-            // NOTE: left
-            if (current->left) 
-            {
-                Entity * cable = FindEntityByLocationAndLayers(current->tilePos + IVec2{ -1, 0 }, findLayers, layerCount);
-                if (cable && IsCable(cable) && !Visited(cable) && cable->right)
-                {
-                    current->leftIndex = cable->entityIndex;
-                    callStack.Add(cable->entityIndex);
-                    connected = true;
-                }
-                
-            }
-            // NOTE: right
-            if (current->right) 
-            {
-                Entity * cable = FindEntityByLocationAndLayers(current->tilePos + IVec2{ 1, 0 }, findLayers, layerCount);
-                if (cable && IsCable(cable) && !Visited(cable) && cable->left)
-                {
-                    current->rightIndex = cable->entityIndex;
-                    callStack.Add(cable->entityIndex);
-                    connected = true;
-                }
-            }
-            
-            SM_ASSERT(connected, "cable are not connected");
-            
-            }
+        SetUpTraverse(Source_Indices[ind]);
+    }
+    
+    for (uint32 ind = 0; ind < Link_Indices.count; ind++)
+    {
+        SetUpTraverse(Link_Indices[ind]);
     }
     
     for (uint32 i = 0; i < Source_Indices.count; i++)
@@ -489,8 +563,9 @@ inline bool8 UpdateElectricDoor()
         if (block && block->tweenController.NoTweens())
         {
             block->actionState = FREEZE_STATE;
-            if (!source->conductive && OnSourcePowerOn(sourceCableIndex))
+            if (!source->conductive)
             {
+                OnSourcePowerOn(sourceCableIndex);
                 changed = true;
                 source->sourceLit = true;
             }
@@ -512,8 +587,9 @@ for (uint32 i = 0; i < Connection_Indices.count; i++)
                 {
                     if (connection->hasPower)
                     {
-                        connection->conductive = true;
-                        if (OnSourcePowerOn(connection->sourceIndex))
+                    connection->conductive = true;
+                    OnSourcePowerOn(connection->sourceIndex);
+                        // if ()
                         {
                             Entity * source = GetEntity(connection->sourceIndex);
                         connection->sourceLit = true;

@@ -18,6 +18,7 @@ enum EntityLayer
     LAYER_CABLE,
     LAYER_SOURCE,
     LAYER_CONNECTION,
+    LAYER_LINK,
     LAYER_GLASS,
     LAYER_SLIME,
     LAYER_BLOCK,
@@ -34,9 +35,13 @@ enum EntityType
     ENTITY_TYPE_SLIME,
     ENTITY_TYPE_WALL,
     ENTITY_TYPE_BLOCK,
-    ENTITY_TYPE_BRIDGE,
     ENTITY_TYPE_GLASS,
-    ENTITY_TYPE_ELECTRIC_DOOR,
+    ENTITY_TYPE_BRIDGE,
+    ENTITY_TYPE_DOOR,
+    ENTITY_TYPE_CABLE_SOURCE,
+    ENTITY_TYPE_CABLE_WIRE,
+    ENTITY_TYPE_CABLE_CONNECT,
+    ENTITY_TYPE_CABLE_LINK,
     ENTITY_TYPE_PIT,
     ENTITY_TYPE_TUT_PORTAL,
     ENTITY_TYPE_MAIN_PORTAL,
@@ -64,7 +69,6 @@ enum SpriteType
 struct Entity
 {
     EntityType type = ENTITY_TYPE_NULL;
-    CableType cableType = CABLE_TYPE_NULL;
     
     SpriteType spriteType;
     Sprite sprite;
@@ -85,7 +89,9 @@ struct Entity
     Vector2 screenEnd;
      
     int32 sourceIndex = -1;
+    int32 doorIndex = -1;
     int32 rightIndex = -1, leftIndex = -1, upIndex = -1, downIndex = -1;
+    uint32 linkCount = 0;
     
     uint32 attachedEntityIndex;
     uint32 unlockEntityIndex;
@@ -105,6 +111,7 @@ struct Entity
     bool8 changed = false;
     bool8 active = false;
     bool8 starCollecting = false;
+    bool8 linkActivated = false;
     
     bool8 mainCable = false;
     

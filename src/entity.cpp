@@ -171,6 +171,13 @@ inline bool8 IsSlime(Entity * entity)
     return entity->type == ENTITY_TYPE_SLIME;
 }
 
+inline bool8 IsCable(Entity * entity)
+{
+    return entity->type == ENTITY_TYPE_CABLE_SOURCE ||
+        entity->type == ENTITY_TYPE_CABLE_WIRE ||
+        entity->type == ENTITY_TYPE_CABLE_CONNECT;
+    }
+
 inline void SetSlimeSprite(Entity * slime, IVec2 dir)
 {
     
@@ -688,14 +695,11 @@ inline FindAttachableResult FindAttachable(IVec2 tilePos, IVec2 attachDir)
                     has = !entity->broken;
                     break;
                 }
-                case ENTITY_TYPE_ELECTRIC_DOOR:
+                case ENTITY_TYPE_DOOR:
                 {
-                    if (entity->cableType == CABLE_TYPE_DOOR) 
-                    {
-                        has = DoorBlocked(entity, attachDir);
+                    has = DoorBlocked(entity, attachDir);
                         
                         if (has) break;
-                    }
                 }
                 case ENTITY_TYPE_PIT:
                 {
@@ -781,7 +785,7 @@ inline Entity * FindBlockEntityFromTo(IVec2 from, IVec2 to, IVec2 dir)
         if (ent)
         {
             if (ent->type == ENTITY_TYPE_GLASS && ent->broken ||
-                ent->type == ENTITY_TYPE_ELECTRIC_DOOR && !DoorBlocked(ent, dir)) continue;
+                ent->type == ENTITY_TYPE_DOOR && !DoorBlocked(ent, dir)) continue;
             result = ent;
             break;
         }
@@ -848,8 +852,7 @@ inline void UpdateSlimes()
                     {
                         if ((blockedEnt->type == ENTITY_TYPE_GLASS &&
                                  blockedEnt->broken) ||
-                            (blockedEnt->type == ENTITY_TYPE_ELECTRIC_DOOR &&
-                             blockedEnt->cableType == CABLE_TYPE_DOOR &&
+                            (blockedEnt->type == ENTITY_TYPE_DOOR &&
                              DoorBlocked(blockedEnt, dir)))
                         {
                             continue;

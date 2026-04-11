@@ -1172,11 +1172,6 @@
          "id":81,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"door"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -1209,7 +1204,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"door"
                 }, 
                 {
                  "name":"up",
@@ -1221,11 +1216,6 @@
          "id":82,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"door"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -1258,7 +1248,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"door"
                 }, 
                 {
                  "name":"up",
@@ -1270,11 +1260,6 @@
          "id":83,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"door"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -1307,7 +1292,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"door"
                 }, 
                 {
                  "name":"up",
@@ -1319,11 +1304,6 @@
          "id":84,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"door"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -1356,7 +1336,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"door"
                 }, 
                 {
                  "name":"up",
@@ -1452,11 +1432,6 @@
          "id":91,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"door"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -1489,7 +1464,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"door"
                 }, 
                 {
                  "name":"up",
@@ -1501,11 +1476,6 @@
          "id":92,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"door"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -1538,7 +1508,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"door"
                 }, 
                 {
                  "name":"up",
@@ -1550,11 +1520,6 @@
          "id":93,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"door"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -1587,7 +1552,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"door"
                 }, 
                 {
                  "name":"up",
@@ -1599,11 +1564,6 @@
          "id":94,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"door"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -1636,7 +1596,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"door"
                 }, 
                 {
                  "name":"up",
@@ -2579,11 +2539,6 @@
          "id":154,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -2606,7 +2561,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -2618,11 +2573,6 @@
          "id":155,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -2645,7 +2595,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -2657,11 +2607,6 @@
          "id":156,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -2684,7 +2629,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -2696,11 +2641,6 @@
          "id":157,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -2723,7 +2663,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -2735,11 +2675,6 @@
          "id":158,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -2762,7 +2697,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -2774,11 +2709,6 @@
          "id":159,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -2801,7 +2731,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -2869,11 +2799,6 @@
          "id":164,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -2896,7 +2821,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -2908,11 +2833,6 @@
          "id":165,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"connect"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -2935,7 +2855,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_connect"
                 }, 
                 {
                  "name":"up",
@@ -2961,11 +2881,6 @@
          "id":167,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -2988,7 +2903,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -3000,11 +2915,6 @@
          "id":168,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"connect"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -3027,7 +2937,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_connect"
                 }, 
                 {
                  "name":"up",
@@ -3109,11 +3019,6 @@
          "id":174,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -3136,7 +3041,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -3162,11 +3067,6 @@
          "id":176,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -3189,7 +3089,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -3201,11 +3101,6 @@
          "id":177,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -3228,7 +3123,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -3249,11 +3144,6 @@
          "id":179,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -3276,7 +3166,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -3344,11 +3234,6 @@
          "id":184,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -3371,7 +3256,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -3383,11 +3268,6 @@
          "id":185,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -3410,7 +3290,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -3422,11 +3302,6 @@
          "id":186,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -3449,7 +3324,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -3461,11 +3336,6 @@
          "id":187,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -3488,7 +3358,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -3500,11 +3370,6 @@
          "id":188,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -3527,7 +3392,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -3539,11 +3404,6 @@
          "id":189,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -3566,7 +3426,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -3634,11 +3494,6 @@
          "id":194,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -3661,7 +3516,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -3673,11 +3528,6 @@
          "id":195,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -3700,7 +3550,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -3712,11 +3562,6 @@
          "id":196,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -3739,7 +3584,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -3751,11 +3596,6 @@
          "id":197,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -3778,7 +3618,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -3790,11 +3630,6 @@
          "id":198,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -3817,7 +3652,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -3829,11 +3664,6 @@
          "id":199,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -3856,7 +3686,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -3924,11 +3754,6 @@
          "id":204,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -3951,7 +3776,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -3963,11 +3788,6 @@
          "id":205,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -3990,7 +3810,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -4016,11 +3836,6 @@
          "id":207,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -4043,7 +3858,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -4055,11 +3870,6 @@
          "id":208,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -4082,7 +3892,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -4108,11 +3918,6 @@
          "id":210,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -4140,7 +3945,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -4152,11 +3957,6 @@
          "id":211,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -4184,7 +3984,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -4196,11 +3996,6 @@
          "id":212,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -4228,7 +4023,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -4254,11 +4049,6 @@
          "id":214,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -4281,7 +4071,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -4293,11 +4083,6 @@
          "id":215,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -4320,7 +4105,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -4388,11 +4173,6 @@
          "id":220,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -4420,7 +4200,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -4432,11 +4212,6 @@
          "id":221,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"connect"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -4464,7 +4239,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_link"
                 }, 
                 {
                  "name":"up",
@@ -4476,11 +4251,6 @@
          "id":222,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -4508,7 +4278,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -4534,11 +4304,6 @@
          "id":224,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -4561,7 +4326,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -4573,11 +4338,6 @@
          "id":225,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -4600,7 +4360,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -4612,11 +4372,6 @@
          "id":226,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -4639,7 +4394,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -4651,11 +4406,6 @@
          "id":227,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -4678,7 +4428,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -4690,11 +4440,6 @@
          "id":228,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -4717,7 +4462,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -4729,11 +4474,6 @@
          "id":229,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -4756,7 +4496,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -4768,11 +4508,6 @@
          "id":230,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -4800,7 +4535,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -4812,11 +4547,6 @@
          "id":231,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -4844,7 +4574,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -4856,11 +4586,6 @@
          "id":232,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -4888,7 +4613,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -4914,11 +4639,6 @@
          "id":234,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -4941,7 +4661,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -4953,11 +4673,6 @@
          "id":235,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"connect"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -4980,7 +4695,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_connect"
                 }, 
                 {
                  "name":"up",
@@ -5026,11 +4741,6 @@
          "id":237,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -5053,7 +4763,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -5065,11 +4775,6 @@
          "id":238,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"connect"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -5092,7 +4797,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_connect"
                 }, 
                 {
                  "name":"up",
@@ -5138,11 +4843,6 @@
          "id":240,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -5170,7 +4870,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -5182,11 +4882,6 @@
          "id":241,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -5214,7 +4909,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -5226,11 +4921,6 @@
          "id":242,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -5258,7 +4948,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -5270,11 +4960,6 @@
          "id":243,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -5302,7 +4987,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -5313,11 +4998,6 @@
         {
          "id":244,
          "properties":[
-                {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
                 {
                  "name":"down",
                  "type":"bool",
@@ -5341,7 +5021,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -5387,11 +5067,6 @@
          "id":246,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -5414,7 +5089,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -5426,11 +5101,6 @@
          "id":247,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -5453,7 +5123,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -5499,11 +5169,6 @@
          "id":249,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -5526,7 +5191,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -5538,11 +5203,6 @@
          "id":250,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -5570,7 +5230,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -5582,11 +5242,6 @@
          "id":251,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -5614,7 +5269,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -5626,11 +5281,6 @@
          "id":252,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -5658,7 +5308,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -5670,11 +5320,6 @@
          "id":253,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -5702,7 +5347,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -5714,11 +5359,6 @@
          "id":254,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -5741,7 +5381,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -5753,11 +5393,6 @@
          "id":255,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -5780,7 +5415,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -5792,11 +5427,6 @@
          "id":256,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -5819,7 +5449,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -5831,11 +5461,6 @@
          "id":257,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -5858,7 +5483,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -5870,11 +5495,6 @@
          "id":258,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -5897,7 +5517,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -5909,11 +5529,6 @@
          "id":259,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -5936,7 +5551,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -5948,11 +5563,6 @@
          "id":260,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -5980,7 +5590,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -5992,11 +5602,6 @@
          "id":261,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -6024,7 +5629,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -6036,11 +5641,6 @@
          "id":262,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -6068,7 +5668,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6080,11 +5680,6 @@
          "id":263,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -6112,7 +5707,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6124,11 +5719,6 @@
          "id":264,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -6151,7 +5741,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6163,11 +5753,6 @@
          "id":265,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -6190,7 +5775,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6202,11 +5787,6 @@
          "id":266,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -6229,7 +5809,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6241,11 +5821,6 @@
          "id":267,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -6268,7 +5843,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6280,11 +5855,6 @@
          "id":268,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -6307,7 +5877,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6319,11 +5889,6 @@
          "id":269,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -6346,7 +5911,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6358,11 +5923,6 @@
          "id":270,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -6390,7 +5950,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -6402,11 +5962,6 @@
          "id":271,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"wire"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -6434,7 +5989,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_wire"
                 }, 
                 {
                  "name":"up",
@@ -6446,11 +6001,6 @@
          "id":272,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -6478,7 +6028,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6490,11 +6040,6 @@
          "id":273,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -6522,7 +6067,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6534,11 +6079,6 @@
          "id":274,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -6561,7 +6101,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6573,11 +6113,6 @@
          "id":275,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -6600,7 +6135,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6626,11 +6161,6 @@
          "id":277,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -6653,7 +6183,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6665,11 +6195,6 @@
          "id":278,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -6692,7 +6217,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6738,11 +6263,6 @@
          "id":280,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -6770,7 +6290,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6782,11 +6302,6 @@
          "id":281,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -6814,7 +6329,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6826,11 +6341,6 @@
          "id":282,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -6858,7 +6368,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6870,11 +6380,6 @@
          "id":283,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -6902,7 +6407,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6914,11 +6419,6 @@
          "id":284,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -6941,7 +6441,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -6953,11 +6453,6 @@
          "id":285,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -6980,7 +6475,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -7026,11 +6521,6 @@
          "id":287,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":true
@@ -7053,7 +6543,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -7065,11 +6555,6 @@
          "id":288,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -7092,7 +6577,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -7138,11 +6623,6 @@
          "id":290,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -7170,7 +6650,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -7182,11 +6662,6 @@
          "id":291,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -7214,7 +6689,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -7226,11 +6701,6 @@
          "id":292,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -7258,7 +6728,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",
@@ -7270,11 +6740,6 @@
          "id":293,
          "properties":[
                 {
-                 "name":"cable_type",
-                 "type":"string",
-                 "value":"source"
-                }, 
-                {
                  "name":"down",
                  "type":"bool",
                  "value":false
@@ -7302,7 +6767,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"cable"
+                 "value":"cable_source"
                 }, 
                 {
                  "name":"up",

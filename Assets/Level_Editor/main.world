@@ -275,10 +275,10 @@
         },
         {
             "fileName": "TileMap/Room_42.tmj",
-            "height": 704,
+            "height": 352,
             "width": 352,
             "x": -1248,
-            "y": 3392
+            "y": 3424
         },
         {
             "fileName": "TileMap/room_43.tmj",
@@ -339,8 +339,8 @@
         {
             "fileName": "TileMap/Room_53.tmj",
             "height": 352,
-            "width": 288,
-            "x": -128,
+            "width": 352,
+            "x": -192,
             "y": 2688
         },
         {
@@ -402,8 +402,8 @@
         {
             "fileName": "TileMap/Broom_7.tmj",
             "height": 352,
-            "width": 704,
-            "x": -256,
+            "width": 352,
+            "x": 96,
             "y": 1984
         },
         {
@@ -416,7 +416,7 @@
         {
             "fileName": "TileMap/Room_61.tmj",
             "height": 352,
-            "width": 416,
+            "width": 352,
             "x": -544,
             "y": 2688
         },
@@ -566,6 +566,41 @@
             "width": 352,
             "x": 2464,
             "y": 2336
+        },
+        {
+            "fileName": "TileMap/Room_77.tmj",
+            "height": 352,
+            "width": 352,
+            "x": -896,
+            "y": 3424
+        },
+        {
+            "fileName": "TileMap/Room_78.tmj",
+            "height": 352,
+            "width": 448,
+            "x": -192,
+            "y": 2336
+        },
+        {
+            "fileName": "TileMap/Room_79.tmj",
+            "height": 352,
+            "width": 352,
+            "x": -1248,
+            "y": 3776
+        },
+        {
+            "fileName": "TileMap/Room_80.tmj",
+            "height": 352,
+            "width": 352,
+            "x": -256,
+            "y": 1984
+        },
+        {
+            "fileName": "TileMap/Room_81.tmj",
+            "height": 352,
+            "width": 128,
+            "x": 480,
+            "y": 3744
         }
     ],
     "onlyShowAdjacentMaps": false,

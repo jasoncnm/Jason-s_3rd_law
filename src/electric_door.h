@@ -16,20 +16,9 @@
 #define Source_Indices gameState->entityTable[LAYER_SOURCE]
 #define Connection_Indices gameState->entityTable[LAYER_CONNECTION]
 #define Door_Indices gameState->entityTable[LAYER_DOOR]
+#define Link_Indices gameState->entityTable[LAYER_LINK]
 
 #define CABLE_MAX_CALL_STACK 50
-
-enum CableType
-{
-    CABLE_TYPE_NULL,
-    
-    CABLE_TYPE_SOURCE,
-    CABLE_TYPE_CONNECT,
-    CABLE_TYPE_CONNECTION_POINT,
-    CABLE_TYPE_DOOR,
-
-    CABLE_TYPE_COUNT,
-};
 
 
 #define ELECTRIC_DOOR_H
