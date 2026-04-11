@@ -1144,11 +1144,11 @@
             }
         },
         "TileMap/Room_37.tmj": {
-            "scale": 4,
+            "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 152.5,
-                "y": 658.875
+                "x": -305,
+                "y": 90.5
             }
         },
         "TileMap/Room_38.tmj": {
@@ -1176,11 +1176,11 @@
             }
         },
         "TileMap/Room_40.tmj": {
-            "scale": 2,
+            "scale": 1,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 920,
-                "y": 400.75
+                "x": 116,
+                "y": 192.5
             }
         },
         "TileMap/Room_40_Tut.tmj": {
@@ -1232,11 +1232,11 @@
             }
         },
         "TileMap/Room_47.tmj": {
-            "scale": 1.5,
+            "scale": 1,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 2392.6666666666665,
-                "y": -669.6666666666665
+                "x": 1903,
+                "y": 442.5
             }
         },
         "TileMap/Room_48.tmj": {
@@ -1256,11 +1256,11 @@
             }
         },
         "TileMap/Room_50.tmj": {
-            "scale": 1.5,
+            "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 96.66666666666669,
-                "y": 381.6666666666667
+                "x": 62,
+                "y": 565.5
             }
         },
         "TileMap/Room_51.tmj": {
@@ -1352,11 +1352,11 @@
             }
         },
         "TileMap/Room_61.tmj": {
-            "scale": 2,
+            "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 268,
-                "y": 566.25
+                "x": 62,
+                "y": 213.5
             }
         },
         "TileMap/Room_62.tmj": {
@@ -1384,11 +1384,11 @@
             }
         },
         "TileMap/Room_65.tmj": {
-            "scale": 2,
-            "selectedLayer": 0,
+            "scale": 1,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 97.5,
-                "y": 550.25
+                "x": -2840,
+                "y": -509.5
             }
         },
         "TileMap/Room_66.tmj": {
