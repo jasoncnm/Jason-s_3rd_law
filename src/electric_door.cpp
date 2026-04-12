@@ -366,13 +366,94 @@ inline bool8 CheckDoor(IVec2 tilePos)
     return result;
 }
 
-void SetUpTraverse(uint32 sourceIndex)
+void SetCable(Array<int32, CABLE_MAX_CALL_STACK> & callStack,
+               IVec2 setPos, IVec2 setDir,
+              EntityLayer * doorLayer, 
+              EntityLayer * findLayers, uint32 layerCount,
+              int32 sourceIndex,
+              int32 * setDoorIndex, int32 * setNextIndex, bool8 setMain)
 {
-    auto Visited = [](Entity * ent) 
+    
+    auto Connected = [] (Entity * ent, IVec2 setDir)
     {
-        bool8 result = ent && (ent->leftIndex >= 0 || ent->rightIndex >= 0 || ent->upIndex >= 0 || ent->downIndex >= 0);
-        return result;
+        if (setDir == DIR_LEFT && ent->right)
+        {
+            return true;
+        }
+        
+        if (setDir == DIR_RIGHT && ent->left)
+        {
+            
+            return true;
+        }
+        
+        if (setDir == DIR_UP && ent->down)
+        {
+            return true;
+        }
+        
+        if (setDir == DIR_DOWN && ent->up)
+        {
+            return true;
+        }
+        
+        return false;
     };
+    
+    auto Visited = [](Entity * ent, IVec2 setDir) 
+    {
+        if (setDir == DIR_LEFT)
+        {
+            return ent->rightIndex >= 0;
+        }
+        
+        if (setDir == DIR_RIGHT)
+        {
+            return ent->leftIndex >= 0;
+        }
+        
+        if (setDir == DIR_UP)
+        {
+            return ent->downIndex >= 0;
+        }
+        
+        if (setDir == DIR_DOWN && ent->up)
+        {
+            return ent->upIndex >= 0;
+        }
+        
+        return false;
+    };
+    
+    // NOTE: find door
+    
+    Entity * door = FindEntityByLocationAndLayers(setPos, doorLayer, 1);
+    if (door && door->sourceIndex == -1 && Connected(door, setDir))
+    {
+        door->sourceIndex = sourceIndex;
+         *setDoorIndex = door->entityIndex;
+    }
+    
+    Entity * cable = FindEntityByLocationAndLayers(setPos, findLayers, layerCount);
+    if (cable && cable->type == ENTITY_TYPE_CABLE_LINK && !Visited(cable, setDir))
+    {
+        cable->linkCount++;
+         *setNextIndex = cable->entityIndex;
+        if (setMain)
+        {
+            callStack.Add(cable->entityIndex);
+        }
+    }
+    else if (cable && !Visited(cable, setDir) && Connected(cable, setDir) && (!setMain || setMain && cable->mainCable))
+    {
+         *setNextIndex = cable->entityIndex;
+        callStack.Add(cable->entityIndex);
+    }
+    
+}
+
+void SetUpTraverse(uint32 sourceIndex, bool8 setMain)
+{
     
     EntityLayer findLayers[] = { 
         LAYER_SOURCE,
@@ -397,61 +478,32 @@ void SetUpTraverse(uint32 sourceIndex)
         
         Entity * current = GetEntity(currentIndex);
         
+        if (setMain)
+        {
+            SM_ASSERT(current->mainCable, "updating main cable but current is not main");
+        }
+        
         current->sourceIndex = sourceIndex;
         
         // NOTE: up
         if (current->up) 
         {
             IVec2 nextPos = current->tilePos + IVec2{ 0, -1 };
-            // NOTE: find door
-            Entity * door = FindEntityByLocationAndLayers(nextPos, doorLayer, 1);
-            if (door && door->sourceIndex == -1 && door->down)
-            {
-                door->sourceIndex = sourceIndex;
-                current->doorIndex = door->entityIndex;
-            }
+            IVec2 nextDir = { 0, -1 };
             
-            Entity * cable = FindEntityByLocationAndLayers(nextPos, findLayers, layerCount);
-            if (cable && cable->type == ENTITY_TYPE_CABLE_LINK && cable->downIndex == -1)
-            {
-                cable->linkCount++;
-                current->upIndex = cable->entityIndex;
-            }
-            else if (cable && !Visited(cable) && cable->down)
-            {
-                
-                current->upIndex = cable->entityIndex;
-                callStack.Add(cable->entityIndex);
-            }
+            SetCable(callStack, nextPos, nextDir, doorLayer, findLayers, layerCount, sourceIndex, 
+                     &current->doorIndex, &current->upIndex, setMain);
             
-        }
+            }
         
         // NOTE: down
         if (current->down) 
         {
             
             IVec2 nextPos = current->tilePos + IVec2{ 0, 1 };
-            // NOTE: find door
-            Entity * door = FindEntityByLocationAndLayers(nextPos, doorLayer, 1);
-            if (door && door->sourceIndex == -1 && door->up)
-            {
-                door->sourceIndex = sourceIndex;
-                current->doorIndex = door->entityIndex;
-            }
-            
-            Entity * cable = FindEntityByLocationAndLayers(nextPos, findLayers, layerCount);
-            
-            if (cable && cable->type == ENTITY_TYPE_CABLE_LINK && cable->upIndex == -1)
-            {
-                cable->linkCount++;
-                current->downIndex = cable->entityIndex;
-                
-            }
-            else if (cable && !Visited(cable) && cable->up)
-            {
-                current->downIndex = cable->entityIndex;
-                callStack.Add(cable->entityIndex);
-            }
+            IVec2 nextDir = IVec2{ 0, 1 };
+            SetCable(callStack, nextPos, nextDir, doorLayer, findLayers, layerCount, sourceIndex, 
+                     &current->doorIndex, &current->downIndex, setMain);
             
         }
         
@@ -459,25 +511,9 @@ void SetUpTraverse(uint32 sourceIndex)
         if (current->left) 
         {
             IVec2 nextPos = current->tilePos + IVec2{ -1, 0 };
-            // NOTE: find door
-            Entity * door = FindEntityByLocationAndLayers(nextPos, doorLayer, 1);
-            if (door && door->sourceIndex == -1 && door->right)
-            {
-                door->sourceIndex = sourceIndex;
-                current->doorIndex = door->entityIndex;
-            }
-            
-            Entity * cable = FindEntityByLocationAndLayers(nextPos, findLayers, layerCount);
-            if (cable && cable->type == ENTITY_TYPE_CABLE_LINK && cable->rightIndex == -1)
-            {
-                cable->linkCount++;
-                current->leftIndex = cable->entityIndex;
-                }
-            else if (cable && !Visited(cable) && cable->right)
-            {
-                current->leftIndex = cable->entityIndex;
-                callStack.Add(cable->entityIndex);
-            }
+            IVec2 nextDir = IVec2{ -1, 0 };
+            SetCable(callStack, nextPos, nextDir, doorLayer, findLayers, layerCount, sourceIndex, 
+                     &current->doorIndex, &current->leftIndex, setMain);
             
         }
         
@@ -485,25 +521,9 @@ void SetUpTraverse(uint32 sourceIndex)
         if (current->right) 
         {
             IVec2 nextPos = current->tilePos + IVec2{ 1, 0 };
-            // NOTE: find door
-            Entity * door = FindEntityByLocationAndLayers(nextPos, doorLayer, 1);
-            if (door && door->sourceIndex == -1 && door->left)
-            {
-                door->sourceIndex = sourceIndex;
-                current->doorIndex = door->entityIndex;
-            }
-            
-            Entity * cable = FindEntityByLocationAndLayers(nextPos, findLayers, layerCount);
-            if (cable && cable->type == ENTITY_TYPE_CABLE_LINK && cable->leftIndex == -1)
-            {
-                cable->linkCount++;
-                current->rightIndex = cable->entityIndex;
-                }
-            else if (cable && !Visited(cable) && cable->left)
-            {
-                current->rightIndex = cable->entityIndex;
-                callStack.Add(cable->entityIndex);
-            }
+            IVec2 nextDir = IVec2{ 1, 0 };
+            SetCable(callStack, nextPos, nextDir, doorLayer, findLayers, layerCount, sourceIndex, 
+                     &current->doorIndex, &current->rightIndex, setMain);
             
         }
         
@@ -515,14 +535,19 @@ void SetUpTraverse(uint32 sourceIndex)
 void SetUpElectricDoor()
     
 {
+    
+    // NOTE: setup  main circuits
     for (uint32 ind = 0; ind < Source_Indices.count; ind++)
     {
-        SetUpTraverse(Source_Indices[ind]);
+        Entity * source = GetEntity(Source_Indices[ind]);
+        if (source->mainCable) SetUpTraverse(Source_Indices[ind], true);
     }
     
-    for (uint32 ind = 0; ind < Link_Indices.count; ind++)
+    // NOTE: setup rest of  circuits
+    for (uint32 ind = 0; ind < Source_Indices.count; ind++)
     {
-        SetUpTraverse(Link_Indices[ind]);
+        Entity * source = GetEntity(Source_Indices[ind]);
+        if (!source->mainCable) SetUpTraverse(Source_Indices[ind], false);
     }
     
     for (uint32 i = 0; i < Source_Indices.count; i++)
