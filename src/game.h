@@ -68,6 +68,11 @@ enum GameScreen
     PAUSE_MENU_SCREEN,
     };
 
+enum SimulateMode
+{
+    GAME_MODE,
+    EDITOR_MOVE,
+};
 
 struct Memory
 {
@@ -77,7 +82,6 @@ struct Memory
 
 struct UndoState
 {
-    
     struct MapUndoInfo
     {
         uint32 mapIndex;
@@ -153,6 +157,7 @@ struct MyCamera
         FOLLOW_WITHIN_MAP,
         FOLLOW_CENTER,
         FOLLOW_ALONG_AXIS,
+        ZOOM_OUT,
     };
     
     Vector2 moveDir = { 0, 0 };
@@ -224,6 +229,7 @@ struct GameState
     real32 * starT;
     
     bool8 refocus = false;
+    bool8 zoomOut = false;
     
     bool8 stateChanged = false;
     bool8 isPressed = false;

@@ -314,8 +314,7 @@ void UpdateStars()
                     
                     star->pivot = GetScreenToWorld2D(screen_cur, gameState->camera.base);
                     
-                    real32 step = 1 / dist;
-                    real32 dt = step * GetFrameTime() * 700;
+                    real32 dt = 0.7f* GetFrameTime();
                     gameState->starT[starIndex] += dt;
                 }
                 
@@ -956,7 +955,7 @@ inline real32 GetCameraZoom(uint32 width, uint32 height)
     real32 zoom = (real32)(newRes - 150) / (real32)camMax ;
     
     if (zoom > 5) zoom = 5;
-    if (zoom < 0.1f) zoom = 0.1f;
+    if (zoom < 0.5f) zoom = 0.1f;
     
     return zoom;
 }
@@ -1031,6 +1030,13 @@ inline void UpdateCameraToTileMapSmooth(Map & map, real32 (*MoveFunc)(real32), r
 
  void SetCamFollowState(MyCamera & cam, Entity * followEnt)
 {
+    
+    if (gameState->zoomOut)
+    {
+        cam.followState = MyCamera::ZOOM_OUT;
+        return;
+    }
+    
     if (followEnt->type == ENTITY_TYPE_LOCK)
     {
         cam.followState = MyCamera::FOLLOW_CENTER;
@@ -1052,7 +1058,7 @@ inline void UpdateCameraToTileMapSmooth(Map & map, real32 (*MoveFunc)(real32), r
     
     }
 
-inline bool8 UpdateCamera(bool refocus = false)
+inline bool8 UpdateCamera(bool8 refocus = false)
 {
     MyCamera & cam = gameState->camera;
     bool8 updated = false;
@@ -1066,6 +1072,28 @@ inline bool8 UpdateCamera(bool refocus = false)
     
     switch (cam.followState)
     {
+        case MyCamera::ZOOM_OUT:
+        {
+            if (cam.tweenController.NoTweens())
+            {
+                real32 oldZoom = gameState->camera.base.zoom;
+                real32 newZoom =
+                    GetCameraZoom(33 * MAP_TILE_SIZE,33 * MAP_TILE_SIZE);
+                if (!FloatEquals(oldZoom, newZoom))
+                {
+                    TweenParams params = {};
+                    params.paramType = PARAM_TYPE_FLOAT;
+                    params.startF = oldZoom;
+                    params.endF = newZoom;
+                    params.realF  = &gameState->camera.base.zoom;
+                    AddTweenUnique(gameState->camera.tweenController, CreateTween(params, 
+                                                                                  CAMERA_ZOOM_FUNC, CAMERA_ZOOM_SPEED));
+                }
+                OnPlayEvent(&cam.tweenController);
+            }
+            
+            break;
+        }
         case MyCamera::LOCK_TO_MAP:
         {
         if (gameState->currentMapIndex == -1)
@@ -1696,13 +1724,7 @@ void SimulateInputs()
         return;
     }
     
-    if (JustPressed(gameState->input.keyMappings, ZOOM_KEY))
-    {
-        
-    }
     Entity * player = GetEntity(gameState->playerEntityIndex);
-    
-    if (!player) return;
     
     if (Entity * followEnt = GetEntity(gameState->camera.followEntityIndex); followEnt != player && gameState->currentMapIndex != gameState->playerMapIndex)
     {
@@ -1713,19 +1735,81 @@ void SimulateInputs()
         return;
     }
     
+    if (JustPressed(gameState->input.keyMappings, ZOOM_KEY))
+    {
+        gameState->zoomOut = !gameState->zoomOut;
+        return;
+    }
+    
+    
+    if (!player) return;
+    
+    IVec2 dirs[] = { DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN };
+    
     DynamicArray<Entity> prevEntState = { 0 };
     DynamicArray<UndoState::MapUndoInfo> prevMapInfos = { 0 };
     
     uint32 prevPlayerIndex = gameState->playerEntityIndex;
     
-    if (IsActionKeyDown(gameState->input.keyMappings))
+    if (gameState->zoomOut)
     {
-        prevEntState = GetCurrentStateEntities();
-        prevMapInfos = GetCurrentMapUndoInfos();
-    }
-    
-    // NOTE SlimeSelection
-    {
+         real32 sceneDistance = 5.0f * MAP_TILE_SIZE;
+        
+        real32 minX = player->pivot.x - sceneDistance;
+        real32 minY = player->pivot.y - sceneDistance;
+        real32 maxX = player->pivot.x + sceneDistance;
+        real32 maxY = player->pivot.y + sceneDistance;
+        
+        
+        Rectangle moveRect = 
+        {
+            player->pivot.x - sceneDistance, player->pivot.y - sceneDistance,
+            sceneDistance * 2, sceneDistance * 2
+        };
+        
+        
+        Vector2 movement = Vector2 { 0, 0 };
+        
+        real32 camSpeed = 300.0f;
+        
+        if (IsDown(gameState->input.keyMappings, LEFT_KEY))
+        {
+            movement -= Vector2 { camSpeed, 0 };
+        }
+        if (IsDown(gameState->input.keyMappings, RIGHT_KEY))
+        {
+            movement += Vector2 { camSpeed, 0 };
+            
+        }
+        if (IsDown(gameState->input.keyMappings, UP_KEY))
+        {
+            movement -= Vector2 { 0, camSpeed };
+        }
+        if (IsDown(gameState->input.keyMappings, DOWN_KEY))
+        {
+            movement += Vector2 { 0, camSpeed };
+            }
+        Vector2 dest = gameState->camera.base.target + movement;
+        if (dest.x > maxX) dest.x = maxX;
+        if (dest.x < minX) dest.x = minX;
+        if (dest.y > maxY) dest.y = maxY;
+        if (dest.y < minY) dest.y = minY;
+        
+            gameState->camera.base.target = 
+                Vector2Lerp(gameState->camera.base.target, dest, GetFrameTime());
+        
+        
+        
+        }
+    else
+        {
+        
+        if (IsActionKeyDown(gameState->input.keyMappings))
+        {
+            prevEntState = GetCurrentStateEntities();
+            prevMapInfos = GetCurrentMapUndoInfos();
+        }
+        
         if (!gameState->camera.tweenController.NoTweens())
         {
             return;
@@ -1734,6 +1818,7 @@ void SimulateInputs()
         if (gameState->canSwitchSlime && 
             JustPressed(gameState->input.keyMappings, POSSES_KEY))
         {
+    // NOTE SlimeSelection
             gameState->stateChanged = SelectNextAsPlayer(player);
             gameState->slimeSwitched = gameState->stateChanged;
         }
@@ -1753,7 +1838,6 @@ void SimulateInputs()
                 }
                 else
                 {
-                    IVec2 dirs[] = { DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN };
                     
                     GameInputType downedKey = GetDownedMoveKey(gameState->input.keyMappings);
                     
@@ -1809,16 +1893,15 @@ void SimulateInputs()
             }
         }
         
+        if (gameState->stateChanged)
+        {
+            gameState->undoStack.push_back(prevPlayerIndex,
+                                           gameState->starCount,
+                                           prevEntState, prevMapInfos);
+        }
     }
     
-    if (gameState->stateChanged)
-    {
-        gameState->undoStack.push_back(prevPlayerIndex,
-                                       gameState->starCount,
-                                       prevEntState, prevMapInfos);
     }
-    
-}
 
 void GameplayUpdateAndRender()
 {
@@ -2094,10 +2177,10 @@ void GameplayUpdateAndRender()
     // NOTE: Camera Updates
     {
         Vector2 oldTarget = gameState->camera.base.target;
-    
+            
+            #if GAME_INTERNAL
         bool8 freeForm = IsKeyDown(KEY_T);
-        
-    // NOTE: Debug Camera Control
+        // NOTE: Debug Camera Control
             if (freeForm)
             {
         // NOTE: CameraZoom
@@ -2116,8 +2199,8 @@ void GameplayUpdateAndRender()
         //if (gameState->camera.base.zoom > 10.0f) gameState->camera.base.zoom = 10.0f;
         if (gameState->camera.base.zoom < 0.1f) gameState->camera.base.zoom = 0.1f;
         }
-        
         if (!freeForm)
+            #endif
         {
                 if (gameState->slimeSwitched)//  || ((followEnt != lastFollowEnt) && (GetPlayer() == followEnt)))
                 {
@@ -2360,7 +2443,12 @@ Fog & fog = gameState->fog;
                 int32 colorIndex = GetRandomValue(0, colorCount-1);
                 mColors[mapIndex] = colors[colorIndex];
             }
-            
+                
+                // NOTE: DrawCenterTile
+                IVec2 mapCenter = tileMap->tilePos + 
+                    IVec2 { tileMap->width / 2 + 1, tileMap->height / 2 + 1 };
+                
+                DrawTile(mapCenter, WHITE);
             
             // NOTE: Could be a setting
             DrawTileMap(gameState->camera.base, tileMap->tilePos, 

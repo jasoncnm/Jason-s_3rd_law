@@ -205,7 +205,7 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields, int32 offsetX = 0, int32 
     
     for (uint32 i = 0; i < STAR_COUNT; i++)
     {
-        float radius = Lerp(15, 5, stars[i].z);
+        real32 radius = Lerp(15, 5, stars[i].z) / 1500.0f * Min(screenWidth, screenHeight);
         Color color = ColorLerp(DARKPURPLE, SKYBLUE, stars[i].z);
         DrawTexturePro(starFields->starTexture.texture,
                        Rectangle 

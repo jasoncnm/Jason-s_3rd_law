@@ -389,8 +389,8 @@ int32 index = 0;
         uint32 old_count = fog.dim.x * fog.dim.y;
         
         fog.initialized = true;
-    fog.tileMin = gameState->tileMin;
-    fog.tileMax = gameState->tileMax;
+        fog.tileMin = gameState->tileMin - IVec2 { 20, 20 };
+        fog.tileMax = gameState->tileMax + IVec2 { 20, 20 };
         fog.dim = fog.tileMax - fog.tileMin;
         
     fog.fogRenderTex = LoadRenderTexture(fog.dim.x, fog.dim.y);
