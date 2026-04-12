@@ -63,7 +63,7 @@ entityTypeMap
 //  ========================================================================
 //              NOTE: Level Functions
 //  ========================================================================
-void LoadTileMapsAndEntities(GameState & state, char * worldPath);
+void LoadTileMapsAndEntities(char * worldPath);
 
 
 #define LEVEL_LOADER_H

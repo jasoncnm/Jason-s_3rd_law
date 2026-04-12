@@ -133,7 +133,7 @@ int main(int argumentCount, char *argumentArray[])
         SetWindowState(FLAG_WINDOW_RESIZABLE);
         SetWindowMonitor(0);
         SetExitKey(KEY_F4);  // IMPORTANT: DEBUG ONLY !!
-          MaximizeWindow();
+          // MaximizeWindow();
 
         Image icon = LoadImage("Assets/ICON/ICON.png");
         if (IsImageValid(icon))

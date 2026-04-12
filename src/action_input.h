@@ -12,18 +12,17 @@
 enum GameInputType 
 {
     NO_INPUT,
+    
     LEFT_KEY,
     RIGHT_KEY,
     UP_KEY,
     DOWN_KEY,
-    
     POSSES_KEY,
     SPLIT_KEY,
-    
     UNDO_KEY,
     RESET_KEY,
+    ZOOM_KEY,
     
-    RECOVER_KEY,
     GAME_INPUT_COUNT,
 };
 
@@ -38,8 +37,7 @@ struct Input
 {
     bool initialized = false;
     KeyMapping keyMappings[GAME_INPUT_COUNT];
-    
-};
+    };
 
 
 // Set axis deadzones
@@ -90,8 +88,7 @@ inline void InitKeyMapping(KeyMapping * keyMappings)
     keyMappings[RESET_KEY].keys.Add(KEY_R);
     keyMappings[RESET_KEY].gamepadButton = GAMEPAD_BUTTON_RIGHT_FACE_UP;
     
-    keyMappings[RECOVER_KEY].keys.Add(KEY_TAB);
-    
+    keyMappings[ZOOM_KEY].keys.Add(KEY_M);
     
 }
 

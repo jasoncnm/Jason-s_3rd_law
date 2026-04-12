@@ -156,12 +156,12 @@ void GenerateTileMap(json & tilesData, json & layerData,
     }
 }
 
-void SetupEntityTable(GameState & state)
+void SetupEntityTable()
 {
     
     for (int32 layer = 0; layer < LAYER_COUNT; layer++)
     {
-        state.entityTable[layer].Clear();
+        gameState->entityTable[layer].Clear();
     }
     
     for (uint16 i = 0; i < gameState->entities.count; i++)
@@ -173,91 +173,91 @@ void SetupEntityTable(GameState & state)
             {
                 case ENTITY_TYPE_SLIME:
                 {
-                    state.entityTable[LAYER_SLIME].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_SLIME].Add(entity->entityIndex);
                     break;
                 }
                 case ENTITY_TYPE_BRIDGE:
                 case ENTITY_TYPE_WALL:
                 {
-                    state.entityTable[LAYER_WALL].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_WALL].Add(entity->entityIndex);
                     break;
                 }
                 case ENTITY_TYPE_BLOCK:
                 {
-                    state.entityTable[LAYER_BLOCK].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_BLOCK].Add(entity->entityIndex);
                     break;
                 }
                 case ENTITY_TYPE_GLASS:
                 {
-                    state.entityTable[LAYER_GLASS].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_GLASS].Add(entity->entityIndex);
                     break;
                 }
                 case ENTITY_TYPE_DOOR:
                     {
-                    state.entityTable[LAYER_DOOR].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_DOOR].Add(entity->entityIndex);
                     break;
                 }
                 case ENTITY_TYPE_CABLE_WIRE:
                     {
-                    state.entityTable[LAYER_CABLE].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_CABLE].Add(entity->entityIndex);
                     break;
                     }
                 case ENTITY_TYPE_CABLE_CONNECT:
                     {
-                    state.entityTable[LAYER_CONNECTION].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_CONNECTION].Add(entity->entityIndex);
                     break;
                     }
                 case ENTITY_TYPE_CABLE_SOURCE:
                     {
-                    state.entityTable[LAYER_SOURCE].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_SOURCE].Add(entity->entityIndex);
                     break;
                     }
                 case ENTITY_TYPE_PIT:
                 {
-                    state.entityTable[LAYER_PIT].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_PIT].Add(entity->entityIndex);
                     break;
                 }
                 case ENTITY_TYPE_TUT_PORTAL:
                 {
-                    state.entityTable[LAYER_BLOCK].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_BLOCK].Add(entity->entityIndex);
                     break;
                 }
                 case ENTITY_TYPE_MAIN_PORTAL:
                 {
-                    state.entityTable[LAYER_PORTAL].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_PORTAL].Add(entity->entityIndex);
                     break;
                 }
                 case ENTITY_TYPE_SLIME_PORTAL:
                 {
-                    state.entityTable[LAYER_PORTAL].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_PORTAL].Add(entity->entityIndex);
                     break;
                 }
                 case ENTITY_TYPE_STAR:
                 {
-                    state.entityTable[LAYER_STAR].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_STAR].Add(entity->entityIndex);
                     break;
                 }
                 case ENTITY_TYPE_LOCK:
                 {
-                    state.entityTable[LAYER_LOCK].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_LOCK].Add(entity->entityIndex);
                     break;
                 }
                 case ENTITY_TYPE_CABLE_LINK:
                 {
-                    state.entityTable[LAYER_LINK].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_LINK].Add(entity->entityIndex);
                     break;
                 }
                 
                 default:
                 {
-                    state.entityTable[LAYER_NULL].Add(entity->entityIndex);
+                    gameState->entityTable[LAYER_NULL].Add(entity->entityIndex);
                 }
                 }
         }
     }
     }
 
-void LoadTileMapsAndEntities(GameState & state, char * worldPath)
+void LoadTileMapsAndEntities(char * worldPath)
 {
     SM_TRACE("worldPath: %s", worldPath);
     uint32 tileCountX = 0, tileCountY = 0;
@@ -265,7 +265,7 @@ void LoadTileMapsAndEntities(GameState & state, char * worldPath)
 
     IVec2 min = { INT_MAX, INT_MAX };
     IVec2 max = { INT_MIN, INT_MIN };
-    state.currentMapIndex = -1;
+    gameState->currentMapIndex = -1;
     
     // NOTE: Load world
         std::ifstream f(worldPath);
@@ -277,9 +277,9 @@ void LoadTileMapsAndEntities(GameState & state, char * worldPath)
     auto tilesData = tileSetData["tiles"];
     
     auto tileMaps = worldData["maps"];
-    state.tileMapCount = (int32)tileMaps.size();
+    gameState->tileMapCount = (int32)tileMaps.size();
 int32 index = 0;
-        for (uint32 i = 0; i < state.tileMapCount; i++)
+        for (uint32 i = 0; i < gameState->tileMapCount; i++)
         {
             
             json mapMeta = tileMaps[i];
@@ -311,7 +311,7 @@ int32 index = 0;
             
             if (fileName == LEVEL_2_ROOM_NAME)
             {
-                state.lv2Map = &state.tileMaps[index];
+                gameState->lv2Map = &gameState->tileMaps[index];
             }
             
              IVec2 startPos = { startPosX, startPosY };
@@ -365,7 +365,7 @@ int32 index = 0;
             if (max.x < endPos.x) max.x = endPos.x;
             if (max.y < endPos.y) max.y = endPos.y;
             
-            state.tileMaps[index] = tileMap;
+            gameState->tileMaps[index] = tileMap;
             
             index++;
         }
@@ -375,22 +375,22 @@ int32 index = 0;
     //animateSlimeCount = 0;
 
     {
-        state.tileMin = min - IVec2 { 1, 1 };
-        state.tileMax = max + IVec2 { 1, 1 };
-        state.starCount = 0;
+        gameState->tileMin = min - IVec2 { 1, 1 };
+        gameState->tileMax = max + IVec2 { 1, 1 };
+        gameState->starCount = 0;
     }
     
     // Render texture to render fog of war
     // NOTE: To get an automatic smooth-fog effect we use a render texture to render fog
     // at a smaller size (one pixel per tile) and scale it on drawing with bilinear filtering
-    Fog & fog = state.fog;
+    Fog & fog = gameState->fog;
     if (!fog.initialized)
     {
         uint32 old_count = fog.dim.x * fog.dim.y;
         
         fog.initialized = true;
-    fog.tileMin = state.tileMin;
-    fog.tileMax = state.tileMax;
+    fog.tileMin = gameState->tileMin;
+    fog.tileMax = gameState->tileMax;
         fog.dim = fog.tileMax - fog.tileMin;
         
     fog.fogRenderTex = LoadRenderTexture(fog.dim.x, fog.dim.y);
@@ -408,18 +408,21 @@ int32 index = 0;
             fog.fogPixels[i] = BLACK;
         }
         // memset(fog.fogPixels, BLANK, count * sizeof(*fog.fogPixels));
-        }
-    SetupEntityTable(state);
+    }
+    
+    
+    SetupEntityTable();
     SetUpElectricDoor();
+    
+    
     // NOTE: init stars
     auto starTable = gameState->entityTable[LAYER_STAR];
-    if (!state.starT || starTable.count > state.starTCount)
+    if (!gameState->starT || starTable.count > gameState->starTCount)
     {
-        state.starTCount = starTable.count;
-        state.starT = (real32 *)BumpAllocArray(gameMemory->persistentStorage, starTable.count, sizeof(real32));
+        gameState->starTCount = starTable.count;
+        gameState->starT = (real32 *)BumpAllocArray(gameMemory->persistentStorage, starTable.count, sizeof(real32));
         }
-    
-    memset(state.starT, 0, starTable.count * sizeof(real32));
+    memset(gameState->starT, 0, starTable.count * sizeof(real32));
     
 }
 

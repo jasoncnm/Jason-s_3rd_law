@@ -13,12 +13,6 @@ uniform vec4 colDiffuse;
 // Output fragment color
 out vec4 finalColor;
 
-// NOTE: Add your custom variables here
-const float samples = 2;          // Pixels per axis; higher = bigger glow, worse performance
-const float quality = 6;          // Defines size factor: Lower = smaller glow, better quality
-float gamma = 0.8;
-float numColors = 10.0;
-
 // Custom uniforms
 uniform vec2 u_frameSize;
 uniform float offset = 0.0;
@@ -32,6 +26,9 @@ uniform bool shake;
 
 vec4 applyBloom(vec4 color, vec2 uv)
 {
+    const float samples = 2;          // Pixels per axis; higher = bigger glow, worse performance
+    const float quality = 8;          // Defines size factor: Lower = smaller glow, better quality
+
     vec4 sum = vec4(0);
     vec2 sizeFactor = vec2(1)/u_frameSize*quality;
 
@@ -81,7 +78,10 @@ vec4 applyScanline(vec4 color, vec2 uv)
 
 vec4 applyPosterization(vec4 color)
 {
+    float gamma = 0.8;
+    float numColors = 10.0;
     vec3 result = color.rgb;
+
     result = pow(result, vec3(gamma, gamma, gamma));
     result = result*numColors;
     result = floor(result);
@@ -103,55 +103,6 @@ vec2 curve(vec2 uv)
 	return uv;
 }
 
-vec2 fisheyeUV()
-{
-    const float PI = 3.1415926535897932384626433832795;
-    float aperture = 180.0;
-    float apertureHalf = 0.5*aperture*(PI/180.0);
-    float maxFactor = sin(apertureHalf);
-
-    vec2 uv = vec2(0);
-    vec2 xy = 2.0*fragTexCoord.xy - 1.0;
-    float d = length(xy);
-
-
-//    if (d < (2.0 - maxFactor))
-    if (d > 0)
-    {
-        d = length(xy*maxFactor);
-        float z = sqrt(1.0 - d*d);
-        float r = atan(d, z)/PI;
-        float phi = atan(xy.y, xy.x);
-
-        uv.x = r*cos(phi) + 0.5;
-        uv.y = r*sin(phi) + 0.5;
-    }
-    else
-    {
-        uv = fragTexCoord.xy;
-        // fragColor = vec4(vec3(0), 1);
-    }
-
-    return uv;
-}
-
-vec4 applyPixelizer(vec2 uv)
-{
-    float pixelWidth = 5;
-    float pixelHeight = 5;
-    float renderWidth = u_frameSize.x;
-	float renderHeight = u_frameSize.y;
-
-    float dx = pixelWidth*(1.0/(1 * renderWidth));
-    float dy = pixelHeight*(1.0/(1 * renderHeight));
-
-    vec2 coord = vec2(dx*floor(uv.x/dx), dy*floor(uv.y/dy));
-
-    vec3 tc = texture(texture0, coord).rgb;
-
-    return vec4(tc, 1.0);
-}
-
 vec4 applyBlur(vec4 color, vec2 uv)
 {
     float offset[3] = float[](0.0, 1.3846153846, 3.2307692308);
@@ -167,14 +118,6 @@ vec4 applyBlur(vec4 color, vec2 uv)
     }
 
     return vec4(texelColor, 1.0);
-}
-
-// Source - https://stackoverflow.com/a/4275343
-// Posted by appas, modified by community. See post 'Timeline' for change history
-// Retrieved 2026-04-07, License - CC BY-SA 4.0
-
-float rand(vec2 co){
-    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
 
@@ -206,17 +149,12 @@ void main()
         color = applyBlur(color, uv);
     }
     
-    //vec4 vfx = PostFX(texture0, uv);
-    // Texel color fetching from texture sampler
-    // color = vfx;
-    // color = applyPixelizer(uv);
-    
+
     color = applyPosterization(color);
     color = applyBloom(color, uv);
     color = applyScanline(color, uv);
     color = applyVignette(color, uv, miny, maxy);
-    // color = mix(color, vfx, 1);  
-
+   
     
     float out_brightness = mix(brightness - 0.1, brightness + 0.1, abs(0.5 * sin(3 * cos(time))));
 

@@ -71,6 +71,7 @@ inline Entity * MergeSlimes(Entity * mergeSlime, Entity * mergedSlime)
         MoveEntity(mergedSlime, attach, nullptr, mergeSlime->tilePos, BLOCK_MOVE_FUNC, BOUNCE_SPEED);
         
     }
+    
     return mergeSlime;
 }
 
@@ -596,11 +597,17 @@ inline void SetActionState(Entity * entity, ActionState state)
     entity->actionState = state;    
 }
 
-inline void SetGlassBeBroken(Entity * glass)
+inline bool8 SetGlassBeBroken(Entity * glass)
 {
+    bool8 changed = false;
     SM_ASSERT(glass && glass->active, "entity does not exist");
-    
-    glass->sprite = GetBrokenGlassSprite();
+    Sprite newSprite = GetBrokenGlassSprite();
+    if (newSprite != glass->sprite)
+    {
+        changed = true;
+        glass->sprite = newSprite;
+    }
+    return changed;
 }
 
 inline Vector2 GetSlimeSize(int32 mass)

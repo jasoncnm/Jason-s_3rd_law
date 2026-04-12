@@ -25,6 +25,19 @@ struct Sprite
 {
     IVec2 altasOffset;
     IVec2 spriteSize;
+    
+    bool8 operator==(Sprite other)
+    {
+        return altasOffset == other.altasOffset && spriteSize == other.spriteSize;
+    }
+    
+    
+    bool8 operator!=(Sprite other)
+    {
+        return altasOffset != other.altasOffset || spriteSize != other.spriteSize;
+    }
+    
+    
 };
 
 struct SpriteAnimation

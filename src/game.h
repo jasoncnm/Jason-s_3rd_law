@@ -7,8 +7,8 @@
    1 - Build for pubilc release
 */
 
-#define SCREEN_WIDTH  1000
-#define SCREEN_HEIGHT 1000
+#define SCREEN_WIDTH  352
+#define SCREEN_HEIGHT 352
 
 #define ENTITY_TILE_VISIBILITY  2   // Player can see 2 tiles around its position
 
@@ -40,7 +40,6 @@
 
 #define STAR_COLLECTOR_POS Vector2 { 0, 0 }
 
-constexpr float zoom_per_tile = 15.5f / 600.0f;
 constexpr float press_freq = 0.2f;
 
 
@@ -223,6 +222,15 @@ struct GameState
     
     uint32 starTCount;
     real32 * starT;
+    
+    bool8 refocus = false;
+    
+    bool8 stateChanged = false;
+    bool8 isPressed = false;
+    bool8 slimeSwitched = false;
+    
+    bool8 canSwitchSlime = false;
+    bool8 canSplitSlime = false;
     
     bool8 initialized;
     bool8 simulating = false;
