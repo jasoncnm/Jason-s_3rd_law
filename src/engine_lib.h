@@ -72,6 +72,8 @@ struct Array
     {
         SM_ASSERT(idx >= 0, "Idx negative!");
         SM_ASSERT(idx < count, "Idx out of bounds!");
+        if (idx < 0 || idx >= count) return elements[0];
+        
         return elements[idx];
     }
     
@@ -98,6 +100,7 @@ struct Array
     uint32 Add(T element)
     {
         SM_ASSERT(count < maxElements, "Array Full!");
+        if (count >= maxElements) return 0;
         elements[count] = element;
         return count++;
     }
@@ -118,6 +121,8 @@ struct Array
     {
         SM_ASSERT(idx >= 0, "Idx negative!");
         SM_ASSERT(idx < count, "Idx out of bounds!");
+        if (idx < 0 || idx >= count) return;
+        
         elements[idx] = elements[--count];
     }
     

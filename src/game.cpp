@@ -417,14 +417,18 @@ DynamicArray<Entity> GetCurrentStateEntities()
     uint32 i = 0;
     for (uint32 idx = 0; idx < layerCount; idx++)
     {
+        
         uint32 layer = pushLayers[idx];
         auto & entList = gameState->entityTable[layer];
         for (uint32 entId = 0; entId < entList.count; entId++)
         {
             Entity & ent = gameState->entities[entList[entId]];
+            
             entities[i++] = ent;
             }
     }
+    
+    SM_ASSERT(i == len, "incorrect len");
     
     DynamicArray<Entity> result = { 0 };
     result.count = i;
@@ -1245,6 +1249,9 @@ void SetUndoEntities(std::vector<Entity> & undoEntities)
             SetGlassBeBroken(&e);
         }
         
+        SM_ASSERT(e.entityIndex < gameState->entities.count, "out of index");
+        if (e.entityIndex < gameState->entities.count)
+        {
         gameState->entities[e.entityIndex] = e;
         gameState->entities[e.entityIndex].tweenController.Reset();
         gameState->entities[e.entityIndex].pivot = GetTilePivot(&e);
@@ -1253,7 +1260,7 @@ void SetUndoEntities(std::vector<Entity> & undoEntities)
         {
             gameState->entities[e.entityIndex].actionState = MOVE_STATE;
         }
-        
+        }
     }
     }
 
@@ -2199,8 +2206,10 @@ void GameplayUpdateAndRender()
     static real32 saturation = 0.0f;
     static real32 brightness = 1.3f;
     static bool8 debugView = false;
+    static bool8 showFog = true;
     
-    // NOTE: Debug Cheats
+    #if GAME_INTERNAL
+    // NOTE: Developer Debug Cheats
     {
         
         if (IsKeyPressed(KEY_EQUAL))
@@ -2223,8 +2232,13 @@ void GameplayUpdateAndRender()
             debugView = !debugView;
         }
         
+        if (IsKeyPressed(KEY_LEFT_BRACKET))
+        {
+            showFog = !showFog;
+        }
+        
     }
-    
+    #endif
     // NOTE: Render
     {
         
@@ -2320,15 +2334,19 @@ Fog & fog = gameState->fog;
             };
             
             DrawRectangleLinesEx(mapRect, 5, BLUE);
-                
-                // NOTE: draw mouse tilePos
-                Vector2 mousePos = GetMousePosition();
-                Vector2 mouseWorld = GetScreenToWorld2D(mousePos, gameState->camera.base);
-                
-                IVec2 tilePos = PivotToTilePos(mouseWorld, Vector2{ 0 });
-                DrawTile(tilePos, RED);
-                DrawLineBezier(GetPlayer()->pivot, GetTilePivot(tilePos, DEFAULT_TILE_SIZE), 2, GREEN);
-            }
+                }
+            
+            
+            // NOTE: draw mouse tilePos
+            Vector2 mousePos = GetMousePosition();
+            Vector2 mouseWorld = GetScreenToWorld2D(mousePos, gameState->camera.base);
+            
+            IVec2 tilePos = PivotToTilePos(mouseWorld, Vector2{ 0 });
+            DrawTile(tilePos, RED);
+            DrawLineBezier(GetPlayer()->pivot, GetTilePivot(tilePos, DEFAULT_TILE_SIZE), 2, GREEN);
+            
+            Vector2 textWorld = GetScreenToWorld2D({ 1200.0f, 200.0f }, gameState->camera.base);
+            DrawText(TextFormat("Mouse TilePos (%d, %d)", tilePos.x, tilePos.y), (int)textWorld.x, (int)textWorld.y, 10, GREEN);
             
             // Draw rectangle outline with extended parameters
             Rectangle cameraRect = GetCameraRect(gameState->camera.base);
@@ -2343,7 +2361,7 @@ Fog & fog = gameState->fog;
             
         }
         
-        if (gameState->currentScreen == GAME_MAIN_SCREEN)
+        if (showFog && gameState->currentScreen == GAME_MAIN_SCREEN)
         {
         Vector2 pivot = GetTilePivot(fog.tileMin, DEFAULT_TILE_SIZE);
         DrawTexturePro(fog.fogRenderTex.texture, 
@@ -2847,10 +2865,10 @@ UPDATE_AND_RENDER(UpdateAndRender)
         {
         // NOTE FadeIn
         alpha += fadeSpeed * GetFrameTime();
-        alpha = Clamp(alpha, 0.0f, 1.0f);
         
-        if (FloatEquals(alpha, 1.0f))
-        {
+        if (alpha >= 1.0f)
+            {
+                alpha = 1.0f;
                 fadeIn = false;
                 
                 if (gameState->currentScreen == GAME_MAIN_SCREEN &&
@@ -2893,10 +2911,10 @@ UPDATE_AND_RENDER(UpdateAndRender)
         {
             // NOTE FadeOut
             alpha -= fadeSpeed * GetFrameTime();
-            alpha = Clamp(alpha, 0.0f, 1.0f);
             
-            if (FloatEquals(alpha, 0.0f))
+            if (alpha <= 0.0f)
             {
+                alpha = 0.0f;
                 fadeIn = true;
                 gameState->switching = false;
             }

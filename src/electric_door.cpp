@@ -139,7 +139,7 @@ inline bool8 SameSide(Entity * door, IVec2 tilePos, IVec2 reachDir)
     for (uint32 i = 0; i < Connection_Indices.count; i++)
     {
         Entity * connect = GetEntity(Connection_Indices[i]);
-        if (connect && connect->sourceIndex == door->sourceIndex)
+        // TODO if (connect && connect->sourceIndex == door->sourceIndex)
         {
             auto & slimeEntityIndices = gameState->entityTable[LAYER_SLIME];
             for (uint32 i = 0; i < slimeEntityIndices.count; i++)
@@ -431,8 +431,8 @@ void SetCable(Array<int32, CABLE_MAX_CALL_STACK> & callStack,
     if (door && door->sourceIndex == -1 && Connected(door, setDir))
     {
         door->sourceIndex = sourceIndex;
-         *setDoorIndex = door->entityIndex;
-    }
+        *setDoorIndex = door->entityIndex;
+        }
     
     Entity * cable = FindEntityByLocationAndLayers(setPos, findLayers, layerCount);
     if (cable && cable->type == ENTITY_TYPE_CABLE_LINK && !Visited(cable, setDir))
@@ -443,12 +443,12 @@ void SetCable(Array<int32, CABLE_MAX_CALL_STACK> & callStack,
         {
             callStack.Add(cable->entityIndex);
         }
-    }
+        }
     else if (cable && !Visited(cable, setDir) && Connected(cable, setDir) && (!setMain || setMain && cable->mainCable))
     {
          *setNextIndex = cable->entityIndex;
         callStack.Add(cable->entityIndex);
-    }
+        }
     
 }
 
@@ -525,6 +525,13 @@ void SetUpTraverse(uint32 sourceIndex, bool8 setMain)
             SetCable(callStack, nextPos, nextDir, doorLayer, findLayers, layerCount, sourceIndex, 
                      &current->doorIndex, &current->rightIndex, setMain);
             
+        }
+        
+        if (current->doorIndex == -1 && current->leftIndex == -1 && 
+            current->rightIndex == -1 && current->upIndex == -1 && 
+            current->downIndex == -1)
+        {
+            SM_WARN("dead wire at (%d, %d)", current->tilePos.x, current->tilePos.y);
         }
         
         // SM_ASSERT(connected, "cable are not connected");
@@ -613,11 +620,12 @@ for (uint32 i = 0; i < Connection_Indices.count; i++)
                     if (connection->hasPower)
                     {
                     connection->conductive = true;
-                    OnSourcePowerOn(connection->sourceIndex);
+                    // OnSourcePowerOn(connection->sourceIndex);
+                    OnSourcePowerOn(connection->entityIndex);
                         // if ()
                         {
-                            Entity * source = GetEntity(connection->sourceIndex);
-                        connection->sourceLit = true;
+                            // Entity * source = GetEntity(connection->sourceIndex);
+                        // connection->sourceLit = true;
                         changed = true;
                         }
 
