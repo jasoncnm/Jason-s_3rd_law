@@ -107,10 +107,10 @@
         },
         {
             "fileName": "TileMap/Room_17.tmj",
-            "height": 384,
+            "height": 352,
             "width": 352,
             "x": 1664,
-            "y": 2304
+            "y": 1984
         },
         {
             "fileName": "TileMap/Room_18.tmj",
@@ -247,10 +247,10 @@
         },
         {
             "fileName": "TileMap/Room_38.tmj",
-            "height": 320,
-            "width": 320,
-            "x": 1696,
-            "y": 1984
+            "height": 352,
+            "width": 352,
+            "x": 1664,
+            "y": 2336
         },
         {
             "fileName": "TileMap/Room_39.tmj",

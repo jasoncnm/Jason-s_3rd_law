@@ -4290,14 +4290,39 @@
          "id":223,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_connect"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
