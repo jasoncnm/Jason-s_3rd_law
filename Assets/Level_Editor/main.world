@@ -248,8 +248,8 @@
         {
             "fileName": "TileMap/Room_38.tmj",
             "height": 320,
-            "width": 352,
-            "x": 1664,
+            "width": 320,
+            "x": 1696,
             "y": 1984
         },
         {
@@ -601,6 +601,13 @@
             "width": 128,
             "x": 480,
             "y": 3744
+        },
+        {
+            "fileName": "TileMap/Room_82.tmj",
+            "height": 352,
+            "width": 352,
+            "x": -192,
+            "y": 4096
         }
     ],
     "onlyShowAdjacentMaps": false,
