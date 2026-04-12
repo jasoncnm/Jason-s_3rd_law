@@ -569,10 +569,10 @@
         },
         {
             "fileName": "TileMap/Room_77.tmj",
-            "height": 352,
+            "height": 384,
             "width": 352,
             "x": -896,
-            "y": 3424
+            "y": 3392
         },
         {
             "fileName": "TileMap/Room_78.tmj",
