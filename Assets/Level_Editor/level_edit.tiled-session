@@ -849,11 +849,11 @@
             }
         },
         "TileMap/Path_86.tmj": {
-            "scale": 1,
-            "selectedLayer": 0,
+            "scale": 0.5,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 106.5,
-                "y": -82.5
+                "x": 1447,
+                "y": 135
             }
         },
         "TileMap/Path_87.tmj": {
@@ -1346,11 +1346,11 @@
             }
         },
         "TileMap/Room_6.tmj": {
-            "scale": 1.5,
+            "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 175.66666666666669,
-                "y": 175.66666666666669
+                "x": 263,
+                "y": 487
             }
         },
         "TileMap/Room_60.tmj": {

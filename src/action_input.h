@@ -12,8 +12,6 @@
 enum GameInputType 
 {
     NO_INPUT,
-    MOUSE_LEFT,
-    MOUSE_RIGHT,
     LEFT_KEY,
     RIGHT_KEY,
     UP_KEY,
@@ -62,8 +60,6 @@ inline void CleanUpKeyMapping(KeyMapping * keyMappings)
 
 inline void InitKeyMapping(KeyMapping * keyMappings)
 {
-    keyMappings[MOUSE_LEFT].keys.Add(MOUSE_BUTTON_LEFT);
-    keyMappings[MOUSE_RIGHT].keys.Add(MOUSE_BUTTON_RIGHT);
     
     keyMappings[LEFT_KEY].keys.Add(KEY_A);
     keyMappings[LEFT_KEY].keys.Add(KEY_LEFT);
@@ -183,6 +179,20 @@ inline bool8 IsDown(KeyMapping * keyMappings, GameInputType type)
     }
 
     return false;
+}
+
+inline bool8 IsActionKeyDown(KeyMapping * keyMappings)
+{
+    bool8 down = false;
+    for (uint32 i = 1; i < GAME_INPUT_COUNT; i++)
+    {
+        if (IsDown(keyMappings, (GameInputType)i))
+        {
+            down = true;
+            break;
+        }
+    }
+    return down;
 }
 
 inline GameInputType GetPressedMoveKey(KeyMapping * keyMappings)

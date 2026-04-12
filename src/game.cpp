@@ -1710,10 +1710,16 @@ void GameplayUpdateAndRender()
         
         Entity * player = GetEntity(gameState->playerEntityIndex);
         
-            DynamicArray<Entity> prevEntState = GetCurrentStateEntities();
-            DynamicArray<UndoState::MapUndoInfo> prevMapInfos = GetCurrentMapUndoInfos();
+            DynamicArray<Entity> prevEntState = { 0 };
+            DynamicArray<UndoState::MapUndoInfo> prevMapInfos = { 0 };
             
             uint32 prevPlayerIndex = gameState->playerEntityIndex;
+            
+            if (IsActionKeyDown(gameState->input.keyMappings))
+            {
+                prevEntState = GetCurrentStateEntities();
+                prevMapInfos = GetCurrentMapUndoInfos();
+                }
             
         // NOTE SlimeSelection
         if (!UpdateElectricDoor())
