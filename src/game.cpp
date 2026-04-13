@@ -1788,7 +1788,8 @@ void SimulateInputs()
         if (IsDown(gameState->input.keyMappings, DOWN_KEY))
         {
             movement += Vector2 { 0, camSpeed };
-            }
+        }
+        
         Vector2 dest = gameState->camera.base.target + movement;
         if (dest.x > maxX) dest.x = maxX;
         if (dest.x < minX) dest.x = minX;
@@ -1797,9 +1798,6 @@ void SimulateInputs()
         
             gameState->camera.base.target = 
                 Vector2Lerp(gameState->camera.base.target, dest, GetFrameTime());
-        
-        
-        
         }
     else
         {
@@ -1864,10 +1862,13 @@ void SimulateInputs()
                         bool8 moved = MoveAction(actionDir);
                         if (!moved && actionDir != player->attachDir)
                         {
+                            
+                            Entity * attachEntity = GetEntity(player->attachedEntityIndex);
+                            
                             SetSlimeSprite(player, actionDir);
                             
                             StretchEntity(player, actionDir, player->attachDir, player->attachDir,
-                                          player->tilePos, player->tilePos, 0.8f, PLAYER_MOVE_FUNC, GetStretchSpeed(player));
+                                          player->tilePos, player->tilePos, 0.8f, PLAYER_MOVE_FUNC, GetStretchSpeed(player), false, attachEntity, attachEntity);
                             OnPlayEvent(&player->tweenController);
                             
                             gameState->aniSpeedAdjustable = true;

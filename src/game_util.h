@@ -78,7 +78,7 @@ Vector2 GetTilePivot(IVec2 tilePos, Vector2 tileSize, IVec2 attachDir = { 0, 0 }
     
     Vector2 dist = (Vector2 {MAP_TILE_SIZE, MAP_TILE_SIZE} - tileSize) * 0.5f;
     Vector2 offset = Vector2{ (float)attachDir.x, (float)attachDir.y } * dist;
-    topLeft = Vector2Add(topLeft, offset);                
+    topLeft = Vector2Add(topLeft, offset);             
     
     return topLeft;
 }

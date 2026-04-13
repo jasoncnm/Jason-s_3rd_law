@@ -254,24 +254,25 @@ inline real32 GetStretchSpeed(Entity * player)
     return speed;
 }
 
-inline void StretchEntity(Entity * entity,
+inline void StretchEntity(Entity * entity, 
                           IVec2 moveDir, IVec2 startAttach, IVec2 endAttach,
                           IVec2 startPos, IVec2 endPos,
                           real32 stretch, real32 (*MoveFunc)(real32),
-                          real32 speed = MOVE_SPEED, bool8 invert = false)
+                          real32 speed = MOVE_SPEED, bool8 invert = false,
+                          Entity * startAttachEntity = nullptr, Entity * endAttachEntity = nullptr)
 {
-    // NOTE: if using hermit spline to stretch
-    //       p#.x == time, p#.y == stretch value
-    //       p0 = { 0, 1 }
-    //       p1 = { 0.5, 1 }
-    //       p2 = { 1, 1 }
-    //       t0 = { 1, 0 }
-    //       t1 = { 1, 3 }
-    //       t2 = { 2, -1 }
-    //       total_t = 2
-    //       dt = 2 * value/second
+    
     Vector2 startPivot = GetTilePivot(startPos, entity->tileSize, startAttach);
+    if (startAttachEntity && IsDoor(startAttachEntity) && startAttachEntity->tilePos == startPos)
+    {
+        startPivot -= Vector2 { (real32)startAttach.x, (real32)startAttach.y } * 5;
+    }
+    
     Vector2 endPivot = GetTilePivot(endPos, entity->tileSize, endAttach);
+    if (endAttachEntity && IsDoor(endAttachEntity) && endAttachEntity->tilePos == endPos)
+    {
+        endPivot -= Vector2 { (real32)endAttach.x, (real32)endAttach.y } * 5;
+    }
     
     Vector2 stretchV = Vector2 { 1 / stretch, stretch };
     if (invert) stretchV = Vector2Invert(stretchV);
@@ -281,9 +282,19 @@ inline void StretchEntity(Entity * entity,
     }
     
     Vector2 size_mid = entity->tileSize * stretchV;
+    Vector2 endS = GetTilePivot(endPos, size_mid, endAttach);
+    if (endAttachEntity && IsDoor(endAttachEntity) && endAttachEntity->tilePos == endPos)
+    {
+         endS -= Vector2 { (real32)endAttach.x, (real32)endAttach.y } * 5;
+    }
     
-    Vector2 end_mid = (GetTilePivot(endPos, size_mid, endAttach) + 
-                       GetTilePivot(startPos, size_mid, startAttach)) / 2;
+    Vector2 startS = GetTilePivot(startPos, size_mid, startAttach);
+    if (startAttachEntity && IsDoor(startAttachEntity) && startAttachEntity->tilePos == startPos)
+    {
+         startS-= Vector2 { (real32)startAttach.x, (real32)startAttach.y } * 5;
+    }
+    
+    Vector2 end_mid = (endS + startS) / 2;
     
     real32 dist1 = Vector2Distance(startPivot, end_mid) / MAP_TILE_SIZE;
     real32 dist2 = Vector2Distance(end_mid, endPivot) / MAP_TILE_SIZE;
@@ -341,6 +352,7 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
     SM_ASSERT(entity->active, "entity does not exist");
     Entity old = *entity;
     Vector2 startPivot = GetTilePivot(entity);
+    
     SetEntityPosition(entity, attachedEntity, targetPos);
     Vector2 endPivot = GetTilePivot(entity);
     
@@ -359,13 +371,24 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
         {
             if ((Abs(old.attachDir) != Abs(entity->attachDir)))
             {
+                Vector2 middlePivot = GetTilePivot(targetPos, entity->tileSize, old.attachDir);
                 
-                Vector2 middlePivot = 
-                    endPivot + Vector2 { (real32)old.attachDir.x, (real32)old.attachDir.y } * 
-                ((DEFAULT_TILE_SIZE - entity->tileSize) * 0.5f);
+                if (offset == IVec2 {0, 0} ||
+                    entity->attachDir == IVec2 { Sign(offset.x), Sign(offset.y) })
+                {
+                    middlePivot += Vector2 
+                    { 
+                        0.5f * entity->attachDir.x * (MAP_TILE_SIZE - entity->tileSize.x),
+                        0.5f * entity->attachDir.y * (MAP_TILE_SIZE - entity->tileSize.y)
+                    };
+                }
                 
-                Entity * prevAttach = GetEntity(old.attachedEntityIndex);
-                if (IsDoor(prevAttach) && (targetPos == prevAttach->tilePos))
+                if (attachedEntity && IsDoor(attachedEntity) && attachedEntity->tilePos == targetPos)
+                {
+                    middlePivot -= Vector2 { (real32)entity->attachDir.x, (real32)entity->attachDir.y } * 5;
+                }
+                else if (Entity * prevAttach = GetEntity(old.attachedEntityIndex);
+                         IsDoor(prevAttach) && (targetPos == prevAttach->tilePos))
                 {
                     middlePivot -= Vector2 { (real32)old.attachDir.x, (real32)old.attachDir.y } * 5;
                 }
@@ -394,21 +417,26 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 }
             else
             {
-                Vector2 dir = Vector2Subtract(endPivot, startPivot);
-                IVec2 idir = IVec2 { Sign(dir.x), Sign(dir.y) };
+                
+                IVec2 idir = IVec2 { Sign(targetPos.x - old.tilePos.x), Sign(targetPos.y - old.tilePos.y) };
                 
                 IVec2 mid_tile = targetPos;
+                IVec2 startAttach = old.attachDir;
+                IVec2 endAttach = entity->attachDir;
+                
                 if (offset.SqrMagnitude() > 1)
                 {
+                    endAttach = startAttach;
                     mid_tile = old.tilePos + idir;
-                    
                 }
                 
                 if (isStretch)
                 {
-                float stretch = 0.8f;
-                StretchEntity(entity, idir, old.attachDir, entity->attachDir, 
-                              old.tilePos, mid_tile, stretch, MoveFunc, speed);
+                    float stretch = 0.8f;
+                    Entity * sEnt = GetEntity(old.attachedEntityIndex);
+                    
+                StretchEntity(entity, idir, startAttach, endAttach, 
+                                  old.tilePos, mid_tile, stretch, MoveFunc, speed, false, sEnt, attachedEntity);
                 }
                 else
                 {
@@ -419,28 +447,56 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                 {
                     int32 ch1 = entity->tweenController.FindChannelByTweenProperty(PARAM_TYPE_VECTOR2, &entity->pivot);
                     
-                    Vector2 midPivot = GetTilePivot(mid_tile, entity->tileSize, entity->attachDir);
+                    Vector2 startPivot = GetTilePivot(mid_tile, entity->tileSize, old.attachDir);
                     
-                float dist = Vector2Distance(midPivot, endPivot);
-                float tileDist = dist / MAP_TILE_SIZE;
+                    
+                    TweenParams param1 = {0};
+                    TweenParams param2 = {0};
+                    float dist = Vector2Distance(startPivot, endPivot);
+                    
+                    if (Abs(entity->attachDir) != Abs(idir))
+                    {
+                    Vector2 midPivot = GetTilePivot(targetPos, entity->tileSize, old.attachDir);
+                        
+                         dist= Vector2Distance(startPivot, midPivot);
+                        
+                     param1.paramType = PARAM_TYPE_VECTOR2;
+                    param1.startVec2 = startPivot;
+                    param1.endVec2 = midPivot;
+                    param1.realVec2 = &entity->pivot;
                 
-                TweenParams param = {};
-                param.paramType = PARAM_TYPE_VECTOR2;
-                param.startVec2 = midPivot;
-                param.endVec2 = endPivot;
-                    param.realVec2  = &entity->pivot;
+                param2.paramType = PARAM_TYPE_VECTOR2;
+                param2.startVec2 = midPivot;
+                param2.endVec2 = endPivot;
+                        param2.realVec2  = &entity->pivot;
+                        
+                    }
+                    else
+                    {
+                        param1.paramType = PARAM_TYPE_VECTOR2;
+                        param1.startVec2 = startPivot;
+                        param1.endVec2 = endPivot;
+                        param1.realVec2 = &entity->pivot;
+                        }
                     
-                    
+                    float tileDist = dist / MAP_TILE_SIZE;
                     
                     if (ch1 < 0)
                     {
-                        AddTweenUnique(entity->tweenController, 
-                                 CreateTween(param, MoveFunc, speed, tileDist));
+                        if (param1.paramType != PARAM_TYPE_NONE)
+                         ch1 = AddTweenUnique(entity->tweenController, 
+                                             CreateTween(param1, MoveFunc, speed, tileDist));
+                        if (param2.paramType != PARAM_TYPE_NONE)
+                            AddTween(entity->tweenController, CreateTween(param2, MoveFunc, speed, 0.1f), ch1);
                         }
                     else
                     {
-                    AddTween(entity->tweenController, 
-                                 CreateTween(param, MoveFunc, speed, tileDist), ch1);
+                        if (param1.paramType != PARAM_TYPE_NONE)
+                            AddTween(entity->tweenController, 
+                                 CreateTween(param1, MoveFunc, speed, tileDist), ch1);
+                        if (param2.paramType != PARAM_TYPE_NONE)
+                            AddTween(entity->tweenController, 
+                                 CreateTween(param2, MoveFunc, speed, 0.1f), ch1);
                     }
                 }
             }
@@ -612,7 +668,7 @@ inline bool8 SetGlassBeBroken(Entity * glass)
 
 inline Vector2 GetSlimeSize(int32 mass)
 {
-     return mass == 1 ? DEFAULT_TILE_SIZE * 0.6f : DEFAULT_TILE_SIZE * 0.8f;
+     return mass == 1 ? DEFAULT_TILE_SIZE * 0.5f : DEFAULT_TILE_SIZE * 0.7f;
 }
 
 inline Vector2 GetSlimeSize(Entity * slime)
