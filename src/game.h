@@ -7,8 +7,8 @@
    1 - Build for pubilc release
 */
 
-#define SCREEN_WIDTH  352
-#define SCREEN_HEIGHT 352
+#define SCREEN_WIDTH  700
+#define SCREEN_HEIGHT 700
 
 #define ENTITY_TILE_VISIBILITY  2   // Player can see 2 tiles around its position
 

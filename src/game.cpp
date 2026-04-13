@@ -2960,7 +2960,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             }
 #endif
             
-            const char * QuitMenuText = "Quit To Main Menu";
+            const char * QuitMenuText = "Main Menu";
             bounds.y += margin;
             if (GuiButton(bounds, QuitMenuText))
             {
