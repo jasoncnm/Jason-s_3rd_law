@@ -316,6 +316,7 @@ void InitUndoState(UndoState * undoState,
                     DynamicArray<Entity> & entityArray,
                    DynamicArray<UndoState::MapUndoInfo> & undoMapInfos);
 
+inline void Undo();
 
 
 //  ========================================================================

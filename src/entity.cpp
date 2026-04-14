@@ -435,8 +435,10 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
                     float stretch = 0.8f;
                     Entity * sEnt = GetEntity(old.attachedEntityIndex);
                     
+                    bool8 reverse = entity->attachDir.x == 0 && old.attachDir == -entity->attachDir;
+                    
                 StretchEntity(entity, idir, startAttach, endAttach, 
-                                  old.tilePos, mid_tile, stretch, MoveFunc, speed, false, sEnt, attachedEntity);
+                                  old.tilePos, mid_tile, stretch, MoveFunc, speed, reverse, sEnt, attachedEntity);
                 }
                 else
                 {
@@ -616,7 +618,12 @@ inline void MoveEntity(Entity * entity, Entity * attachedEntity, TweenEvent * pl
     {
         TweenEvent deleteEvent = { 0 };
         deleteEvent.deleteEntity = entity;
+        if (IsSlime(entity))
+        {
+            deleteEvent.undo = true;
+        }
         entity->tweenController.endEvents.Add(deleteEvent);
+        
         }
     
 }

@@ -16,6 +16,7 @@ struct TweenEvent
     TweenController * controller = nullptr;
     Entity * deleteEntity = nullptr;
     Entity * breakEntity = nullptr;
+    bool8 undo = false;
     
     void Reset()
     {
@@ -95,7 +96,8 @@ struct Tween
     
 };
 
-Tween CreateTween(TweenParams params, real32 (*Easing)(real32) = nullptr, real32 animateSpeed = 5.0f, real32 target_t = 1.0f);
+Tween CreateTween(TweenParams params, real32 (*Easing)(real32) = nullptr, 
+                  real32 animateSpeed = 5.0f, real32 target_t = 1.0f);
 
 
 // NOTE: Handle event

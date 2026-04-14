@@ -137,7 +137,12 @@ void HandleEvents(Array<TweenEvent, MAX_EVENT> & events)
     if (event.breakEntity)
     {
         OnBreakGlass(event.breakEntity);
-    }
+        }
+        
+        if (event.undo)
+        {
+            Undo();
+        }
     
         event.Reset();
     }

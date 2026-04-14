@@ -1753,7 +1753,7 @@ void SimulateInputs()
     
     if (gameState->zoomOut)
     {
-         real32 sceneDistance = 5.0f * MAP_TILE_SIZE;
+         real32 sceneDistance = 20.0f * MAP_TILE_SIZE;
         
         real32 minX = player->pivot.x - sceneDistance;
         real32 minY = player->pivot.y - sceneDistance;
@@ -2362,6 +2362,28 @@ void GameplayUpdateAndRender()
         }
         
     }
+    
+    #if 0
+    EntityLayer layers[] =  { LAYER_WALL };
+    Entity * block = FindEntityByLocationAndLayers(IVec2 { -12, 86 }, layers, 1);
+    if (!block)
+    {
+        Entity addEntity = {};
+        addEntity.type = ENTITY_TYPE_BRIDGE;
+        addEntity.right = true;
+        addEntity.up = true;
+        addEntity.tilePos = IVec2 { -12,86 };
+        addEntity.sprite = GetSprite(108);
+        addEntity.active = true;
+        addEntity.tileSize = DEFAULT_TILE_SIZE;
+        addEntity.pivot = GetTilePivot(addEntity.tilePos, DEFAULT_TILE_SIZE);
+        addEntity.color = WHITE;
+        uint32 entityIndex = gameState->entities.Add(addEntity);
+        GetEntity(entityIndex)->entityIndex = entityIndex;
+        gameState->entityTable[LAYER_WALL].Add(entityIndex);
+    }
+#endif
+    
     #endif
     // NOTE: Render
     {
