@@ -100,10 +100,10 @@
         },
         "TileMap/Broom_2.tmj": {
             "scale": 1,
-            "selectedLayer": 2,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 352.5,
-                "y": 175.5
+                "x": 1312.5,
+                "y": 1575.5
             }
         },
         "TileMap/Broom_3.tmj": {
@@ -859,11 +859,11 @@
             }
         },
         "TileMap/Path_87.tmj": {
-            "scale": 0.5,
-            "selectedLayer": 2,
+            "scale": 1,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 175,
-                "y": 176
+                "x": 4293.5,
+                "y": 683.5
             }
         },
         "TileMap/Path_88.tmj": {
@@ -1156,10 +1156,10 @@
         },
         "TileMap/Room_38.tmj": {
             "scale": 1,
-            "selectedLayer": 0,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 176.5,
-                "y": 176
+                "x": -186.5,
+                "y": 196.5
             }
         },
         "TileMap/Room_39.tmj": {
@@ -1337,11 +1337,11 @@
             }
         },
         "TileMap/Room_59.tmj": {
-            "scale": 0.5,
-            "selectedLayer": 1,
+            "scale": 1,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 557,
-                "y": -1145
+                "x": -1665.5,
+                "y": -1872.5
             }
         },
         "TileMap/Room_6.tmj": {
@@ -1393,11 +1393,11 @@
             }
         },
         "TileMap/Room_65.tmj": {
-            "scale": 1.5,
-            "selectedLayer": 0,
+            "scale": 1,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 175.66666666666669,
-                "y": 175.66666666666669
+                "x": 100.5,
+                "y": 161.5
             }
         },
         "TileMap/Room_66.tmj": {
@@ -1754,8 +1754,32 @@
     "last.imagePath": "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Texture",
     "last.worldFilePath": "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor",
     "loadedWorlds": [
-        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/TestLevels/test.world",
-        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/main.world"
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/main.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Broom_3_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_0_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_34_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_59_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_2_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_29_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_6_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_47_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_60_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_18_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_9_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_11_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_4_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_22_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Broom_4_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_17_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Tutorial_1_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Toturial_2_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_26_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Path_37_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/TestLevels/test.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_40_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_71_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Tutorial_3_Tutorial.world",
+        "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor/Room_75_Tutorial.world"
     ],
     "map.height": 11,
     "map.lastUsedFormat": "json",

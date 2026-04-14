@@ -792,7 +792,8 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                         {
                             continue;
                             }
-                            else if (ent->type == ENTITY_TYPE_BRIDGE && !BridgeBlocked(ent, dirs[i]))
+                            else if (dirs[i] != current.pushDir && 
+                                     ent->type == ENTITY_TYPE_BRIDGE && !BridgeBlocked(ent, dirs[i]))
                             {
                                 continue;
                             }
@@ -805,7 +806,9 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                                                                                            checkLayers, layerCount);
                                     if (blockedEntity)
                                     {
-                                        if (blockedEntity->type != ENTITY_TYPE_GLASS || !blockedEntity->broken)
+                                        if ((blockedEntity->type == ENTITY_TYPE_GLASS && !blockedEntity->broken) ||
+                                            ent->type == ENTITY_TYPE_DOOR && DoorBlocked(ent, dirs[i]) ||
+                                            ent->type == ENTITY_TYPE_BRIDGE || ent->type == ENTITY_TYPE_WALL)
                                         {
                                         current.pushResult.state = PUSH_BLOCKED;
                                             current.pushResult.blockedEntity = target;
@@ -1521,12 +1524,12 @@ bool8 MoveAction(IVec2 actionDir)
             }
         case PUSH_MERGED:
         {
-            if (!door)
+            // if (!door)
             {
                 MergeSlimes(pushResult.mergeEntity, player);
                 return true;
             }
-            return false;
+            // return false;
             }
         
     }
@@ -2326,9 +2329,9 @@ void GameplayUpdateAndRender()
 }
     
     
-    static real32 contrast = 0.0f;
-    static real32 saturation = 0.0f;
-    static real32 brightness = 1.3f;
+    static real32 contrast = -2.0f;
+    static real32 saturation = 4.5f;
+    static real32 brightness = 1.1f;
     static bool8 debugView = false;
     static bool8 showFog = true;
     
@@ -2364,23 +2367,23 @@ void GameplayUpdateAndRender()
     }
     
     #if 0
-    EntityLayer layers[] =  { LAYER_WALL };
-    Entity * block = FindEntityByLocationAndLayers(IVec2 { -12, 86 }, layers, 1);
+    EntityLayer layers[] =  { LAYER_DOOR };
+    Entity * block = FindEntityByLocationAndLayers(IVec2 { 69, 130 }, layers, 1);
     if (!block)
     {
         Entity addEntity = {};
-        addEntity.type = ENTITY_TYPE_BRIDGE;
-        addEntity.right = true;
+        addEntity.type = ENTITY_TYPE_DOOR;
+        addEntity.down = true;
         addEntity.up = true;
-        addEntity.tilePos = IVec2 { -12,86 };
-        addEntity.sprite = GetSprite(108);
+        addEntity.tilePos = IVec2 { 69,130 };
+        addEntity.sprite = GetSprite(84);
         addEntity.active = true;
         addEntity.tileSize = DEFAULT_TILE_SIZE;
         addEntity.pivot = GetTilePivot(addEntity.tilePos, DEFAULT_TILE_SIZE);
         addEntity.color = WHITE;
         uint32 entityIndex = gameState->entities.Add(addEntity);
         GetEntity(entityIndex)->entityIndex = entityIndex;
-        gameState->entityTable[LAYER_WALL].Add(entityIndex);
+        gameState->entityTable[LAYER_DOOR].Add(entityIndex);
     }
 #endif
     
