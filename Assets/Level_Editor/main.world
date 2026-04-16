@@ -285,7 +285,7 @@
             "height": 352,
             "width": 352,
             "x": 2848,
-            "y": 2400
+            "y": 2656
         },
         {
             "fileName": "TileMap/Room_44.tmj",
@@ -324,7 +324,7 @@
         },
         {
             "fileName": "TileMap/Room_50.tmj",
-            "height": 352,
+            "height": 384,
             "width": 352,
             "x": -544,
             "y": 2336
