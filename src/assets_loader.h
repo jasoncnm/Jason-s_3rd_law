@@ -20,6 +20,7 @@ using json = nlohmann::json;
 #define MAIN_PATH "Assets/Level_Editor/main.world"
 #define TEST_PATH "Assets/Level_Editor/TestLevels/test.world"
 #define LEVEL_2_ROOM_NAME "TileMap/Room_59.tmj"
+#define LAST_ROOM_NAME "TileMap/Path_88.tmj"
 
 //  ========================================================================
 //              NOTE: Level structs
@@ -48,6 +49,7 @@ entityTypeMap
     {"main_portal", ENTITY_TYPE_MAIN_PORTAL},
     {"slime_portal", ENTITY_TYPE_SLIME_PORTAL},
     {"star", ENTITY_TYPE_STAR},
+    {"star_dest", ENTITY_TYPE_STAR_DEST},
     {"lock", ENTITY_TYPE_LOCK},
     {"door", ENTITY_TYPE_DOOR},
     {"cable_wire", ENTITY_TYPE_CABLE_WIRE},

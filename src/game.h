@@ -158,6 +158,7 @@ struct MyCamera
         FOLLOW_CENTER,
         FOLLOW_ALONG_AXIS,
         ZOOM_OUT,
+        FOLLOW_STAR,
     };
     
     Vector2 moveDir = { 0, 0 };
@@ -199,6 +200,7 @@ struct GameState
     uint32 tileMapCount;
     Map tileMaps[500];
     Map * lv2Map;
+    Map * lastMap;
     
     Fog fog;
     

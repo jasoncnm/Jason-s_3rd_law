@@ -25,6 +25,7 @@ enum EntityLayer
     LAYER_PIT,
     LAYER_PORTAL,
     LAYER_STAR,
+    LAYER_STAR_DEST,
     LAYER_LOCK,
     LAYER_COUNT,
 };
@@ -47,6 +48,7 @@ enum EntityType
     ENTITY_TYPE_MAIN_PORTAL,
     ENTITY_TYPE_SLIME_PORTAL,
     ENTITY_TYPE_STAR,
+    ENTITY_TYPE_STAR_DEST,
     ENTITY_TYPE_LOCK,
     ENTITY_TYPE_COUNT,
 };
@@ -85,8 +87,8 @@ struct Entity
     Vector2 pivot;
     Vector2 tileSize;
     
-    Vector2 screenStart;
-    Vector2 screenEnd;
+    Vector2 collectStart;
+    Vector2 collectEnd;;
      
     int32 sourceIndex = -1;
     int32 doorIndex = -1;
@@ -111,10 +113,10 @@ struct Entity
     bool8 changed = false;
     bool8 active = false;
     bool8 starCollecting = false;
+    bool8 starDested = false; 
     bool8 linkActivated = false;
-    
     bool8 mainCable = false;
-    
+        
     // TODO: These are too big for it to store upfront,
     // Allocate it whenever you need this
     TweenController tweenController;

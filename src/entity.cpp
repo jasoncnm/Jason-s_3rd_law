@@ -177,7 +177,42 @@ inline bool8 IsCable(Entity * entity)
     return entity->type == ENTITY_TYPE_CABLE_SOURCE ||
         entity->type == ENTITY_TYPE_CABLE_WIRE ||
         entity->type == ENTITY_TYPE_CABLE_CONNECT;
+}
+
+inline bool8 StarCollecting()
+{
+    bool8 result = false;
+    for (uint32 i = 0 ; i < gameState->entityTable[LAYER_STAR].count; i++)
+    {
+        uint32 entityIndex = gameState->entityTable[LAYER_STAR][i];
+        Entity * star = GetEntity(entityIndex);
+        if (star && star->starCollecting)
+        {
+            result = true;
+            break;
+        }
     }
+    
+    return result;
+}
+
+inline Entity * GetCollectingStar()
+{
+    Entity * result = nullptr;
+    for (uint32 i = 0 ; i < gameState->entityTable[LAYER_STAR].count; i++)
+    {
+        uint32 entityIndex = gameState->entityTable[LAYER_STAR][i];
+        Entity * star = GetEntity(entityIndex);
+        if (star && star->starCollecting)
+        {
+            result = star;
+            break;
+        }
+    }
+    
+    return result;
+    
+}
 
 inline void SetSlimeSprite(Entity * slime, IVec2 dir)
 {

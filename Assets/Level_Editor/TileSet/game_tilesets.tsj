@@ -605,7 +605,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"star_dest"
                 }]
         }, 
         {

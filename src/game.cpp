@@ -101,6 +101,26 @@ void UndoStack::pop_back()
 //              NOTE: Game Functions (internal)
 //  ========================================================================
 
+inline Vector2 GetStarDestPosition()
+{
+    Vector2 result = { 0 };
+    for (uint32 i = 0; i < gameState->entityTable[LAYER_STAR_DEST].count; i++)
+    {
+        uint32 entityIndex = gameState->entityTable[LAYER_STAR_DEST][i];
+        Entity * starDest = GetEntity(entityIndex);
+        
+        if (starDest && !starDest->starDested)
+        {
+            starDest->starDested = true;
+            result = starDest->pivot;
+            break;
+            
+        }
+    }
+    
+    return result;
+}
+
 inline bool8 BridgeBlocked(Entity * bridge, IVec2 dir)
 {
     bool8 result = 
@@ -295,26 +315,32 @@ void UpdateStars()
             
             if (star->starCollecting)
             {
-                real32 dist = Vector2Distance(star->screenStart, star->screenEnd);
+                real32 dist = Vector2Distance(star->collectStart, star->collectEnd);
                 if (dist <= 0 || gameState->starT[starIndex] > 1)
                 {
-                    DeleteEntity(star);
-                }
+                    star->pivot = star->collectEnd;
+                      star->starCollecting = false;
+                    star->tilePos = PivotToTilePos(star->collectEnd, DEFAULT_TILE_SIZE);
+                    EntityLayer layer[] = { LAYER_STAR_DEST };
+                    Entity * d = FindEntityByLocationAndLayers(star->tilePos, layer, 1);
+                    DeleteEntity(d);
+                    }
                 else
                 {
-                    Vector2 start = star->screenStart;
-                    Vector2 end = star->screenEnd;
+                    
+                    gameState->camera.followEntityIndex = star->entityIndex;
+                    
+                    Vector2 start = star->collectStart;
+                    Vector2 end = star->collectEnd;
                     Vector2 mid = Vector2 { end.x, start.y };
                     
-                    real32 t = EaseInSine(gameState->starT[starIndex]);
+                    real32 t = EaseInOutSine(gameState->starT[starIndex]);
                     
                     Vector2 screen_cur = GetSplinePointBezierQuad(start, mid, end, t);
                     
-                     star->tileSize = Vector2Lerp(DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE * 1.5f, t);
+                    star->pivot = screen_cur;
                     
-                    star->pivot = GetScreenToWorld2D(screen_cur, gameState->camera.base);
-                    
-                    real32 dt = 0.7f* GetFrameTime();
+                    real32 dt = 0.2f * GetFrameTime();
                     gameState->starT[starIndex] += dt;
                 }
                 
@@ -398,10 +424,11 @@ DynamicArray<Entity> GetCurrentStateEntities()
         LAYER_SLIME,
         LAYER_BLOCK,
         LAYER_STAR,
+        LAYER_STAR_DEST,
         LAYER_LOCK,
         LAYER_LINK,
         LAYER_PORTAL,
-    };
+        };
     uint32 layerCount = ArrayCount(pushLayers);
     
     uint32 len = 0;
@@ -1031,8 +1058,14 @@ inline void UpdateCameraToTileMapSmooth(Map & map, real32 (*MoveFunc)(real32), r
     return result;
 }
 
+
  void SetCamFollowState(MyCamera & cam, Entity * followEnt)
 {
+    if (StarCollecting())
+    {
+        cam.followState = MyCamera::FOLLOW_STAR;
+        return;
+    }
     
     if (gameState->zoomOut)
     {
@@ -1166,6 +1199,27 @@ inline bool8 UpdateCamera(bool8 refocus = false)
                 }
                 OnPlayEvent(&cam.tweenController);
             }
+            break;
+        }
+        case MyCamera::FOLLOW_STAR:
+        {
+            
+            if (!gameState->camera.tweenController.NoTweens())
+            {
+                Vector2 startPos = gameState->camera.base.target;
+                real32 startZoom = gameState->camera.base.zoom;
+                gameState->camera.tweenController.Reset();
+                gameState->camera.base.target = startPos;
+                gameState->camera.base.zoom = startZoom;
+            }
+            
+            Entity * star = GetCollectingStar();
+            
+            if (star)
+            {
+                gameState->camera.base.target = Vector2Lerp(gameState->camera.base.target, star->pivot, 6 * GetFrameTime());
+            }
+            
             break;
         }
         case MyCamera::FOLLOW_ALONG_AXIS:
@@ -1794,10 +1848,13 @@ void SimulateInputs()
         }
         
         Vector2 dest = gameState->camera.base.target + movement;
+        
+        #if 0
         if (dest.x > maxX) dest.x = maxX;
         if (dest.x < minX) dest.x = minX;
         if (dest.y > maxY) dest.y = maxY;
         if (dest.y < minY) dest.y = minY;
+#endif
         
             gameState->camera.base.target = 
                 Vector2Lerp(gameState->camera.base.target, dest, GetFrameTime());
@@ -1947,7 +2004,7 @@ void GameplayUpdateAndRender()
         gameState->moveBufferTimer -= GetFrameTime();
         
         // NOTE: Undo and Restart
-        {
+        if (!gameState->zoomOut) {
             static bool8 repeat = false;
             static real32 timeSinceLastPress = 0;
             
@@ -1987,9 +2044,8 @@ void GameplayUpdateAndRender()
                         ResetResetStates();
                             // DeleteEntity(star);
                             star->starCollecting = true;
-                            star->screenStart = GetWorldToScreen2D(star->pivot, gameState->camera.base);
-                            star->screenEnd =
-                                Vector2 { (real32)GetScreenWidth() * 0.5f, -100 };
+                            star->collectStart = star->pivot;
+                            star->collectEnd = GetStarDestPosition();
                         gameState->starCount++;
                         break;
                     }
@@ -2435,6 +2491,7 @@ Fog & fog = gameState->fog;
             LAYER_GLASS,  
             LAYER_DOOR,
             LAYER_STAR,
+            LAYER_STAR_DEST,
             LAYER_LOCK,
             LAYER_NULL,
          };
@@ -2755,6 +2812,9 @@ void InitializeGame()
     
     UpdateCamera();
     ResetResetStates();
+    
+    // NOTE: reveal last map
+    RevealMap(*gameState->lastMap);
     
 }
 

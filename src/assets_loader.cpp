@@ -247,6 +247,11 @@ void SetupEntityTable()
                     gameState->entityTable[LAYER_LINK].Add(entity->entityIndex);
                     break;
                 }
+                case ENTITY_TYPE_STAR_DEST:
+                {
+                    gameState->entityTable[LAYER_STAR_DEST].Add(entity->entityIndex);
+                    break;
+                }
                 
                 default:
                 {
@@ -312,7 +317,12 @@ int32 index = 0;
             if (fileName == LEVEL_2_ROOM_NAME)
             {
                 gameState->lv2Map = &gameState->tileMaps[index];
-            }
+        }
+        
+        if (fileName == LAST_ROOM_NAME)
+        {
+            gameState->lastMap = &gameState->tileMaps[index];
+        }
             
              IVec2 startPos = { startPosX, startPosY };
             
