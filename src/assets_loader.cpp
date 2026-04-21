@@ -20,6 +20,8 @@ Entity * AddEntityToMap(json & tileData, IVec2 tilePos, uint32 tileID)
     Entity addEntity = {};
     auto & tileProperties = tileData["properties"];
     
+    real32 colorAlpha = 1.0f;
+    
     for (uint32 pIdx = 0; pIdx < tileProperties.size(); pIdx++)
     {
         auto & prop = tileProperties[pIdx];
@@ -70,6 +72,11 @@ Entity * AddEntityToMap(json & tileData, IVec2 tilePos, uint32 tileID)
              int32 value = prop["value"];
             addEntity.openDir.y = value;
         }
+        else if (propName == "color_alpha")
+        {
+            real32 value = prop["value"];
+             colorAlpha = value;
+        }
         
     }
     
@@ -82,14 +89,15 @@ Entity * AddEntityToMap(json & tileData, IVec2 tilePos, uint32 tileID)
         addEntity.active = true;
         addEntity.tileSize = DEFAULT_TILE_SIZE;
         addEntity.pivot = GetTilePivot(tilePos, DEFAULT_TILE_SIZE);
-        
         addEntity.color = WHITE;
         
         if (IsCable(&addEntity))
         {
             addEntity.color = GRAY;
         }
-    
+        
+        addEntity.color = ColorAlpha(addEntity.color, colorAlpha);
+        
         uint32 entityIndex = gameState->entities.Add(addEntity);
         result = &gameState->entities[entityIndex];
         result->entityIndex = entityIndex;
@@ -252,6 +260,11 @@ void SetupEntityTable()
                     gameState->entityTable[LAYER_STAR_DEST].Add(entity->entityIndex);
                     break;
                 }
+                case ENTITY_TYPE_UI:
+                {
+                    gameState->entityTable[LAYER_UI].Add(entity->entityIndex);
+                    }
+                
                 
                 default:
                 {

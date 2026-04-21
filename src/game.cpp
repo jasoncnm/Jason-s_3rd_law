@@ -1700,6 +1700,11 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                     
                 }
                 
+                if (layer == LAYER_NULL)
+                {
+                    DrawTile(entity->tilePos, RED);
+                }
+                
 #if 0
                 // NOTE: Draw Debug Informations
                 else if (entity->type == ENTITY_TYPE_BLOCK)
@@ -2493,7 +2498,7 @@ Fog & fog = gameState->fog;
             LAYER_STAR,
             LAYER_STAR_DEST,
             LAYER_LOCK,
-            LAYER_NULL,
+            LAYER_UI,
          };
         
         int32 count = ArrayCount(orderedDrawLayers);

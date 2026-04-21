@@ -56,9 +56,10 @@ entityTypeMap
     {"cable_connect", ENTITY_TYPE_CABLE_CONNECT},
     {"cable_source", ENTITY_TYPE_CABLE_SOURCE},
     {"cable_link", ENTITY_TYPE_CABLE_LINK},
+    {"ui", ENTITY_TYPE_UI},
     
-    {"null", ENTITY_TYPE_NULL},
     {"error", ENTITY_TYPE_NULL},
+    {"null", ENTITY_TYPE_NULL},
     };
 
 

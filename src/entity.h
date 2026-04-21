@@ -27,6 +27,7 @@ enum EntityLayer
     LAYER_STAR,
     LAYER_STAR_DEST,
     LAYER_LOCK,
+    LAYER_UI,
     LAYER_COUNT,
 };
 
@@ -50,6 +51,7 @@ enum EntityType
     ENTITY_TYPE_STAR,
     ENTITY_TYPE_STAR_DEST,
     ENTITY_TYPE_LOCK,
+    ENTITY_TYPE_UI,
     ENTITY_TYPE_COUNT,
 };
 
