@@ -131,10 +131,11 @@ int main(int argumentCount, char *argumentArray[])
         // else SetWindowState(FLAG_VSYNC_HINT);
 // SetWindowState(FLAG_WINDOW_TOPMOST);
         // SetTargetFPS(30);
-        MaximizeWindow();
         SetExitKey(KEY_F4);  // IMPORTANT: DEBUG ONLY !!
 #else
-        ToggleBorderlessWindowed();
+        SetExitKey(0);
+        MaximizeWindow();
+        // ToggleBorderlessWindowed();
 #endif
         
         Image icon = LoadImage("Assets/ICON/ICON.png");
