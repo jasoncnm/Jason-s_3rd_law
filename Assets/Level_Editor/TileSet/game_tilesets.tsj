@@ -1,11 +1,11 @@
 { "columns":10,
  "image":"..\/..\/Texture\/SpriteAtlas.png",
- "imageheight":960,
+ "imageheight":1248,
  "imagewidth":320,
  "margin":0,
  "name":"tileSet",
  "spacing":0,
- "tilecount":300,
+ "tilecount":390,
  "tiledversion":"1.11.2",
  "tileheight":32,
  "tiles":[
@@ -605,7 +605,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"star_dest"
                 }]
         }, 
         {
@@ -1883,56 +1883,156 @@
          "id":110,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
          "id":111,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
          "id":112,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
          "id":113,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_link"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
@@ -2063,56 +2163,156 @@
          "id":120,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
          "id":121,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_link"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
          "id":122,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
          "id":123,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_connect"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
@@ -2203,56 +2403,156 @@
          "id":130,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
          "id":131,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
          "id":132,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
          "id":133,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_link"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
@@ -2343,56 +2643,156 @@
          "id":140,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
          "id":141,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
          "id":142,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
          "id":143,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
@@ -2483,56 +2883,156 @@
          "id":150,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
          "id":151,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
          "id":152,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
          "id":153,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
@@ -2743,56 +3243,156 @@
          "id":160,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
          "id":161,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
          "id":162,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
          "id":163,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
@@ -2963,56 +3563,156 @@
          "id":170,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
          "id":171,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
          "id":172,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
          "id":173,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
@@ -3178,56 +3878,156 @@
          "id":180,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
          "id":181,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
          "id":182,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
          "id":183,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
@@ -3438,56 +4238,156 @@
          "id":190,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
          "id":191,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
          "id":192,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
                 }]
         }, 
         {
          "id":193,
          "properties":[
                 {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
                 }, 
                 {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }, 
         {
@@ -4034,6 +4934,11 @@
         {
          "id":213,
          "properties":[
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
                 {
                  "name":"place_holder",
                  "type":"string",
@@ -4649,6 +5554,11 @@
         {
          "id":233,
          "properties":[
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
                 {
                  "name":"place_holder",
                  "type":"string",
@@ -6882,6 +7792,2865 @@
                  "name":"type",
                  "type":"string",
                  "value":"null"
+                }]
+        }, 
+        {
+         "id":300,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":301,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":302,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":303,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":304,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":305,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":306,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":307,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_link"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":308,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":310,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":311,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_link"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":312,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":313,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_connect"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":314,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":315,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_link"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":316,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":317,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_connect"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":318,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":320,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":321,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":322,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":323,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":324,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":325,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":326,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":327,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_link"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":328,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":330,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":331,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":332,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":333,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":334,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":335,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":336,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":337,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":338,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":340,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":341,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":342,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":343,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":344,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":345,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":346,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":347,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":348,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":350,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":351,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":352,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":353,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":354,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":355,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":356,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":357,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":358,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":360,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":361,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":362,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":363,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":364,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":365,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_wire"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":366,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":367,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":368,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":370,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":371,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":372,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":373,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":374,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":375,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":376,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":377,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":378,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":380,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":381,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":382,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":383,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":384,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":385,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":386,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":387,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"main",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"place_holder",
+                 "type":"string",
+                 "value":""
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"cable_source"
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
+                }]
+        }, 
+        {
+         "id":388,
+         "properties":[
+                {
+                 "name":"down",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"left",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"right",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"up",
+                 "type":"bool",
+                 "value":false
                 }]
         }],
  "tilewidth":32,

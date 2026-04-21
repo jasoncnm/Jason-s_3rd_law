@@ -20,6 +20,13 @@
             "width": 352,
             "x": 1568,
             "y": 320
+        },
+        {
+            "fileName": "test_4.tmj",
+            "height": 640,
+            "width": 640,
+            "x": 928,
+            "y": 960
         }
     ],
     "onlyShowAdjacentMaps": false,
