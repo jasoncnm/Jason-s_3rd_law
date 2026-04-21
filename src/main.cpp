@@ -132,10 +132,10 @@ int main(int argumentCount, char *argumentArray[])
 // SetWindowState(FLAG_WINDOW_TOPMOST);
         // SetTargetFPS(30);
         SetExitKey(KEY_F4);  // IMPORTANT: DEBUG ONLY !!
+        MaximizeWindow();
 #else
         SetExitKey(0);
-        MaximizeWindow();
-        // ToggleBorderlessWindowed();
+        ToggleBorderlessWindowed();
 #endif
         
         Image icon = LoadImage("Assets/ICON/ICON.png");

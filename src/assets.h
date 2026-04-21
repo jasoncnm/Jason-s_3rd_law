@@ -10,8 +10,7 @@
 
 #include "engine_lib.h"
 
-#define TEXTURE_PATH "Assets/Texture/SpriteAtlas-10x.png"
-#define ANIMATED_PLAYER_PATH "Assets/Texture/player_ani-10x.png"
+#define TEXTURE_PATH "Assets/Texture/SpriteAtlas.png"
 
 #define TileSetCols 10
 //  ========================================================================
