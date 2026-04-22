@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TileMap/Room_70.tmj",
+    "activeFile": "TileMap/Room_14.tmj",
     "expandedProjectPaths": [
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
@@ -960,11 +960,11 @@
             }
         },
         "TileMap/Room_14.tmj": {
-            "scale": 2,
+            "scale": 0.25,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 176,
-                "y": 176.25
+                "x": 752,
+                "y": 898
             }
         },
         "TileMap/Room_15.tmj": {
@@ -1848,61 +1848,12 @@
     "map.lastUsedFormat": "json",
     "map.width": 11,
     "openFiles": [
-        "TileSet/game_tilesets.tsj",
-        "TestLevels/Test_2.tmj",
-        "TileMap/Room_1.tmj",
-        "TileMap/Room_40.tmj",
-        "TileMap/Room_31.tmj",
-        "TileMap/Room_69.tmj",
-        "TileMap/Room_61.tmj",
-        "TileMap/Tutorial_1.tmj",
-        "TileMap/Room_52.tmj",
-        "TileMap/Room_65.tmj",
-        "TileMap/Room_66.tmj",
-        "TileMap/Room_5.tmj",
-        "TileMap/Room_74.tmj",
-        "TileMap/Room_50.tmj",
-        "TileMap/room_43.tmj",
-        "TileMap/Room_35.tmj",
-        "TileMap/Room_78.tmj",
-        "TileMap/Room_53.tmj",
-        "TileMap/Path_80.tmj",
-        "TileMap/Room_44.tmj",
-        "TileMap/Room_83.tmj",
-        "TileMap/Room_76.tmj",
-        "TileMap/Room_68.tmj",
-        "TileMap/Room_79.tmj",
-        "TileMap/Room_25.tmj",
-        "TileMap/Room_85.tmj",
-        "TileMap/Room_36.tmj",
-        "TileMap/Room_86.tmj",
-        "TileMap/Room_87.tmj",
-        "TileMap/Room_88.tmj",
-        "TileMap/Broom_6.tmj",
-        "TileMap/Room_38.tmj",
-        "TileMap/Room_37.tmj",
-        "TileMap/Room_73.tmj",
-        "TileMap/Path_88.tmj",
-        "TileMap/Froom_1.tmj",
-        "TileMap/Room_9.tmj",
-        "TileMap/Broom_4.tmj",
-        "TileMap/Room_14.tmj",
-        "TileMap/Path_89.tmj",
-        "TileMap/Path_87.tmj",
-        "TileMap/Tutorial_6.tmj",
-        "TileMap/Tutorial_8.tmj",
-        "TileMap/Tutorial_5.tmj",
-        "TileMap/Blocks.tmj",
-        "TileMap/Broon_1.tmj",
-        "TileMap/Path_17.tmj",
-        "TileMap/Path_1.tmj",
-        "TileMap/Broom_7.tmj",
-        "TileMap/Room_70.tmj",
-        "TileMap/Room_10.tmj"
+        "TileMap/Room_14.tmj"
     ],
     "project": "level_edit.tiled-project",
     "property.type": "string",
     "recentFiles": [
+        "TileMap/Room_14.tmj",
         "TileSet/game_tilesets.tsj",
         "TestLevels/Test_2.tmj",
         "TileMap/Room_1.tmj",
@@ -1913,8 +1864,7 @@
         "TileMap/Tutorial_1.tmj",
         "TileMap/Room_52.tmj",
         "TileMap/Room_65.tmj",
-        "TileMap/Room_66.tmj",
-        "TileMap/Room_5.tmj"
+        "TileMap/Room_66.tmj"
     ],
     "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
     "tileset.lastUsedFormat": "tsx",
