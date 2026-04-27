@@ -27,13 +27,13 @@ uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
 
 void fragment() {
     vec2 uv = SCREEN_UV;
-	uv -= 0.5;
+    uv -= 0.5;
     uv *= 1.0 - 2.0 * magnitude.x;
     uv += 0.5;
-	vec2 dt = vec2(0.0, 0.0);
-	dt.x = sin(TIME * FactorA.x+FactorB.x) * magnitude.x;
-	dt.y = cos(TIME *FactorA.y+ FactorB.y) * magnitude.y;
-	COLOR = texture(SCREEN_TEXTURE, SCREEN_UV + dt * ShakeStrength);
+    vec2 dt = vec2(0.0, 0.0);
+    dt.x = sin(TIME * FactorA.x+FactorB.x) * magnitude.x;
+    dt.y = cos(TIME *FactorA.y+ FactorB.y) * magnitude.y;
+    COLOR = texture(SCREEN_TEXTURE, SCREEN_UV + dt * ShakeStrength);
 }
 
 
@@ -319,12 +319,12 @@ void UpdateStars()
                 if (dist <= 0 || gameState->starT[starIndex] > 1)
                 {
                     star->pivot = star->collectEnd;
-                      star->starCollecting = false;
+                    star->starCollecting = false;
                     star->tilePos = PivotToTilePos(star->collectEnd, DEFAULT_TILE_SIZE);
                     EntityLayer layer[] = { LAYER_STAR_DEST };
                     Entity * d = FindEntityByLocationAndLayers(star->tilePos, layer, 1);
                     DeleteEntity(d);
-                    }
+                }
                 else
                 {
                     
@@ -339,8 +339,12 @@ void UpdateStars()
                     Vector2 screen_cur = GetSplinePointBezierQuad(start, mid, end, t);
                     
                     star->pivot = screen_cur;
+
+                    real32 maxDT = 0.003f;
+                    real32 dt = 150.0f * GetFrameTime() / (dist * 0.5f);
+
+                    dt = Clamp(dt, 0.0f, maxDT);
                     
-                    real32 dt = 0.2f * GetFrameTime();
                     gameState->starT[starIndex] += dt;
                 }
                 
