@@ -807,29 +807,17 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 bool isProjectable = true;
                 
                 { // NOTE: IsProjectable
-                IVec2 tilePos = target->tilePos;
-                IVec2 dirs[4] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-                for (uint32 i = 0; i < 4; i++)
-                {
-                    if (dirs[i] == -current.pushDir) continue;
-                    Entity * ent = FindEntityByLocationAndLayers(tilePos + dirs[i], checkLayers, layerCount);
-                    if (ent)
+                    IVec2 tilePos = target->tilePos;
+                    IVec2 dirs[4] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+                    for (uint32 i = 0; i < 4; i++)
                     {
-                        // NOTE: slime dose not block the block if it is attach to the block...
-                        if ((ent->type == ENTITY_TYPE_DOOR) &&
-                                (!SameSide(ent, ent->tilePos, dirs[i]) || !DoorBlocked(ent, dirs[i])) ||
-                            (ent->type == ENTITY_TYPE_GLASS && ent->broken) ||
-                            (IsSlime(ent) && (!ent->attach || dirs[i] != current.pushDir)))
+                        if (dirs[i] == -current.pushDir) continue;
+                        Entity * ent = FindEntityByLocationAndLayers(tilePos + dirs[i], checkLayers, layerCount);
+                        if (ent)
                         {
-                            continue;
-                            }
-                            else if (dirs[i] != current.pushDir && 
-                                     ent->type == ENTITY_TYPE_BRIDGE && !BridgeBlocked(ent, dirs[i]))
+                            // NOTE: slime dose not block the block if it is attach to the block, unless slime next tile is blocked...
+                            if (IsSlime(ent) && GetEntity(ent->attachedEntityIndex) == target)
                             {
-                                continue;
-                            }
-                            else if (IsSlime(ent) && GetEntity(ent->attachedEntityIndex) == target)
-                        {
                                 if (dirs[i] == current.pushDir)
                                 {
                                     // TODO: very weird edge case behavior
@@ -839,15 +827,29 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                                     {
                                         if ((blockedEntity->type == ENTITY_TYPE_GLASS && !blockedEntity->broken) ||
                                             ent->type == ENTITY_TYPE_DOOR && DoorBlocked(ent, dirs[i]) ||
-                                            ent->type == ENTITY_TYPE_BRIDGE || ent->type == ENTITY_TYPE_WALL)
+                                            ent->type == ENTITY_TYPE_BRIDGE ||
+                                            ent->type == ENTITY_TYPE_WALL ||
+                                            ent->type == ENTITY_TYPE_BLOCK)
                                         {
-                                        current.pushResult.state = PUSH_BLOCKED;
+                                            current.pushResult.state = PUSH_BLOCKED;
                                             current.pushResult.blockedEntity = target;
                                             return;
                                         }
                                     }
                                 }
-                            continue;
+                                continue;
+                            }
+                            else if ((ent->type == ENTITY_TYPE_DOOR) &&
+                                (!SameSide(ent, ent->tilePos, dirs[i]) || !DoorBlocked(ent, dirs[i])) ||
+                                (ent->type == ENTITY_TYPE_GLASS && ent->broken) ||
+                                (IsSlime(ent) && (!ent->attach || dirs[i] != current.pushDir)))
+                            {
+                                continue;
+                            }
+                            else if (dirs[i] != current.pushDir && 
+                                     ent->type == ENTITY_TYPE_BRIDGE && !BridgeBlocked(ent, dirs[i]))
+                            {
+                                continue;
                             }
                             else if (ent->type == ENTITY_TYPE_BLOCK && dirs[i] == current.pushDir)
                             {
@@ -858,9 +860,9 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                                 // TODO: very weird edge case behavior
                             }
                             isProjectable = false;
-                        break;
+                            break;
+                        }
                     }
-                }
                 }
                 
                 if (isProjectable)
