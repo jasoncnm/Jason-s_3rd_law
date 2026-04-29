@@ -826,10 +826,10 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                                     if (blockedEntity)
                                     {
                                         if ((blockedEntity->type == ENTITY_TYPE_GLASS && !blockedEntity->broken) ||
-                                            ent->type == ENTITY_TYPE_DOOR && DoorBlocked(ent, dirs[i]) ||
-                                            ent->type == ENTITY_TYPE_BRIDGE ||
-                                            ent->type == ENTITY_TYPE_WALL ||
-                                            ent->type == ENTITY_TYPE_BLOCK)
+                                            blockedEntity->type == ENTITY_TYPE_DOOR && DoorBlocked(blockedEntity, dirs[i]) ||
+                                            blockedEntity->type == ENTITY_TYPE_BRIDGE ||
+                                            blockedEntity->type == ENTITY_TYPE_WALL ||
+                                            blockedEntity->type == ENTITY_TYPE_BLOCK && blockedEntity->actionState == FREEZE_STATE)
                                         {
                                             current.pushResult.state = PUSH_BLOCKED;
                                             current.pushResult.blockedEntity = target;
@@ -2825,7 +2825,7 @@ void InitializeGame()
     ResetResetStates();
     
     // NOTE: reveal last map
-    RevealMap(*gameState->lastMap);
+    if (!gameState->isTestLevel && gameState->lastMap) RevealMap(*gameState->lastMap);
     
 }
 
@@ -2944,8 +2944,9 @@ UPDATE_AND_RENDER(UpdateAndRender)
             if (GuiButton(bounds, NewGameText))
             {
                 LoadTileMapsAndEntities(MAIN_PATH);
+                gameState->isTestLevel = false;
                 ChangeScreen(GAME_MAIN_SCREEN);
-                }
+            }
             
             #if 0
             // TODO: Experimental features, Very breakable!!!
@@ -2992,6 +2993,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             if (GuiButton(bounds, TestLevel))
             {
                 LoadTileMapsAndEntities(TEST_PATH);
+                gameState->isTestLevel = true;
                 ChangeScreen(GAME_MAIN_SCREEN);
             }
             

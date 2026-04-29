@@ -244,6 +244,8 @@ struct GameState
     bool8 simulating = false;
     
     bool8 aniSpeedAdjustable = false;
+
+    bool8 isTestLevel = false;
     
     bool8 switching = false;
     GameScreen nextScreen;
