@@ -2913,7 +2913,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
             DrawScrollingBackGround(gameState->bgTexture, PINK);
             
-            uint32 numButtons = 3;
+            uint32 numButtons = 2;
             real32 margin = 200.0f;
             
             real32 width = GetScreenWidth() - 600.0f;
@@ -2987,6 +2987,8 @@ UPDATE_AND_RENDER(UpdateAndRender)
             };
             
 #endif
+
+#if GAME_INTERNAL
             
             bounds.y += margin;
             const char * TestLevel = "test level";
@@ -2996,6 +2998,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 gameState->isTestLevel = true;
                 ChangeScreen(GAME_MAIN_SCREEN);
             }
+#endif
             
             bounds.y += margin;
             const char * QuitGame = "Quit Game";
