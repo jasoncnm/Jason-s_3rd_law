@@ -650,6 +650,34 @@
             "width": 352,
             "x": 2720,
             "y": 3040
+        },
+        {
+            "fileName": "TileMap/Toturial_Room1.tmj",
+            "height": 352,
+            "width": 352,
+            "x": -2656,
+            "y": 2336
+        },
+        {
+            "fileName": "TileMap/Tutorial_Room2.tmj",
+            "height": 352,
+            "width": 352,
+            "x": -2304,
+            "y": 2336
+        },
+        {
+            "fileName": "TileMap/Tutorial_Room3.tmj",
+            "height": 352,
+            "width": 352,
+            "x": -1952,
+            "y": 2336
+        },
+        {
+            "fileName": "TileMap/Tutorial_Romm4.tmj",
+            "height": 352,
+            "width": 352,
+            "x": -1600,
+            "y": 2336
         }
     ],
     "onlyShowAdjacentMaps": false,
