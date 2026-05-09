@@ -1293,11 +1293,11 @@
             }
         },
         "TileMap/Room_50.tmj": {
-            "scale": 2,
+            "scale": 1,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 285.5,
-                "y": 113.75
+                "x": -7,
+                "y": 1340.5
             }
         },
         "TileMap/Room_51.tmj": {
