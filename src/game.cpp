@@ -72,14 +72,13 @@ UndoState & UndoStack::back()
 }
 
 void UndoStack::push_back(uint32 playerIndex, uint32 starCount, 
-                          DynamicArray<Entity> & entityArray,
-                          DynamicArray<UndoState::MapUndoInfo> & undoMapInfos)
+                          DynamicArray<Entity> & entityArray)
 {
     last++;
     count++;
     if (last > MAX_UNDO) last = 1;
     if (count > MAX_UNDO) count = MAX_UNDO;
-    InitUndoState(&undoStack[last - 1], playerIndex, starCount, entityArray, undoMapInfos);
+    InitUndoState(&undoStack[last - 1], playerIndex, starCount, entityArray);
     }
 
 void UndoStack::pop_back()
@@ -161,8 +160,7 @@ void ChangeScreen(GameScreen screen)
 
 void InitUndoState(UndoState * undoState, 
                    uint32 playerIndex, uint32 starCount,
-                    DynamicArray<Entity> & ea,
-                   DynamicArray<UndoState::MapUndoInfo> & mapUndoInfo)
+                   DynamicArray<Entity> & ea)
 {
     if (undoState)
     {
@@ -172,10 +170,7 @@ void InitUndoState(UndoState * undoState,
         undoState->undoEntities.insert(undoState->undoEntities.begin(), 
                                        ea.elements, 
                                        ea.elements + ea.count);
-        undoState->undoMapInfos.insert(undoState->undoMapInfos.begin(),
-                                       mapUndoInfo.elements,
-                                       mapUndoInfo.elements + mapUndoInfo.count);
-    }
+        }
 }
 
 bool8 MapIsVisible(Map & tileMap)
@@ -194,6 +189,7 @@ bool8 MapIsVisible(int32 mapIndex)
     return result;
 }
 
+#if 0
 void ResetResetStates()
 {
     for (uint32 mapIndex = 0; mapIndex < gameState->tileMapCount; mapIndex++)
@@ -202,6 +198,7 @@ void ResetResetStates()
         map.stateInitilized = false;
     }
 }
+#endif 
 
 bool8 IsDisappearing(Entity * entity)
 {
@@ -303,6 +300,33 @@ void UpdateFog()
     
 }
 
+void CollectStar(Entity * star)
+{
+    star->pivot = star->collectEnd;
+    star->starCollecting = false;
+    star->tilePos = PivotToTilePos(star->collectEnd, DEFAULT_TILE_SIZE);
+    EntityLayer layer[] = { LAYER_STAR_DEST };
+    Entity * d = FindEntityByLocationAndLayers(star->tilePos, layer, 1);
+    if (d) DeleteEntity(d);
+    
+}
+
+void ResetStars()
+{
+    auto & starTable  = gameState->entityTable[LAYER_STAR];
+    
+    for (uint32 starIndex = 0; starIndex < starTable.count; starIndex++)
+    {
+        if (Entity * star = GetEntity(starTable[starIndex]); star)
+        {
+            
+            if (star->starCollecting)
+            {
+                CollectStar(star);
+            }
+        }
+    }
+}
 
 void UpdateStars()
 {
@@ -318,18 +342,10 @@ void UpdateStars()
                 real32 dist = Vector2Distance(star->collectStart, star->collectEnd);
                 if (dist <= 0 || gameState->starT[starIndex] > 1)
                 {
-                    star->pivot = star->collectEnd;
-                    star->starCollecting = false;
-                    star->tilePos = PivotToTilePos(star->collectEnd, DEFAULT_TILE_SIZE);
-                    EntityLayer layer[] = { LAYER_STAR_DEST };
-                    Entity * d = FindEntityByLocationAndLayers(star->tilePos, layer, 1);
-                    DeleteEntity(d);
-                }
+                    CollectStar(star);
+                    }
                 else
                 {
-                    
-                    gameState->camera.followEntityIndex = star->entityIndex;
-                    
                     Vector2 start = star->collectStart;
                     Vector2 end = star->collectEnd;
                     Vector2 mid = Vector2 { end.x, start.y };
@@ -341,7 +357,7 @@ void UpdateStars()
                     star->pivot = screen_cur;
 
                     real32 maxDT = 0.003f;
-                    real32 dt = 150.0f * GetFrameTime() / (dist * 0.5f);
+                    real32 dt = 100.0f * GetFrameTime() / (dist * 0.5f);
 
                     dt = Clamp(dt, 0.0f, maxDT);
                     
@@ -398,6 +414,7 @@ void SetShake(real32 duration, real32 strength)
     gameState->shakeStrength = strength;
 }
 
+#if 0
 DynamicArray<UndoState::MapUndoInfo> GetCurrentMapUndoInfos()
 {
     uint32 count = gameState->tileMapCount;
@@ -416,6 +433,7 @@ DynamicArray<UndoState::MapUndoInfo> GetCurrentMapUndoInfos()
     result.elements = infos;
     return result;
 }
+#endif
 
 DynamicArray<Entity> GetCurrentStateEntities()
 {
@@ -453,7 +471,17 @@ DynamicArray<Entity> GetCurrentStateEntities()
         auto & entList = gameState->entityTable[layer];
         for (uint32 entId = 0; entId < entList.count; entId++)
         {
-            Entity & ent = gameState->entities[entList[entId]];
+            Entity ent = gameState->entities[entList[entId]];
+            
+            if (layer == LAYER_STAR && ent.starCollecting)
+            {
+                CollectStar(&ent);
+            }
+            
+            if (layer == LAYER_SLIME)
+            {
+                SM_TRACE("slime pos (%d, %d)", ent.tilePos.x, ent.tilePos.y);
+            }
             
             entities[i++] = ent;
             }
@@ -1067,12 +1095,13 @@ inline void UpdateCameraToTileMapSmooth(Map & map, real32 (*MoveFunc)(real32), r
 
  void SetCamFollowState(MyCamera & cam, Entity * followEnt)
 {
+    #if 0
     if (StarCollecting())
     {
         cam.followState = MyCamera::FOLLOW_STAR;
         return;
     }
-    
+    #endif
     if (gameState->zoomOut)
     {
         cam.followState = MyCamera::ZOOM_OUT;
@@ -1207,6 +1236,7 @@ inline bool8 UpdateCamera(bool8 refocus = false)
             }
             break;
         }
+        #if 0
         case MyCamera::FOLLOW_STAR:
         {
             
@@ -1228,6 +1258,7 @@ inline bool8 UpdateCamera(bool8 refocus = false)
             
             break;
         }
+        #endif
         case MyCamera::FOLLOW_ALONG_AXIS:
         {
             
@@ -1358,11 +1389,12 @@ void SetUndoEntities(std::vector<Entity> & undoEntities)
         if (IsSlime(&e) && (e.actionState == ANIMATE_STATE))
         {
             gameState->entities[e.entityIndex].actionState = MOVE_STATE;
-        }
-        }
+            }
+            }
     }
     }
 
+#if 0
 void SetUndoMapInfos(std::vector<UndoState::MapUndoInfo> & undoMapInfos)
 {
     for (auto info : undoMapInfos)
@@ -1370,10 +1402,11 @@ void SetUndoMapInfos(std::vector<UndoState::MapUndoInfo> & undoMapInfos)
         gameState->tileMaps[info.mapIndex].stateInitilized = info.initilized;
     }
 }
-
+#endif
 
 inline void SetGameState(UndoState & undoState)
 {
+    
     gameState->playerEntityIndex = undoState.playerIndex;
     gameState->camera.followEntityIndex = gameState->playerEntityIndex;
     gameState->starCount = (uint16)undoState.starCount;
@@ -1385,13 +1418,26 @@ inline void SetGameState(UndoState & undoState)
 
 inline void Undo()
 {
+    // ResetStars();
+    if (!gameState->undoStack.IsEmpty())
+    {
     SetGameState(gameState->undoStack.back());
-    gameState->undoStack.pop_back();
+        gameState->undoStack.pop_back();
+    }
     }
 
 
 inline void Restart()
 {
+    // ResetStars();
+    DynamicArray<Entity> ea = GetCurrentStateEntities();
+    gameState->undoStack.push_back(gameState->playerEntityIndex, 
+                                   gameState->starCount, 
+                                   ea);
+    
+    SetGameState(gameState->restartState);
+    
+#if 0
     Map & currentMap = gameState->tileMaps[gameState->playerMapIndex];
     if (currentMap.stateInitilized)
     {
@@ -1403,6 +1449,7 @@ inline void Restart()
                                    ea, mapUndoInfos);
         SetGameState(currentMap.resetState);
     }
+    #endif
     }
 
 bool8 MoveAction(IVec2 actionDir)
@@ -1784,7 +1831,7 @@ inline bool8 SelectNextAsPlayer(Entity * player = nullptr)
     return result;
 }
 
-void SimulateInputs()
+void SimulateInputs(DynamicArray<Entity> & prevEntState, uint32 & prevPlayerIndex)
 {
     
     if (UpdateElectricDoor()) 
@@ -1813,11 +1860,6 @@ void SimulateInputs()
     if (!player) return;
     
     IVec2 dirs[] = { DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN };
-    
-    DynamicArray<Entity> prevEntState = { 0 };
-    DynamicArray<UndoState::MapUndoInfo> prevMapInfos = { 0 };
-    
-    uint32 prevPlayerIndex = gameState->playerEntityIndex;
     
     if (gameState->zoomOut)
     {
@@ -1876,8 +1918,7 @@ void SimulateInputs()
         if (IsActionKeyDown(gameState->input.keyMappings))
         {
             prevEntState = GetCurrentStateEntities();
-            prevMapInfos = GetCurrentMapUndoInfos();
-        }
+            }
         
         if (!gameState->camera.tweenController.NoTweens())
         {
@@ -1969,10 +2010,10 @@ void SimulateInputs()
         {
             gameState->undoStack.push_back(prevPlayerIndex,
                                            gameState->starCount,
-                                           prevEntState, prevMapInfos);
+                                           prevEntState);
         }
+        
     }
-    
     }
 
 void GameplayUpdateAndRender()
@@ -1992,6 +2033,7 @@ void GameplayUpdateAndRender()
         {
             gameState->lastMoveKey = lastMoveKey;
             gameState->moveBufferTimer = MOVE_BUFFER;
+            SM_TRACE("Reset BUFFER");
             
             if (Entity * player = GetPlayer(); gameState->simulating && player && gameState->aniSpeedAdjustable)
             {
@@ -2001,10 +2043,51 @@ void GameplayUpdateAndRender()
         }
         
     // NOTE: Actions
-        if (GetPlayer() && !gameState->simulating) {
-            SimulateInputs();
-    }
-    
+        if (GetPlayer() && !gameState->simulating) 
+        {
+            DynamicArray<Entity> prevEntState = { 0 };
+            uint32 prevPlayerIndex = gameState->playerEntityIndex;
+            
+            SimulateInputs(prevEntState, prevPlayerIndex);
+            // NOTE: Stars
+            {
+                auto & slimeIndexTable = gameState->entityTable[LAYER_SLIME];
+                for (uint32 slimeIndex = 0; slimeIndex < slimeIndexTable.count; slimeIndex++)
+                {
+                    Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
+                    if (slime)
+                    {
+                        auto & starTable = gameState->entityTable[LAYER_STAR];
+                        for (uint32 starIndex = 0; starIndex < starTable.count; starIndex++)
+                        {
+                            Entity * star = GetEntity(starTable[starIndex]);
+                            if (star && !star->starCollecting &&  (star->tilePos == slime->tilePos))
+                            {
+                                // ResetResetStates();
+                                // DeleteEntity(star);
+                                star->starCollecting = true;
+                                star->collectStart = star->pivot;
+                                star->collectEnd = GetStarDestPosition();
+                                gameState->starCount++;
+                                
+                                SM_TRACE("reset player pos: (%d, %d)", GetPlayer()->tilePos.x, GetPlayer()->tilePos.y);
+                                // NOTE: when star collected, clear undo stack and update reset state
+                                DynamicArray<Entity> ea = GetCurrentStateEntities();
+                                
+                                gameState->undoStack.reset();
+                                gameState->undoStack.push_back(gameState->playerEntityIndex, 
+                                                               gameState->starCount,
+                                                               ea);
+                                InitUndoState(&gameState->restartState, gameState->playerEntityIndex, 
+                                              gameState->starCount, ea);
+                                break;
+                            } // if
+                        } // for 
+                    } // if
+                } // for
+            } // star
+        }
+
     static uint32 change_count = 0;
         if (gameState->stateChanged) change_count++;
     
@@ -2012,16 +2095,17 @@ void GameplayUpdateAndRender()
         UpdateSlimes();
         UpdateStars();
         
-        gameState->moveBufferTimer -= GetFrameTime();
-        
+            gameState->moveBufferTimer -= GetFrameTime();
+            
         // NOTE: Undo and Restart
-        if (!gameState->zoomOut) {
+        if (!gameState->zoomOut) 
+        {
             static bool8 repeat = false;
             static real32 timeSinceLastPress = 0;
             
             timeSinceLastPress -= GetFrameTime();
             
-        if (timeSinceLastPress < 0 && IsDown(gameState->input.keyMappings, UNDO_KEY) && !gameState->undoStack.empty())
+        if (timeSinceLastPress < 0 && IsDown(gameState->input.keyMappings, UNDO_KEY) && !gameState->undoStack.IsEmpty())
             {
                 // NOTE: Undo
                 Undo();
@@ -2037,33 +2121,7 @@ void GameplayUpdateAndRender()
         }
         }
         
-        
-    // NOTE: Keys and Locks
-    {
-        auto & slimeIndexTable = gameState->entityTable[LAYER_SLIME];
-        for (uint32 slimeIndex = 0; slimeIndex < slimeIndexTable.count; slimeIndex++)
-        {
-            Entity * slime = GetEntity(slimeIndexTable[slimeIndex]);
-            if (slime)
-            {
-                auto & starTable = gameState->entityTable[LAYER_STAR];
-                for (uint32 starIndex = 0; starIndex < starTable.count; starIndex++)
-                {
-                    Entity * star = GetEntity(starTable[starIndex]);
-                    if (star && !star->starCollecting &&  (star->tilePos == PivotToTilePos(slime->pivot, slime->tileSize)))
-                    {
-                        ResetResetStates();
-                            // DeleteEntity(star);
-                            star->starCollecting = true;
-                            star->collectStart = star->pivot;
-                            star->collectEnd = GetStarDestPosition();
-                        gameState->starCount++;
-                        break;
-                    }
-                }
-            }
-        }
-        
+            #if 0
         auto & lockTable = gameState->entityTable[LAYER_LOCK];
         for (uint32 lockIndex = 0; lockIndex < lockTable.count; lockIndex++)
         {
@@ -2092,15 +2150,18 @@ void GameplayUpdateAndRender()
                 
             }
         }
+            
         
-    }
+#endif
+        
+        
     
         // NOTE: Simulate
         Entity * lastFollowEnt = gameState->simulating ? nullptr : GetEntity(gameState->camera.followEntityIndex);
     {
         gameState->simulating = false;
         // NOTE: Update: Entity
-        EntityLayer simulateLayers[] = { LAYER_SLIME, LAYER_BLOCK, LAYER_LOCK };
+        EntityLayer simulateLayers[] = { LAYER_SLIME, LAYER_BLOCK };
         for (uint32 idx = 0; idx < ArrayCount(simulateLayers); idx++)
         {
             uint32 layer = simulateLayers[idx];
@@ -2217,31 +2278,18 @@ void GameplayUpdateAndRender()
                 gameState->prevMapIndex = gameState->currentMapIndex;
             }
             
-                if (Entity * player = GetPlayer(); player)
-                {
-                    result = FindTileMap(GetPlayer()->tilePos);
-                if (result.map)
-                {
-                    gameState->playerMapIndex = result.mapIndex;
-                    
-                    if (!result.map->stateInitilized)
-                    {
-                            result.map->stateInitilized = true;
-                            DynamicArray<UndoState::MapUndoInfo> mapInfos = GetCurrentMapUndoInfos();
-                            
-                         DynamicArray<Entity> ea = GetCurrentStateEntities();
-                        InitUndoState(&result.map->resetState,
-                                      gameState->playerEntityIndex,
-                                      gameState->starCount,
-                                      ea, mapInfos);
-                        
-                    }
-                }
-                
-            }
             }
             
-            if (Entity * player = GetPlayer(); player && player->tweenController.NoTweens()) RevealMap(gameState->tileMaps[gameState->playerMapIndex]);
+            if (Entity * player = GetPlayer(); 
+                player && player->tweenController.NoTweens()) 
+            {
+                FindTileMapResult playerMap = FindTileMap(player->tilePos);
+                if (playerMap.map && MapIsVisible(*playerMap.map))
+                {
+                    gameState->playerMapIndex = playerMap.mapIndex;
+                RevealMap(gameState->tileMaps[gameState->playerMapIndex]);
+                }
+            }
             }
     
     
@@ -2501,11 +2549,9 @@ Fog & fog = gameState->fog;
             LAYER_BLOCK,
             LAYER_GLASS,  
             LAYER_DOOR,
-            LAYER_STAR,
-            LAYER_STAR_DEST,
             LAYER_LOCK,
             LAYER_UI,
-         };
+        };
         
         int32 count = ArrayCount(orderedDrawLayers);
         DrawSpriteLayers(orderedDrawLayers, count);
@@ -2596,6 +2642,13 @@ Fog & fog = gameState->fog;
                        },
                        Vector2 { 0, 0 }, 0, WHITE);
         }
+        
+        EntityLayer layers[] = 
+        {
+            LAYER_STAR,
+            LAYER_STAR_DEST,
+            };
+        DrawSpriteLayers(layers, ArrayCount(layers));
         
         EndMode2D();
         EndTextureMode();
@@ -2723,6 +2776,7 @@ Fog & fog = gameState->fog;
 #endif
         
         DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
+        DrawText(TextFormat("Move buffer timer: %.2fs", gameState->moveBufferTimer), 10, 350, 20, GREEN);
         }    
 }
 
@@ -2810,9 +2864,6 @@ void InitializeGame()
      gameState->canSplitSlime = true;
     #endif
     
-    // NOTE: Initalize gameState->undoStack record
-    gameState->undoStack.reset();
-    
     gameState->currentMapIndex = -1;
     gameState->simulating = false;
     
@@ -2822,11 +2873,19 @@ void InitializeGame()
     gameState->shakeTime = 0.0f;
     
     UpdateCamera();
-    ResetResetStates();
+    // ResetResetStates();
     
     // NOTE: reveal last map
     if (!gameState->isTestLevel && gameState->lastMap) RevealMap(*gameState->lastMap);
     
+    
+    // NOTE: Initalize gameState->undoStack record
+    gameState->undoStack.reset();
+    
+    // NOTE: push initial state as restart state
+    DynamicArray<Entity> ea = GetCurrentStateEntities();
+    InitUndoState(&gameState->restartState, gameState->playerEntityIndex, gameState->starCount,ea);
+                  
 }
 
 void CleanUpGame()

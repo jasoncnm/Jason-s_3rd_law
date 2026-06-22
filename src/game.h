@@ -82,17 +82,19 @@ struct Memory
 
 struct UndoState
 {
+    #if 0
     struct MapUndoInfo
     {
         uint32 mapIndex;
         bool8 initilized;
     };
+    std::vector<MapUndoInfo> undoMapInfos; 
+#endif
     
     int32 playerIndex;
     int32 starCount;
     // NOTE: using vector for dynamic heap allocations
     std::vector<Entity> undoEntities;
-    std::vector<MapUndoInfo> undoMapInfos; 
     
     Entity * GetByEntityIndex(uint32 entityIndex);
     };
@@ -109,10 +111,9 @@ struct UndoStack
     void pop_back();
     
     void push_back(uint32 playerIndex, uint32 starCount,
-                   DynamicArray<Entity> & ea,
-                   DynamicArray<UndoState::MapUndoInfo> & undoMapInfos);
+                   DynamicArray<Entity> & ea);
         
-    bool empty()
+    bool IsEmpty()
     {
         return count == 0;
     }
@@ -128,14 +129,12 @@ struct UndoStack
 struct Map
 {
     char mapID[100];
-    UndoState resetState;
     
     IVec2 tilePos;            // Top left tile position of the map
     int32   width;              // Number of tiles in X axis
     int32   height;             // Number of tiles in Y axis
     uint16 visibleStarCount = 0;
     
-    bool8 stateInitilized = false;
 };
 
 struct Fog
@@ -224,6 +223,7 @@ struct GameState
     
     GameScreen currentScreen = TITLE_SCREEN;
     UndoState lastState;
+    UndoState restartState;
     
     uint16 starCount = 0;
     
@@ -317,8 +317,7 @@ FindTileMapResult FindTileMap(IVec2 tilePos);
 void InitUndoState(UndoState * undoState, 
                    uint32 playerIndex, 
                    uint32 starCount,
-                    DynamicArray<Entity> & entityArray,
-                   DynamicArray<UndoState::MapUndoInfo> & undoMapInfos);
+                   DynamicArray<Entity> & entityArray);
 
 inline void Undo();
 
