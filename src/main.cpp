@@ -150,6 +150,7 @@ int main(int argumentCount, char *argumentArray[])
             return -1;
         }
         
+        gameState->soundData = LoadSoundData(&persistentStorage);
         
         gameState->textureAltas = LoadTexture(TEXTURE_PATH); // Initialize Texture
         if (!IsTextureValid(gameState->textureAltas))

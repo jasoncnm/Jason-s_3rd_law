@@ -53,6 +53,7 @@ constexpr float press_freq = 0.2f;
 #include "game_ui.h"
 #include "action_input.h"
 #include "assets.h"
+#include "sound.h"
 
 // ----------------------------------------------------
 // NOTE: Game Structs
@@ -170,6 +171,8 @@ struct MyCamera
 // NOTE: GameState
 struct GameState
 {
+    SoundData * soundData;
+    
     UndoStack undoStack;
     
     MyCamera camera;
