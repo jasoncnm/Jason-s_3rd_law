@@ -171,7 +171,7 @@ struct MyCamera
 // NOTE: GameState
 struct GameState
 {
-    SoundData * soundData;
+     AudioData audioData;
     
     UndoStack undoStack;
     

@@ -1986,6 +1986,13 @@ void SimulateInputs(DynamicArray<Entity> & prevEntState, uint32 & prevPlayerInde
                             gameState->aniSpeedAdjustable = true;
                             
                         }
+                        else if (moved)
+                        {
+                            // TODO  saparate move sound and move by pushed sound
+                            // NOTE: I might be more accurate to play sound when an tween event occur rather than logic
+                            // NOTE: Add a play sound event might  be a good idea
+                            PlayClip(&gameState->audioData, PLAYER_MOVE_SOUND, .2f);
+                        }
                         gameState->stateChanged = gameState->stateChanged || moved;
                     }
                 }
@@ -2782,6 +2789,7 @@ Fog & fog = gameState->fog;
 
 void InitializeGame()
 {
+    SetRandomSeed((uint32)GetTime());
     // NOTE: Initialization
     gameState->initialized = true;
     IVec2 directions[4] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} }; 

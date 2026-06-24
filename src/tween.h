@@ -16,6 +16,8 @@ struct TweenEvent
     TweenController * controller = nullptr;
     Entity * deleteEntity = nullptr;
     Entity * breakEntity = nullptr;
+    
+    // TODO: this seems ugly but I'm not sure how to refactor
     bool8 undo = false;
     
     void Reset()

@@ -167,6 +167,7 @@ inline Rectangle GetEntityRect(Entity * entity)
     return rect;
 }
 
+
 inline bool8 IsSlime(Entity * entity)
 {
     return entity->type == ENTITY_TYPE_SLIME;
