@@ -1938,6 +1938,8 @@ void SimulateInputs(DynamicArray<Entity> & prevEntState, uint32 & prevPlayerInde
             case MOVE_STATE:
             {
                 
+                if (!player->attach) break;
+                
                 IVec2 actionDir = { 0 };
                 if (gameState->canSplitSlime && JustPressed(gameState->input.keyMappings, SPLIT_KEY))
                 {
