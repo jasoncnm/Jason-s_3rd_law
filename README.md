@@ -1,6 +1,6 @@
 # ![](Assets/ICON/ICON.png)  Jason's_law (working title)
 
-This is a 2D puzzle game made with raylib/C++. The plan is contributing to this project until we have a polish game demo.
+This is a 2D puzzle game made with raylib/C++.
 
 # How to Build and Run
 clone the repo with the command
