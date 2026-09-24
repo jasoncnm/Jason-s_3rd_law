@@ -4,7 +4,7 @@ Jason's 3rd Law is a 2D grid-based puzzle game written in C++ using raylib.
 
 The game is built around interactions between movable slimes and blocks, electrical systems, doors, portals, bridges, collectibles, and other environmental objects.
 
-[![Watch the video](https://img.youtube.com/vi/DW0J4LAYtxA/hqdefault.jpg)](https://www.youtube.com/embed/DW0J4LAYtxA)
+[![Video Title](https://img.youtube.com/vi/v-zVFc_OQC4/0.jpg)](https://www.youtube.com/watch?v=v-zVFc_OQC4)
 
 # Features
 
