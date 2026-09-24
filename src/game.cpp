@@ -1129,6 +1129,31 @@ inline void UpdateCameraToTileMapSmooth(Map & map, real32 (*MoveFunc)(real32), r
     
     }
 
+const char * GetCameraState(MyCamera & camera)
+{
+    switch (camera.followState)
+    {
+        case MyCamera::LOCK_TO_MAP:
+        {
+            return "LOCK_TO_MAP";
+        }
+        case MyCamera::FOLLOW_WITHIN_MAP:
+        {
+            return "FOLLOW_WITHIN_MAP";
+        }
+        case MyCamera::FOLLOW_CENTER:
+        {
+            return "FOLLOW_CENTER";
+        }
+        case MyCamera::FOLLOW_ALONG_AXIS:
+        {
+            return "FOLLOW_ALONG_AXIS";
+        }
+    }
+    
+    return "none";
+}
+
 inline bool8 UpdateCamera(bool8 refocus = false)
 {
     MyCamera & cam = gameState->camera;
@@ -2027,6 +2052,7 @@ void SimulateInputs(DynamicArray<Entity> & prevEntState, uint32 & prevPlayerInde
 
 void GameplayUpdateAndRender()
 {
+    
     bool8 noPlayer = false;
     if (!gameState->switching)
     {
@@ -2780,12 +2806,12 @@ Fog & fog = gameState->fog;
             DrawText("Game Simulating", gameState->screenWidth / 4, gameState->screenHeight / 4, 20, RED);
             }
         
+        DrawText(TextFormat("Move buffer timer: %.2fs", gameState->moveBufferTimer), 10, 350, 20, GREEN);
 #endif
         
 #endif
         
         DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
-        DrawText(TextFormat("Move buffer timer: %.2fs", gameState->moveBufferTimer), 10, 350, 20, GREEN);
         }    
 }
 
@@ -2958,7 +2984,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
             DrawScrollingBackGround(gameState->bgTexture, DARKGREEN);
             
-            const char * Title = "TITLE SCREEN";
+            const char * Title = "JASON'S 3rd LAW";
             int32 TitleTextX = (GetScreenWidth() - MeasureText(Title, 40)) / 2;
             int32 TitleTextY = (GetScreenHeight() - 40) / 2 - 100;
             DrawText(Title, TitleTextX, TitleTextY, 40, WHITE);

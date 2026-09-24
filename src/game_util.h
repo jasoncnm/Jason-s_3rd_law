@@ -125,31 +125,6 @@ Color IntToRGBA(uint32 val)
     return color;
 }
 
-const char * GetCameraState(MyCamera & camera)
-{
-    switch (camera.followState)
-    {
-        case MyCamera::LOCK_TO_MAP:
-        {
-            return "LOCK_TO_MAP";
-        }
-        case MyCamera::FOLLOW_WITHIN_MAP:
-        {
-            return "FOLLOW_WITHIN_MAP";
-        }
-        case MyCamera::FOLLOW_CENTER:
-        {
-            return "FOLLOW_CENTER";
-        }
-        case MyCamera::FOLLOW_ALONG_AXIS:
-        {
-            return "FOLLOW_ALONG_AXIS";
-        }
-    }
-    
-    return "none";
-}
-
 const char * GetEntityType(Entity * entity)
 {
     if (entity)

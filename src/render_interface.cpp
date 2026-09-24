@@ -33,18 +33,6 @@ void UpdateShaderInfo(ShaderInfo & shaderInfo)
     
 }
 
-Rectangle GetCameraRect(Camera2D camera)
-{
-    //Vector2 delta = { 50.0f, 50.0f };
-    Vector2 offset = Vector2Scale(camera.offset, 1.0f / camera.zoom);//  - delta;        
-    Vector2 topleft = Vector2Subtract(camera.target, offset);
-    
-    Rectangle result = { topleft.x, topleft.y,
-        offset.x * 2, offset.y * 2 };
-    
-    return result;
-}
-
 void DebugDrawPlayerActionState(ActionState state, int32 x, int32 y, int32 fontSize, Color color)
 {
     char * stateTable[] = { 
@@ -65,6 +53,20 @@ void DrawTile(IVec2 tilePos, Color color)
     Vector2 pivot = GetTilePivot(tilePos, tileSize);
     Rectangle rect = { pivot.x, pivot.y, MAP_TILE_SIZE, MAP_TILE_SIZE };
     DrawRectangleRec(rect, color);
+}
+
+
+// NOTE: internal function
+static Rectangle GetCameraRect(Camera2D camera)
+{
+    //Vector2 delta = { 50.0f, 50.0f };
+    Vector2 offset = Vector2Scale(camera.offset, 1.0f / camera.zoom);//  - delta;        
+    Vector2 topleft = Vector2Subtract(camera.target, offset);
+    
+    Rectangle result = { topleft.x, topleft.y,
+        offset.x * 2, offset.y * 2 };
+    
+    return result;
 }
 
 void DrawTileMap(Camera2D camera, IVec2 startPos, IVec2 dim, Color tileColor, Color gridColor)

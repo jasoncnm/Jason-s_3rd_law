@@ -83,14 +83,6 @@ struct Memory
 
 struct UndoState
 {
-    #if 0
-    struct MapUndoInfo
-    {
-        uint32 mapIndex;
-        bool8 initilized;
-    };
-    std::vector<MapUndoInfo> undoMapInfos; 
-#endif
     
     int32 playerIndex;
     int32 starCount;
@@ -171,59 +163,65 @@ struct MyCamera
 // NOTE: GameState
 struct GameState
 {
+    // NOTE: Audio Module
      AudioData audioData;
     
+    // NOTE: Undo Module
     UndoStack undoStack;
     
+    // NOTE: Camera Module
     MyCamera camera;
+    
+    // NOTE: Rendering Module
+    Color bgColor;
     Texture2D textureAltas;
     Texture2D bgTexture;
-    
     RenderTexture2D renderTarget;
-    
     StarFields starFields;
-    
-    bool8 shake = false;
-    real32 shakeTime = 0;
-    real32 time = 0.0f;
-    real32 shakeStrength;
-    
-    real32 moveBufferTimer = 0;
-    GameInputType lastMoveKey;
     
     //PostFX postFX[FX_COUNT];
     ShaderInfo postShader;
     ShaderInfo movableShader;
     ShaderInfo portalShader;
     
+    bool8 shake = false;
+    real32 shakeTime = 0;
+    real32 time = 0.0f;
+    real32 shakeStrength;
+    Fog fog;
+    
+    int32 screenWidth = SCREEN_WIDTH;
+    int32 screenHeight = SCREEN_HEIGHT;
+    
+    // NOTE: Input Module
+    Input input;
+    real32 moveBufferTimer = 0;
+    GameInputType lastMoveKey;
+    
+    // NOTE: Entity Module
     Array<uint32, MAX_ENTITIES> entityTable[LAYER_COUNT];
     Array<Entity, MAX_ENTITIES> entities;
+    uint32 playerEntityIndex;
+    int32 lastTutBlockIndex;
     
+    
+    // NOTE: TileMap Module
     uint32 tileMapCount;
     Map tileMaps[500];
     Map * lv2Map;
     Map * lastMap;
     
-    Fog fog;
-    
-    Input input;
-    Color bgColor;
-    
     IVec2 tileMin, tileMax;
     
-    uint32 playerEntityIndex;
-    
-    // NOTE: map index of the map containing camera follow entity current tilePos
+    //  map index of the map containing camera follow entity current tilePos
     int32 currentMapIndex;
-    // NOTE: map index of the map containing camera follow entity prev tilePos
+    //  map index of the map containing camera follow entity prev tilePos
     int32 prevMapIndex;
-    // NOTE: map index of the map containing player tilePos
+    //  map index of the map containing player tilePos
     int32 playerMapIndex;
     
-    int32 lastTutBlockIndex;
-    int32 screenWidth = SCREEN_WIDTH;
-    int32 screenHeight = SCREEN_HEIGHT;
     
+    // NOTE: Game State Module
     GameScreen currentScreen = TITLE_SCREEN;
     UndoState lastState;
     UndoState restartState;
