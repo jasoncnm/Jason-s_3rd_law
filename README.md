@@ -36,7 +36,7 @@ Then, to run the game, type
 ```
 hotrun.bat
 ```
-Alternatively, Go to the latest successful [Actions](https://github.com/jasoncnm/Jason-s_3rd_law/actions) and download and the 'release-file' artifacts. And Run 
+Alternatively, go and download the latest [release artifacts](https://github.com/jasoncnm/Jason-s_3rd_law/actions/runs/39805864821/artifacts/12438316092). Then unzip the file and run 
 ```
 game.exe
 ```
