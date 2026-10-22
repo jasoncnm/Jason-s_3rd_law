@@ -19,7 +19,7 @@ The game is built around interactions between movable slimes and blocks, electri
 - Live code editing in Windows by compiling gameplay code into a DLL
 - JSON-based tilemap level creation
 
-# How to Build and Run
+# How to Build and Run (Windows System only)
 Clone the repo with the command
 ```
 git clone --recurse-submodules <URL> 
