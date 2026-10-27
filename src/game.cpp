@@ -2746,7 +2746,18 @@ Fog & fog = gameState->fog;
         {
         DrawText(TextFormat("Follow Entity Type: %s(%d)", GetEntityType(followEnt), followEnt->entityIndex),
                  10, 200, 25, YELLOW);
-        }
+            }
+            
+            if (GetPlayer()->actionState == FREEZE_STATE)
+            {
+                DrawText(TextFormat("Player Freezed"),
+                         10, 220, 25, YELLOW);
+                }
+            else if (GetPlayer()->actionState == MOVE_STATE)
+            {
+                DrawText(TextFormat("Player Moved"),
+                         10, 220, 25, YELLOW);
+            }
         
         real32 vert = 445;
         real32 gap = 100;
@@ -2944,7 +2955,6 @@ void CleanUpGame()
 // Called on every frame
 UPDATE_AND_RENDER(UpdateAndRender)
 {
-    
     if (gameState != gameStateIn) gameState = gameStateIn;
     if (gameMemory != gameMemoryIn) gameMemory = gameMemoryIn;
     

@@ -133,7 +133,6 @@ int main(int argumentCount, char *argumentArray[])
         MaximizeWindow();
 #else
         SetExitKey(0);
-        ToggleBorderlessWindowed();
 #endif
         
         Image icon = LoadImage("Assets/ICON/ICON.png");

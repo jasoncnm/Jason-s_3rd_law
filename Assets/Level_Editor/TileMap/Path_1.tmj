@@ -60,10 +60,6 @@
         {
             "firstgid": 1,
             "source": "../TileSet/game_tilesets.tsj"
-        },
-        {
-            "firstgid": 391,
-            "source": "../TileSet/game_tilesets.tsj"
         }
     ],
     "tilewidth": 32,

@@ -19,5 +19,5 @@ def ReplaceTileSet(mapDir):
 
 print(os.getcwd());
 
-ReplaceTileSet('Assets/Level_Editor/TileMap/')
-ReplaceTileSet('Assets/Level_Editor/TestLevels/')
+ReplaceTileSet('TileMap/')
+ReplaceTileSet('TestLevels/')

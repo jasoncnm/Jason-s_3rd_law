@@ -599,7 +599,7 @@ inline bool8 UpdateElectricDoor()
             {
                 OnSourcePowerOn(sourceCableIndex);
                 changed = true;
-                // source->sourceLit = true;
+                 source->sourceLit = true;
             }
                 
         }
@@ -621,6 +621,7 @@ for (uint32 i = 0; i < Connection_Indices.count; i++)
                     {
                     connection->conductive = true;
                     OnSourcePowerOn(connection->entityIndex);
+                    GetEntity(connection->sourceIndex)->sourceLit = true;
                         changed = true;
                     }
             }

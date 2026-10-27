@@ -8,7 +8,7 @@
             0, 0, 0, 0, 0, 281, 212, 212, 224, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 221, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 221, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 231, 232, 232,
+            0, 0, 0, 0, 0, 0, 0, 0, 231, 212, 212,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -19,7 +19,7 @@
          "name":"Overlap",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":11,
          "x":0,
          "y":0
@@ -41,7 +41,7 @@
          "name":"Door",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":11,
          "x":0,
          "y":0
@@ -63,7 +63,7 @@
          "name":"Blocks",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":11,
          "x":0,
          "y":0
