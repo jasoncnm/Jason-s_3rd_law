@@ -22,11 +22,11 @@ int main(void)
 
 #include "WinDef.h"
 #include "winbase.h"
-#include "platform.h"
+#include "platform/platform.h"
 
 #if defined _WIN32
 
-#include "win32_hot_reload.cpp"
+#include "platform/win32_hot_reload.cpp"
 #elif defined __linux__
 #error Linux build not supported
 #elif defined __APPLE__
@@ -39,7 +39,7 @@ int main(void)
 
 
 #if defined _WIN32
-#include "win32_memory.cpp"
+#include "platform/win32_memory.cpp"
 #endif
 
 
@@ -91,7 +91,7 @@ int main(int argumentCount, char *argumentArray[])
     //--------------------------------------------------------------------------------------
     
 #if GAME_INTERNAL
-     void * baseAddress = (void *)TB(2);
+    void * baseAddress = (void *)TB(2);
 
     size_t transientStorageSize = MB(500);
     size_t perminentStorageSize = GB(1);
@@ -99,7 +99,7 @@ int main(int argumentCount, char *argumentArray[])
     BumpAllocator persistentStorage = MakeBumpAllocator(baseAddress, perminentStorageSize);
     BumpAllocator transientStorage =
         MakeBumpAllocator((uint8 *)persistentStorage.memory + persistentStorage.capacity, transientStorageSize);
-    #else
+#else
     
     BumpAllocator persistentStorage = MakeBumpAllocator(MB(500));
     BumpAllocator transientStorage = MakeBumpAllocator(MB(500));

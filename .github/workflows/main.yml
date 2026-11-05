@@ -4,12 +4,16 @@ permissions:
   contents: write 
 
 on:
+  
   push:
-	paths-ignore:
-	  - '**.md'
     branches: [ main ]
+    
+    paths-ignore:
+      - '**.md'
+
     tags:
       - 'v*'
+
   pull_request:
     branches: [ main ]
 jobs:

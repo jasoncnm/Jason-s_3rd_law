@@ -4,48 +4,36 @@
 #define DEBUG_VIEW_H
 
 
-void DrawDebugViewEntity(Entity * entity)
+void DebugViewControl(bool8 & debugView, bool8 & showFog)
 {
-    
-    #if 0
-    
-// NOTE: Draw Debug Informations
-    if (entity->type == ENTITY_TYPE_BLOCK)
+    // NOTE: Developer Debug Cheats
     {
         
-        // if (CheckProjectState(entity))
-        //{
-            //color = ColorTint(color, GRAY);
-        //}
-    }
-    
-    if (!IsSlime(entity) && FindAttachSlime(entity))
-    {
-        color = BLUE;
-    }
-    
-    if (IsSlime(entity))
-    {
+        if (IsKeyPressed(KEY_EQUAL))
+        {
+            SetShake(0.05f, 0.001f);
+            gameState->starCount++;
+        }
         
-        DrawCircleV(entity->pivot + Vector2 {entity->tileSize/2, entity->tileSize/2}, 
-                    3, ColorAlpha(YELLOW, 0.8f));
-        DrawTile(PivotToTilePos(entity->pivot, entity->tileSize), ColorAlpha(RED, 0.5f));
+        
+        if (IsKeyPressed(KEY_NINE))
+        {
+            UnloadTexture(gameState->bgTexture);
+            UnloadTexture(gameState->textureAltas);    // Unload render texture
+            gameState->textureAltas = LoadTexture(TEXTURE_PATH);
+            gameState->bgTexture = LoadTexture(BACKGROUND_PATH);
+        }
+        
+        if (IsKeyPressed(KEY_RIGHT_BRACKET))
+        {
+            debugView = !debugView;
+        }
+        
+        if (IsKeyPressed(KEY_LEFT_BRACKET))
+        {
+            showFog = !showFog;
+        }
     }
-    
-    if (IsSlime(entity))
-    {
-        real32 halfSize = entity->tileSize/2;
-        Vector2 center = entity->pivot + Vector2 {halfSize, halfSize};
-        Vector2 attachPos = center + { halfSize * entity->attachDir.x, halfSize * entity->attachDir.y };
-        
-        IVec2 parallel = { entity->attachDir.y, entity->attachDir.x };
-        
-        Vector2 A = attachPos + { parallel.x * halfSize, parallel.y * halfSize };
-        Vector2 B = attachPos - { parallel.x * halfSize, parallel.y * halfSize };
-        DrawLineEx(A, B, 5, BLUE);
-        
-    }
-    #endif
 }
 
 void DrawDebugViewGame(Entity * followEnt)
@@ -120,7 +108,7 @@ void DrawDebugViewGame(Entity * followEnt)
     
 }
 
-void DrawDebugViewUI(Entity * followEnt, real32 contrast, real32 saturation, real32 brightness)
+void DrawDebugViewUI(Entity * followEnt, real32 * contrast, real32 * saturation, real32 * brightness)
 {
     // NOTE: UI Draw Game Informations
     Entity * player = GetEntity(gameState->playerEntityIndex);
@@ -155,9 +143,9 @@ void DrawDebugViewUI(Entity * followEnt, real32 contrast, real32 saturation, rea
     
     real32 vert = 445;
     real32 gap = 100;
-    GuiSliderBar(Rectangle{ 100, vert, 400, 30 }, "Contrast", TextFormat("%.1f", contrast), &contrast, -100.0f, 100.0f);
-    GuiSliderBar(Rectangle{ 100, vert + gap, 400, 30 }, "Saturation", TextFormat("%.1f", saturation), &saturation, -100.0f, 100.0f);
-    GuiSliderBar(Rectangle{ 100, vert + gap * 2, 400, 30 }, "Brightness", TextFormat("%.1f", brightness), &brightness, 0, 10.0f);
+    GuiSliderBar(Rectangle{ 100, vert, 400, 30 }, "Contrast", TextFormat("%.1f", contrast), contrast, -100.0f, 100.0f);
+    GuiSliderBar(Rectangle{ 100, vert + gap, 400, 30 }, "Saturation", TextFormat("%.1f", saturation), saturation, -100.0f, 100.0f);
+    GuiSliderBar(Rectangle{ 100, vert + gap * 2, 400, 30 }, "Brightness", TextFormat("%.1f", brightness), brightness, 0, 10.0f);
     
     DrawText(TextFormat("Stars Collected: %d",
                         gameState->starCount),

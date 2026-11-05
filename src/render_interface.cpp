@@ -232,8 +232,10 @@ void UpdateAndDrawStarFieldBG(StarFields * starFields, int32 offsetX = 0, int32 
     
 }
 
+
 void PostProcessing(RenderTexture2D & renderTarget, ShaderInfo & shader, 
-                    int32 shake, real32 shakeStrength, float time)
+                    int32 shake, real32 shakeStrength, real32 time,
+                    real32 * contrast, real32 * saturation, real32 * brightness)
 {
     
     int32 tWidth = renderTarget.texture.width;
@@ -253,6 +255,18 @@ void PostProcessing(RenderTexture2D & renderTarget, ShaderInfo & shader,
     SetShaderValue(shader.shader, offsetLoc, &val, SHADER_UNIFORM_FLOAT);
     SetShaderValue(shader.shader, shakeStrengthLoc, &shakeStrength, SHADER_UNIFORM_FLOAT);
     SetShaderValue(shader.shader, shakeLoc, &shake, SHADER_UNIFORM_INT);
+
+            
+    int32 contrastLoc =
+        GetShaderLocation(gameState->postShader.shader, "contrast");
+    int32 saturationLoc =
+        GetShaderLocation(gameState->postShader.shader, "saturation");
+    int32 brightnessLoc = 
+        GetShaderLocation(gameState->postShader.shader, "brightness");
+    SetShaderValue(gameState->postShader.shader, contrastLoc, contrast, SHADER_UNIFORM_FLOAT);
+    SetShaderValue(gameState->postShader.shader, saturationLoc, saturation, SHADER_UNIFORM_FLOAT);
+    SetShaderValue(gameState->postShader.shader, brightnessLoc, brightness, SHADER_UNIFORM_FLOAT);
+
     
     BeginShaderMode(shader.shader);
     

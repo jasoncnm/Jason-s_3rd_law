@@ -598,6 +598,11 @@
          "id":40,
          "properties":[
                 {
+                 "name":"color_alpha",
+                 "type":"float",
+                 "value":0.5
+                }, 
+                {
                  "name":"place_holder",
                  "type":"string",
                  "value":""
@@ -605,7 +610,7 @@
                 {
                  "name":"type",
                  "type":"string",
-                 "value":"null"
+                 "value":"star_dest"
                 }]
         }, 
         {

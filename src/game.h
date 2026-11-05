@@ -52,7 +52,7 @@ constexpr float press_freq = 0.2f;
 #include "tween_controller.h"
 #include "game_ui.h"
 #include "action_input.h"
-#include "assets.h"
+#include "assets/assets.h"
 #include "sound.h"
 
 // ----------------------------------------------------

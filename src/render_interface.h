@@ -7,7 +7,7 @@
    $Notice: $
    ======================================================================== */
 
-#include "assets.h"
+#include "assets/assets.h"
 #include "engine_lib.h"
 #include "entity.h"
 

@@ -8,10 +8,10 @@
 #include "debug_view.h"
 
 #include "render_interface.cpp"
-#include "assets.cpp"
+#include "assets/assets.cpp"
 #include "entity.cpp"
 #include "electric_door.cpp"
-#include "assets_loader.cpp"
+#include "assets/assets_loader.cpp"
 #include "tween.cpp"
 #include "tween_controller.cpp"
 #include "save_game.cpp"
@@ -20,6 +20,7 @@
   TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
   - Fix weird animation bugs 
   - Redo shake shader with the godot implementation (See Below)
+  -  reset system
 
   uniform real32 ShakeStrength = 0;
   uniform vec2 FactorA  = vec2(100.0,100.0);
@@ -46,7 +47,6 @@
 
 // NOTE: done but need testing
 1. background
--  reset system
 2. key and door
 - Undo should update the maps reset states
 */
@@ -2475,61 +2475,12 @@ void GameplayUpdateAndRender()
     static real32 contrast = -2.0f;
     static real32 saturation = 4.5f;
     static real32 brightness = 1.1f;
+    
     static bool8 debugView = false;
     static bool8 showFog = true;
     
 #if GAME_INTERNAL
-    // NOTE: Developer Debug Cheats
-    {
-        
-        if (IsKeyPressed(KEY_EQUAL))
-        {
-            SetShake(0.05f, 0.001f);
-            gameState->starCount++;
-        }
-        
-        
-        if (IsKeyPressed(KEY_NINE))
-        {
-            UnloadTexture(gameState->bgTexture);
-            UnloadTexture(gameState->textureAltas);    // Unload render texture
-            gameState->textureAltas = LoadTexture(TEXTURE_PATH);
-            gameState->bgTexture = LoadTexture(BACKGROUND_PATH);
-        }
-        
-        if (IsKeyPressed(KEY_RIGHT_BRACKET))
-        {
-            debugView = !debugView;
-        }
-        
-        if (IsKeyPressed(KEY_LEFT_BRACKET))
-        {
-            showFog = !showFog;
-        }
-        
-    }
-    
-#if 0
-    EntityLayer layers[] =  { LAYER_DOOR };
-    Entity * block = FindEntityByLocationAndLayers(IVec2 { 69, 130 }, layers, 1);
-    if (!block)
-    {
-        Entity addEntity = {};
-        addEntity.type = ENTITY_TYPE_DOOR;
-        addEntity.down = true;
-        addEntity.up = true;
-        addEntity.tilePos = IVec2 { 69,130 };
-        addEntity.sprite = GetSprite(84);
-        addEntity.active = true;
-        addEntity.tileSize = DEFAULT_TILE_SIZE;
-        addEntity.pivot = GetTilePivot(addEntity.tilePos, DEFAULT_TILE_SIZE);
-        addEntity.color = WHITE;
-        uint32 entityIndex = gameState->entities.Add(addEntity);
-        GetEntity(entityIndex)->entityIndex = entityIndex;
-        gameState->entityTable[LAYER_DOOR].Add(entityIndex);
-    }
-#endif
-    
+    DebugViewControl(debugView, showFog);    
 #endif
     // NOTE: Render
     {
@@ -2631,25 +2582,9 @@ void GameplayUpdateAndRender()
             gameState->shake = false;
         }
         
-        {
-            int32 contrastLoc =
-                GetShaderLocation(gameState->postShader.shader, "contrast");
-            int32 saturationLoc =
-                GetShaderLocation(gameState->postShader.shader, "saturation");
-            int32 brightnessLoc = 
-                GetShaderLocation(gameState->postShader.shader, "brightness");
-            
-            
-            SetShaderValue(gameState->postShader.shader, contrastLoc, &contrast, SHADER_UNIFORM_FLOAT);
-            
-            SetShaderValue(gameState->postShader.shader, saturationLoc, &saturation, SHADER_UNIFORM_FLOAT);
-            
-            SetShaderValue(gameState->postShader.shader, brightnessLoc, &brightness, SHADER_UNIFORM_FLOAT);
-            
-            PostProcessing(gameState->renderTarget, gameState->postShader, 
-                           gameState->shake, gameState->shakeStrength, gameState->time);
-        }
-        
+        PostProcessing(gameState->renderTarget, gameState->postShader, 
+                       gameState->shake, gameState->shakeStrength, gameState->time,
+                       &contrast, &saturation, &brightness);
         
         if (noPlayer)
         {
@@ -2658,11 +2593,9 @@ void GameplayUpdateAndRender()
         
         if (debugView)
         {
-            DrawDebugViewUI(followEnt, contrast, saturation, brightness);
+            DrawDebugViewUI(followEnt, &contrast, &saturation, &brightness);
+            DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
         }
-
-
-        DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
     }    
 }
 
