@@ -74,43 +74,48 @@
          "name":"Text",
          "objects":[
                 {
-                 "height":25.8333333333333,
+                 "height":32,
                  "id":1,
                  "name":"",
                  "rotation":0,
                  "text":
                     {
                      "bold":true,
-                     "fontfamily":"Segoe UI",
+                     "color":"#00ffff",
+                     "fontfamily":"Sans Serif Collection",
                      "halign":"center",
+                     "pixelsize":20,
                      "text":"Left",
                      "valign":"center",
                      "wrap":true
                     },
                  "type":"",
                  "visible":true,
-                 "width":43.3333333333333,
-                 "x":75.3333333333333,
-                 "y":259.5
+                 "width":64,
+                 "x":64,
+                 "y":256
                 }, 
                 {
-                 "height":19,
+                 "height":32,
                  "id":3,
                  "name":"",
                  "rotation":0,
                  "text":
                     {
                      "bold":true,
+                     "color":"#00ffff",
+                     "fontfamily":"Sans Serif Collection",
                      "halign":"center",
+                     "pixelsize":20,
                      "text":"Right",
                      "valign":"center",
                      "wrap":true
                     },
                  "type":"",
                  "visible":true,
-                 "width":51.3333333333334,
-                 "x":233.166666666667,
-                 "y":262.166666666667
+                 "width":64,
+                 "x":224,
+                 "y":256
                 }],
          "opacity":1,
          "type":"objectgroup",

@@ -30,38 +30,44 @@
          "name":"Text",
          "objects":[
                 {
-                 "height":19,
+                 "height":32,
                  "id":1,
                  "name":"",
                  "rotation":0,
                  "text":
                     {
                      "bold":true,
+                     "color":"#00ffff",
+                     "halign":"center",
                      "text":"Undo",
+                     "valign":"center",
                      "wrap":true
                     },
                  "type":"",
                  "visible":true,
-                 "width":83,
-                 "x":203.833333333333,
-                 "y":69.8333333333333
+                 "width":64,
+                 "x":192,
+                 "y":64
                 }, 
                 {
-                 "height":19,
+                 "height":32,
                  "id":2,
                  "name":"",
                  "rotation":0,
                  "text":
                     {
                      "bold":true,
+                     "color":"#00ffff",
+                     "halign":"center",
                      "text":"Reset",
+                     "valign":"center",
                      "wrap":true
                     },
                  "type":"",
                  "visible":true,
-                 "width":83,
-                 "x":203.833333333333,
-                 "y":104.166666666667
+                 "width":64,
+                 "x":192,
+                 "y":96
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -72,8 +78,8 @@
         {
          "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 431, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 414, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

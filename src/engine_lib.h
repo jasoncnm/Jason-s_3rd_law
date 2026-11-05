@@ -571,5 +571,15 @@ Pack32(uint32 val,uint8 *dest)
     dest[3] = (uint8)((val & 0x000000ff))      ;
 }
 
+uint32 DecodeHex(std::string hexStr)
+{
+    uint32 result = 0;
+    SM_ASSERT(!hexStr.empty() && hexStr[0] == '#', "Not valid hex string");
+    hexStr = hexStr.substr(1);
+
+    result = (uint32)std::stoul(hexStr, nullptr, 16);
+    return result;
+}
+
 #define ENGINE_LIB_H
 #endif

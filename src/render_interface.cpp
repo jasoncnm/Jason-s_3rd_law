@@ -57,7 +57,7 @@ void DrawTile(IVec2 tilePos, Color color)
 
 
 // NOTE: internal function
-static Rectangle GetCameraRect(Camera2D camera)
+Rectangle GetCameraRect(Camera2D camera)
 {
     //Vector2 delta = { 50.0f, 50.0f };
     Vector2 offset = Vector2Scale(camera.offset, 1.0f / camera.zoom);//  - delta;        

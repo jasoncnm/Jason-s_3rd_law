@@ -22,6 +22,9 @@ using json = nlohmann::json;
 #define LEVEL_2_ROOM_NAME "TileMap/Room_59.tmj"
 #define LAST_ROOM_NAME "TileMap/Path_88.tmj"
 
+#define DEFAULT_FONT_SIZE 16
+#define DEFAULT_FONT_COLOR BLACK
+
 //  ========================================================================
 //              NOTE: Level structs
 //  ========================================================================
@@ -56,7 +59,7 @@ entityTypeMap
     {"cable_connect", ENTITY_TYPE_CABLE_CONNECT},
     {"cable_source", ENTITY_TYPE_CABLE_SOURCE},
     {"cable_link", ENTITY_TYPE_CABLE_LINK},
-    {"ui", ENTITY_TYPE_UI},
+    {"ui_tile", ENTITY_TYPE_UI_TILE},
     
     {"error", ENTITY_TYPE_NULL},
     {"null", ENTITY_TYPE_NULL},

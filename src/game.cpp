@@ -5,6 +5,8 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
+#include "debug_view.h"
+
 #include "render_interface.cpp"
 #include "assets.cpp"
 #include "entity.cpp"
@@ -15,39 +17,39 @@
 #include "save_game.cpp"
 
 /*
-TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
-- Fix weird animation bugs 
-- Redo shake shader with the godot implementation (See Below)
+  TODO BUGS: FIX THE BUGS THAT NEEDS TO BE FIXED
+  - Fix weird animation bugs 
+  - Redo shake shader with the godot implementation (See Below)
 
-uniform real32 ShakeStrength = 0;
-uniform vec2 FactorA  = vec2(100.0,100.0);
-uniform vec2 FactorB  = vec2(1.0,1.0);
-uniform vec2 magnitude = vec2(0.01,0.01);
-uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
+  uniform real32 ShakeStrength = 0;
+  uniform vec2 FactorA  = vec2(100.0,100.0);
+  uniform vec2 FactorB  = vec2(1.0,1.0);
+  uniform vec2 magnitude = vec2(0.01,0.01);
+  uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
 
-void fragment() {
-    vec2 uv = SCREEN_UV;
-    uv -= 0.5;
-    uv *= 1.0 - 2.0 * magnitude.x;
-    uv += 0.5;
-    vec2 dt = vec2(0.0, 0.0);
-    dt.x = sin(TIME * FactorA.x+FactorB.x) * magnitude.x;
-    dt.y = cos(TIME *FactorA.y+ FactorB.y) * magnitude.y;
-    COLOR = texture(SCREEN_TEXTURE, SCREEN_UV + dt * ShakeStrength);
-}
+  void fragment() {
+  vec2 uv = SCREEN_UV;
+  uv -= 0.5;
+  uv *= 1.0 - 2.0 * magnitude.x;
+  uv += 0.5;
+  vec2 dt = vec2(0.0, 0.0);
+  dt.x = sin(TIME * FactorA.x+FactorB.x) * magnitude.x;
+  dt.y = cos(TIME *FactorA.y+ FactorB.y) * magnitude.y;
+  COLOR = texture(SCREEN_TEXTURE, SCREEN_UV + dt * ShakeStrength);
+  }
 
 
-TODO: Things that I can do beside arts and design I guess
-3. collectable: show in ui
-5. Sound effect
-2. saves and loads
+  TODO: Things that I can do beside arts and design I guess
+  3. collectable: show in ui
+  5. Sound effect
+  2. saves and loads
 
 // NOTE: done but need testing
 1. background
 -  reset system
 2. key and door
 - Undo should update the maps reset states
- */
+*/
 
 //  ========================================================================
 //              NOTE: Internal Functions (internal)
@@ -79,7 +81,7 @@ void UndoStack::push_back(uint32 playerIndex, uint32 starCount,
     if (last > MAX_UNDO) last = 1;
     if (count > MAX_UNDO) count = MAX_UNDO;
     InitUndoState(&undoStack[last - 1], playerIndex, starCount, entityArray);
-    }
+}
 
 void UndoStack::pop_back()
 {
@@ -136,19 +138,19 @@ void ChangeScreen(GameScreen screen)
     gameState->switching = true;
     gameState->nextScreen = screen;
     for (;GetKeyPressed() > 0;) {} // NOTE: Flush all the pressed key
-    }
+}
 
-  DynamicArray<int32> FindAllMapsWithStarCount(uint32 starCount)
+DynamicArray<int32> FindAllMapsWithStarCount(uint32 starCount)
 {
     uint32 count = 0;
     int32 * indices = (int32 *)BumpAllocArray(gameMemory->transientStorage, starCount, sizeof(int32));
     for (uint32 mapIndex = 0; mapIndex < gameState->tileMapCount; mapIndex++)
         if (gameState->tileMaps[mapIndex].visibleStarCount == starCount)
-    {
         {
-            indices[count++] = mapIndex;
+            {
+                indices[count++] = mapIndex;
+            }
         }
-    }
     
     DynamicArray<int32> result = { 0 };
     result.count = count;
@@ -170,7 +172,7 @@ void InitUndoState(UndoState * undoState,
         undoState->undoEntities.insert(undoState->undoEntities.begin(), 
                                        ea.elements, 
                                        ea.elements + ea.count);
-        }
+    }
 }
 
 bool8 MapIsVisible(Map & tileMap)
@@ -233,19 +235,19 @@ void RevealTile(Fog & fog, IVec2 tilePos)
     }
     else
     {
-    for (uint32 i = 0; i < fog.updatingIndices.count; i++)
-    {
-        uint32 index = fog.updatingIndices[i];
-        if (index == fogIndex)
+        for (uint32 i = 0; i < fog.updatingIndices.count; i++)
         {
-            add = false;
+            uint32 index = fog.updatingIndices[i];
+            if (index == fogIndex)
+            {
+                add = false;
+            }
         }
-    }
     }
     
     if (add)
-    fog.updatingIndices.Add(fogIndex);
-    }
+        fog.updatingIndices.Add(fogIndex);
+}
 
 void RevealEntity(Entity * entity, int32 visibility)
 {
@@ -263,7 +265,7 @@ void RevealEntity(Entity * entity, int32 visibility)
             if (!CheckOutOfBound(x, y))
             {
                 RevealTile(gameState->fog, IVec2{x, y});
-                }
+            }
         }
     }
     
@@ -343,7 +345,7 @@ void UpdateStars()
                 if (dist <= 0 || gameState->starT[starIndex] > 1)
                 {
                     CollectStar(star);
-                    }
+                }
                 else
                 {
                     Vector2 start = star->collectStart;
@@ -386,8 +388,14 @@ void SetDrawingEntities()
     for (uint32 i = 0; i < gameState->entities.count; i++)
     {
         Entity * ent = GetEntity(i);
+        
         if (ent)
         {
+            if (ent->type == ENTITY_TYPE_UI_TEXT)
+            {
+                ent->isVisible = true;
+                continue;
+            }
             FindTileMapResult mapResult = FindTileMap(ent->tilePos);
             if (ent->tweenController.NoTweens() && mapResult.map && !MapIsVisible(*mapResult.map))
             {
@@ -396,14 +404,14 @@ void SetDrawingEntities()
             }
             
             Rectangle dest =
-            {
-                //topLeft.x + tileSize, topLeft.y + tileSize,
-                ent->pivot.x, ent->pivot.y,
-                ent->tileSize.x, ent->tileSize.y
-            };
+                {
+                    //topLeft.x + tileSize, topLeft.y + tileSize,
+                    ent->pivot.x, ent->pivot.y,
+                    ent->tileSize.x, ent->tileSize.y
+                };
             ent->isVisible =
                 CheckCollisionRecs(dest, GetCameraRect(gameState->camera.base));
-                }
+        }
     }
 }
 
@@ -419,7 +427,7 @@ DynamicArray<UndoState::MapUndoInfo> GetCurrentMapUndoInfos()
 {
     uint32 count = gameState->tileMapCount;
     UndoState::MapUndoInfo * infos =
-    (UndoState::MapUndoInfo *)BumpAllocArray(gameMemory->transientStorage, count, sizeof(UndoState::MapUndoInfo));
+        (UndoState::MapUndoInfo *)BumpAllocArray(gameMemory->transientStorage, count, sizeof(UndoState::MapUndoInfo));
     
     for (uint32 i = 0; i < count; i++)
     {
@@ -439,7 +447,7 @@ DynamicArray<Entity> GetCurrentStateEntities()
 {
     EntityLayer pushLayers[] = {
         LAYER_DOOR,
-          LAYER_CABLE,
+        LAYER_CABLE,
         LAYER_SOURCE,
         LAYER_CONNECTION,
         LAYER_GLASS,
@@ -450,18 +458,18 @@ DynamicArray<Entity> GetCurrentStateEntities()
         LAYER_LOCK,
         LAYER_LINK,
         LAYER_PORTAL,
-        };
+    };
     uint32 layerCount = ArrayCount(pushLayers);
     
     uint32 len = 0;
     for (uint32 idx = 0; idx < layerCount; idx++)
     {
         uint32 layer = pushLayers[idx];
-         len += gameState->entityTable[layer].count;
+        len += gameState->entityTable[layer].count;
     }
     
     Entity * entities =
-    (Entity *)BumpAllocArray(gameMemory->transientStorage, len, sizeof(Entity));
+        (Entity *)BumpAllocArray(gameMemory->transientStorage, len, sizeof(Entity));
     
     uint32 i = 0;
     for (uint32 idx = 0; idx < layerCount; idx++)
@@ -484,7 +492,7 @@ DynamicArray<Entity> GetCurrentStateEntities()
             }
             
             entities[i++] = ent;
-            }
+        }
     }
     
     SM_ASSERT(i == len, "incorrect len");
@@ -494,17 +502,17 @@ DynamicArray<Entity> GetCurrentStateEntities()
     result.elements = entities;
     
     return result;
-    }
+}
 
 inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & current)
 {
-            Entity * ent = current.pushEnt;
+    Entity * ent = current.pushEnt;
     switch(current.pushResult.state)
     {
         case PUSH_BLOCKED:
         {
             current.parent->pushResult.state = PUSH_BLOCKED;
-                current.parent->pushResult.blockedEntity = current.pushEnt;
+            current.parent->pushResult.blockedEntity = current.pushEnt;
             
             break;
         }
@@ -522,7 +530,7 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
                 
                 int32 index = ani.endEvents.Add(TweenEvent{0});
                 playEvent = &ani.endEvents[index];
-                }
+            }
             if (IsSlime(current.parent->pushEnt) && current.parent->pushEnt->attachedEntityIndex == ent->entityIndex)
             {
                 MoveEntity(ent, current.parent->pushEnt, playEvent, ent->tilePos + current.pushDir, 
@@ -547,7 +555,7 @@ inline void CheckPushState(Array<CheckThings, 100> & checkList, CheckThings & cu
             MergeSlimes(current.pushResult.mergeEntity, ent); 
             break;
         }
-        }
+    }
 }
 
 TweenEvent * GetPlayEventFromCheckThings(CheckThings * thing)
@@ -624,7 +632,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     
                     if (!target->attach || target->attachDir == -pushDir)
                     {
-                    // NOTE one special case 
+                        // NOTE one special case 
                         checkList.last().pushResult.state = PROJECT_DEFERRED;
                         
                         CheckThings second = {};
@@ -639,8 +647,8 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                     
                     finalPos = pos - pushDir;
                     
-                        goto MoveAndStop;
-                    }
+                    goto MoveAndStop;
+                }
                 case ENTITY_TYPE_BLOCK:
                 {
                     CheckThings newThings = {};
@@ -682,7 +690,7 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                         {
                             DettachSlime(attachSlime);
                         }
-                        }
+                    }
                     
                     break;
                 }
@@ -697,8 +705,8 @@ inline void ProjectAndCheck(Entity * projectedEnt,
                 {
                     if (target->type == ENTITY_TYPE_DOOR)
                     {
-                    bool8 blocked = DoorBlocked(target, pushDir) || DoorBlocked(target, -pushDir);
-                    if (!blocked) break;
+                        bool8 blocked = DoorBlocked(target, pushDir) || DoorBlocked(target, -pushDir);
+                        if (!blocked) break;
                     }
                     
                     Entity * blockedEntity = target;
@@ -734,13 +742,13 @@ inline void ProjectAndCheck(Entity * projectedEnt,
     }
     
     
-    MoveAndStop:;
+MoveAndStop:;
     MoveEntity(projectedEnt, attach, playEvent, finalPos, 
                BLOCK_PROJ_FUNC, BOUNCE_SPEED, !defered);
-    }
+}
 
 inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMass, 
-                                 int32 startMass, EntityLayer * checkLayers, uint32 layerCount)
+                      int32 startMass, EntityLayer * checkLayers, uint32 layerCount)
 {
     CheckThings & current = checkList.last();
     auto entList = FindAllEntitiesFromLocationAndLayers(current.pushEnt->tilePos + current.pushDir, 
@@ -754,7 +762,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
             current.pushResult.state = PUSH_BLOCKED;
             current.pushResult.blockedEntity = target;
             return;
-            }
+        }
         
         switch(target->type)
         {
@@ -765,7 +773,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 {
                     current.pushResult.state = PUSH_BLOCKED;
                     current.pushResult.blockedEntity = target;
-                        return;
+                    return;
                 }
                 break;
             }
@@ -775,7 +783,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 {
                     current.pushResult.state = PUSH_BLOCKED;
                     current.pushResult.blockedEntity = target;
-                        return;
+                    return;
                 }
                 break;
             }
@@ -805,7 +813,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                     return;
                     
                 }
-                }
+            }
             case ENTITY_TYPE_LOCK:
             {
                 if (target->open) break;
@@ -816,7 +824,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
             {
                 current.pushResult.state = PUSH_BLOCKED;
                 current.pushResult.blockedEntity = target;
-                    return;
+                return;
             }
             case ENTITY_TYPE_BLOCK:
             {
@@ -827,7 +835,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                     {
                         current.pushResult.state = PUSH_BLOCKED;
                         current.pushResult.blockedEntity = target;
-                            return;
+                        return;
                     }
                 }
                 
@@ -868,9 +876,9 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                                 continue;
                             }
                             else if ((ent->type == ENTITY_TYPE_DOOR) &&
-                                (!SameSide(ent, ent->tilePos, dirs[i]) || !DoorBlocked(ent, dirs[i])) ||
-                                (ent->type == ENTITY_TYPE_GLASS && ent->broken) ||
-                                (IsSlime(ent) && (!ent->attach || dirs[i] != current.pushDir)))
+                                     (!SameSide(ent, ent->tilePos, dirs[i]) || !DoorBlocked(ent, dirs[i])) ||
+                                     (ent->type == ENTITY_TYPE_GLASS && ent->broken) ||
+                                     (IsSlime(ent) && (!ent->attach || dirs[i] != current.pushDir)))
                             {
                                 continue;
                             }
@@ -915,7 +923,7 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 {
                     current.pushResult.state = PUSH_BLOCKED;
                     current.pushResult.blockedEntity = target;
-                        return;
+                    return;
                 }
                 
                 CheckThings newThings = {};
@@ -926,14 +934,14 @@ inline void PushCheck(Array<CheckThings, 100> & checkList, int32 & accumulatedMa
                 newThings.checkType = CHECK_MOVE;
                 newThings.parent = &current;
                 checkList.Add(newThings);
-                    return;
+                return;
             }
         }
     }
     
     current.pushResult.state = PUSH_MOVED;
         
-        return;
+    return;
 }
 
 
@@ -946,7 +954,7 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
     Array<CheckThings, 100> checkList;
     
     CheckThings root = 
-    { false, pushDir, startState, startEnt, { false, PUSH_NONE, nullptr } };
+        { false, pushDir, startState, startEnt, { false, PUSH_NONE, nullptr } };
     root.parent = &root;
     
     checkList.Add(root);
@@ -977,19 +985,19 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
                 if (parent->pushEnt != current.pushEnt && parent->pushResult.state == PROJECT_DEFERRED)
                 {
                     TweenEvent * playEvent = GetPlayEventFromCheckThings(parent->parent);
-                    #if 0
+#if 0
                     if (!parent->parent->pushEnt->tweenController.NoTweens())
                     {
                         int32 index = parent->parent->pushEnt->tweenController.endEvents.Add(TweenEvent{0});
                         playEvent = &parent->parent->pushEnt->tweenController.endEvents[index];
                     }
-                    #endif
+#endif
                     IVec2 pos = current.pushEnt->tilePos - current.pushDir;
                     MoveEntity(parent->pushEnt, nullptr, playEvent, pos, BLOCK_MOVE_FUNC, BOUNCE_SPEED, false);
                     
                 }
             }
-            }
+        }
         else
         {
             current.visited = true;
@@ -1002,12 +1010,12 @@ PushResult ActionCheck(Entity * startEnt, IVec2 pushDir, CheckType startState)
             {
                 PushCheck(checkList, accumulatedMass, startMass, checkLayers, layerCount);
             }
-                    }
+        }
     }
     
     // NOTE: Deal with root outside of the function
     return checkList.last().pushResult;
-    }
+}
 
 inline real32 GetCameraZoom(uint32 width, uint32 height)
 {
@@ -1042,16 +1050,16 @@ inline void UpdateCameraToTileMapSmooth(Map & map, real32 (*MoveFunc)(real32), r
         gameState->camera.tweenController.Reset();
         gameState->camera.base.target = startPos;
         gameState->camera.base.zoom = startZoom;
-}
+    }
     
     if (!Vector2Equals(gameState->camera.base.target, pos))
     {
         TweenParams params = {};
-    params.paramType = PARAM_TYPE_VECTOR2;
+        params.paramType = PARAM_TYPE_VECTOR2;
         params.startVec2 = startPos;
-    params.endVec2 = pos;
-    params.realVec2  = &gameState->camera.base.target;
-    AddTweenUnique(gameState->camera.tweenController, CreateTween(params, MoveFunc, moveSpeed));
+        params.endVec2 = pos;
+        params.realVec2  = &gameState->camera.base.target;
+        AddTweenUnique(gameState->camera.tweenController, CreateTween(params, MoveFunc, moveSpeed));
     }
     
     real32 oldZoom = gameState->camera.base.zoom;
@@ -1067,9 +1075,9 @@ inline void UpdateCameraToTileMapSmooth(Map & map, real32 (*MoveFunc)(real32), r
     }
     
     OnPlayEvent(&gameState->camera.tweenController);
-    }
+}
 
- FindTileMapResult FindTileMap(IVec2 tilePos)
+FindTileMapResult FindTileMap(IVec2 tilePos)
 {
     FindTileMapResult result = { 0 };
     for (uint32 i = 0; i < gameState->tileMapCount; i++)
@@ -1093,15 +1101,15 @@ inline void UpdateCameraToTileMapSmooth(Map & map, real32 (*MoveFunc)(real32), r
 }
 
 
- void SetCamFollowState(MyCamera & cam, Entity * followEnt)
+void SetCamFollowState(MyCamera & cam, Entity * followEnt)
 {
-    #if 0
+#if 0
     if (StarCollecting())
     {
         cam.followState = MyCamera::FOLLOW_STAR;
         return;
     }
-    #endif
+#endif
     if (gameState->zoomOut)
     {
         cam.followState = MyCamera::ZOOM_OUT;
@@ -1119,15 +1127,15 @@ inline void UpdateCameraToTileMapSmooth(Map & map, real32 (*MoveFunc)(real32), r
         if (gameState->prevMapIndex != gameState->currentMapIndex &&
             ((followEnt->tweenController.playing && (followEnt->tweenController.FindTweenByTweenProperty(PARAM_TYPE_VECTOR2, &followEnt->pivot)->dt == BOUNCE_SPEED)) ||
              !IsSlime(followEnt)))
-    {
-        cam.followState = MyCamera::FOLLOW_ALONG_AXIS;
-        return;
-            }
+        {
+            cam.followState = MyCamera::FOLLOW_ALONG_AXIS;
+            return;
+        }
     }
     
-     cam.followState = MyCamera::LOCK_TO_MAP;
+    cam.followState = MyCamera::LOCK_TO_MAP;
     
-    }
+}
 
 const char * GetCameraState(MyCamera & camera)
 {
@@ -1192,7 +1200,7 @@ inline bool8 UpdateCamera(bool8 refocus = false)
         }
         case MyCamera::LOCK_TO_MAP:
         {
-        if (gameState->currentMapIndex == -1)
+            if (gameState->currentMapIndex == -1)
             {
                 SM_ASSERT(IsSlime(followEnt), "Initial follow entity must be player");
                 gameState->screenWidth = GetScreenWidth();
@@ -1221,21 +1229,21 @@ inline bool8 UpdateCamera(bool8 refocus = false)
                 if (result.map) 
                 {
                     UpdateCameraToTileMapSmooth(*result.map,
-                                                            CAMERA_MOVE_FUNC, CAMERA_ZOOM_FUNC,
-                                                            CAMERA_MOVE_SPEED, CAMERA_ZOOM_SPEED);
+                                                CAMERA_MOVE_FUNC, CAMERA_ZOOM_FUNC,
+                                                CAMERA_MOVE_SPEED, CAMERA_ZOOM_SPEED);
                 }
             }
             
             
             break;
-            }
+        }
         case MyCamera::FOLLOW_CENTER:
         {
             FindTileMapResult result = FindTileMap(followEnt->tilePos);
             if (cam.tweenController.NoTweens())
             {
                 Vector2 center = followEnt->pivot +
-                                            Vector2 { followEnt->tileSize.x * 0.5f, followEnt->tileSize.y * 0.5f };
+                    Vector2 { followEnt->tileSize.x * 0.5f, followEnt->tileSize.y * 0.5f };
                 
                 real32 dist = Vector2Distance(center, cam.base.target) / (real32)MAP_TILE_SIZE;
                 
@@ -1246,22 +1254,22 @@ inline bool8 UpdateCamera(bool8 refocus = false)
                 params.realVec2  = &cam.base.target;
                 AddTweenUnique(cam.tweenController, CreateTween(params, 
                                                                 CAMERA_MOVE_FUNC, 
-                                                                               CAMERA_MOVE_SPEED * 5.0f,
-                                                                               dist));
+                                                                CAMERA_MOVE_SPEED * 5.0f,
+                                                                dist));
                 
                 SM_ASSERT(followEnt->type == ENTITY_TYPE_LOCK, "camera behaviour for lock only!");
                 if (!followEnt->tweenController.NoTweens() && !followEnt->tweenController.playing)
                 {
-                TweenEvent playEvent;
-                playEvent.controller = &followEnt->tweenController;
-                cam.tweenController.endEvents.Add(playEvent);
+                    TweenEvent playEvent;
+                    playEvent.controller = &followEnt->tweenController;
+                    cam.tweenController.endEvents.Add(playEvent);
                     // cam.base.target = Vector2Lerp(cam.base.target, center, 5 * GetFrameTime());
                 }
                 OnPlayEvent(&cam.tweenController);
             }
             break;
         }
-        #if 0
+#if 0
         case MyCamera::FOLLOW_STAR:
         {
             
@@ -1283,7 +1291,7 @@ inline bool8 UpdateCamera(bool8 refocus = false)
             
             break;
         }
-        #endif
+#endif
         case MyCamera::FOLLOW_ALONG_AXIS:
         {
             
@@ -1294,7 +1302,7 @@ inline bool8 UpdateCamera(bool8 refocus = false)
             Vector2 finalPos = TilePositionToPixelPosition(currentMap->width * 0.5f + currentMap->tilePos.x + 0.5f, 
                                                            currentMap->height * 0.5f + currentMap->tilePos.y + 0.5f);
             
-             real32 speed = 6;
+            real32 speed = 6;
             
             
             if (followEnt->tweenController.NoTweens())
@@ -1304,8 +1312,8 @@ inline bool8 UpdateCamera(bool8 refocus = false)
                 {
                     
                     UpdateCameraToTileMapSmooth(*currentMap, 
-                                                                                CAMERA_MOVE_FUNC, CAMERA_ZOOM_FUNC,
-                                                                                CAMERA_MOVE_SPEED, CAMERA_ZOOM_SPEED);
+                                                CAMERA_MOVE_FUNC, CAMERA_ZOOM_FUNC,
+                                                CAMERA_MOVE_SPEED, CAMERA_ZOOM_SPEED);
                 }
                 break;
             }
@@ -1318,13 +1326,13 @@ inline bool8 UpdateCamera(bool8 refocus = false)
             
             Map * prevMap = &gameState->tileMaps[gameState->prevMapIndex];
             Vector2 initPos = TilePositionToPixelPosition(prevMap->width * 0.5f + prevMap->tilePos.x + 0.5f, 
-                                                           prevMap->height * 0.5f + prevMap->tilePos.y + 0.5f);
+                                                          prevMap->height * 0.5f + prevMap->tilePos.y + 0.5f);
             
             bool8 moveX = Abs(moveDir.x) > 0 &&
-            (Sign(center.x - cam.base.target.x) == Sign(moveDir.x));
+                (Sign(center.x - cam.base.target.x) == Sign(moveDir.x));
             
             bool8 moveY = Abs(moveDir.y) > 0 && 
-            (Sign(center.y - cam.base.target.y) == Sign(moveDir.y));
+                (Sign(center.y - cam.base.target.y) == Sign(moveDir.y));
             
             
             if (moveX)
@@ -1357,7 +1365,7 @@ inline bool8 UpdateCamera(bool8 refocus = false)
             
             break;
         }
-        }
+    }
     
     if (refocus)
     {
@@ -1407,17 +1415,17 @@ void SetUndoEntities(std::vector<Entity> & undoEntities)
         SM_ASSERT(e.entityIndex < gameState->entities.count, "out of index");
         if (e.entityIndex < gameState->entities.count)
         {
-        gameState->entities[e.entityIndex] = e;
-        gameState->entities[e.entityIndex].tweenController.Reset();
-        gameState->entities[e.entityIndex].pivot = GetTilePivot(&e);
+            gameState->entities[e.entityIndex] = e;
+            gameState->entities[e.entityIndex].tweenController.Reset();
+            gameState->entities[e.entityIndex].pivot = GetTilePivot(&e);
         
-        if (IsSlime(&e) && (e.actionState == ANIMATE_STATE))
-        {
-            gameState->entities[e.entityIndex].actionState = MOVE_STATE;
+            if (IsSlime(&e) && (e.actionState == ANIMATE_STATE))
+            {
+                gameState->entities[e.entityIndex].actionState = MOVE_STATE;
             }
-            }
+        }
     }
-    }
+}
 
 #if 0
 void SetUndoMapInfos(std::vector<UndoState::MapUndoInfo> & undoMapInfos)
@@ -1439,17 +1447,17 @@ inline void SetGameState(UndoState & undoState)
     SetUndoEntities(undoEntities);
     
     // TODO : SetUndoMapInfos(undoState.undoMapInfos);
-    }
+}
 
 inline void Undo()
 {
     // ResetStars();
     if (!gameState->undoStack.IsEmpty())
     {
-    SetGameState(gameState->undoStack.back());
+        SetGameState(gameState->undoStack.back());
         gameState->undoStack.pop_back();
     }
-    }
+}
 
 
 inline void Restart()
@@ -1466,16 +1474,16 @@ inline void Restart()
     Map & currentMap = gameState->tileMaps[gameState->playerMapIndex];
     if (currentMap.stateInitilized)
     {
-    DynamicArray<Entity> ea = GetCurrentStateEntities();
-    DynamicArray<UndoState::MapUndoInfo> mapUndoInfos = GetCurrentMapUndoInfos();
+        DynamicArray<Entity> ea = GetCurrentStateEntities();
+        DynamicArray<UndoState::MapUndoInfo> mapUndoInfos = GetCurrentMapUndoInfos();
     
-    gameState->undoStack.push_back(gameState->playerEntityIndex, 
-                                   gameState->starCount, 
-                                   ea, mapUndoInfos);
+        gameState->undoStack.push_back(gameState->playerEntityIndex, 
+                                       gameState->starCount, 
+                                       ea, mapUndoInfos);
         SetGameState(currentMap.resetState);
     }
-    #endif
-    }
+#endif
+}
 
 bool8 MoveAction(IVec2 actionDir)
 {
@@ -1493,21 +1501,21 @@ bool8 MoveAction(IVec2 actionDir)
     IVec2 actionTilePos = currentPos + actionDir;
     
     EntityLayer doorLayer[] = { LAYER_DOOR };
-        Entity * door = FindEntityByLocationAndLayers(currentPos, doorLayer, ArrayCount(doorLayer));
-        if (door && DoorBlocked(door, -actionDir))
+    Entity * door = FindEntityByLocationAndLayers(currentPos, doorLayer, ArrayCount(doorLayer));
+    if (door && DoorBlocked(door, -actionDir))
+    {
+        if (actionDir == -player->attachDir)
         {
-            if (actionDir == -player->attachDir)
-            {
             PushResult rResult = ActionCheck(player, player->attachDir, CHECK_MOVE);
             if (rResult.state != PUSH_BLOCKED)
             {
-                    return true;
+                return true;
             }
-            }
+        }
         
         MoveEntity(player, door, nullptr, player->tilePos, PLAYER_MOVE_FUNC, MOVE_SPEED);
         return true;
-        }
+    }
         
     {
         EntityLayer layers[] = { LAYER_PIT };
@@ -1527,7 +1535,7 @@ bool8 MoveAction(IVec2 actionDir)
         case PUSH_NONE:
         {
             return false;
-            }
+        }
         case PUSH_MOVED:
         {
             if (player->attachDir == -actionDir)
@@ -1546,7 +1554,7 @@ bool8 MoveAction(IVec2 actionDir)
                     }
                     SetSlimeSprite(player, actionDir);
                     
-                return true;
+                    return true;
                 }
                 return false;
             }
@@ -1560,9 +1568,9 @@ bool8 MoveAction(IVec2 actionDir)
                 door && DoorBlocked(door, -player->attachDir))
             {
                 MoveEntity(player, door, nullptr, door->tilePos, PLAYER_MOVE_FUNC, MOVE_SPEED);
-                }
+            }
             else if (FindAttachableResult findResult = FindAttachable(standingPlatformPos, player->attachDir);
-                findResult.has)
+                     findResult.has)
             {
                 Entity * resultEntity = findResult.entity;
                 if (resultEntity->type == ENTITY_TYPE_DOOR &&
@@ -1653,7 +1661,7 @@ bool8 MoveAction(IVec2 actionDir)
             SetSlimeSprite(player, -player->attachDir);
             MoveEntity(player, pushResult.blockedEntity, nullptr, player->tilePos, PLAYER_MOVE_FUNC, MOVE_SPEED);
             return true;
-            }
+        }
         case PUSH_MERGED:
         {
             // if (!door)
@@ -1662,7 +1670,7 @@ bool8 MoveAction(IVec2 actionDir)
                 return true;
             }
             // return false;
-            }
+        }
         
     }
     
@@ -1719,13 +1727,13 @@ bool8 SplitAction(Entity * player, IVec2 bounceDir)
         player->pivot = GetTilePivot(player);
         DeleteEntity(clone);
         return false;
-        }
+    }
     
     return true;
 }
 
 
-inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
+inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount, bool debugView = false)
 {
     for (int32 layerIndex = 0; layerIndex < arrayCount; layerIndex++)
     {
@@ -1761,10 +1769,10 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                 
                 if (IsSlime(entity))
                 {
-                BeginShaderMode(gameState->movableShader.shader);
+                    BeginShaderMode(gameState->movableShader.shader);
                 
-                DrawSprite(gameState->camera.base, drawTexture, drawSprite, drawPivot, entity->tileSize, color);
-                EndShaderMode();
+                    DrawSprite(gameState->camera.base, drawTexture, drawSprite, drawPivot, entity->tileSize, color);
+                    EndShaderMode();
                 }
                 else if (entity->type == ENTITY_TYPE_TUT_PORTAL)
                 {
@@ -1772,10 +1780,33 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                     DrawSprite(gameState->camera.base, drawTexture, drawSprite, drawPivot, entity->tileSize, color);
                     EndShaderMode();
                 }
+                else if (entity->type == ENTITY_TYPE_UI_TEXT)
+                {
+                    Font font = GetFontDefault();
+                    real32 spacing = 2.0f;
+
+                    Vector2 textSize = MeasureTextEx(font, entity->text, entity->fontSize, spacing);
+                    Vector2 center = entity->pivot + (entity->tileSize - textSize) * 0.5f;
+                    
+                    DrawTextEx(font, entity->text, center, entity->fontSize, spacing, entity->color); 
+
+                    // NOTE: Debug View
+                    if (debugView)
+                    {
+                        DrawCircleV(entity->pivot, 1.0f, RED);
+
+                        Rectangle textRec =
+                            {
+                                entity->pivot.x, entity->pivot.y,
+                                entity->tileSize.x, entity->tileSize.y
+                            };
+                        DrawRectangleLinesEx(textRec, 1.0f, YELLOW);
+                
+                    }
+                }
                 else
                 {
                     DrawSprite(gameState->camera.base, drawTexture, drawSprite, drawPivot, entity->tileSize, color);
-                    
                 }
                 
                 if (layer == LAYER_NULL)
@@ -1783,45 +1814,7 @@ inline void DrawSpriteLayers(EntityLayer * layers, int32 arrayCount)
                     DrawTile(entity->tilePos, RED);
                 }
                 
-#if 0
-                // NOTE: Draw Debug Informations
-                else if (entity->type == ENTITY_TYPE_BLOCK)
-                {
-                    if (CheckProjectState(entity))
-                    {
-                        color = ColorTint(color, GRAY);
-                    }
-                }
-                
-                if (!IsSlime(entity) && FindAttachSlime(entity))
-                {
-                    color = BLUE;
-                }
-                
-                if (IsSlime(entity))
-                {
-                    
-                    DrawCircleV(entity->pivot + Vector2 {entity->tileSize/2, entity->tileSize/2}, 
-                                3, ColorAlpha(YELLOW, 0.8f));
-                    DrawTile(PivotToTilePos(entity->pivot, entity->tileSize), ColorAlpha(RED, 0.5f));
-                    }
-
-                if (IsSlime(entity))
-                {
-                    real32 halfSize = entity->tileSize/2;
-                    Vector2 center = entity->pivot + Vector2 {halfSize, halfSize};
-                    Vector2 attachPos = center + { halfSize * entity->attachDir.x, halfSize * entity->attachDir.y };
-                    
-                    IVec2 parallel = { entity->attachDir.y, entity->attachDir.x };
-                    
-                    Vector2 A = attachPos + { parallel.x * halfSize, parallel.y * halfSize };
-                    Vector2 B = attachPos - { parallel.x * halfSize, parallel.y * halfSize };
-                    DrawLineEx(A, B, 5, BLUE);
-                    
-                }
-#endif
-                
-                }
+            }
         }
     } 
 }
@@ -1850,7 +1843,7 @@ inline bool8 SelectNextAsPlayer(Entity * player = nullptr)
         
         player = GetEntity(gameState->playerEntityIndex);
         player->color = WHITE;
-         result = true;
+        result = true;
     } 
     
     return result;
@@ -1888,7 +1881,7 @@ void SimulateInputs(DynamicArray<Entity> & prevEntState, uint32 & prevPlayerInde
     
     if (gameState->zoomOut)
     {
-         real32 sceneDistance = 20.0f * MAP_TILE_SIZE;
+        real32 sceneDistance = 20.0f * MAP_TILE_SIZE;
         
         real32 minX = player->pivot.x - sceneDistance;
         real32 minY = player->pivot.y - sceneDistance;
@@ -1897,10 +1890,10 @@ void SimulateInputs(DynamicArray<Entity> & prevEntState, uint32 & prevPlayerInde
         
         
         Rectangle moveRect = 
-        {
-            player->pivot.x - sceneDistance, player->pivot.y - sceneDistance,
-            sceneDistance * 2, sceneDistance * 2
-        };
+            {
+                player->pivot.x - sceneDistance, player->pivot.y - sceneDistance,
+                sceneDistance * 2, sceneDistance * 2
+            };
         
         
         Vector2 movement = Vector2 { 0, 0 };
@@ -1927,23 +1920,23 @@ void SimulateInputs(DynamicArray<Entity> & prevEntState, uint32 & prevPlayerInde
         
         Vector2 dest = gameState->camera.base.target + movement;
         
-        #if 0
+#if 0
         if (dest.x > maxX) dest.x = maxX;
         if (dest.x < minX) dest.x = minX;
         if (dest.y > maxY) dest.y = maxY;
         if (dest.y < minY) dest.y = minY;
 #endif
         
-            gameState->camera.base.target = 
-                Vector2Lerp(gameState->camera.base.target, dest, GetFrameTime());
-        }
+        gameState->camera.base.target = 
+            Vector2Lerp(gameState->camera.base.target, dest, GetFrameTime());
+    }
     else
-        {
+    {
         
         if (IsActionKeyDown(gameState->input.keyMappings))
         {
             prevEntState = GetCurrentStateEntities();
-            }
+        }
         
         if (!gameState->camera.tweenController.NoTweens())
         {
@@ -1953,7 +1946,7 @@ void SimulateInputs(DynamicArray<Entity> & prevEntState, uint32 & prevPlayerInde
         if (gameState->canSwitchSlime && 
             JustPressed(gameState->input.keyMappings, POSSES_KEY))
         {
-    // NOTE SlimeSelection
+            // NOTE SlimeSelection
             gameState->stateChanged = SelectNextAsPlayer(player);
             gameState->slimeSwitched = gameState->stateChanged;
         }
@@ -2048,7 +2041,7 @@ void SimulateInputs(DynamicArray<Entity> & prevEntState, uint32 & prevPlayerInde
         }
         
     }
-    }
+}
 
 void GameplayUpdateAndRender()
 {
@@ -2056,7 +2049,7 @@ void GameplayUpdateAndRender()
     bool8 noPlayer = false;
     if (!gameState->switching)
     {
-    // NOTE: Recored if State Changes
+        // NOTE: Recored if State Changes
         gameState->stateChanged = false;
         gameState->isPressed = false;
         gameState->slimeSwitched = false;
@@ -2077,7 +2070,7 @@ void GameplayUpdateAndRender()
             }
         }
         
-    // NOTE: Actions
+        // NOTE: Actions
         if (GetPlayer() && !gameState->simulating) 
         {
             DynamicArray<Entity> prevEntState = { 0 };
@@ -2123,14 +2116,14 @@ void GameplayUpdateAndRender()
             } // star
         }
 
-    static uint32 change_count = 0;
+        static uint32 change_count = 0;
         if (gameState->stateChanged) change_count++;
     
-    SetFreeze();
+        SetFreeze();
         UpdateSlimes();
         UpdateStars();
         
-            gameState->moveBufferTimer -= GetFrameTime();
+        gameState->moveBufferTimer -= GetFrameTime();
             
         // NOTE: Undo and Restart
         if (!gameState->zoomOut) 
@@ -2140,7 +2133,7 @@ void GameplayUpdateAndRender()
             
             timeSinceLastPress -= GetFrameTime();
             
-        if (timeSinceLastPress < 0 && IsDown(gameState->input.keyMappings, UNDO_KEY) && !gameState->undoStack.IsEmpty())
+            if (timeSinceLastPress < 0 && IsDown(gameState->input.keyMappings, UNDO_KEY) && !gameState->undoStack.IsEmpty())
             {
                 // NOTE: Undo
                 Undo();
@@ -2153,10 +2146,10 @@ void GameplayUpdateAndRender()
             {
                 repeat = true;
                 Restart();
-        }
+            }
         }
         
-            #if 0
+#if 0
         auto & lockTable = gameState->entityTable[LAYER_LOCK];
         for (uint32 lockIndex = 0; lockIndex < lockTable.count; lockIndex++)
         {
@@ -2177,7 +2170,7 @@ void GameplayUpdateAndRender()
                 lock->tweenController.endEvents.Add(deleteEvent2);
                 // OnPlayEvent(&lock->tweenController);
                 
-                 DynamicArray<int32> da = FindAllMapsWithStarCount(gameState->starCount);
+                DynamicArray<int32> da = FindAllMapsWithStarCount(gameState->starCount);
                 uint32 unlockedMapCount = da.count;
                 int32 * unlockedMaps = da.elements;
                 
@@ -2193,125 +2186,125 @@ void GameplayUpdateAndRender()
     
         // NOTE: Simulate
         Entity * lastFollowEnt = gameState->simulating ? nullptr : GetEntity(gameState->camera.followEntityIndex);
-    {
-        gameState->simulating = false;
-        // NOTE: Update: Entity
-        EntityLayer simulateLayers[] = { LAYER_SLIME, LAYER_BLOCK };
-        for (uint32 idx = 0; idx < ArrayCount(simulateLayers); idx++)
         {
-            uint32 layer = simulateLayers[idx];
-            auto & entList = gameState->entityTable[layer];
-            for (uint32 entIdx = 0; entIdx < entList.count; entIdx++)
+            gameState->simulating = false;
+            // NOTE: Update: Entity
+            EntityLayer simulateLayers[] = { LAYER_SLIME, LAYER_BLOCK };
+            for (uint32 idx = 0; idx < ArrayCount(simulateLayers); idx++)
             {
-                Entity * entity = GetEntity(entList[entIdx]);
-            if (entity)
+                uint32 layer = simulateLayers[idx];
+                auto & entList = gameState->entityTable[layer];
+                for (uint32 entIdx = 0; entIdx < entList.count; entIdx++)
                 {
-                    // NOTE: AnimatedSprite Updates
-                    if (entity->spriteType == SPRITE_TYPE_ANIMATED)
+                    Entity * entity = GetEntity(entList[entIdx]);
+                    if (entity)
                     {
-                        PlayAnimatedSprite(&entity->animatedSprite);
-                    }
+                        // NOTE: AnimatedSprite Updates
+                        if (entity->spriteType == SPRITE_TYPE_ANIMATED)
+                        {
+                            PlayAnimatedSprite(&entity->animatedSprite);
+                        }
                     
-                    // NOTE: Tween updates
-                if (!entity->tweenController.NoTweens())
-                {
-                    if (IsSlime(entity))
-                    {
-                        if (entity->actionState == MOVE_STATE) SetActionState(entity, ANIMATE_STATE);
-                    }
+                        // NOTE: Tween updates
+                        if (!entity->tweenController.NoTweens())
+                        {
+                            if (IsSlime(entity))
+                            {
+                                if (entity->actionState == MOVE_STATE) SetActionState(entity, ANIMATE_STATE);
+                            }
                             entity->tweenController.Update();
                             
                             RevealEntity(entity, ENTITY_TILE_VISIBILITY);
                             
-                        if (!IsDisappearing(entity))
-                        {
-                        gameState->simulating = true;
-                        Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
-                        if (entity->tweenController.playing)
-                        {
-                            if (!followEnt)
+                            if (!IsDisappearing(entity))
                             {
-                                gameState->camera.followEntityIndex = entity->entityIndex;
-                            }
-                            else if (IsSlime(followEnt))
-                            {
-                                if (FindAttachSlime(entity) == followEnt)
-                            {
-                                    gameState->camera.followEntityIndex = entity->entityIndex;
+                                gameState->simulating = true;
+                                Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
+                                if (entity->tweenController.playing)
+                                {
+                                    if (!followEnt)
+                                    {
+                                        gameState->camera.followEntityIndex = entity->entityIndex;
+                                    }
+                                    else if (IsSlime(followEnt))
+                                    {
+                                        if (FindAttachSlime(entity) == followEnt)
+                                        {
+                                            gameState->camera.followEntityIndex = entity->entityIndex;
+                                        }
+                                        else if ((entity->tilePos - followEnt->tilePos).SqrMagnitude() > 1)
+                                        {
+                                            gameState->camera.followEntityIndex = entity->entityIndex;
+                                        }
+                                
+                                    }
+                                    else if (followEnt->tweenController.NoTweens())
+                                    {
+                                        gameState->camera.followEntityIndex = entity->entityIndex;
+                                    }
                                 }
-                                else if ((entity->tilePos - followEnt->tilePos).SqrMagnitude() > 1)
+                                else if (layer == LAYER_LOCK)
                                 {
                                     gameState->camera.followEntityIndex = entity->entityIndex;
                                 }
-                                
                             }
-                            else if (followEnt->tweenController.NoTweens())
-                            {
-                                gameState->camera.followEntityIndex = entity->entityIndex;
-                            }
-                        }
-                        else if (layer == LAYER_LOCK)
-                        {
-                            gameState->camera.followEntityIndex = entity->entityIndex;
-                            }
-                        }
                         
-                        if (layer == LAYER_BLOCK)
-                        {
-                            IVec2 pos = PivotToTilePos(entity->pivot, entity->tileSize);
-                            EntityLayer glassLayer[] = { LAYER_GLASS };
-                            Entity * glass = FindEntityByLocationAndLayers(pos, glassLayer, 1);
+                            if (layer == LAYER_BLOCK)
+                            {
+                                IVec2 pos = PivotToTilePos(entity->pivot, entity->tileSize);
+                                EntityLayer glassLayer[] = { LAYER_GLASS };
+                                Entity * glass = FindEntityByLocationAndLayers(pos, glassLayer, 1);
                                 if (glass && SetGlassBeBroken(glass))
-                            {
+                                {
                                     SetShake(0.05f, 0.001f);
-                                    }
-                        }
+                                }
+                            }
                         
                         }
-                else
-                {
-                    if (entity->actionState == ANIMATE_STATE) SetActionState(entity, MOVE_STATE);
+                        else
+                        {
+                            if (entity->actionState == ANIMATE_STATE) SetActionState(entity, MOVE_STATE);
+                        }
+                    } 
                 }
-            } 
-        }
-        }
+            }
         }
     
-    Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
-    if (!followEnt || 
-            (gameState->isPressed && (followEnt != GetPlayer()) && followEnt->tweenController.NoTweens()))
-    {
-        gameState->camera.followEntityIndex = gameState->playerEntityIndex;
-        }
-    
-    // NOTE: update mapIndex
-    {
         Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
-        if (followEnt)
+        if (!followEnt || 
+            (gameState->isPressed && (followEnt != GetPlayer()) && followEnt->tweenController.NoTweens()))
         {
-        Entity * prevFollowEnt = gameState->undoStack.back().GetByEntityIndex(followEnt->entityIndex);
-        
-        gameState->prevMapIndex = -1;
-        
-        if (prevFollowEnt && prevFollowEnt->active)
-        {
-        FindTileMapResult prevResult = FindTileMap(prevFollowEnt->tilePos);
-        if (prevResult.map)
-        {
-            gameState->prevMapIndex = prevResult.mapIndex;
+            gameState->camera.followEntityIndex = gameState->playerEntityIndex;
         }
-            }
-            
-        FindTileMapResult result = FindTileMap(followEnt->tilePos);
-            if (result.map && MapIsVisible(*result.map))
+    
+        // NOTE: update mapIndex
         {
-                gameState->currentMapIndex = result.mapIndex;
+            Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
+            if (followEnt)
+            {
+                Entity * prevFollowEnt = gameState->undoStack.back().GetByEntityIndex(followEnt->entityIndex);
+        
+                gameState->prevMapIndex = -1;
+        
+                if (prevFollowEnt && prevFollowEnt->active)
+                {
+                    FindTileMapResult prevResult = FindTileMap(prevFollowEnt->tilePos);
+                    if (prevResult.map)
+                    {
+                        gameState->prevMapIndex = prevResult.mapIndex;
+                    }
                 }
             
-            if (gameState->prevMapIndex < 0)
-            {
-                gameState->prevMapIndex = gameState->currentMapIndex;
-            }
+                FindTileMapResult result = FindTileMap(followEnt->tilePos);
+                if (result.map && MapIsVisible(*result.map))
+                {
+                    gameState->currentMapIndex = result.mapIndex;
+                }
+            
+                if (gameState->prevMapIndex < 0)
+                {
+                    gameState->prevMapIndex = gameState->currentMapIndex;
+                }
             
             }
             
@@ -2322,161 +2315,161 @@ void GameplayUpdateAndRender()
                 if (playerMap.map && MapIsVisible(*playerMap.map))
                 {
                     gameState->playerMapIndex = playerMap.mapIndex;
-                RevealMap(gameState->tileMaps[gameState->playerMapIndex]);
+                    RevealMap(gameState->tileMaps[gameState->playerMapIndex]);
                 }
             }
-            }
+        }
     
     
-    // NOTE: Camera Updates
-    {
-        Vector2 oldTarget = gameState->camera.base.target;
+        // NOTE: Camera Updates
+        {
+            Vector2 oldTarget = gameState->camera.base.target;
             
-            #if GAME_INTERNAL
-        bool8 freeForm = IsKeyDown(KEY_T);
-        // NOTE: Debug Camera Control
+#if GAME_INTERNAL
+            bool8 freeForm = IsKeyDown(KEY_T);
+            // NOTE: Debug Camera Control
             if (freeForm)
             {
-        // NOTE: CameraZoom
-        // Camera zoom controls
-        // Uses log scaling to provide consistent zoom speed
-        real32 wheelDelta = (real32)GetMouseWheelMove();
+                // NOTE: CameraZoom
+                // Camera zoom controls
+                // Uses log scaling to provide consistent zoom speed
+                real32 wheelDelta = (real32)GetMouseWheelMove();
         
-        gameState->camera.base.zoom = expf(logf(gameState->camera.base.zoom) + (wheelDelta*0.1f));
-        // NOTE: Camera Drag
-        if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
+                gameState->camera.base.zoom = expf(logf(gameState->camera.base.zoom) + (wheelDelta*0.1f));
+                // NOTE: Camera Drag
+                if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
+                {
+                    Vector2 mouseDelta = GetMouseDelta();
+                    gameState->camera.base.target.x -= mouseDelta.x;
+                    gameState->camera.base.target.y -= mouseDelta.y;
+                }
+                //if (gameState->camera.base.zoom > 10.0f) gameState->camera.base.zoom = 10.0f;
+                if (gameState->camera.base.zoom < 0.1f) gameState->camera.base.zoom = 0.1f;
+            }
+            if (!freeForm)
+#endif
             {
-                Vector2 mouseDelta = GetMouseDelta();
-            gameState->camera.base.target.x -= mouseDelta.x;
-            gameState->camera.base.target.y -= mouseDelta.y;
-        }
-        //if (gameState->camera.base.zoom > 10.0f) gameState->camera.base.zoom = 10.0f;
-        if (gameState->camera.base.zoom < 0.1f) gameState->camera.base.zoom = 0.1f;
-        }
-        if (!freeForm)
-            #endif
-        {
                 if (gameState->slimeSwitched)//  || ((followEnt != lastFollowEnt) && (GetPlayer() == followEnt)))
                 {
                     gameState->refocus = true;
-    }
-        UpdateCamera(gameState->refocus);
-    }
+                }
+                UpdateCamera(gameState->refocus);
+            }
         
-    Vector2 newTarget = gameState->camera.base.target;
-    gameState->camera.moveDir = { 0 };
-    if (!Vector2Equals(oldTarget, newTarget))
-    {
+            Vector2 newTarget = gameState->camera.base.target;
+            gameState->camera.moveDir = { 0 };
+            if (!Vector2Equals(oldTarget, newTarget))
+            {
                 gameState->camera.moveDir = (oldTarget - newTarget) * 0.1f * gameState->camera.base.zoom;
-    }
-    }
+            }
+        }
     
-    if (!GetPlayer() && !SelectNextAsPlayer())
-    {
-        noPlayer = true;
-    }
+        if (!GetPlayer() && !SelectNextAsPlayer())
+        {
+            noPlayer = true;
+        }
         
         // NOTE: UpdateFog
         UpdateFog();
     
-    // NOTE: tutorials
-    if (gameState->currentScreen == GAME_MAIN_SCREEN)
-    {
-    Entity * player = GetPlayer();
-    if (player && player->tweenController.NoTweens())
-    {
-        EntityLayer layer[] = { LAYER_BLOCK };
-        Entity * portal = FindEntityByLocationAndLayers(player->tilePos, layer, 1);
-        if (portal && portal->type == ENTITY_TYPE_TUT_PORTAL)
+        // NOTE: tutorials
+        if (gameState->currentScreen == GAME_MAIN_SCREEN)
+        {
+            Entity * player = GetPlayer();
+            if (player && player->tweenController.NoTweens())
+            {
+                EntityLayer layer[] = { LAYER_BLOCK };
+                Entity * portal = FindEntityByLocationAndLayers(player->tilePos, layer, 1);
+                if (portal && portal->type == ENTITY_TYPE_TUT_PORTAL)
                 {
                     gameState->canSwitchSlime = true;
                     gameState->canSplitSlime = true;
-            gameState->lastState = gameState->undoStack.back();
+                    gameState->lastState = gameState->undoStack.back();
             
-            for (uint32 idx = 0; idx < gameState->lastState.undoEntities.size(); idx ++)
-            {
-                Entity * e = &gameState->lastState.undoEntities[idx];
-                if (portal->entityIndex == e->entityIndex)
-                {
-                    portal = e;
-                }
-                }
+                    for (uint32 idx = 0; idx < gameState->lastState.undoEntities.size(); idx ++)
+                    {
+                        Entity * e = &gameState->lastState.undoEntities[idx];
+                        if (portal->entityIndex == e->entityIndex)
+                        {
+                            portal = e;
+                        }
+                    }
                     
                     portal->sprite = GetBlockSprite(portal->mass);
                     
-            portal->type = ENTITY_TYPE_BLOCK;
-            portal->color = WHITE;
-                gameState->lastTutBlockIndex = portal->entityIndex;
-                ChangeScreen(GAME_TUT_SCREEN);
+                    portal->type = ENTITY_TYPE_BLOCK;
+                    portal->color = WHITE;
+                    gameState->lastTutBlockIndex = portal->entityIndex;
+                    ChangeScreen(GAME_TUT_SCREEN);
+                    return;
+                }
+            }
+        }
+        else if (gameState->currentScreen == GAME_TUT_SCREEN)
+        {
+            auto goalTable = gameState->entityTable[LAYER_PORTAL];
+            bool8 end = true;
+            for (uint32 i = 0; i < goalTable.count; i++)
+            {
+                Entity * goal = GetEntity(goalTable[i]);
+            
+                if (goal->type == ENTITY_TYPE_MAIN_PORTAL)
+                {
+                    EntityLayer layers[] = { LAYER_BLOCK };
+                    Entity * block = FindEntityByLocationAndLayers(goal->tilePos, layers, 1);
+                    if (!block || !block->tweenController.NoTweens())
+                    {
+                        end = false;
+                        break;
+                    }
+                }
+                else if (goal->type == ENTITY_TYPE_SLIME_PORTAL)
+                {
+                    EntityLayer layers[] = { LAYER_SLIME };
+                    Entity * slime = FindEntityByLocationAndLayers(goal->tilePos, layers, 1);
+                
+                    if (!slime || !slime->tweenController.NoTweens())
+                    {
+                        end = false;
+                        break;
+                    }
+                
+                    Entity * attach = slime->attach ? GetEntity(slime->attachedEntityIndex) : nullptr;
+                    if (!attach || attach->type != ENTITY_TYPE_BLOCK)
+                    {
+                        end = false;
+                        break;
+                    }
+                
+                    EntityLayer checkLayers[] = { LAYER_PORTAL };
+                    Entity * portal = FindEntityByLocationAndLayers(attach->tilePos, checkLayers, 1);
+                    if (!portal)
+                    {
+                        end = false;
+                        break;
+                    }
+                
+                }
+                else
+                {
+                    SM_ASSERT(false, "unknown type");
+                }
+            }
+        
+            if (IsKeyPressed(KEY_DELETE))
+            {
+                end = true;
+            }
+        
+            if (end)
+            {
+            
+                ChangeScreen(GAME_MAIN_SCREEN);
                 return;
-        }
+            }
+        
         }
     }
-    else if (gameState->currentScreen == GAME_TUT_SCREEN)
-    {
-        auto goalTable = gameState->entityTable[LAYER_PORTAL];
-        bool8 end = true;
-        for (uint32 i = 0; i < goalTable.count; i++)
-        {
-            Entity * goal = GetEntity(goalTable[i]);
-            
-            if (goal->type == ENTITY_TYPE_MAIN_PORTAL)
-            {
-            EntityLayer layers[] = { LAYER_BLOCK };
-            Entity * block = FindEntityByLocationAndLayers(goal->tilePos, layers, 1);
-                if (!block || !block->tweenController.NoTweens())
-                {
-                    end = false;
-                    break;
-                }
-            }
-            else if (goal->type == ENTITY_TYPE_SLIME_PORTAL)
-            {
-                EntityLayer layers[] = { LAYER_SLIME };
-                Entity * slime = FindEntityByLocationAndLayers(goal->tilePos, layers, 1);
-                
-                if (!slime || !slime->tweenController.NoTweens())
-                {
-                    end = false;
-                    break;
-                }
-                
-                Entity * attach = slime->attach ? GetEntity(slime->attachedEntityIndex) : nullptr;
-                if (!attach || attach->type != ENTITY_TYPE_BLOCK)
-                {
-                    end = false;
-                    break;
-                }
-                
-                EntityLayer checkLayers[] = { LAYER_PORTAL };
-                Entity * portal = FindEntityByLocationAndLayers(attach->tilePos, checkLayers, 1);
-                if (!portal)
-                {
-                    end = false;
-                    break;
-                }
-                
-            }
-            else
-            {
-                SM_ASSERT(false, "unknown type");
-            }
-        }
-        
-        if (IsKeyPressed(KEY_DELETE))
-        {
-            end = true;
-        }
-        
-        if (end)
-        {
-            
-            ChangeScreen(GAME_MAIN_SCREEN);
-            return;
-            }
-        
-    }
-}
     
     
     static real32 contrast = -2.0f;
@@ -2485,7 +2478,7 @@ void GameplayUpdateAndRender()
     static bool8 debugView = false;
     static bool8 showFog = true;
     
-    #if GAME_INTERNAL
+#if GAME_INTERNAL
     // NOTE: Developer Debug Cheats
     {
         
@@ -2502,7 +2495,7 @@ void GameplayUpdateAndRender()
             UnloadTexture(gameState->textureAltas);    // Unload render texture
             gameState->textureAltas = LoadTexture(TEXTURE_PATH);
             gameState->bgTexture = LoadTexture(BACKGROUND_PATH);
-            }
+        }
         
         if (IsKeyPressed(KEY_RIGHT_BRACKET))
         {
@@ -2516,7 +2509,7 @@ void GameplayUpdateAndRender()
         
     }
     
-    #if 0
+#if 0
     EntityLayer layers[] =  { LAYER_DOOR };
     Entity * block = FindEntityByLocationAndLayers(IVec2 { 69, 130 }, layers, 1);
     if (!block)
@@ -2537,11 +2530,11 @@ void GameplayUpdateAndRender()
     }
 #endif
     
-    #endif
+#endif
     // NOTE: Render
     {
         
-Fog & fog = gameState->fog;
+        Fog & fog = gameState->fog;
         IVec2 fogDim = fog.tileMax - fog.tileMin;
         
         // NOTE: Draw Fog of War
@@ -2569,121 +2562,58 @@ Fog & fog = gameState->fog;
                                  gameState->camera.moveDir);
         
         BeginMode2D(gameState->camera.base);
+        
+        // NOTE: Draw text
+        
+        
         SetDrawingEntities();
         
         EntityLayer orderedDrawLayers[] = 
-        {
-            LAYER_LINK,
-            LAYER_SOURCE,
-            LAYER_CABLE,
-            LAYER_CONNECTION,
-            LAYER_WALL, 
-            LAYER_PIT,
-            LAYER_PORTAL,
-            LAYER_SLIME,
-            LAYER_BLOCK,
-            LAYER_GLASS,  
-            LAYER_DOOR,
-            LAYER_LOCK,
-            LAYER_UI,
-        };
+            {
+                LAYER_LINK,
+                LAYER_SOURCE,
+                LAYER_CABLE,
+                LAYER_CONNECTION,
+                LAYER_WALL, 
+                LAYER_PIT,
+                LAYER_PORTAL,
+                LAYER_SLIME,
+                LAYER_BLOCK,
+                LAYER_GLASS,  
+                LAYER_DOOR,
+                LAYER_LOCK,
+                LAYER_UI,
+            };
         
         int32 count = ArrayCount(orderedDrawLayers);
-        DrawSpriteLayers(orderedDrawLayers, count);
+        DrawSpriteLayers(orderedDrawLayers, count, debugView);
         Entity * followEnt = GetEntity(gameState->camera.followEntityIndex);
         
         if (debugView)
         {
-        Color colors[] = {
-            LIGHTGRAY, GRAY, DARKGRAY, YELLOW, GOLD, ORANGE, PINK, RED, MAROON, GREEN, LIME, DARKGREEN, SKYBLUE, BLUE, DARKBLUE, PURPLE, VIOLET, DARKPURPLE, BEIGE, BROWN, DARKBROWN, WHITE, BLACK, MAGENTA, RAYWHITE,
-        };
-        
-        int32 colorCount = ArrayCount(colors);
-        
-        static Color * mColors = (Color *)BumpAllocArray(gameMemory->persistentStorage,
-                                                         gameState->tileMapCount,
-                                                         sizeof(Color));
-        
-        static bool * set = (bool *)BumpAllocArray(gameMemory->persistentStorage,
-                                                   gameState->tileMapCount,
-                                                   sizeof(bool));
-        
-        for (uint32 mapIndex = 0; mapIndex < gameState->tileMapCount; mapIndex++)
-        {
-            Map * tileMap = gameState->tileMaps + mapIndex;
-            
-            if (!set[mapIndex])
-            {
-                set[mapIndex] = true;
-                int32 colorIndex = GetRandomValue(0, colorCount-1);
-                mColors[mapIndex] = colors[colorIndex];
-            }
-                
-                // NOTE: DrawCenterTile
-                IVec2 mapCenter = tileMap->tilePos + 
-                    IVec2 { tileMap->width / 2 + 1, tileMap->height / 2 + 1 };
-                
-                DrawTile(mapCenter, WHITE);
-            
-            // NOTE: Could be a setting
-            DrawTileMap(gameState->camera.base, tileMap->tilePos, 
-                        IVec2{ tileMap->width, tileMap->height },
-                        mColors[mapIndex], mColors[mapIndex]);
-            Map & map = gameState->tileMaps[mapIndex];
-            Rectangle mapRect = 
-            { 
-                (real32)map.tilePos.x * MAP_TILE_SIZE, (real32)map.tilePos.y * MAP_TILE_SIZE, 
-                (real32)map.width * MAP_TILE_SIZE,  (real32)map.height * MAP_TILE_SIZE
-            };
-            
-            DrawRectangleLinesEx(mapRect, 5, BLUE);
-                }
-            
-            
-            // NOTE: draw mouse tilePos
-            Vector2 mousePos = GetMousePosition();
-            Vector2 mouseWorld = GetScreenToWorld2D(mousePos, gameState->camera.base);
-            
-            IVec2 tilePos = PivotToTilePos(mouseWorld, Vector2{ 0 });
-            DrawTile(tilePos, RED);
-            DrawLineBezier(GetPlayer()->pivot, GetTilePivot(tilePos, DEFAULT_TILE_SIZE), 2, GREEN);
-            
-            Vector2 textWorld = GetScreenToWorld2D({ 1200.0f, 200.0f }, gameState->camera.base);
-            DrawText(TextFormat("Mouse TilePos (%d, %d)", tilePos.x, tilePos.y), (int)textWorld.x, (int)textWorld.y, 10, GREEN);
-            
-            // Draw rectangle outline with extended parameters
-            Rectangle cameraRect = GetCameraRect(gameState->camera.base);
-            DrawRectangleLinesEx(cameraRect, 1, RED);
-            
-            if (followEnt)
-            {
-                Vector2 center = followEnt->pivot + Vector2 { followEnt->tileSize.x * 0.5f, followEnt->tileSize.y * 0.5f };
-                DrawCircleV(center, 5,  RED);
-                DrawCircleV(gameState->camera.base.target, 5, YELLOW);
-            }
-            
+            DrawDebugViewGame(followEnt);
         }
         
         if (showFog && gameState->currentScreen == GAME_MAIN_SCREEN)
         {
-        Vector2 pivot = GetTilePivot(fog.tileMin, DEFAULT_TILE_SIZE);
-        DrawTexturePro(fog.fogRenderTex.texture, 
-                       Rectangle { 0, 0, (real32)fog.fogRenderTex.texture.width, (real32)fog.fogRenderTex.texture.height },
-                       Rectangle {
-                           pivot.x,
-                           pivot.y, 
-                           (real32)MAP_TILE_SIZE * fog.dim.x,
-                           (real32)MAP_TILE_SIZE * fog.dim.y
-                       },
-                       Vector2 { 0, 0 }, 0, WHITE);
+            Vector2 pivot = GetTilePivot(fog.tileMin, DEFAULT_TILE_SIZE);
+            DrawTexturePro(fog.fogRenderTex.texture, 
+                           Rectangle { 0, 0, (real32)fog.fogRenderTex.texture.width, (real32)fog.fogRenderTex.texture.height },
+                           Rectangle {
+                               pivot.x,
+                               pivot.y, 
+                               (real32)MAP_TILE_SIZE * fog.dim.x,
+                               (real32)MAP_TILE_SIZE * fog.dim.y
+                           },
+                           Vector2 { 0, 0 }, 0, WHITE);
         }
         
         EntityLayer layers[] = 
-        {
-            LAYER_STAR,
-            LAYER_STAR_DEST,
+            {
+                LAYER_STAR,
+                LAYER_STAR_DEST,
             };
-        DrawSpriteLayers(layers, ArrayCount(layers));
+        DrawSpriteLayers(layers, ArrayCount(layers), debugView);
         
         EndMode2D();
         EndTextureMode();
@@ -2699,7 +2629,7 @@ Fog & fog = gameState->fog;
         if (gameState->shakeTime < 0)
         {
             gameState->shake = false;
-            }
+        }
         
         {
             int32 contrastLoc =
@@ -2717,113 +2647,23 @@ Fog & fog = gameState->fog;
             SetShaderValue(gameState->postShader.shader, brightnessLoc, &brightness, SHADER_UNIFORM_FLOAT);
             
             PostProcessing(gameState->renderTarget, gameState->postShader, 
-                                      gameState->shake, gameState->shakeStrength, gameState->time);
-            }
+                           gameState->shake, gameState->shakeStrength, gameState->time);
+        }
         
         
         if (noPlayer)
         {
             DrawError();
         }
-#if  GAME_INTERNAL
+        
         if (debugView)
         {
-        // NOTE: UI Draw Game Informations
-        Entity * player = GetEntity(gameState->playerEntityIndex);
-        if (player)
-        {
-        IVec2 centerPos = player->tilePos;
-        Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), gameState->camera.base);
+            DrawDebugViewUI(followEnt, contrast, saturation, brightness);
         }
-        
-        
-        DrawText(TextFormat("Camera target: (%.2f, %.2f)\nCamera offset: (%.2f, %.2f)\nCamera Zoom: %.2f\nCamera State: %s",
-                            gameState->camera.base.target.x, gameState->camera.base.target.y,
-                            gameState->camera.base.offset.x, gameState->camera.base.offset.y, gameState->camera.base.zoom,
-                            GetCameraState(gameState->camera)), 10, 50, 20, RAYWHITE);
-        
-        if (followEnt)
-        {
-        DrawText(TextFormat("Follow Entity Type: %s(%d)", GetEntityType(followEnt), followEnt->entityIndex),
-                 10, 200, 25, YELLOW);
-            }
-            
-            if (GetPlayer()->actionState == FREEZE_STATE)
-            {
-                DrawText(TextFormat("Player Freezed"),
-                         10, 220, 25, YELLOW);
-                }
-            else if (GetPlayer()->actionState == MOVE_STATE)
-            {
-                DrawText(TextFormat("Player Moved"),
-                         10, 220, 25, YELLOW);
-            }
-        
-        real32 vert = 445;
-        real32 gap = 100;
-        GuiSliderBar(Rectangle{ 100, vert, 400, 30 }, "Contrast", TextFormat("%.1f", contrast), &contrast, -100.0f, 100.0f);
-        GuiSliderBar(Rectangle{ 100, vert + gap, 400, 30 }, "Saturation", TextFormat("%.1f", saturation), &saturation, -100.0f, 100.0f);
-        GuiSliderBar(Rectangle{ 100, vert + gap * 2, 400, 30 }, "Brightness", TextFormat("%.1f", brightness), &brightness, 0, 10.0f);
-        
-        DrawText(TextFormat("Stars Collected: %d",
-                                     gameState->starCount),
-                 10, 250, 25, ORANGE);
-        
-        
-        
-        if (player)
-        {
-            DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: (%.2f, %.2f),  Entity Count: %i",
-                            player->tilePos.x, player->tilePos.y,
-                            player->mass, player->tileSize.x , player->tileSize.y,  gameState->entities.count), 10, 140, 20, GREEN);
-        }
-        }
-#if 0
 
-        DrawText(TextFormat("TotalLine: %d, Connection: %d, Door: %d, TotalSource: %d",
-                                     Cable_Indices.count,
-                                     CP_Indices.count,
-                                     Door_Indices.count,
-                                     Source_Indices.count
-                                     ), 10, 280, 20, GREEN);
-        
-        DrawText(TextFormat("TotalEntities: %d, TotalWall: %d, TotalDoor: %d, TotalCable: %d, TotalGlass: %d, TotalSlime %d, TotalBlock: %d, TotalPit: %d, TotalPortal %d", gameState->entities.count,
-                                     gameState->entityTable[LAYER_WALL].count,
-                                     gameState->entityTable[LAYER_DOOR].count,
-                                     gameState->entityTable[LAYER_CABLE].count,
-                                     gameState->entityTable[LAYER_GLASS].count,
-                                     gameState->entityTable[LAYER_SLIME].count,
-                                     gameState->entityTable[LAYER_BLOCK].count,
-                                     gameState->entityTable[LAYER_PIT].count,
-                                     gameState->entityTable[LAYER_PORTAL].count
-                                     ), 10, 250, 20, GREEN);
-        
-        DrawText(TextFormat("Player pivot (%.2f, %.2f), mouse world (%.2f, %.2f)",
-                            player->pivot.x, player->pivot.y, mousePos.x, mousePos.y ), 10, 200, 20, GREEN);
-        
-        DrawText(TextFormat("Player Points at tile (%i, %i), Player Mass: %i, Player tile size: %.2f,  Entity Count: %i",
-                            centerPos.x, centerPos.y,
-                            player->mass, player->tileSize,  gameState->entities.count), 10, 140, 20, GREEN);
-        
-        DrawText(TextFormat("UndoStack Count: %d, last index: %d",
-                            gameState->undoStack.count, gameState->undoStack.last - 1), 10, 170, 20, GREEN);
-        
-        
-        int32 posX = GetScreenWidth() - MeasureText("Entity Action State: FFFFFFFFFFFFFFFFFFFF", 20);
-        DebugDrawPlayerActionState(player->actionState, posX, 50, 20, IntToRGBA(0x923eed));
-        
-        if (gameState->simulating)
-        {
-            DrawText("Game Simulating", gameState->screenWidth / 4, gameState->screenHeight / 4, 20, RED);
-            }
-        
-        DrawText(TextFormat("Move buffer timer: %.2fs", gameState->moveBufferTimer), 10, 350, 20, GREEN);
-#endif
-        
-#endif
-        
+
         DrawText(TextFormat("%.2f ms\n%iFPS", 1000.0f / GetFPS(), GetFPS()), 10, 300, 20, GREEN);
-        }    
+    }    
 }
 
 void InitializeGame()
@@ -2853,10 +2693,10 @@ void InitializeGame()
                         portal->attach = true;
                         portal->attachDir = dir;
                         break;
-                        }
-                    
                     }
+                    
                 }
+            }
             
         }
     }
@@ -2869,7 +2709,7 @@ void InitializeGame()
         Entity * slimeB = nullptr;
         if (slimeEntityIndices.count == 2)
         {
-        slimeB = GetEntity(slimeEntityIndices[1]);
+            slimeB = GetEntity(slimeEntityIndices[1]);
         }
         
         if (slimeA)
@@ -2882,7 +2722,7 @@ void InitializeGame()
             
             slimeA->pivot = GetTilePivot(slimeA);
             RevealEntity(slimeA, ENTITY_TILE_VISIBILITY);
-            }
+        }
         
         if (slimeB)
         {
@@ -2907,9 +2747,9 @@ void InitializeGame()
     }
     
 #if GAME_INTERNAL
-     gameState->canSwitchSlime = true;
-     gameState->canSplitSlime = true;
-    #endif
+    gameState->canSwitchSlime = true;
+    gameState->canSplitSlime = true;
+#endif
     
     gameState->currentMapIndex = -1;
     gameState->simulating = false;
@@ -2946,7 +2786,7 @@ void CleanUpGame()
         gameState->entityTable[i].Clear();
     }
     gameState->entities.Clear();
-    }
+}
 
 //  ========================================================================
 //              NOTE: Game Functions (exposed)
@@ -2972,7 +2812,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
         init = true;
         GuiLoadStyle(RAYLIB_GUI_STYLE_PATH);
         GuiSetStyle(DEFAULT, TEXT_SIZE, 50);
-        }
+    }
     
     if (!gameState->input.initialized)
     {
@@ -3039,12 +2879,12 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
             
             Rectangle bounds =
-            {
-                x,
-                y,
-                width,
-                height
-            };
+                {
+                    x,
+                    y,
+                    width,
+                    height
+                };
             
             if (GuiButton(bounds, NewGameText))
             {
@@ -3053,7 +2893,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 ChangeScreen(GAME_MAIN_SCREEN);
             }
             
-            #if 0
+#if 0
             // TODO: Experimental features, Very breakable!!!
             const char * LoadGameText = "load game";
             bounds.y += margin;
@@ -3145,19 +2985,19 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
             const char * ContinueGameText = "Continue";
             Rectangle bounds =
-            {
-                x,
-                y,
-                width,
-                height
-            };
+                {
+                    x,
+                    y,
+                    width,
+                    height
+                };
             
             if (GuiButton(bounds, ContinueGameText))
             {
                 ChangeScreen(GAME_MAIN_SCREEN);
             }
             
-            #if 0
+#if 0
             // TODO: Experimental features, Very breakable!!!
             const char * SaveGameText = "save game";
             bounds.y += margin;
@@ -3176,7 +3016,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                 gameState->fog.initialized = false;
                 UnloadRenderTexture(gameState->fog.fogRenderTex);
                 // NOTE: check memory leak!
-                }
+            }
             
             break;
         }
@@ -3205,10 +3045,10 @@ UPDATE_AND_RENDER(UpdateAndRender)
         
         if (fadeIn)
         {
-        // NOTE FadeIn
-        alpha += fadeSpeed * GetFrameTime();
+            // NOTE FadeIn
+            alpha += fadeSpeed * GetFrameTime();
         
-        if (alpha >= 1.0f)
+            if (alpha >= 1.0f)
             {
                 alpha = 1.0f;
                 fadeIn = false;
@@ -3247,7 +3087,7 @@ UPDATE_AND_RENDER(UpdateAndRender)
                     
                 }
                 gameState->currentScreen = gameState->nextScreen;
-                }
+            }
         }
         else
         {
@@ -3263,9 +3103,9 @@ UPDATE_AND_RENDER(UpdateAndRender)
             
         }
         DrawRectangleRec(Rectangle{0,0,(real32)GetScreenWidth(), (real32)GetScreenHeight()},
-                      Fade(BLACK, alpha));
+                         Fade(BLACK, alpha));
         
-        }
+    }
     
     EndDrawing();
-    }
+}

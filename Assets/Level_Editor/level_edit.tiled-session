@@ -3,13 +3,12 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TileMap/Path_88.tmj",
+    "activeFile": "TileMap/Path_87.tmj",
     "expandedProjectPaths": [
-        "TestLevels",
-        "TileSet",
-        "enums",
         "TileMap",
-        "."
+        ".",
+        "TileSet",
+        "enums"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -73,7 +72,7 @@
             "selectedLayer": 1,
             "viewCenter": {
                 "x": 175,
-                "y": 565
+                "y": 176
             }
         },
         "TestLevels/Test_3.tmj": {
@@ -115,11 +114,11 @@
             "expandedObjectLayers": [
                 4
             ],
-            "scale": 0.75,
-            "selectedLayer": 2,
+            "scale": 0.5,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": -12,
-                "y": 527.3333333333334
+                "x": 163,
+                "y": 959
             }
         },
         "TileMap/Broom_3.tmj": {
@@ -174,8 +173,8 @@
             "scale": 0.75,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -441.33333333333326,
-                "y": 394
+                "x": 411.99999999999994,
+                "y": -167.33333333333337
             }
         },
         "TileMap/Hard_1.tmj": {
@@ -843,7 +842,7 @@
             "selectedLayer": 0,
             "viewCenter": {
                 "x": 175,
-                "y": 175
+                "y": 176
             }
         },
         "TileMap/Path_81.tmj": {
@@ -898,11 +897,11 @@
             "expandedObjectLayers": [
                 4
             ],
-            "scale": 0.75,
-            "selectedLayer": 0,
+            "scale": 1.5,
+            "selectedLayer": 3,
             "viewCenter": {
-                "x": 1030.6666666666667,
-                "y": 380.66666666666663
+                "x": 297.66666666666663,
+                "y": 190.66666666666666
             }
         },
         "TileMap/Path_87.tmj#tileSet": {
@@ -942,11 +941,11 @@
             }
         },
         "TileMap/Room_1.tmj": {
-            "scale": 0.33,
+            "scale": 2,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 639.3939393939395,
-                "y": -246.969696969697
+                "x": 176.25,
+                "y": 175.5
             }
         },
         "TileMap/Room_10.tmj": {
@@ -986,10 +985,10 @@
                 5
             ],
             "scale": 0.5,
-            "selectedLayer": 2,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 1264,
-                "y": 555
+                "x": 2119,
+                "y": 82
             }
         },
         "TileMap/Room_15.tmj": {
@@ -1057,11 +1056,11 @@
             }
         },
         "TileMap/Room_22.tmj": {
-            "scale": 0.5,
+            "scale": 1.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 175,
-                "y": 175
+                "x": 176.33333333333331,
+                "y": 176
             }
         },
         "TileMap/Room_23.tmj": {
@@ -1148,8 +1147,8 @@
             "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 246,
-                "y": 508.3333333333333
+                "x": 176.33333333333331,
+                "y": 176
             }
         },
         "TileMap/Room_32.tmj": {
@@ -1468,11 +1467,11 @@
             "expandedObjectLayers": [
                 4
             ],
-            "scale": 2,
-            "selectedLayer": 0,
+            "scale": 1.5,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 298.25,
-                "y": 8.75
+                "x": -246.33333333333331,
+                "y": 211.33333333333331
             }
         },
         "TileMap/Room_7.tmj": {
@@ -1543,8 +1542,8 @@
             "scale": 1,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": -100,
-                "y": -154.5
+                "x": 176.5,
+                "y": 176
             }
         },
         "TileMap/Room_78.tmj": {
@@ -1796,11 +1795,11 @@
             }
         },
         "TileMap/Tutorial_5.tmj": {
-            "scale": 1.5,
-            "selectedLayer": 0,
+            "scale": 3,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 175.66666666666669,
-                "y": 175.66666666666669
+                "x": 176.16666666666666,
+                "y": 176
             }
         },
         "TileMap/Tutorial_6.tmj": {
@@ -1893,8 +1892,8 @@
         },
         "TileSet/game_tilesets.tsj": {
             "dynamicWrapping": false,
-            "scaleInDock": 1.5,
-            "scaleInEditor": 2
+            "scaleInDock": 1,
+            "scaleInEditor": 1
         },
         "TlieSet/tileSet.tsj": {
             "scaleInDock": 0.75,
@@ -1911,7 +1910,8 @@
     "last.worldFilePath": "C:/Users/h26ly/Documents/GitHub/Jason/Jason-s_3rd_law/Assets/Level_Editor",
     "loadedWorlds": [
         "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/TestLevels/test.world",
-        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/main.world"
+        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/main.world",
+        "W:/RayLib_Games/Jason's_3rd_law/Version_0.2/Assets/Level_Editor/Room_22_Tutorial.world"
     ],
     "map.height": 11,
     "map.lastUsedFormat": "json",
@@ -1925,12 +1925,20 @@
         "TileMap/Broon_1.tmj",
         "TileMap/Room_39.tmj",
         "TileMap/Path_80.tmj",
-        "TileMap/Path_88.tmj"
+        "TestLevels/Test_2.tmj",
+        "TileMap/Path_87.tmj",
+        "TileMap/Room_14.tmj",
+        "TileMap/Room_69.tmj",
+        "TileSet/game_tilesets.tsj",
+        "TileMap/Room_77.tmj",
+        "TileMap/Room_31.tmj",
+        "TileMap/Broom_2.tmj",
+        "TileMap/Room_22.tmj",
+        "TileMap/Tutorial_5.tmj"
     ],
     "project": "level_edit.tiled-project",
     "property.type": "string",
     "recentFiles": [
-        "TileMap/Path_88.tmj",
         "TileMap/Room_1.tmj",
         "TileMap/Room_78.tmj",
         "TileMap/Toturial_Room1.tmj",
@@ -1939,9 +1947,10 @@
         "TileMap/Broon_1.tmj",
         "TileMap/Room_39.tmj",
         "TileMap/Path_80.tmj",
-        "TileSet/game_tilesets.tsj",
         "TestLevels/Test_2.tmj",
-        "TileMap/Room_69.tmj"
+        "TileMap/Tutorial_5.tmj",
+        "TileMap/Room_22.tmj",
+        "TileMap/Broom_2.tmj"
     ],
     "tileset.lastUsedFilter": "All Files (*)"
 }

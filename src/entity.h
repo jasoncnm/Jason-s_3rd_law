@@ -51,7 +51,8 @@ enum EntityType
     ENTITY_TYPE_STAR,
     ENTITY_TYPE_STAR_DEST,
     ENTITY_TYPE_LOCK,
-    ENTITY_TYPE_UI,
+    ENTITY_TYPE_UI_TILE,
+    ENTITY_TYPE_UI_TEXT,
     ENTITY_TYPE_COUNT,
 };
 
@@ -123,6 +124,10 @@ struct Entity
     // Allocate it whenever you need this
     TweenController tweenController;
     AnimatedSprite animatedSprite;
+
+    real32 fontSize;
+    char text[500];
+    
     };
 
 struct FindAttachableResult
@@ -140,6 +145,8 @@ inline bool8 IsMovable(Entity * entity)
     return result;
 }
 
+inline Entity * FindAttachSlime(Entity * attachObject);
+inline Entity * GetPlayer();
 inline IVec2 GetDoorDirection(Entity * door);
 inline bool8 BridgeBlocked(Entity * bridge, IVec2 dir);
 inline bool8 DoorBlocked(Entity * door, IVec2 reachDir);

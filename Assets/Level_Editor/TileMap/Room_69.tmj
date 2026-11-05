@@ -30,13 +30,14 @@
          "name":"Text",
          "objects":[
                 {
-                 "height":19,
+                 "height":32,
                  "id":1,
                  "name":"",
                  "rotation":0,
                  "text":
                     {
                      "bold":true,
+                     "color":"#00ffff",
                      "halign":"center",
                      "text":"UP",
                      "valign":"center",
@@ -44,18 +45,19 @@
                     },
                  "type":"",
                  "visible":true,
-                 "width":33.6666666666666,
-                 "x":64.1666666666667,
-                 "y":7.16666666666666
+                 "width":64,
+                 "x":48,
+                 "y":0
                 }, 
                 {
-                 "height":19,
+                 "height":32,
                  "id":2,
                  "name":"",
                  "rotation":0,
                  "text":
                     {
                      "bold":true,
+                     "color":"#00ffff",
                      "halign":"center",
                      "text":"Down",
                      "valign":"center",
@@ -63,9 +65,9 @@
                     },
                  "type":"",
                  "visible":true,
-                 "width":63.0000333333333,
-                 "x":49.4999833333333,
-                 "y":134.166666666667
+                 "width":64,
+                 "x":48,
+                 "y":128
                 }],
          "opacity":1,
          "type":"objectgroup",

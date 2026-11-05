@@ -31,7 +31,7 @@ Entity * AddEntityToMap(json & tileData, IVec2 tilePos, uint32 tileID)
         {
             std::string typeName = prop["value"];
             addEntity.type = entityTypeMap[typeName];
-            }
+        }
         else if (propName == "mass")
         {
             int8 mass = prop["value"];
@@ -64,18 +64,18 @@ Entity * AddEntityToMap(json & tileData, IVec2 tilePos, uint32 tileID)
         }
         else if (propName == "open_dir_x")
         {
-             int32 value = prop["value"];
+            int32 value = prop["value"];
             addEntity.openDir.x = value;
         }
         else if (propName == "open_dir_y")
         {
-             int32 value = prop["value"];
+            int32 value = prop["value"];
             addEntity.openDir.y = value;
         }
         else if (propName == "color_alpha")
         {
             real32 value = prop["value"];
-             colorAlpha = value;
+            colorAlpha = value;
         }
         
     }
@@ -84,8 +84,8 @@ Entity * AddEntityToMap(json & tileData, IVec2 tilePos, uint32 tileID)
     
     if (addEntity.type != ENTITY_TYPE_NULL)
     {
-    addEntity.tilePos = tilePos;
-    addEntity.sprite = GetSprite(tileID);
+        addEntity.tilePos = tilePos;
+        addEntity.sprite = GetSprite(tileID);
         addEntity.active = true;
         addEntity.tileSize = DEFAULT_TILE_SIZE;
         addEntity.pivot = GetTilePivot(tilePos, DEFAULT_TILE_SIZE);
@@ -104,6 +104,50 @@ Entity * AddEntityToMap(json & tileData, IVec2 tilePos, uint32 tileID)
     }
     
     return result;
+}
+
+void GenerateText(json & text_objs, Vector2 mapOrigin)
+{
+    for (json::iterator it = text_objs.begin(); it != text_objs.end(); ++it)
+    {
+        json & text_info = *it;
+        Vector2 position = 
+            {
+                mapOrigin.x + (real32)text_info["x"] - MAP_TILE_SIZE,
+                mapOrigin.y + (real32)text_info["y"] - MAP_TILE_SIZE
+            };
+        
+        std::string text = text_info["text"]["text"];
+
+        real32 text_width = text_info["width"];
+        real32 text_height = text_info["height"];
+        
+        Entity addEntity = {};
+        addEntity.type = ENTITY_TYPE_UI_TEXT;
+        TextCopy(addEntity.text, text.data());
+        addEntity.pivot = position;
+        addEntity.tileSize = { text_width, text_height };
+        addEntity.active = true;
+
+        addEntity.fontSize = DEFAULT_FONT_SIZE;
+        if (text_info["text"].contains("pixelsize"))
+        {
+            addEntity.fontSize = text_info["text"]["pixelsize"];
+        }
+
+        addEntity.color = DEFAULT_FONT_COLOR;
+        if (text_info["text"].contains("color"))
+        {
+            uint32 hexCode = DecodeHex(text_info["text"]["color"]);
+            hexCode *= (16 * 16);
+            hexCode |= 0xff;
+            addEntity.color = GetColor(hexCode);
+        }
+        
+        uint32 entityIndex = gameState->entities.Add(addEntity);
+        gameState->entities[entityIndex].entityIndex = entityIndex;
+        
+    }
 }
 
 void GenerateTileMap(json & tilesData, json & layerData, 
@@ -160,7 +204,7 @@ void GenerateTileMap(json & tilesData, json & layerData,
                 }
             }
             
-            }
+        }
     }
 }
 
@@ -201,25 +245,25 @@ void SetupEntityTable()
                     break;
                 }
                 case ENTITY_TYPE_DOOR:
-                    {
+                {
                     gameState->entityTable[LAYER_DOOR].Add(entity->entityIndex);
                     break;
                 }
                 case ENTITY_TYPE_CABLE_WIRE:
-                    {
+                {
                     gameState->entityTable[LAYER_CABLE].Add(entity->entityIndex);
                     break;
-                    }
+                }
                 case ENTITY_TYPE_CABLE_CONNECT:
-                    {
+                {
                     gameState->entityTable[LAYER_CONNECTION].Add(entity->entityIndex);
                     break;
-                    }
+                }
                 case ENTITY_TYPE_CABLE_SOURCE:
-                    {
+                {
                     gameState->entityTable[LAYER_SOURCE].Add(entity->entityIndex);
                     break;
-                    }
+                }
                 case ENTITY_TYPE_PIT:
                 {
                     gameState->entityTable[LAYER_PIT].Add(entity->entityIndex);
@@ -260,20 +304,24 @@ void SetupEntityTable()
                     gameState->entityTable[LAYER_STAR_DEST].Add(entity->entityIndex);
                     break;
                 }
-                case ENTITY_TYPE_UI:
+                case ENTITY_TYPE_UI_TILE:
                 {
                     gameState->entityTable[LAYER_UI].Add(entity->entityIndex);
-                    }
-                
-                
+                    break;
+                }
+                case ENTITY_TYPE_UI_TEXT:
+                {
+                    gameState->entityTable[LAYER_UI].Add(entity->entityIndex);
+                    break;
+                }
                 default:
                 {
                     gameState->entityTable[LAYER_NULL].Add(entity->entityIndex);
                 }
-                }
+            }
         }
     }
-    }
+}
 
 void LoadTileMapsAndEntities(char * worldPath)
 {
@@ -286,7 +334,7 @@ void LoadTileMapsAndEntities(char * worldPath)
     gameState->currentMapIndex = -1;
     
     // NOTE: Load world
-        std::ifstream f(worldPath);
+    std::ifstream f(worldPath);
     json worldData = json::parse(f);
     
     // NOTE: Load TileSet
@@ -296,40 +344,45 @@ void LoadTileMapsAndEntities(char * worldPath)
     
     auto tileMaps = worldData["maps"];
     gameState->tileMapCount = (int32)tileMaps.size();
-int32 index = 0;
-        for (uint32 i = 0; i < gameState->tileMapCount; i++)
+    int32 index = 0;
+    for (uint32 i = 0; i < gameState->tileMapCount; i++)
+    {
+            
+        json mapMeta = tileMaps[i];
+        std::string fileName = mapMeta["fileName"];
+        const char * levelPath = GetDirectoryPath(worldPath);
+        std::string path = "/" + fileName;
+        path = levelPath + path;
+            
+        std::ifstream file(path);
+        json map = json::parse(file);
+        int32 tileWidth = (int32)map["tilewidth"];
+
+        Vector2 mapOrigin =
         {
+            (real32)mapMeta["x"], (real32)mapMeta["y"]
+        };
             
-            json mapMeta = tileMaps[i];
-            std::string fileName = mapMeta["fileName"];
-            const char * levelPath = GetDirectoryPath(worldPath);
-            std::string path = "/" + fileName;
-            path = levelPath + path;
+        int32 mapWidth =  (int32)mapMeta["width"] / tileWidth;
+        int32 mapHeight = (int32)mapMeta["height"] / tileWidth;
+        int32 startPosX = (int32)mapOrigin.x / tileWidth;
+        int32 startPosY = (int32)mapOrigin.y / tileWidth;
             
-            std::ifstream file(path);
-            json map = json::parse(file);
-            int32 tileWidth = (int32)map["tilewidth"];
+        std::string ID = FindFileNameFromPath(fileName).c_str();
+        // Source - https://stackoverflow.com/a
+        // Posted by Pixelchemist
+        // Retrieved 2026-01-23, License - CC BY-SA 3.0
+        std::string::size_type const p(ID.find_last_of('.'));
+        std::string mapName = ID.substr(0, p);
             
-            int32 mapWidth =  (int32)mapMeta["width"] / tileWidth;
-            int32 mapHeight = (int32)mapMeta["height"] / tileWidth;
-            int32 startPosX = (int32)mapMeta["x"] / tileWidth;
-            int32 startPosY = (int32)mapMeta["y"] / tileWidth;
+        Map tileMap = {};
+        strcpy(tileMap.mapID, mapName.c_str());
+        tileMap.tilePos = { startPosX - 1, startPosY - 1 };
+        tileMap.width = mapWidth, tileMap.height =  mapHeight;
             
-            std::string ID = FindFileNameFromPath(fileName).c_str();
-            // Source - https://stackoverflow.com/a
-            // Posted by Pixelchemist
-            // Retrieved 2026-01-23, License - CC BY-SA 3.0
-            std::string::size_type const p(ID.find_last_of('.'));
-            std::string mapName = ID.substr(0, p);
-            
-            Map tileMap = {};
-            strcpy(tileMap.mapID, mapName.c_str());
-            tileMap.tilePos = { startPosX - 1, startPosY - 1 };
-            tileMap.width = mapWidth, tileMap.height =  mapHeight;
-            
-            if (fileName == LEVEL_2_ROOM_NAME)
-            {
-                gameState->lv2Map = &gameState->tileMaps[index];
+        if (fileName == LEVEL_2_ROOM_NAME)
+        {
+            gameState->lv2Map = &gameState->tileMaps[index];
         }
         
         if (fileName == LAST_ROOM_NAME)
@@ -337,61 +390,63 @@ int32 index = 0;
             gameState->lastMap = &gameState->tileMaps[index];
         }
             
-             IVec2 startPos = { startPosX, startPosY };
+        IVec2 startPos = { startPosX, startPosY };
             
-            // NOTE: Generate tile map    
+        // NOTE: Generate tile map    
+        {
+            json array = map["layers"];
+            for (json::iterator it = array.begin(); it != array.end(); ++it)
             {
-                json array = map["layers"];
-                for (json::iterator it = array.begin(); it != array.end(); ++it)
+                json & layer = *it;
+                if (!layer["visible"]) continue;
+                
+                std::string layerName = layer["name"];
+                if (layerName == "level_info")
                 {
-                    json & layer = *it;
-                    if (!layer["visible"]) continue;
-                    
-                    std::string layerName = layer["name"];
-                    
-                    if (layerName == "level_info")
+                    json properties = layer["properties"];
+                    for (auto & prop : properties)
                     {
-                        json properties = layer["properties"];
-                        for (auto & prop : properties)
+                        if ((prop["name"] == "visible_star_count") &&
+                            (prop["type"] == "int"))
                         {
-                            if ((prop["name"] == "visible_star_count") &&
-                                (prop["type"] == "int"))
-                            {
-                                 tileMap.visibleStarCount = (int16)prop["value"];
-                                break;
-                            }
+                            tileMap.visibleStarCount = (int16)prop["value"];
+                            break;
                         }
-                        continue;
                     }
-                    
-                    if (layer["type"] == "tilelayer")
-                    {
-                        // tileCountX = width;
+                    continue;
+                }
+                if (layerName == "Text")
+                {
+                    GenerateText(layer["objects"], mapOrigin);
+                    continue;
+                }
+                if (layer["type"] == "tilelayer")
+                {
+                    // tileCountX = width;
                     // tileCountY = height;
                     
                     GenerateTileMap(tilesData, layer, 
                                     startPos, mapWidth, mapHeight);
                 }
-                
-                    SM_TRACE("%s layer loading done", layerName.data());
-                    }
-                SM_TRACE("Level width: %i, Level height: %i", mapWidth, mapHeight);
+                SM_TRACE("%s layer loading done", layerName.data());
             }
-            
-            if (min.x > startPos.x) min.x = startPos.x;
-            if (min.y > startPos.y) min.y = startPos.y;
-
-            IVec2 dim = { mapWidth, mapHeight };
-
-            IVec2 endPos = startPos + dim;
-            
-            if (max.x < endPos.x) max.x = endPos.x;
-            if (max.y < endPos.y) max.y = endPos.y;
-            
-            gameState->tileMaps[index] = tileMap;
-            
-            index++;
+            SM_TRACE("Level width: %i, Level height: %i", mapWidth, mapHeight);
         }
+            
+        if (min.x > startPos.x) min.x = startPos.x;
+        if (min.y > startPos.y) min.y = startPos.y;
+
+        IVec2 dim = { mapWidth, mapHeight };
+
+        IVec2 endPos = startPos + dim;
+            
+        if (max.x < endPos.x) max.x = endPos.x;
+        if (max.y < endPos.y) max.y = endPos.y;
+            
+        gameState->tileMaps[index] = tileMap;
+            
+        index++;
+    }
 
     // NOTE(Jason): 
     //animationPlaying = false;
@@ -416,14 +471,14 @@ int32 index = 0;
         fog.tileMax = gameState->tileMax + IVec2 { 20, 20 };
         fog.dim = fog.tileMax - fog.tileMin;
         
-    fog.fogRenderTex = LoadRenderTexture(fog.dim.x, fog.dim.y);
-    SetTextureFilter(fog.fogRenderTex.texture, TEXTURE_FILTER_BILINEAR);
+        fog.fogRenderTex = LoadRenderTexture(fog.dim.x, fog.dim.y);
+        SetTextureFilter(fog.fogRenderTex.texture, TEXTURE_FILTER_BILINEAR);
         SetTextureWrap(fog.fogRenderTex.texture, TEXTURE_WRAP_CLAMP);
         
         uint32 count = (fog.dim.x) * (fog.dim.y);
         if (!fog.fogPixels || count > old_count)
         {
-        fog.fogPixels = (Color *)BumpAllocArray(gameMemory->persistentStorage, count, sizeof(Color));
+            fog.fogPixels = (Color *)BumpAllocArray(gameMemory->persistentStorage, count, sizeof(Color));
         }
         
         for (uint32 i = 0; i < count; i++)
@@ -444,7 +499,7 @@ int32 index = 0;
     {
         gameState->starTCount = starTable.count;
         gameState->starT = (real32 *)BumpAllocArray(gameMemory->persistentStorage, starTable.count, sizeof(real32));
-        }
+    }
     memset(gameState->starT, 0, starTable.count * sizeof(real32));
     
 }

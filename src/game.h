@@ -3,8 +3,8 @@
 /*
   NOTE:
   GAME_INTERNAL
-   0 - Build for developer only
-   1 - Build for pubilc release
+  0 - Build for developer only
+  1 - Build for pubilc release
 */
 
 #define SCREEN_WIDTH  1920
@@ -67,7 +67,7 @@ enum GameScreen
     GAME_MAIN_SCREEN,
     GAME_TUT_SCREEN,
     PAUSE_MENU_SCREEN,
-    };
+};
 
 enum SimulateMode
 {
@@ -90,7 +90,7 @@ struct UndoState
     std::vector<Entity> undoEntities;
     
     Entity * GetByEntityIndex(uint32 entityIndex);
-    };
+};
 
 struct UndoStack
 {
@@ -139,7 +139,7 @@ struct Fog
     RenderTexture2D fogRenderTex;
     Color * fogPixels;
     Array<uint32, 500> updatingIndices;
-    };
+};
 
 struct MyCamera
 {
@@ -164,7 +164,7 @@ struct MyCamera
 struct GameState
 {
     // NOTE: Audio Module
-     AudioData audioData;
+    AudioData audioData;
     
     // NOTE: Undo Module
     UndoStack undoStack;
@@ -321,6 +321,7 @@ void InitUndoState(UndoState * undoState,
                    DynamicArray<Entity> & entityArray);
 
 inline void Undo();
+const char * GetCameraState(MyCamera & camera);
 
 
 //  ========================================================================
