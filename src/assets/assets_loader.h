@@ -20,7 +20,7 @@ using json = nlohmann::json;
 #define MAIN_PATH "Assets/Level_Editor/main.world"
 #define TEST_PATH "Assets/Level_Editor/TestLevels/test.world"
 #define LEVEL_2_ROOM_NAME "TileMap/Room_59.tmj"
-#define LAST_ROOM_NAME "TileMap/Path_88.tmj"
+#define LAST_ROOM_NAME "TileMap/Broom_2.tmj"
 
 #define DEFAULT_FONT_SIZE 16
 #define DEFAULT_FONT_COLOR BLACK

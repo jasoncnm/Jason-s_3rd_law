@@ -70,7 +70,7 @@ void DrawDebugViewGame(Entity * followEnt)
         DrawTile(mapCenter, WHITE);
         
         // NOTE: Could be a setting
-        DrawTileMap(gameState->camera.base, tileMap->tilePos, 
+        DrawTileGrid(gameState->camera.base, tileMap->tilePos, 
                     IVec2{ tileMap->width, tileMap->height },
                     mColors[mapIndex], mColors[mapIndex]);
         Map & map = gameState->tileMaps[mapIndex];

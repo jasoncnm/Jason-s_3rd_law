@@ -25,6 +25,38 @@
          "y":0
         }, 
         {
+         "draworder":"topdown",
+         "id":8,
+         "name":"Text",
+         "objects":[
+                {
+                 "height":32,
+                 "id":1,
+                 "name":"",
+                 "rotation":0,
+                 "text":
+                    {
+                     "bold":true,
+                     "color":"#00ffff",
+                     "halign":"center",
+                     "pixelsize":20,
+                     "text":"Zoom Out",
+                     "valign":"center",
+                     "wrap":true
+                    },
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":112,
+                 "y":288
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -55,7 +87,7 @@
             0, 0, 0, 0, 0, 231, 212, 212, 212, 212, 212,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 437, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":11,
@@ -90,8 +122,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":8,
- "nextobjectid":1,
+ "nextlayerid":9,
+ "nextobjectid":2,
  "orientation":"orthogonal",
  "properties":[
         {

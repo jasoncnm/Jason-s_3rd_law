@@ -69,7 +69,7 @@ Rectangle GetCameraRect(Camera2D camera)
     return result;
 }
 
-void DrawTileMap(Camera2D camera, IVec2 startPos, IVec2 dim, Color tileColor, Color gridColor)
+void DrawTileGrid(Camera2D camera, IVec2 startPos, IVec2 dim, Color tileColor, Color gridColor)
 {
     int32 tileSize = MAP_TILE_SIZE;
     
@@ -91,6 +91,7 @@ void DrawTileMap(Camera2D camera, IVec2 startPos, IVec2 dim, Color tileColor, Co
         }
     }
 }
+
 
 void DrawSprite(Camera2D camera, Texture2D texture, Sprite & sprite, Vector2 topLeft, Vector2 tileSize, Color color = WHITE)
 {

@@ -2533,6 +2533,8 @@ void GameplayUpdateAndRender()
                 LAYER_GLASS,  
                 LAYER_DOOR,
                 LAYER_LOCK,
+                LAYER_STAR,
+                LAYER_STAR_DEST,
                 LAYER_UI,
             };
         
@@ -2558,13 +2560,6 @@ void GameplayUpdateAndRender()
                            },
                            Vector2 { 0, 0 }, 0, WHITE);
         }
-        
-        EntityLayer layers[] = 
-            {
-                LAYER_STAR,
-                LAYER_STAR_DEST,
-            };
-        DrawSpriteLayers(layers, ArrayCount(layers), debugView);
         
         EndMode2D();
         EndTextureMode();

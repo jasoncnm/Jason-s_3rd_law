@@ -91,7 +91,7 @@ void UnloadShaderInfo(ShaderInfo * shaderInfo)
 }
 
 void DrawTile(IVec2 tilePos, Color color);
-void DrawTileMap(Camera2D camera, IVec2 startPos, IVec2 dim, Color tileColor, Color gridColor);
+void DrawTileGrid(Camera2D camera, IVec2 startPos, IVec2 dim, Color tileColor, Color gridColor);
 static Rectangle GetCameraRect(Camera2D camera);
 
 
